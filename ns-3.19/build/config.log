@@ -1,13 +1,13 @@
-# project ns (3.19) configured on Sun Aug 19 13:52:02 2018 by
+# project ns (3.19) configured on Sun Aug 19 14:12:44 2018 by
 # waf 1.7.13 (abi 98, python 2070cf0 on linux2)
 # using ./waf configure
 #
 ----------------------------------------
 Setting top to
-/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19
+/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19
 ----------------------------------------
 Setting out to
-/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build
+/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build
 ----------------------------------------
 Checking for 'gcc' (c compiler)
 find program=['gcc', 'cc'] paths=['/home/espen/bin', '/home/espen/.local/bin', '/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/usr/games', '/usr/local/games', '/snap/bin'] var='CC' -> '/usr/bin/gcc'
@@ -33,7 +33,7 @@ int main() { return 0; }
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-Wl,--soname=foo', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '../test.cc', '-c', '-o', 'test.cc.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_fe0ca542f39064c5a14ee41a2e983996/testbuild/test.cc.1.o -> build/.conf_check_fe0ca542f39064c5a14ee41a2e983996/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cc.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_fe0ca542f39064c5a14ee41a2e983996/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cc.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_fe0ca542f39064c5a14ee41a2e983996/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 ok
 ---------------------------------------------------------
 Checking for program python
@@ -104,22 +104,22 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-fno-strict-aliasing', '-fwrapv', '-fstack-protector-strong', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DPYTHONDIR="/usr/local/lib/python2.7/dist-packages"', '-DPYTHONARCHDIR="/usr/local/lib/python2.7/dist-packages"', '-DNDEBUG', '-D_FORTIFY_SOURCE=2', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_3b2479b91ea1f8aedc2bbc867fa4858e/testbuild/test.cpp.1.o -> build/.conf_check_3b2479b91ea1f8aedc2bbc867fa4858e/testbuild/testprog
 [0m
-['/usr/bin/g++', '-Wl,-Bsymbolic-functions', '-Wl,-z,relro', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_3b2479b91ea1f8aedc2bbc867fa4858e/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-L/usr/lib', '-lpython2.7']
+['/usr/bin/g++', '-Wl,-Bsymbolic-functions', '-Wl,-z,relro', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_3b2479b91ea1f8aedc2bbc867fa4858e/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-L/usr/lib', '-lpython2.7']
 err: /usr/bin/ld: cannot find -lpython2.7
 collect2: error: ld returned 1 exit status
 
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/bindings/python: Test does not build: Traceback (most recent call last):
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/bindings/python: Test does not build: Traceback (most recent call last):
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
     bld.compile()
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 139669164522960: cxxprogram test.cpp.1.o -> testprog}
-['/usr/bin/g++', '-Wl,-Bsymbolic-functions', '-Wl,-z,relro', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_3b2479b91ea1f8aedc2bbc867fa4858e/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-L/usr/lib', '-lpython2.7']
+	{task 140444610212304: cxxprogram test.cpp.1.o -> testprog}
+['/usr/bin/g++', '-Wl,-Bsymbolic-functions', '-Wl,-z,relro', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_3b2479b91ea1f8aedc2bbc867fa4858e/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-L/usr/lib', '-lpython2.7']
 
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/bindings/python: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/bindings/python: The configuration failed
 
 
 # try again with -L$python_LIBPL (some systems don't install the python library in $prefix/lib)
@@ -139,13 +139,13 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-fno-strict-aliasing', '-fwrapv', '-fstack-protector-strong', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DPYTHONDIR="/usr/local/lib/python2.7/dist-packages"', '-DPYTHONARCHDIR="/usr/local/lib/python2.7/dist-packages"', '-DNDEBUG', '-D_FORTIFY_SOURCE=2', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_d17a70babee59afe3e1c1c75ef40e077/testbuild/test.cpp.1.o -> build/.conf_check_d17a70babee59afe3e1c1c75ef40e077/testbuild/testprog
 [0m
-['/usr/bin/g++', '-Wl,-Bsymbolic-functions', '-Wl,-z,relro', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_d17a70babee59afe3e1c1c75ef40e077/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-L/usr/lib/python2.7/config-x86_64-linux-gnu', '-lpython2.7']
+['/usr/bin/g++', '-Wl,-Bsymbolic-functions', '-Wl,-z,relro', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_d17a70babee59afe3e1c1c75ef40e077/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-L/usr/lib/python2.7/config-x86_64-linux-gnu', '-lpython2.7']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for program /usr/bin/python-config,python2.7-config,python-config-2.7,python2.7m-config
 not found
 find program=['/usr/bin/python-config', 'python2.7-config', 'python-config-2.7', 'python2.7m-config'] paths=['/home/espen/bin', '/home/espen/.local/bin', '/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/usr/games', '/usr/local/games', '/snap/bin'] var='PYTHON_CONFIG' -> ''
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/bindings/python: Could not find the program /usr/bin/python-config,python2.7-config,python-config-2.7,python2.7m-config
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/bindings/python: Could not find the program /usr/bin/python-config,python2.7-config,python-config-2.7,python2.7m-config
 Include path for Python extensions (found via distutils module): '/usr/include/python2.7'
 
 ------------------------------------------------------------------------------------------------
@@ -176,30 +176,30 @@ int main(int argc, char **argv)
 err: ../test.cpp:2:20: fatal error: Python.h: No such file or directory
 compilation terminated.
 
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/bindings/python: Test does not build: Traceback (most recent call last):
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/bindings/python: Test does not build: Traceback (most recent call last):
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
     bld.compile()
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 139669164661200: cxx test.cpp -> test.cpp.1.o}
+	{task 140444611108368: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-fno-strict-aliasing', '-fwrapv', '-fstack-protector-strong', '-fno-strict-aliasing', '-I/usr/include/python2.7', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DPYTHONDIR="/usr/local/lib/python2.7/dist-packages"', '-DPYTHONARCHDIR="/usr/local/lib/python2.7/dist-packages"', '-DNDEBUG', '-D_FORTIFY_SOURCE=2', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 :-(
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/bindings/python: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/bindings/python: The configuration failed
 ------------------------------------------------------------------------------------------------
 Asking python-config for pyembed --cflags flags
 [[], '--cflags']
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/bindings/python: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/bindings/python: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking boost includes
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src: headers not found, please provide a --boost-includes argument (see help)
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src: headers not found, please provide a --boost-includes argument (see help)
 not found
 ------------------------------------------------------------------------------------------------
 Checking boost includes
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src: headers not found, please provide a --boost-includes argument (see help)
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src: headers not found, please provide a --boost-includes argument (see help)
 not found
 ------------------------------------------------------------------------------------------------
 Checking for click location
@@ -212,12 +212,12 @@ find program=['pkg-config'] paths=['/home/espen/bin', '/home/espen/.local/bin', 
 Checking for 'gtk+-2.0' >= 2.12
 ['/usr/bin/pkg-config', '--atleast-version=2.12', 'gtk+-2.0']
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/config-store: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/config-store: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for 'libxml-2.0' >= 2.7
 ['/usr/bin/pkg-config', '--atleast-version=2.7', 'libxml-2.0']
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/config-store: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/config-store: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for type uint128_t
 ==>
@@ -248,18 +248,18 @@ err: ../test.cpp: In function ‘int main(int, char**)’:
   if (sizeof (uint128_t)) return 0;
               ^
 
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/core: Test does not build: Traceback (most recent call last):
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/core: Test does not build: Traceback (most recent call last):
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
     bld.compile()
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 139669121144656: cxx test.cpp -> test.cpp.1.o}
+	{task 140444610849616: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/core: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/core: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for type __uint128_t
 ==>
@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_ace1886511f08627ee2e4ca020806295/testbuild/test.cpp.1.o -> build/.conf_check_ace1886511f08627ee2e4ca020806295/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_ace1886511f08627ee2e4ca020806295/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_ace1886511f08627ee2e4ca020806295/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking high precision time implementation
@@ -299,7 +299,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/test.cpp.1.o -> build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header inttypes.h
@@ -317,7 +317,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/test.cpp.1.o -> build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header sys/inttypes.h
@@ -336,18 +336,18 @@ int main(int argc, char **argv) {
 err: ../test.cpp:1:26: fatal error: sys/inttypes.h: No such file or directory
 compilation terminated.
 
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/core: Test does not build: Traceback (most recent call last):
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/core: Test does not build: Traceback (most recent call last):
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
     bld.compile()
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 139669164723408: cxx test.cpp -> test.cpp.1.o}
+	{task 140444610849680: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/core: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/core: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for header sys/types.h
 ==>
@@ -364,7 +364,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_8d38681417ac64f5b5b7d4ca87b0e4f3/testbuild/test.cpp.1.o -> build/.conf_check_8d38681417ac64f5b5b7d4ca87b0e4f3/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_8d38681417ac64f5b5b7d4ca87b0e4f3/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_8d38681417ac64f5b5b7d4ca87b0e4f3/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header sys/stat.h
@@ -382,7 +382,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '-DHAVE_SYS_TYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_8dd79274749d59bf459dfbeb1200c7d7/testbuild/test.cpp.1.o -> build/.conf_check_8dd79274749d59bf459dfbeb1200c7d7/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_8dd79274749d59bf459dfbeb1200c7d7/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_8dd79274749d59bf459dfbeb1200c7d7/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header dirent.h
@@ -400,7 +400,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_c94d96928742c001335a0559791a93d8/testbuild/test.cpp.1.o -> build/.conf_check_c94d96928742c001335a0559791a93d8/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_c94d96928742c001335a0559791a93d8/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_c94d96928742c001335a0559791a93d8/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header stdlib.h
@@ -418,7 +418,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_3a82ef2f96ebcc67f6086c98d2e6291e/testbuild/test.cpp.1.o -> build/.conf_check_3a82ef2f96ebcc67f6086c98d2e6291e/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_3a82ef2f96ebcc67f6086c98d2e6291e/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_3a82ef2f96ebcc67f6086c98d2e6291e/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header signal.h
@@ -436,7 +436,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_48955ac54d2136a572805353a7b9b62d/testbuild/test.cpp.1.o -> build/.conf_check_48955ac54d2136a572805353a7b9b62d/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_48955ac54d2136a572805353a7b9b62d/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_48955ac54d2136a572805353a7b9b62d/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header pthread.h
@@ -456,7 +456,7 @@ int main ()
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-pthread', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '-DHAVE_SIGNAL_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_2be466e82e703a744ee152afe2b58299/testbuild/test.cpp.1.o -> build/.conf_check_2be466e82e703a744ee152afe2b58299/testbuild/testprog
 [0m
-['/usr/bin/g++', '-pthread', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_2be466e82e703a744ee152afe2b58299/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', '-pthread', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_2be466e82e703a744ee152afe2b58299/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header stdint.h
@@ -474,7 +474,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_INTTYPES_H=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '-DHAVE_SIGNAL_H=1', '-DHAVE_PTHREAD_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/test.cpp.1.o -> build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_fa0c4ec9c63ac505501cc0863d9bdc48/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header inttypes.h
@@ -492,7 +492,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '-DHAVE_SIGNAL_H=1', '-DHAVE_PTHREAD_H=1', '-DHAVE_STDINT_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/test.cpp.1.o -> build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_7c67b81911f8bf0aede92c843d0e47cf/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header sys/inttypes.h
@@ -511,18 +511,18 @@ int main(int argc, char **argv) {
 err: ../test.cpp:1:26: fatal error: sys/inttypes.h: No such file or directory
 compilation terminated.
 
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/core: Test does not build: Traceback (most recent call last):
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/core: Test does not build: Traceback (most recent call last):
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Tools/c_config.py", line 459, in run_c_code
     bld.compile()
-  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
+  File "/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/.waf-1.7.13-5a064c2686fe54de4e11018d22148cfc/waflib/Build.py", line 188, in compile
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 139669164787344: cxx test.cpp -> test.cpp.1.o}
+	{task 140444610099344: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '-DHAVE_SIGNAL_H=1', '-DHAVE_PTHREAD_H=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/core: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/core: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for library rt
 ==>
@@ -538,7 +538,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-pthread', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '-DHAVE_SIGNAL_H=1', '-DHAVE_PTHREAD_H=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_5ef57bc0d8aa3565949b6ce1186fd4a7/testbuild/test.cpp.1.o -> build/.conf_check_5ef57bc0d8aa3565949b6ce1186fd4a7/testbuild/testprog
 [0m
-['/usr/bin/g++', '-pthread', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_5ef57bc0d8aa3565949b6ce1186fd4a7/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-lrt']
+['/usr/bin/g++', '-pthread', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_5ef57bc0d8aa3565949b6ce1186fd4a7/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic', '-lrt']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header netpacket/packet.h
@@ -556,7 +556,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/test.cpp.1.o -> build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header sys/ioctl.h
@@ -574,7 +574,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_PACKET_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_ebd591dbc3bb45aa25214505e9aa0d0f/testbuild/test.cpp.1.o -> build/.conf_check_ebd591dbc3bb45aa25214505e9aa0d0f/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_ebd591dbc3bb45aa25214505e9aa0d0f/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_ebd591dbc3bb45aa25214505e9aa0d0f/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header net/if.h
@@ -592,7 +592,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_PACKET_H=1', '-DHAVE_SYS_IOCTL_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_ab7199aa46fcaa2e15071e73776f8218/testbuild/test.cpp.1.o -> build/.conf_check_ab7199aa46fcaa2e15071e73776f8218/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_ab7199aa46fcaa2e15071e73776f8218/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_ab7199aa46fcaa2e15071e73776f8218/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header net/ethernet.h
@@ -610,7 +610,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_PACKET_H=1', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_6c6255d84543ffa2d8b83c989561eef9/testbuild/test.cpp.1.o -> build/.conf_check_6c6255d84543ffa2d8b83c989561eef9/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_6c6255d84543ffa2d8b83c989561eef9/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_6c6255d84543ffa2d8b83c989561eef9/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header linux/if_tun.h
@@ -628,7 +628,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_PACKET_H=1', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '-DHAVE_NET_ETHERNET_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/test.cpp.1.o -> build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for header netpacket/packet.h
@@ -646,7 +646,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '-DHAVE_NET_ETHERNET_H=1', '-DHAVE_IF_TUN_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/test.cpp.1.o -> build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_f00bb2460dc7019f64c1a347be5879fa/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for NSC location
@@ -660,7 +660,7 @@ to the PKG_CONFIG_PATH environment variable
 No package 'sqlite3' found
 
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/src/stats: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/src/stats: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for header linux/if_tun.h
 ==>
@@ -677,7 +677,7 @@ int main(int argc, char **argv) {
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '-DHAVE_NET_ETHERNET_H=1', '-DHAVE_PACKET_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 [2/2] [33mcxxprogram: build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/test.cpp.1.o -> build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/testprog
 [0m
-['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/g++', 'test.cpp.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_79f849e1774b3cde8897857e178c7c8c/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 yes
 ------------------------------------------------------------------------------------------------
 Checking for program sudo
@@ -687,7 +687,7 @@ find program=['sudo'] paths=['/home/espen/bin', '/home/espen/.local/bin', '/usr/
 Checking for program valgrind
 not found
 find program=['valgrind'] paths=['/home/espen/bin', '/home/espen/.local/bin', '/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/usr/games', '/usr/local/games', '/snap/bin'] var='VALGRIND' -> ''
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19: Could not find the program valgrind
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19: Could not find the program valgrind
 ------------------------------------------------------------------------------------------------
 Checking for 'gsl'
 ['/usr/bin/pkg-config', '--cflags', '--libs', 'gsl']
@@ -697,7 +697,7 @@ to the PKG_CONFIG_PATH environment variable
 No package 'gsl' found
 
 not found
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19: The configuration failed
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19: The configuration failed
 ------------------------------------------------------------------------------------------------
 Checking for compilation flag -Wno-error=deprecated-d... support
 ==>
@@ -710,7 +710,7 @@ int main() { return 0; }
 ['/usr/bin/gcc', '-Wno-error=deprecated-declarations', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '-DHAVE_NET_ETHERNET_H=1', '-DHAVE_PACKET_H=1', '-DHAVE_IF_TUN_H=1', '../test.c', '-c', '-o', 'test.c.1.o']
 [2/2] [33mcprogram: build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/test.c.1.o -> build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog
 [0m
-['/usr/bin/gcc', 'test.c.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/gcc', 'test.c.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 ok
 ------------------------------------------------------------------------------------------------
 Checking for compilation flag -fstrict-aliasing... support
@@ -724,7 +724,7 @@ int main() { return 0; }
 ['/usr/bin/gcc', '-fstrict-aliasing', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '-DHAVE_NET_ETHERNET_H=1', '-DHAVE_PACKET_H=1', '-DHAVE_IF_TUN_H=1', '../test.c', '-c', '-o', 'test.c.1.o']
 [2/2] [33mcprogram: build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/test.c.1.o -> build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog
 [0m
-['/usr/bin/gcc', 'test.c.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/gcc', 'test.c.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 ok
 ------------------------------------------------------------------------------------------------
 Checking for compilation flag -Wstrict-aliasing... support
@@ -738,10 +738,10 @@ int main() { return 0; }
 ['/usr/bin/gcc', '-Wstrict-aliasing', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE_SYS_IOCTL_H=1', '-DHAVE_IF_NETS_H=1', '-DHAVE_NET_ETHERNET_H=1', '-DHAVE_PACKET_H=1', '-DHAVE_IF_TUN_H=1', '../test.c', '-c', '-o', 'test.c.1.o']
 [2/2] [33mcprogram: build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/test.c.1.o -> build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog
 [0m
-['/usr/bin/gcc', 'test.c.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19/build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
+['/usr/bin/gcc', 'test.c.1.o', '-o', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19/build/.conf_check_d8a2c40aecfb7c8eac7dd03fcbfb1110/testbuild/testprog', '-Wl,-Bstatic', '-Wl,-Bdynamic']
 ok
 ------------------------------------------------------------------------------------------------
 Checking for program doxygen
 not found
 find program=['doxygen'] paths=['/home/espen/bin', '/home/espen/.local/bin', '/usr/local/sbin', '/usr/local/bin', '/usr/sbin', '/usr/bin', '/sbin', '/bin', '/usr/games', '/usr/local/games', '/snap/bin'] var='DOXYGEN' -> ''
-from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/instrumented-tinyos-plus-extended-ns3/ns-3.19: Could not find the program doxygen
+from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/latest_ns3_implementation/ns-3.19: Could not find the program doxygen
