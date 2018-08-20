@@ -3,6 +3,7 @@
 #define TELOSB_HELPER_H
 
 #include "ns3/telosb.h"
+#include "ns3/node-container.h"
 
 namespace ns3 {
 
@@ -18,7 +19,7 @@ namespace ns3 {
         /*
          * For installing the provided TelosB
          */
-        TelosB *TelosBHelper::Install (NodeContainer nodes, std::string deviceFile)
+        std::vector<TelosB*> *Install (NodeContainer nodes, std::string deviceFile);
     };
 }
 

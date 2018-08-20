@@ -6,18 +6,19 @@
 # All modules can be enabled by choosing 'all_modules'.
 modules_enabled = [
         'all_modules',
-        'core',
-        'processing',
-        # 'linsched',
-        # 'wifi',
-        'network',
-        # 'config-store',
-        'internet', # Espen
-        # 'applications',
-        # 'point-to-point',
-        # 'mobility',
-	'csma', # Espen
-	'sixlowpan', # Espen
+    #    'core',
+    #    'processing',
+    #    # 'linsched',
+    #    # 'wifi',
+    #    'network',
+    #    # 'config-store',
+    #    'internet', # Espen
+    #    # 'applications',
+    #    # 'point-to-point',
+    #    # 'mobility',
+	#'csma', # Espen
+	#'sixlowpan', # Espen
+    #'processing',
         ]
 
 # Set this equal to true if you want examples to be run.

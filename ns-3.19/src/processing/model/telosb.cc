@@ -26,9 +26,8 @@
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE("TelosB");
-
 namespace ns3 {
+    NS_LOG_COMPONENT_DEFINE("TelosB");
     // For debug
     extern bool debugOn;
 }
