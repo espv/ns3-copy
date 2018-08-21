@@ -28,10 +28,10 @@
 #include "ns3/trace-source-accessor.h"
 
 /* STEIN */
-#include "ns3/empty.h"
+/*#include "ns3/empty.h"
 #include "ns3/execenv.h"
 #include "ns3/hwmodel.h"
-#include "ns3/interrupt-controller.h"
+#include "ns3/interrupt-controller.h"*/
 /* STEIN */
 
 #include "qos-tag.h"
@@ -193,51 +193,51 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
 	  WifiMacHeader *hdr = &hdrCopy;
 	  /* STEIN */
 
-	  Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
-
-	  // Create packet, and specify ReceivePacketTest to be
-	  // triggered upon hitting "bcm4329::nic::enqueueonnic"
-	  if(ee) {
-		  if(ee->Proceed(packet, "ENQUEUEnic::tx", &AdhocWifiMac::Receive, this, packet, hdrCopy)) {
-				ee->queues["nic::rx"]->Enqueue(packet);
-
-				// Set intr-register to correct value
-				if(ee->queues["nic::rx"]->GetNPackets() == 1) {
-					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
-					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 11) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 9) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
-					}
-				} else if(ee->queues["nic::rx"]->GetNPackets() >= 2) {
-					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
-					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 1) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 3) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
-					}
-				}
-
-				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-
-				Simulator::ScheduleNow(
-						&InterruptController::IssueInterruptWithService,
-						ee->hwModel->m_interruptController,
-						ee->m_serviceMap["HIRQ-202"],
-						tempVar(),
-						Ptr<Packet>(),
-						std::map<std::string, Ptr<StateVariable> >(),
-						std::map<std::string, Ptr<StateVariableQueue> >());
-			  return;
-		  } else
-				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-	  }
+//	  Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
+//
+//	  // Create packet, and specify ReceivePacketTest to be
+//	  // triggered upon hitting "bcm4329::nic::enqueueonnic"
+//	  if(ee) {
+//		  if(ee->Proceed(packet, "ENQUEUEnic::tx", &AdhocWifiMac::Receive, this, packet, hdrCopy)) {
+//				ee->queues["nic::rx"]->Enqueue(packet);
+//
+//				// Set intr-register to correct value
+//				if(ee->queues["nic::rx"]->GetNPackets() == 1) {
+//					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
+//					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 11) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 9) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
+//					}
+//				} else if(ee->queues["nic::rx"]->GetNPackets() >= 2) {
+//					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
+//					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 1) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 3) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
+//					}
+//				}
+//
+//				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+//
+//				Simulator::ScheduleNow(
+//						&InterruptController::IssueInterruptWithService,
+//						ee->hwModel->m_interruptController,
+//						ee->m_serviceMap["HIRQ-202"],
+//						tempVar(),
+//						Ptr<Packet>(),
+//						std::map<std::string, Ptr<StateVariable> >(),
+//						std::map<std::string, Ptr<StateVariableQueue> >());
+//			  return;
+//		  } else
+//				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+//	  }
 
 
   NS_LOG_FUNCTION (this << packet << hdr);
