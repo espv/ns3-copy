@@ -1,4 +1,4 @@
-# project ns (3.19) configured on Tue Aug 21 09:33:36 2018 by
+# project ns (3.19) configured on Tue Aug 21 10:08:04 2018 by
 # waf 1.7.13 (abi 98, python 2070cf0 on linux2)
 # using ./waf configure --enable-examples
 #
@@ -246,7 +246,7 @@ from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 140130879231376: cxx test.cpp -> test.cpp.1.o}
+	{task 140448738522512: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-std=c++11', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 not found
@@ -334,7 +334,7 @@ from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 140130879230608: cxx test.cpp -> test.cpp.1.o}
+	{task 140448738521744: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-std=c++11', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 not found
@@ -509,7 +509,7 @@ from /home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-
     raise Errors.BuildError(self.producer.error)
 BuildError: Build failed
  -> task in 'testprog' failed (exit status 1): 
-	{task 140130879462928: cxx test.cpp -> test.cpp.1.o}
+	{task 140448738370000: cxx test.cpp -> test.cpp.1.o}
 ['/usr/bin/g++', '-Wall', '-g', '-O0', '-std=c++11', '-DNS3_ASSERT_ENABLE', '-DNS3_LOG_ENABLE', '-DHAVE___UINT128_T=1', '-DINT64X64_USE_128=1', '-DHAVE_SYS_TYPES_H=1', '-DHAVE_SYS_STAT_H=1', '-DHAVE_DIRENT_H=1', '-DHAVE_STDLIB_H=1', '-DHAVE_GETENV=1', '-DHAVE_SIGNAL_H=1', '-DHAVE_PTHREAD_H=1', '-DHAVE_STDINT_H=1', '-DHAVE_INTTYPES_H=1', '../test.cpp', '-c', '-o', 'test.cpp.1.o']
 
 not found
