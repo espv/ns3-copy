@@ -56,3 +56,8 @@ def build(bld):
         'model/telosb.h',
         'helper/telosb-helper.h',
     ]
+
+    if bld.env['ENABLE_EXAMPLES']:
+        bld.recurse('examples')
+
+    bld.ns3_python_bindings()
