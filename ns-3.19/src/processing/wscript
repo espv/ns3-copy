@@ -26,7 +26,6 @@ def build(bld):
         # 'model/rrpriorityscheduler.cc',
 
         'model/telosb.cc',
-        'helper/telosb-helper.cc',
         ]
 
     headers = bld(features='ns3header')
@@ -54,7 +53,6 @@ def build(bld):
         # 'model/rrpriorityscheduler.h',
 
         'model/telosb.h',
-        'helper/telosb-helper.h',
     ]
 
     if bld.env['ENABLE_EXAMPLES']:
