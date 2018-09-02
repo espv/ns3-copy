@@ -2,11 +2,12 @@ APPNAME = 'ns'
 AR = '/usr/bin/ar'
 ARFLAGS = 'rcs'
 BINDIR = '/usr/local/bin'
+BOOST_VERSION = '1_58'
 BUILD_PROFILE = 'debug'
 BUILD_SUFFIX = '-debug'
 CC = ['/usr/bin/gcc']
 CCDEFINES = ['_DEBUG']
-CCFLAGS = ['-O0', '-ggdb', '-g3', '-Wall', '-Werror', '-Wall', '-g', '-O0', '-std=c++11', '-Wno-error=deprecated-declarations', '-fstrict-aliasing', '-Wstrict-aliasing']
+CCFLAGS = ['-O0', '-ggdb', '-g3', '-Wall', '-Werror', '-Wall', '-O3', '-std=c++11', '-Wno-error=deprecated-declarations', '-fstrict-aliasing', '-Wstrict-aliasing']
 CCFLAGS_PTHREAD = '-pthread'
 CCFLAGS_PYEXT = ['-fvisibility=hidden']
 CCLNK_SRC_F = []
@@ -23,7 +24,7 @@ COMPILER_CC = 'gcc'
 COMPILER_CXX = 'g++'
 CPPPATH_ST = '-I%s'
 CXX = ['/usr/bin/g++']
-CXXFLAGS = ['-Wall', '-g', '-O0', '-std=c++11']
+CXXFLAGS = ['-Wall', '-O3', '-std=c++11']
 CXXFLAGS_MACBUNDLE = ['-fPIC']
 CXXFLAGS_PTHREAD = '-pthread'
 CXXFLAGS_PYEMBED = ['-fno-strict-aliasing', '-fwrapv', '-fstack-protector-strong', '-fno-strict-aliasing']
@@ -65,6 +66,7 @@ EXAMPLE_DIRECTORIES = ['realtime', 'error-model', 'wireless', 'tcp', 'matrix-top
 EXEC_PREFIX = '/usr/local'
 HTMLDIR = '/usr/local/share/doc/ns'
 INCLUDEDIR = '/usr/local/include'
+INCLUDES_BOOST = '/usr/include'
 INCLUDES_PYEMBED = ['/usr/include/python2.7', '/usr/include/x86_64-linux-gnu/python2.7']
 INCLUDES_PYEXT = ['/usr/include/python2.7', '/usr/include/x86_64-linux-gnu/python2.7']
 INFODIR = '/usr/local/share/info'
