@@ -131,8 +131,8 @@ int main(int argc, char *argv[])
   createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
-#define ONE_CONTEXT 0
-#define SIMULATION_OVERHEAD_TEST 1
+#define ONE_CONTEXT 1
+#define SIMULATION_OVERHEAD_TEST 0
 #define ALL_CONTEXTS 0
 #define CC2420_MODEL 0
 #if CC2420_MODEL
@@ -339,10 +339,11 @@ int main(int argc, char *argv[])
   NS_LOG_INFO ("3 " << ps.packet_size << " " << ps.pps << " " << ps.total_intra_os_delay/(float)ps.nr_packets_total << "\n");
   NS_LOG_INFO ("Milliseconds it took to simulate: " << t);
 #elif SIMULATION_OVERHEAD_TEST
+
     NodeContainer c;
-    int numberMotes = 1;
-    ps.pps = 1;
-    ps.duration = 100;
+    int numberMotes = 100000;
+    ps.pps = 0;
+    ps.duration = 10000000;
     memset(&c, 0, sizeof(NodeContainer));
     c.Create(numberMotes);
 
@@ -399,8 +400,8 @@ int main(int argc, char *argv[])
     eeh->Install(ps.deviceFile, c);
     for (int i = 0; i < numberMotes; i++) {
         ScheduleInterrupt (c.Get(i), Create<Packet>(0), "HIRQ-12", Seconds(0));
-        protocolStack->GenerateTraffic(c.Get(i), ps.packet_size, new TelosB(c.Get(i), &ps),
-                                       new TelosB(c.Get(i), &ps), new TelosB(c.Get(i), &ps));
+        //protocolStack->GenerateTraffic(c.Get(i), ps.packet_size, new TelosB(c.Get(i), &ps),
+        //                               new TelosB(c.Get(i), &ps), new TelosB(c.Get(i), &ps));
     }
     install_time = clock() - install_time;
     ns3::debugOn = false;
