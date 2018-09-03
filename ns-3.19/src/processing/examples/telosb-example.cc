@@ -15,6 +15,7 @@
 #include "ns3/cc2420-module.h"
 #include "ns3/applications-module.h"
 #include "ns3/mobility-module.h"
+#include "../model/telosb.h"
 
 #include <sstream>
 
@@ -110,7 +111,7 @@ void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* data
 int main(int argc, char *argv[])
 {
   // Debugging and tracing
-  ns3::debugOn = true;
+  ns3::debugOn = false;
   LogComponentEnable ("TelosBExample", LOG_LEVEL_ALL);
   LogComponentEnable ("TelosB", LOG_LEVEL_INFO);
   LogComponentEnable ("OnOffCC2420Application", LOG_LEVEL_INFO);
@@ -131,12 +132,12 @@ int main(int argc, char *argv[])
   createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
-#define ONE_CONTEXT 1
+#define ONE_CONTEXT 0
 #define SIMULATION_OVERHEAD_TEST 0
 #define ALL_CONTEXTS 0
-#define CC2420_MODEL 0
+#define CC2420_MODEL 1
 #if CC2420_MODEL
-  CC2420Helper cc2420;
+    CC2420Helper cc2420;
 
     NodeContainer nodes;
     nodes.Create(3);
@@ -148,6 +149,8 @@ int main(int argc, char *argv[])
     stack.Install(nodes);
 
     MobilityHelper mobility;
+    ps.kbps = "2kbps";
+    ps.packet_size = 10;
 
     // The way we want to configure this: mote 1 receives the packet from mote 2, but mote 3 does not receive it.
     // Mote 3 receives the packet from mote 2.
@@ -212,8 +215,15 @@ int main(int argc, char *argv[])
 
     ps.duration = 8.01;
     Simulator::Stop(Seconds(ps.duration));
+    clock_t t;
+    NS_LOG_INFO ("Before");
+    t = clock();
     Simulator::Run();
+    t = clock() - t;
     Simulator::Destroy();
+
+    NS_LOG_INFO ("Microseconds to simulate 3 motes for " << ps.duration << " seconds: " <<
+                                             t);
 
     NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
                  ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<

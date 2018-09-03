@@ -14,6 +14,7 @@
 NS_LOG_COMPONENT_DEFINE ("OnOffCC2420Application");
 
 namespace ns3 {
+    bool debug = false;
 
 NS_OBJECT_ENSURE_REGISTERED (OnOffCC2420Application);
 
@@ -213,9 +214,10 @@ void OnOffCC2420Application::SendPacket ()
 
   m_totBytes += m_pktSize;
 
-  NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-          << "s on-off-cc2420 application sent " <<  m_pktSize << " bytes"
-          << " total Tx " << m_totBytes << " bytes");
+  if (debug)
+    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
+              << "s on-off-cc2420 application sent " <<  m_pktSize << " bytes"
+              << " total Tx " << m_totBytes << " bytes");
 
   netDevice->descendingSignal(msg);
 
@@ -231,9 +233,10 @@ void OnOffCC2420Application::ReSend() {
     // send with CCA
     Ptr<CC2420Send> msg = CreateObject<CC2420Send>(nullBuffer, m_pktSize, true);
 
-    NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-            << "s on-off-cc2420 application re-sent " <<  m_pktSize << " bytes"
-            << " total Tx " << m_totBytes << " bytes");
+    if (debug)
+        NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
+                  << "s on-off-cc2420 application re-sent " <<  m_pktSize << " bytes"
+                  << " total Tx " << m_totBytes << " bytes");
     netDevice->descendingSignal(msg);
 
     m_lastStartTime = Simulator::Now ();
@@ -255,18 +258,20 @@ bool OnOffCC2420Application::HandleRead (Ptr<CC2420Message> msg)
 
   Ptr<CC2420Recv> recvMsg = DynamicCast<CC2420Recv>(msg);
   if(recvMsg){
-      NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-              << "s on-off-cc2420 application received " << recvMsg->getSize()
-              << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
-              << " and RSSI=" << recvMsg->getRSSI() << " bytes");
+      if (debug)
+        NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
+                  << "s on-off-cc2420 application received " << recvMsg->getSize()
+                  << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
+                  << " and RSSI=" << recvMsg->getRSSI() << " bytes");
       return true;
 
   } else {
       Ptr<CC2420Cca> ccaMsg = DynamicCast<CC2420Cca>(msg);
       if(ccaMsg){
-          NS_LOG_INFO ("At time " << Simulator::Now ()
-                  << "s on-off-cc2420 application received CC2420Cca message with value "
-                  << (ccaMsg->getCcaValue()?"true":"false"));
+          if (debug)
+            NS_LOG_INFO ("At time " << Simulator::Now ()
+                      << "s on-off-cc2420 application received CC2420Cca message with value "
+                      << (ccaMsg->getCcaValue()?"true":"false"));
           return true;
 
       } else {
@@ -276,32 +281,35 @@ bool OnOffCC2420Application::HandleRead (Ptr<CC2420Message> msg)
                   Simulator::Schedule (Seconds(0.0025),  // Espen added the +Seconds(1)
                                        &OnOffCC2420Application::ReSend, this);
               }
-              NS_LOG_INFO ("At time " << Simulator::Now ()
-                      << "s on-off-cc2420 application received CC2420Sending message with value "
-                      << (sendingMsg->getSending()?"true":"false"));
+              if (debug)
+                NS_LOG_INFO ("At time " << Simulator::Now ()
+                          << "s on-off-cc2420 application received CC2420Sending message with value "
+                          << (sendingMsg->getSending()?"true":"false"));
               return true;
 
           } else {
               Ptr<CC2420SendFinished> sfMsg = DynamicCast<CC2420SendFinished>(msg);
               if(sfMsg){
-                  NS_LOG_INFO ("At time " << Simulator::Now ()
-                          << "s on-off-cc2420 application received CC2420SendFinished message");
+                  if (debug)
+                    NS_LOG_INFO ("At time " << Simulator::Now ()
+                              << "s on-off-cc2420 application received CC2420SendFinished message");
                   return true;
 
               } else {
                   Ptr<CC2420StatusResp> respMsg = DynamicCast<CC2420StatusResp>(msg);
                   if(respMsg){
-                      NS_LOG_INFO ("At time " << Simulator::Now ()
-                              << "s on-off-cc2420 application received CC2420StatusResp message with values"
-                              << " CCA mode=" << (int) respMsg->getCcaMode()
-                              << ", CCA hysteresis=" << (int) respMsg->getCcaHysteresis()
-                              << ", CCA threshold=" << (int) respMsg->getCcaThreshold()
-                              << ", long TX turnaround=" << (respMsg->getTxTurnaround()?"true":"false")
-                              << ", automatic CRC=" << (respMsg->getAutoCrc()?"true":"false")
-                              << ", preamble length=" << (int) respMsg->getPreambleLength()
-                              << ", sync word=0x" << std::hex << (int) respMsg->getSyncWord() << std::dec
-                              << ", channel=" << (int) respMsg->getChannel()
-                              << ", power=" << (int) respMsg->getPower());
+                      if (debug)
+                          NS_LOG_INFO ("At time " << Simulator::Now ()
+                                    << "s on-off-cc2420 application received CC2420StatusResp message with values"
+                                    << " CCA mode=" << (int) respMsg->getCcaMode()
+                                    << ", CCA hysteresis=" << (int) respMsg->getCcaHysteresis()
+                                    << ", CCA threshold=" << (int) respMsg->getCcaThreshold()
+                                    << ", long TX turnaround=" << (respMsg->getTxTurnaround()?"true":"false")
+                                    << ", automatic CRC=" << (respMsg->getAutoCrc()?"true":"false")
+                                    << ", preamble length=" << (int) respMsg->getPreambleLength()
+                                    << ", sync word=0x" << std::hex << (int) respMsg->getSyncWord() << std::dec
+                                    << ", channel=" << (int) respMsg->getChannel()
+                                    << ", power=" << (int) respMsg->getPower());
                       return true;
                   } else {
                       //unknown message or NULL-Pointer
