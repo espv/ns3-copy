@@ -21,11 +21,8 @@
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
-
-using namespace ns3;
-
 namespace ns3 {
-    NS_LOG_COMPONENT_DEFINE("TelosBForwardingApp");
+    NS_LOG_COMPONENT_DEFINE("TelosBExample");
     // For debug
     extern bool debugOn;
 }
