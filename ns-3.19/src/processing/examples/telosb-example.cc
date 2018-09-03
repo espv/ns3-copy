@@ -177,6 +177,9 @@ int main(int argc, char *argv[])
     TelosB *mote2 = new TelosB(nodes.Get(1), InetSocketAddress(interfaces.GetAddress(1), 9),
                                InetSocketAddress(interfaces.GetAddress(2), 9), netDevice2, &ps);
     TelosB *mote3 = new TelosB(nodes.Get(2), InetSocketAddress(interfaces.GetAddress(2), 9), netDevice3, &ps);
+    mote1->use_device_model = true;
+    mote2->use_device_model = true;
+    mote3->use_device_model = true;
     ns3::debugOn = false;
 
     Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
