@@ -16,13 +16,18 @@
 #include "ns3/applications-module.h"
 #include "ns3/mobility-module.h"
 
+#include "ns3/telosb.h"
+
 #include <sstream>
 
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
+
+using namespace ns3;
+
 namespace ns3 {
-    NS_LOG_COMPONENT_DEFINE("TelosBExample");
+    NS_LOG_COMPONENT_DEFINE("TelosBForwardingApp");
     // For debug
     extern bool debugOn;
 }
@@ -33,23 +38,23 @@ static ProtocolStack ps;
 // ScheduleInterrupt schedules an interrupt on the node.
 // interruptId is the service name of the interrupt, such as HIRQ-123
 void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interruptId, Time time) {
-  Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+    Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
 
-  // TODO: Model the interrupt distribution somehow
-  static int cpu = 0;
+    // TODO: Model the interrupt distribution somehow
+    static int cpu = 0;
 
-  dummyProgramLoc = new ProgramLocation();
-  dummyProgramLoc->tempvar = tempVar();
-  dummyProgramLoc->curPkt = packet;
-  dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-  dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
+    dummyProgramLoc = new ProgramLocation();
+    dummyProgramLoc->tempvar = tempVar();
+    dummyProgramLoc->curPkt = packet;
+    dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
+    dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
 
-  Simulator::Schedule(time,
-                      &InterruptController::IssueInterruptWithServiceOnCPU,
-                      ee->hwModel->m_interruptController,
-                      cpu,
-                      ee->m_serviceMap[interruptId],
-                      dummyProgramLoc);
+    Simulator::Schedule(time,
+                        &InterruptController::IssueInterruptWithServiceOnCPU,
+                        ee->hwModel->m_interruptController,
+                        cpu,
+                        ee->m_serviceMap[interruptId],
+                        dummyProgramLoc);
 
 }
 
@@ -73,61 +78,61 @@ Gnuplot2dDataset *numberIPDroppedDataSet = NULL;
 Gnuplot2dDataset *intraOsDelayDataSet = NULL;
 
 void createPlot(Gnuplot** plot, std::string filename, std::string title, Gnuplot2dDataset** dataSet) {
-  *plot = new Gnuplot(filename);
-  (*plot)->SetTitle(title);
-  (*plot)->SetTerminal("png");
+    *plot = new Gnuplot(filename);
+    (*plot)->SetTitle(title);
+    (*plot)->SetTerminal("png");
 
-  *dataSet = new Gnuplot2dDataset();
-  (*dataSet)->SetTitle(title);
-  (*dataSet)->SetStyle(Gnuplot2dDataset::LINES_POINTS);
+    *dataSet = new Gnuplot2dDataset();
+    (*dataSet)->SetTitle(title);
+    (*dataSet)->SetStyle(Gnuplot2dDataset::LINES_POINTS);
 }
 
 void createPlot2(Gnuplot** plot, std::string filename, std::string title, Gnuplot2dDataset** dataSet, std::string dataSetTitle) {
-  *plot = new Gnuplot(filename);
-  (*plot)->SetTitle(title);
-  (*plot)->SetTerminal("png");
+    *plot = new Gnuplot(filename);
+    (*plot)->SetTitle(title);
+    (*plot)->SetTerminal("png");
 
-  *dataSet = new Gnuplot2dDataset();
-  (*dataSet)->SetTitle(dataSetTitle);
-  (*dataSet)->SetStyle(Gnuplot2dDataset::LINES_POINTS);
+    *dataSet = new Gnuplot2dDataset();
+    (*dataSet)->SetTitle(dataSetTitle);
+    (*dataSet)->SetStyle(Gnuplot2dDataset::LINES_POINTS);
 }
 
 void writePlot(Gnuplot* plot, std::string filename, Gnuplot2dDataset* dataSet) {
-  plot->AddDataset(*dataSet);
-  std::ofstream plotFile(filename.c_str());
-  plot->GenerateOutput(plotFile);
-  plotFile.close();
+    plot->AddDataset(*dataSet);
+    std::ofstream plotFile(filename.c_str());
+    plot->GenerateOutput(plotFile);
+    plotFile.close();
 }
 
 void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* dataSet1, Gnuplot2dDataset* dataSet2) {
-  plot->AddDataset(*dataSet1);
-  plot->AddDataset(*dataSet2);
-  std::ofstream plotFile(filename.c_str());
-  plot->GenerateOutput(plotFile);
-  plotFile.close();
+    plot->AddDataset(*dataSet1);
+    plot->AddDataset(*dataSet2);
+    std::ofstream plotFile(filename.c_str());
+    plot->GenerateOutput(plotFile);
+    plotFile.close();
 }
 
 int main(int argc, char *argv[])
 {
-  // Debugging and tracing
-  ns3::debugOn = true;
-  LogComponentEnable ("TelosB", LOG_LEVEL_INFO);
-  LogComponentEnable ("OnOffCC2420Application", LOG_LEVEL_INFO);
+    // Debugging and tracing
+    ns3::debugOn = true;
+    LogComponentEnable ("TelosB", LOG_LEVEL_INFO);
+    LogComponentEnable ("OnOffCC2420Application", LOG_LEVEL_INFO);
 
-  // Fetch from command line
-  CommandLine cmd;
-  cmd.AddValue("seed", "seed for the random generator", ps.seed);
-  cmd.AddValue("duration", "The number of seconds the simulation should run", ps.duration);
-  cmd.AddValue("pps", "Packets per second", ps.pps);
-  cmd.AddValue("ps", "Packet size", ps.packet_size);
-  cmd.AddValue("device", "Device file to use for simulation", ps.deviceFile);
-  cmd.AddValue("trace_file", "Trace file including times when packets should get sent", ps.trace_fn);
-  cmd.Parse(argc, argv);
+    // Fetch from command line
+    CommandLine cmd;
+    cmd.AddValue("seed", "seed for the random generator", ps.seed);
+    cmd.AddValue("duration", "The number of seconds the simulation should run", ps.duration);
+    cmd.AddValue("pps", "Packets per second", ps.pps);
+    cmd.AddValue("ps", "Packet size", ps.packet_size);
+    cmd.AddValue("device", "Device file to use for simulation", ps.deviceFile);
+    cmd.AddValue("trace_file", "Trace file including times when packets should get sent", ps.trace_fn);
+    cmd.Parse(argc, argv);
 
-  SeedManager::SetSeed(ps.seed);
+    SeedManager::SetSeed(ps.seed);
 
-  createPlot(&ppsPlot, "testplot.png", "pps", &ppsDataSet);
-  createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
+    createPlot(&ppsPlot, "testplot.png", "pps", &ppsDataSet);
+    createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
 #define ONE_CONTEXT 1
@@ -135,7 +140,7 @@ int main(int argc, char *argv[])
 #define ALL_CONTEXTS 0
 #define CC2420_MODEL 1
 #if CC2420_MODEL
-  CC2420Helper cc2420;
+    CC2420Helper cc2420;
 
     NodeContainer nodes;
     nodes.Create(3);
@@ -215,14 +220,14 @@ int main(int argc, char *argv[])
     Simulator::Destroy();
 
     NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
-                 ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<
-                 ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
-                 ps.nr_packets_forwarded << " / " << ps.nr_packets_total << " = " <<
-                 (ps.nr_packets_forwarded/(float)ps.nr_packets_total)*100 << "% in " << (ps.duration/2 + (int)ps.duration % 2) <<
-                 " seconds, actual pps=" << (ps.nr_packets_forwarded/(ps.duration/2 + (int)ps.duration % 2)));
+                                 ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<
+                                 ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
+                                 ps.nr_packets_forwarded << " / " << ps.nr_packets_total << " = " <<
+                                 (ps.nr_packets_forwarded/(float)ps.nr_packets_total)*100 << "% in " << (ps.duration/2 + (int)ps.duration % 2) <<
+                                 " seconds, actual pps=" << (ps.nr_packets_forwarded/(ps.duration/2 + (int)ps.duration % 2)));
 
 #elif READ_TRACES
-  Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
+    Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
             "cacheLineSize", UintegerValue(64), "tracingOverhead",
             UintegerValue(0));
 
@@ -621,5 +626,5 @@ int main(int argc, char *argv[])
     numberForwardedFile.close();
 #endif
 
-  return 0;
+    return 0;
 }

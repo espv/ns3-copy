@@ -186,85 +186,85 @@ void
 AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
 /* STEIN */
 {
-	  /* STEIN */
-	  /* NOTE: Since callers of this function assume that this functions is
-	           executing immediately, hdr is allocated on the stack. This means,
-	           if we return, hdr will be lost. */
-	  WifiMacHeader *hdr = &hdrCopy;
-	  /* STEIN */
+//	  /* STEIN */
+//	  /* NOTE: Since callers of this function assume that this functions is
+//	           executing immediately, hdr is allocated on the stack. This means,
+//	           if we return, hdr will be lost. */
+//	  WifiMacHeader *hdr = &hdrCopy;
+//	  /* STEIN */
+//
+//	  Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
+//
+//	  // Create packet, and specify ReceivePacketTest to be
+//	  // triggered upon hitting "bcm4329::nic::enqueueonnic"
+//	  if(ee) {
+//		  if(ee->Proceed(packet, "ENQUEUEnic::tx", &AdhocWifiMac::Receive, this, packet, hdrCopy)) {
+//				ee->queues["nic::rx"]->Enqueue(packet);
+//
+//				// Set intr-register to correct value
+//				if(ee->queues["nic::rx"]->GetNPackets() == 1) {
+//					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
+//					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 11) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 9) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
+//					}
+//				} else if(ee->queues["nic::rx"]->GetNPackets() >= 2) {
+//					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
+//					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 1) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
+//					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 3) {
+//						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
+//					}
+//				}
+//
+//				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+//
+//				Simulator::ScheduleNow(
+//						&InterruptController::IssueInterruptWithService,
+//						ee->hwModel->m_interruptController,
+//						ee->m_serviceMap["HIRQ-202"],
+//						tempVar(),
+//						Ptr<Packet>(),
+//						std::map<std::string, Ptr<StateVariable> >(),
+//						std::map<std::string, Ptr<StateVariableQueue> >());
+//			  return;
+//		  } else
+//				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+//	  }
+//
+//
+//  NS_LOG_FUNCTION (this << packet << hdr);
+//  NS_ASSERT (!hdr->IsCtl ());
+//  Mac48Address from = hdr->GetAddr2 ();
+//  Mac48Address to = hdr->GetAddr1 ();
+//  if (hdr->IsData ())
+//    {
+//      if (hdr->IsQosData () && hdr->IsQosAmsdu ())
+//        {
+//          NS_LOG_DEBUG ("Received A-MSDU from" << from);
+//          DeaggregateAmsduAndForward (packet, hdr);
+//        }
+//      else
+//        {
+//          ForwardUp (packet, from, to);
+//        }
+//      return;
+//    }
 
-	  Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
-
-	  // Create packet, and specify ReceivePacketTest to be
-	  // triggered upon hitting "bcm4329::nic::enqueueonnic"
-	  if(ee) {
-		  if(ee->Proceed(packet, "ENQUEUEnic::tx", &AdhocWifiMac::Receive, this, packet, hdrCopy)) {
-				ee->queues["nic::rx"]->Enqueue(packet);
-
-				// Set intr-register to correct value
-				if(ee->queues["nic::rx"]->GetNPackets() == 1) {
-					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
-					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 11) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 3;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 9) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 1;
-					}
-				} else if(ee->queues["nic::rx"]->GetNPackets() >= 2) {
-					if(ee->conditionFunctions->m_wl1251NICIntrReg == 0) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
-					} else if(ee->conditionFunctions->m_wl1251NICIntrReg == 1) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 9;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 2) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
-					} else if (ee->conditionFunctions->m_wl1251NICIntrReg == 3) {
-						ee->conditionFunctions->m_wl1251NICIntrReg = 11;
-					}
-				}
-
-				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-
-				Simulator::ScheduleNow(
-						&InterruptController::IssueInterruptWithService,
-						ee->hwModel->m_interruptController,
-						ee->m_serviceMap["HIRQ-202"],
-						tempVar(),
-						Ptr<Packet>(),
-						std::map<std::string, Ptr<StateVariable> >(),
-						std::map<std::string, Ptr<StateVariableQueue> >());
-			  return;
-		  } else
-				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-	  }
-
-
-  NS_LOG_FUNCTION (this << packet << hdr);
-  NS_ASSERT (!hdr->IsCtl ());
-  Mac48Address from = hdr->GetAddr2 ();
-  Mac48Address to = hdr->GetAddr1 ();
-  if (hdr->IsData ())
-    {
-      if (hdr->IsQosData () && hdr->IsQosAmsdu ())
-        {
-          NS_LOG_DEBUG ("Received A-MSDU from" << from);
-          DeaggregateAmsduAndForward (packet, hdr);
-        }
-      else
-        {
-          ForwardUp (packet, from, to);
-        }
-      return;
-    }
-
-  // Invoke the receive handler of our parent class to deal with any
-  // other frames. Specifically, this will handle Block Ack-related
-  // Management Action frames.
-  /* STEIN */
-  // RegularWifiMac::Receive (packet, hdr);
-  RegularWifiMac::Receive (packet, *hdr);
-  /* STEIN */
+//  // Invoke the receive handler of our parent class to deal with any
+//  // other frames. Specifically, this will handle Block Ack-related
+//  // Management Action frames.
+//  /* STEIN */
+//  // RegularWifiMac::Receive (packet, hdr);
+//  RegularWifiMac::Receive (packet, *hdr);
+////  /* STEIN */
 }
 
 } // namespace ns3
