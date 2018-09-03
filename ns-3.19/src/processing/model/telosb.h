@@ -25,6 +25,35 @@
 
 using namespace ns3;
 
+class TelosB;
+
+class ProtocolStack {
+public:
+    void GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, TelosB *m2, TelosB *m3);
+    void GenerateTraffic2(Ptr<Node> n, uint32_t pktSize, Time time, TelosB *m1, TelosB *m2, TelosB *m3);
+    void GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *m1, TelosB *m2, TelosB *m3);
+
+    uint32_t seed = 3;
+    double duration = 10;
+    int pps = 138;
+    int packet_size = 125;
+    std::string deviceFile = "device-files/telosb-min.device";  // Required if we use gdb
+    std::string trace_fn = "trace-inputs/packets-received.txt";
+    std::string kbps = "65kbps";
+
+    int nr_packets_collision_missed = 0;
+    int nr_rxfifo_flushes = 0;
+    int nr_packets_dropped_bad_crc = 0;
+    int nr_packets_forwarded = 0;
+    int nr_packets_dropped_ip_layer;
+    int total_intra_os_delay = 0;
+    int nr_packets_total = 0;
+    bool firstNodeSendingtal = false;
+    std::vector<int> forwarded_packets_seqnos;
+    std::vector<int> time_received_packets;
+    std::vector<int> all_intra_os_delays;
+};
+
 class CC2420 {
 public:
     bool rxfifo_overflow = false;
@@ -62,6 +91,7 @@ private:
     int packets_in_send_queue = 0;
     bool receivingPacket = false;
     std::vector<Ptr<Packet> > receive_queue;
+    ProtocolStack *ps;
 
     Address src;
     Address dst;
@@ -77,11 +107,11 @@ public:
     bool use_device_model = true;
     int seqNr = 0;
 
-    TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice);
+    TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps);
 
-    TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice);
+    TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps);
 
-    TelosB(Ptr<Node> node);
+    TelosB(Ptr<Node> node, ProtocolStack *ps);
 
     // Models the radio's behavior before the packets are processed by the microcontroller.
     void ReceivePacket(Ptr<Packet> packet);
@@ -108,33 +138,6 @@ public:
     void SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote);
 
     bool HandleRead (Ptr<CC2420Message> msg);
-};
-
-class ProtocolStack {
-public:
-    void GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, TelosB *m2, TelosB *m3);
-    void GenerateTraffic2(Ptr<Node> n, uint32_t pktSize, Time time, TelosB *m1, TelosB *m2, TelosB *m3);
-    void GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *m1, TelosB *m2, TelosB *m3);
-
-    uint32_t seed = 3;
-    double duration = 10;
-    int pps = 138;
-    int packet_size = 125;
-    std::string deviceFile = "device-files/telosb-min.device";  // Required if we use gdb
-    std::string trace_fn = "trace-inputs/packets-received.txt";
-    std::string kbps = "65kbps";
-
-    int nr_packets_collision_missed = 0;
-    int nr_rxfifo_flushes = 0;
-    int nr_packets_dropped_bad_crc = 0;
-    int nr_packets_forwarded = 0;
-    int nr_packets_dropped_ip_layer;
-    int total_intra_os_delay = 0;
-    int nr_packets_total = 0;
-    bool firstNodeSendingtal = false;
-    std::vector<int> forwarded_packets_seqnos;
-    std::vector<int> time_received_packets;
-    std::vector<int> all_intra_os_delays;
 };
 
 #endif //TELOSB_CSW_MODEL_TELOSB_H

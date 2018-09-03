@@ -34,7 +34,6 @@ namespace ns3 {
 
 static ProgramLocation *dummyProgramLoc;
 
-static ProtocolStack ps;
 // ScheduleInterrupt schedules an interrupt on the node.
 // interruptId is the service name of the interrupt, such as HIRQ-123
 void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interruptId, Time time) {
@@ -58,16 +57,17 @@ void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interrupt
 
 }
 
-TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice) : Mote() {
+TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
   TelosB::packets_in_send_queue = 0;
   TelosB::receivingPacket = false;
   TelosB::src = src;
   TelosB::netDevice = netDevice;
+  TelosB::ps = ps;
 }
 
-TelosB::TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice) : Mote() {
+TelosB::TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
   TelosB::packets_in_send_queue = 0;
@@ -75,18 +75,20 @@ TelosB::TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetD
   TelosB::src = src;
   TelosB::dst = dst;
   TelosB::netDevice = netDevice;
+  TelosB::ps = ps;
 }
 
-TelosB::TelosB(Ptr<Node> node) : Mote() {
+TelosB::TelosB(Ptr<Node> node, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
   TelosB::packets_in_send_queue = 0;
   TelosB::receivingPacket = false;
+  TelosB::ps = ps;
 }
 
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
-  ps.firstNodeSendingtal = false;
+  ps->firstNodeSendingtal = false;
   --radio.nr_send_recv;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   packet->collided = radio.collision;
@@ -170,7 +172,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
       NS_LOG_INFO ("RXFIFO gets flushed");
     radio.rxfifo_overflow = false;
     radio.bytes_in_rxfifo = 0;
-    ps.nr_rxfifo_flushes++;
+    ps->nr_rxfifo_flushes++;
   }
 
   // Packets received and causing RXFIFO overflow get dropped.
@@ -179,7 +181,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     if (cur_nr_packets_processing == 0) {
       ScheduleInterrupt (node, packet, "HIRQ-12", Seconds(0));
     }
-    ps.nr_packets_dropped_bad_crc++;
+    ps->nr_packets_dropped_bad_crc++;
     if (ns3::debugOn)
       NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload, collision caused packet CRC check to fail, dropping it " << packet->m_executionInfo.seqNr);
     if (!receive_queue.empty()) {
@@ -195,7 +197,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
           NS_LOG_INFO ("RXFIFO gets flushed");
         radio.rxfifo_overflow = false;
         radio.bytes_in_rxfifo = 0;
-        ps.nr_rxfifo_flushes++;
+        ps->nr_rxfifo_flushes++;
       }
     }
   } else {
@@ -248,7 +250,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     if (cur_nr_packets_processing == 0) {
       ScheduleInterrupt (node, packet, "HIRQ-12", Seconds(0));
     }
-    ++ps.nr_packets_dropped_ip_layer;
+    ++ps->nr_packets_dropped_ip_layer;
     ScheduleInterrupt(node, packet, "HIRQ-17", MicroSeconds(1));
     if (ns3::debugOn)
       NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet " << packet->m_executionInfo.seqNr);
@@ -267,7 +269,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
         NS_LOG_INFO ("RXFIFO gets flushed");
       radio.rxfifo_overflow = false;
       radio.bytes_in_rxfifo = 0;
-      ps.nr_rxfifo_flushes++;
+      ps->nr_rxfifo_flushes++;
     }
   }
 }
@@ -326,10 +328,10 @@ void TelosB::sendDoneTask(Ptr<Packet> packet) {
     packet->attemptedSent = true;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
     int intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() - packet->m_executionInfo.timestamps[1].GetMicroSeconds();
-    ps.time_received_packets.push_back (packet->m_executionInfo.timestamps[1].GetMicroSeconds());
-    ps.forwarded_packets_seqnos.push_back (packet->m_executionInfo.seqNr);
-    ps.all_intra_os_delays.push_back(intra_os_delay);
-    ps.total_intra_os_delay += intra_os_delay;
+    ps->time_received_packets.push_back (packet->m_executionInfo.timestamps[1].GetMicroSeconds());
+    ps->forwarded_packets_seqnos.push_back (packet->m_executionInfo.seqNr);
+    ps->all_intra_os_delays.push_back(intra_os_delay);
+    ps->total_intra_os_delay += intra_os_delay;
     if (ns3::debugOn) {
       NS_LOG_INFO (Simulator::Now() << " " << id << ": sendDoneTask " << packet->m_executionInfo.seqNr);
       NS_LOG_INFO (id << " sendDoneTask: DELTA: " << intra_os_delay << ", UDP payload size (36+payload bytes): " << packet->GetSize () << ", seq no " << packet->m_executionInfo.seqNr);
@@ -362,7 +364,7 @@ void TelosB::sendDoneTask(Ptr<Packet> packet) {
 // If acks are enabled, the ack has to be received before that can be done.
 void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  ++ps.nr_packets_forwarded;
+  ++ps->nr_packets_forwarded;
 
   // I believe it's here that the packet gets removed from the send queue, but it might be in sendDoneTask
   ip_radioBusy = false;
@@ -403,13 +405,13 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
 
   // Finish this, also change ReceivePacket to also accept acks
   if (!to_mote->radio.rxfifo_overflow && to_mote->radio.nr_send_recv == 0) {
-    if (ps.firstNodeSendingtal) {
+    if (ps->firstNodeSendingtal) {
       Simulator::Schedule(MicroSeconds(100), &TelosB::SendPacket, this, packet, to_mote, third_mote);
       return;
     }
 
-    ps.firstNodeSendingtal = true;
-    ++ps.nr_packets_total;
+    ps->firstNodeSendingtal = true;
+    ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
     Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize ()+36 + 5/* 36 is UDP packet, 5 is preamble + SFD*/) + MicroSeconds (192) /* 12 symbol lengths before sending packet, even without CCA. 8 symbol lengths is 128 µs */, &TelosB::ReceivePacket, to_mote, packet);
@@ -422,9 +424,9 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
       Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::SendPacket, this, packet, to_mote, third_mote);
       return;
     }
-    ++ps.nr_packets_total;
+    ++ps->nr_packets_total;
     to_mote->radio.collision = true;
-    ++ps.nr_packets_collision_missed;
+    ++ps->nr_packets_collision_missed;
     // We should send a packet here, but drop it immediately afterwards. The reason why
     // is that this packet's header will not be read by the receiving radio, and thus
     // it will only serve as disturbance or preamble.
@@ -459,8 +461,8 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
     //        << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
     //        << " and RSSI=" << recvMsg->getRSSI() << " bytes");
 
-    Ptr<Packet> packet = Create<Packet>(ps.packet_size);
-    ps.nr_packets_total++;
+    Ptr<Packet> packet = Create<Packet>(ps->packet_size);
+    ps->nr_packets_total++;
     packet->m_executionInfo.timestamps.push_back (Simulator::Now());
     packet->src = src;
     packet->dst = dst;
@@ -488,7 +490,7 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
         if (!sendingMsg->getSending ()) {
           // This means we failed to send packet because channel is busy
           //NS_LOG_INFO ("recvMsg->getSize (): " << recvMsg->getSize ());
-          Ptr<Packet> packet = Create<Packet>(ps.packet_size);
+          Ptr<Packet> packet = Create<Packet>(ps->packet_size);
           packet->attemptedSent = true;
           Simulator::Schedule(Seconds(0.0025), &TelosB::sendDoneTask, this, packet);
         }
@@ -500,7 +502,7 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
           //NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
           //        << "s mote " << GetId() << " received CC2420SendFinished message");
 
-          finishedTransmitting (Create<Packet>(ps.packet_size));
+          finishedTransmitting (Create<Packet>(ps->packet_size));
           return true;
 
         } else {
@@ -549,8 +551,8 @@ void ProtocolStack::GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, T
   static int curSeqNr = 0;
 
   GeneratePacket(pktSize, curSeqNr++, m1, m2, m3);
-  if (Simulator::Now().GetSeconds() + (1.0 / (double) ps.pps) < ps.duration - 0.02)
-    Simulator::Schedule(Seconds(1.0 / (double) ps.pps) + MicroSeconds(rand() % 100),
+  if (Simulator::Now().GetSeconds() + (1.0 / (double) pps) < duration - 0.02)
+    Simulator::Schedule(Seconds(1.0 / (double) pps) + MicroSeconds(rand() % 100),
                         &ProtocolStack::GenerateTraffic, this, n, pktSize, m1, m2, m3);
 }
 

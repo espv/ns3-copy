@@ -28,10 +28,10 @@
 #include "ns3/trace-source-accessor.h"
 
 /* STEIN */
-#include "ns3/empty.h"
+/*#include "ns3/empty.h"
 #include "ns3/execenv.h"
 #include "ns3/hwmodel.h"
-#include "ns3/interrupt-controller.h"
+#include "ns3/interrupt-controller.h"*/
 /* STEIN */
 
 #include "qos-tag.h"
@@ -186,13 +186,13 @@ void
 AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
 /* STEIN */
 {
-//	  /* STEIN */
-//	  /* NOTE: Since callers of this function assume that this functions is
-//	           executing immediately, hdr is allocated on the stack. This means,
-//	           if we return, hdr will be lost. */
-//	  WifiMacHeader *hdr = &hdrCopy;
-//	  /* STEIN */
-//
+	  /* STEIN */
+	  /* NOTE: Since callers of this function assume that this functions is
+	           executing immediately, hdr is allocated on the stack. This means,
+	           if we return, hdr will be lost. */
+	  WifiMacHeader *hdr = &hdrCopy;
+	  /* STEIN */
+
 //	  Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
 //
 //	  // Create packet, and specify ReceivePacketTest to be
@@ -238,33 +238,33 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
 //		  } else
 //				packet->m_executionInfo.timestamps.push_back(Simulator::Now());
 //	  }
-//
-//
-//  NS_LOG_FUNCTION (this << packet << hdr);
-//  NS_ASSERT (!hdr->IsCtl ());
-//  Mac48Address from = hdr->GetAddr2 ();
-//  Mac48Address to = hdr->GetAddr1 ();
-//  if (hdr->IsData ())
-//    {
-//      if (hdr->IsQosData () && hdr->IsQosAmsdu ())
-//        {
-//          NS_LOG_DEBUG ("Received A-MSDU from" << from);
-//          DeaggregateAmsduAndForward (packet, hdr);
-//        }
-//      else
-//        {
-//          ForwardUp (packet, from, to);
-//        }
-//      return;
-//    }
 
-//  // Invoke the receive handler of our parent class to deal with any
-//  // other frames. Specifically, this will handle Block Ack-related
-//  // Management Action frames.
-//  /* STEIN */
-//  // RegularWifiMac::Receive (packet, hdr);
-//  RegularWifiMac::Receive (packet, *hdr);
-////  /* STEIN */
+
+  NS_LOG_FUNCTION (this << packet << hdr);
+  NS_ASSERT (!hdr->IsCtl ());
+  Mac48Address from = hdr->GetAddr2 ();
+  Mac48Address to = hdr->GetAddr1 ();
+  if (hdr->IsData ())
+    {
+      if (hdr->IsQosData () && hdr->IsQosAmsdu ())
+        {
+          NS_LOG_DEBUG ("Received A-MSDU from" << from);
+          DeaggregateAmsduAndForward (packet, hdr);
+        }
+      else
+        {
+          ForwardUp (packet, from, to);
+        }
+      return;
+    }
+
+  // Invoke the receive handler of our parent class to deal with any
+  // other frames. Specifically, this will handle Block Ack-related
+  // Management Action frames.
+  /* STEIN */
+  // RegularWifiMac::Receive (packet, hdr);
+  RegularWifiMac::Receive (packet, *hdr);
+  /* STEIN */
 }
 
 } // namespace ns3

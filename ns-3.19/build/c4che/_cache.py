@@ -7,7 +7,7 @@ BUILD_PROFILE = 'debug'
 BUILD_SUFFIX = '-debug'
 CC = ['/usr/bin/gcc']
 CCDEFINES = ['_DEBUG']
-CCFLAGS = ['-O0', '-ggdb', '-g3', '-Wall', '-Werror', '-Wall', '-g', '-Wno-error=deprecated-declarations', '-fstrict-aliasing', '-Wstrict-aliasing']
+CCFLAGS = ['-O0', '-ggdb', '-g3', '-Wall', '-Werror', '-Wall', '-O3', '-std=c++11', '-Wno-error=deprecated-declarations', '-fstrict-aliasing', '-Wstrict-aliasing']
 CCFLAGS_PTHREAD = '-pthread'
 CCFLAGS_PYEXT = ['-fvisibility=hidden']
 CCLNK_SRC_F = []
@@ -24,7 +24,7 @@ COMPILER_CC = 'gcc'
 COMPILER_CXX = 'g++'
 CPPPATH_ST = '-I%s'
 CXX = ['/usr/bin/g++']
-CXXFLAGS = ['-Wall', '-g']
+CXXFLAGS = ['-Wall', '-O3', '-std=c++11']
 CXXFLAGS_MACBUNDLE = ['-fPIC']
 CXXFLAGS_PTHREAD = '-pthread'
 CXXFLAGS_PYEMBED = ['-fno-strict-aliasing', '-fwrapv', '-fstack-protector-strong', '-fno-strict-aliasing']
@@ -45,7 +45,6 @@ DEST_BINFMT = 'elf'
 DEST_CPU = 'x86_64'
 DEST_OS = 'linux'
 DOCDIR = '/usr/local/share/doc/ns'
-DOXYGEN = '/usr/bin/doxygen'
 DVIDIR = '/usr/local/share/doc/ns'
 ENABLE_BRITE = False
 ENABLE_EMU = True
@@ -63,7 +62,7 @@ ENABLE_SUDO = False
 ENABLE_TAP = True
 ENABLE_TESTS = False
 ENABLE_THREADING = True
-EXAMPLE_DIRECTORIES = ['routing', 'stats', 'matrix-topology', 'wireless', 'ipv6', 'udp-client-server', 'realtime', 'tutorial', 'energy', 'socket', 'naming', 'udp', 'error-model', 'tcp']
+EXAMPLE_DIRECTORIES = ['realtime', 'error-model', 'wireless', 'tcp', 'matrix-topology', 'ipv6', 'udp-client-server', 'tutorial', 'routing', 'energy', 'stats', 'udp', 'naming', 'socket']
 EXEC_PREFIX = '/usr/local'
 HTMLDIR = '/usr/local/share/doc/ns'
 INCLUDEDIR = '/usr/local/include'
@@ -133,8 +132,7 @@ STLIB_MARKER = '-Wl,-Bstatic'
 STLIB_ST = '-l%s'
 SUDO = '/usr/bin/sudo'
 SYSCONFDIR = '/usr/local/etc'
-VALGRIND = '/usr/bin/valgrind'
-VALGRIND_FOUND = True
+VALGRIND_FOUND = False
 VERSION = '3.19'
 WL_SONAME_SUPPORTED = True
 cfg_files = ['/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/ns-3-extended-with-execution-environment/ns-3.19/build/ns3/config-store-config.h', '/home/espen/Research/A-Methodology-to-Model-the-Execution-of-Communication-Software-for-Accurate-Network-Simulation/ns-3-extended-with-execution-environment/ns-3.19/build/ns3/core-config.h']

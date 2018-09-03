@@ -9,4 +9,3 @@ def build(bld):
 
     obj = bld.create_ns3_program('play', ['cc2420', 'message'])
     obj.source = 'play.cc'
-    pass

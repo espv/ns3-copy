@@ -84,7 +84,6 @@ waf-*-*/
 waf3-*-*/
 # Lockfile
 .lock-waf_*_build
-build/
-
+build/*
 
 # End of https://www.gitignore.io/api/c,waf,c++
