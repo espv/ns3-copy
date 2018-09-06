@@ -242,10 +242,10 @@ private:
 class Packet : public SimpleRefCount<Packet>
 {
 public:
-  bool attemptedSent = false;
-  bool collided = false;
   Address src;
   Address dst;
+  bool attemptedSent = false;
+  bool collided = false;
   /**
    * Create an empty packet with a new uid (as returned
    * by getUid).
