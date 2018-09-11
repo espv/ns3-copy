@@ -13,12 +13,13 @@
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 
+bool thenop_something_happened = true;
+bool thenop_in_final_state = false;
 class ThenCEPOpHelper
 {
     // Espen's THEN events
     struct first_event {};
     struct second_event {};
-
 
     // front-end: define the FSM structure
     struct then_ : public msm::front::state_machine_def<then_>
@@ -55,7 +56,10 @@ class ThenCEPOpHelper
         struct ReceivedSecondEvent : public msm::front::state<msm::front::default_base_state,msm::front::sm_ptr>
         {
             template <class Event,class FSM>
-            void on_entry(Event const& ,FSM&) {std::cout << "entering: ReceivedSecondEvent" << std::endl;}
+            void on_entry(Event const& ,FSM&) {
+                thenop_in_final_state = true;
+                std::cout << "entering: ReceivedSecondEvent" << std::endl;
+            }
             template <class Event,class FSM>
             void on_exit(Event const&,FSM& ) {std::cout << "leaving: ReceivedSecondEvent" << std::endl;}
             void set_sm_ptr(then_* th)
@@ -91,6 +95,7 @@ class ThenCEPOpHelper
         template <class FSM,class Event>
         void no_transition(Event const& e, FSM&,int state)
         {
+            thenop_something_happened = false;
             std::cout << "no transition from state " << state
                       << " on event " << typeid(e).name() << std::endl;
         }
@@ -121,23 +126,42 @@ class ThenCEPOpHelper
         t.stop();
     }*/
 
-    vector<then_sm> sequences;
+    deque<then_sm> sequences;
 
-    void InsertEvent() {
+    void InsertEvent(string event) {
         //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
-        for (std::vector<then_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+        for (deque<then_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+            then_sm sm(*it);
+            if (event == "first")
+                sm.process_event(first_event());
+            else if (event == "second")
+                sm.process_event(second_event());
 
+            if (thenop_something_happened) {
+                sequences.push_back(sm);
+            }
+
+            if (thenop_in_final_state) {
+                thenop_in_final_state = false;
+                cout << "ThenOp in final state" << endl;
+            }
+
+            thenop_something_happened = true;
         }
     }
 
 public:
     ThenCEPOpHelper() {
         then_sm first_sm;
-        first_sm.start();
         sequences.push_back(first_sm);
+        first_sm.start();
+        InsertEvent("first");  // Test
+        InsertEvent("second");
     }
 };
 
+bool orop_something_happend = true;
+bool orop_in_final_state = false;
 class OrCEPOpHelper
 {
     // Espen's OR events
@@ -171,7 +195,10 @@ class OrCEPOpHelper
         struct ReceivedEvent : public msm::front::state<>
         {
             template <class Event,class FSM>
-            void on_entry(Event const& ,FSM&) {std::cout << "entering: ReceivedEvent" << std::endl;}
+            void on_entry(Event const& ,FSM&) {
+                orop_in_final_state = true;
+                cout << "entering: ReceivedEvent" << std::endl;
+            }
             template <class Event,class FSM>
             void on_exit(Event const&,FSM& ) {std::cout << "leaving: ReceivedEvent" << std::endl;}
         };
@@ -202,6 +229,7 @@ class OrCEPOpHelper
         template <class FSM,class Event>
         void no_transition(Event const& e, FSM&,int state)
         {
+            orop_something_happend = false;
             std::cout << "no transition from state " << state
                       << " on event " << typeid(e).name() << std::endl;
         }
@@ -232,20 +260,37 @@ class OrCEPOpHelper
         o.stop();
     }*/
 
-    vector<or_sm> sequences;
+    deque<or_sm> sequences;
 
-    void InsertEvent() {
+    void InsertEvent(string event) {
         //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
-        for (std::vector<or_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+        for (deque<or_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+            or_sm sm(*it);
+            if (event == "first")
+                sm.process_event(first_event());
+            else if (event == "second")
+                sm.process_event(second_event());
 
+            if (orop_something_happend) {
+                sequences.push_front(sm);
+            }
+
+            if (orop_in_final_state) {
+                orop_in_final_state = false;
+                cout << "OrOp in final state" << endl;
+            }
+
+            orop_something_happend = true;
         }
     }
 
 public:
     OrCEPOpHelper() {
         or_sm first_sm;
-        first_sm.start();
         sequences.push_back(first_sm);
+        first_sm.start();
+        /*InsertEvent("first");  // Test
+        InsertEvent("second");*/
     }
 };
 

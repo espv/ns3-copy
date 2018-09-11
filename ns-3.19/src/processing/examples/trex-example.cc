@@ -111,7 +111,8 @@ void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* data
 
 int main(int argc, char *argv[])
 {
-  OrCEPOp orop;
+  //OrCEPOp orop;
+  //ThenCEPOp thenop;
   // Debugging and tracing
   ns3::debugOn = true;
   LogComponentEnable ("TRexExample", LOG_LEVEL_ALL);
