@@ -128,6 +128,7 @@ class ThenCEPOpHelper
 
     deque<then_sm> sequences;
 
+public:
     void InsertEvent(string event) {
         //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
         for (deque<then_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
@@ -150,7 +151,6 @@ class ThenCEPOpHelper
         }
     }
 
-public:
     ThenCEPOpHelper() {
         then_sm first_sm;
         sequences.push_back(first_sm);
@@ -262,6 +262,7 @@ class OrCEPOpHelper
 
     deque<or_sm> sequences;
 
+public:
     void InsertEvent(string event) {
         //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
         for (deque<or_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
@@ -284,7 +285,6 @@ class OrCEPOpHelper
         }
     }
 
-public:
     OrCEPOpHelper() {
         or_sm first_sm;
         sequences.push_back(first_sm);

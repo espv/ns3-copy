@@ -22,15 +22,14 @@ class OrCEPOpHelper;
 
 class ThenCEPOpHelper;
 
-class CEPEngine {
-
-};
-
 class CEPOp {
+public:
+    virtual void InsertEvent(string event) {
 
+    }
 };
 
-class OrCEPOp : CEPOp {
+class OrCEPOp : public CEPOp {
     OrCEPOpHelper *helper;
 
 public:
@@ -41,11 +40,34 @@ public:
     vector<and_sm> sequences;
 };*/
 
-class ThenCEPOp : CEPOp {
+class ThenCEPOp : public CEPOp {
     ThenCEPOpHelper *helper;
 
 public:
     ThenCEPOp();
+};
+
+class CEPEngine {
+    vector<CEPOp> operators;
+
+public:
+    void InsertEvent(string event) {
+        //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
+        for (vector<CEPOp>::iterator it = operators.begin(); it != operators.end(); ++it) {
+            CEPOp *op = (CEPOp*)&(*it);
+            op->InsertEvent(event);
+        }
+    }
+
+    void AddOperator(string type) {
+        if (type == "OR") {
+            OrCEPOp or_op;
+            operators.push_back(or_op);
+        } else if (type == "THEN") {
+            ThenCEPOp then_op;
+            operators.push_back(then_op);
+        }
+    }
 };
 
 #endif //PROCESSING_DELAY_MODELS_CEP_H
