@@ -1106,6 +1106,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(ps);
 	}
 
+	// Handle incoming CEP event
+	if (!tokens[1].compare("HANDLEINCOMINGCEPEVENT")) {
+
+	}
+
 	// Remember: unless the queue is explicitly specified,
 	// which happens only outside of loops, we don't have
 	// to specify any queue inside of this event. This is

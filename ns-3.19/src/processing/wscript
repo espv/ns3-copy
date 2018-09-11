@@ -27,6 +27,7 @@ def build(bld):
 
         'model/telosb.cc',
         'model/trex.cc',
+        'model/cep.cc',
         ]
 
     headers = bld(features='ns3header')
@@ -55,6 +56,7 @@ def build(bld):
 
         'model/telosb.h',
         'model/trex.h',
+        'model/cep.h',
     ]
 
     if bld.env['ENABLE_EXAMPLES']:

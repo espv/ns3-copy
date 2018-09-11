@@ -18,6 +18,8 @@
 
 #include <sstream>
 
+#include "ns3/cep.h"
+
 #define SSTR( x ) static_cast< std::ostringstream & >( \
         ( std::ostringstream() << std::dec << x ) ).str()
 
@@ -109,6 +111,7 @@ void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* data
 
 int main(int argc, char *argv[])
 {
+  OrCEPOp orop;
   // Debugging and tracing
   ns3::debugOn = true;
   LogComponentEnable ("TRexExample", LOG_LEVEL_ALL);
