@@ -11,7 +11,7 @@
 ############################### HEADER ######################################
 #############################################################################
 
-CEPENABLED
+#CEPENABLED
 
 QUEUES
 # Format: name
@@ -64,20 +64,12 @@ PEU 4 cpu0 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
 SYNCH
 # name type arguments
 # type 0 is a semaphore
+process_event_SEM 0 0
 
 CONDITIONS
 
 TRIGGERS
-LOC startofhirq1 readdonelength
-LOC startofhirq2 readdonefcf
-LOC startofhirq3 readdonepayload
-LOC sendDoneLoc senddonetrigger
-LOC startoftask1 receivedone
-LOC startoftask2 sendtask
-LOC startoftask3 senddone
-LOC startofhirq9 readdoneacklength
-LOC startofhirq10 readdoneackpayload
-LOC endoftaskloop emptytaskloop
+LOC send_event_loc do_send_event
 #SERVICE sendTask sendtask
 
 # Entrypoint function for the PEU defined above
@@ -114,7 +106,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x WAKEUP packet_thread
+x TTWAKEUP packet_thread
+x PROCESS 1000 0
 0 STOP
 
 SIGEND
@@ -127,7 +120,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x CALL hardware_interrupt_1
+send_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 0 STOP
 
 SIGEND
@@ -140,9 +133,10 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x PROCESS 1000 0
 x CALL process_received_packet
-x WAKEUP packet_thread
-x SEMDOWN process_event
+x TTWAKEUP event_thread
+x SEMDOWN process_event_SEM global
 x CALL send_event
 x SLEEP
 0 STOP
@@ -158,8 +152,8 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1000 0
-x HANDLECEPEVENT
-x SEMUP process_event+
+#x HANDLEINCOMINGCEPEVENT
+x SEMUP process_event_SEM global
 x SLEEP
 0 STOP
 
@@ -167,5 +161,5 @@ SIGEND
 
 
 THREADS
-packet_thread packet_processing_thread infinite -99
-event_thread event_processing_thread infinite -99
+packet_thread packet_processing_thread infinite -1
+event_thread event_processing_thread infinite -1

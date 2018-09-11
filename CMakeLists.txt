@@ -16,6 +16,10 @@ add_custom_target(
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3.19
 )
 add_custom_target(
+        TRex COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3.19
+)
+add_custom_target(
         DCEP-Sim COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3.19
 )
