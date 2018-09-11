@@ -35,7 +35,7 @@
 #include "resource-manager.h"
 #include "src/network/utils/ipv4-address.h"
 #include "dcep-state.h"
-#include "../../processing/model/cep.h"
+#include "ns3/cep.h"
 
 namespace ns3 {
 

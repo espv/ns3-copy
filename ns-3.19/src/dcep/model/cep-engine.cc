@@ -70,7 +70,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         AggregateObject(detector);
         AggregateObject(producer);
         AggregateObject(pCEPengine); // Added by Espen for the CEP software execution model
-        
+
         
     }
     
