@@ -5,69 +5,71 @@
 #ifndef PROCESSING_DELAY_MODELS_CEP_H
 #define PROCESSING_DELAY_MODELS_CEP_H
 
+
+using namespace std;
+
 // back-end
 #include <boost/msm/back/state_machine.hpp>
 //front-end
 #include <boost/msm/front/state_machine_def.hpp>
 
-using namespace std;
+#include "ns3/object.h"
 
-class CEPEngine;
-class CEPOp;
-class OrCEPOp;
-//class AndCEPOp;
-class ThenCEPOp;
+namespace ns3 {
+    class ProcessCEPEngine;
+    class CEPOp;
+    class OrCEPOp;
+    //class AndCEPOp;
+    class ThenCEPOp;
 
-class OrCEPOpHelper;
+    class OrCEPOpHelper : public Object {
+    public:
+        static TypeId GetTypeId (void);
+    };
 
-class ThenCEPOpHelper;
+    class ThenCEPOpHelper : public Object {
+    public:
+        static TypeId GetTypeId (void);
+    };
 
-class CEPOp {
-public:
-    virtual void InsertEvent(string event) {
+    class CEPOp : public Object {
+    public:
+        virtual void InsertEvent(string event) {
 
-    }
-};
-
-class OrCEPOp : public CEPOp {
-    OrCEPOpHelper *helper;
-
-public:
-    OrCEPOp();
-};
-
-/*class AndCEPOp : CEPOp {
-    vector<and_sm> sequences;
-};*/
-
-class ThenCEPOp : public CEPOp {
-    ThenCEPOpHelper *helper;
-
-public:
-    ThenCEPOp();
-};
-
-class CEPEngine {
-    vector<CEPOp> operators;
-
-public:
-    void InsertEvent(string event) {
-        //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
-        for (vector<CEPOp>::iterator it = operators.begin(); it != operators.end(); ++it) {
-            CEPOp *op = (CEPOp*)&(*it);
-            op->InsertEvent(event);
         }
-    }
+    };
 
-    void AddOperator(string type) {
-        if (type == "OR") {
-            OrCEPOp or_op;
-            operators.push_back(or_op);
-        } else if (type == "THEN") {
-            ThenCEPOp then_op;
-            operators.push_back(then_op);
-        }
-    }
-};
+    class OrCEPOp : public CEPOp {
+        Ptr<OrCEPOpHelper> helper;
 
+    public:
+        static TypeId GetTypeId (void);
+        OrCEPOp();
+    };
+
+    /*class AndCEPOp : CEPOp {
+        vector<and_sm> sequences;
+    };*/
+
+    class ThenCEPOp : public CEPOp {
+        Ptr<ThenCEPOpHelper> helper;
+
+    public:
+        static TypeId GetTypeId (void);
+        ThenCEPOp();
+    };
+
+    class ProcessCEPEngine : public Object {
+        vector< Ptr<CEPOp> > operators;
+
+    public:
+        static TypeId GetTypeId (void);
+
+        ProcessCEPEngine();
+
+        void InsertEvent(string event);
+
+        void AddOperator(string type);
+    };
+}
 #endif //PROCESSING_DELAY_MODELS_CEP_H

@@ -35,6 +35,7 @@
 #include "resource-manager.h"
 #include "src/network/utils/ipv4-address.h"
 #include "dcep-state.h"
+#include "../../processing/model/cep.h"
 
 namespace ns3 {
 
@@ -440,6 +441,8 @@ namespace ns3 {
         if (placed) 
         {
             NS_LOG_INFO ("QUERY PLACED");
+            // Call ProcessCEPEngine.AddOperator
+            GetObject<CEPEngine>()->GetObject<ProcessCEPEngine>()->AddOperator("THEN");
             newLocalPlacement(q->eventType);
             if(dstate->GetNextHop(q->eventType).IsEqual(cm->GetLocalAddress()))
             {
