@@ -195,9 +195,9 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         ipv4.SetDestination(addr);
         ipv4.SetProtocol(123);
         p->AddHeader(ipv4);
-
-        //Ptr<Packet> p_item = (Ptr<Packet>)Create<Packet>(p);
-        m_sendQueue->Enqueue(p/*p_item*/);
+        
+        //Ptr<ns3::QueueItem> p_item = Create<ns3::QueueItem>(p);
+        m_sendQueue->Enqueue(p);
         
         Simulator::Schedule (Seconds (0.0), &Communication::send, this);
         
@@ -208,7 +208,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
     {
         if(m_sendQueue->GetNPackets() > 0)
         {
-            Ptr<Packet> p = (Ptr<Packet>)m_sendQueue->Dequeue();
+            Ptr<Packet> p = m_sendQueue->Dequeue();
             DcepHeader dcepHeader;
             Ipv4Header ipv4;
             p->RemoveHeader(ipv4);
@@ -219,13 +219,13 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             SeqTsHeader sth;
             sth.SetSeq(m_sent);
 
-            p->AddHeader(dcepHeader);
-            p->AddHeader(ipv4);
-            p->AddHeader(sth);
+            pp->AddHeader(dcepHeader);
+            pp->AddHeader(ipv4);
+            pp->AddHeader(sth);
             bool itemSent = false;
 
             m_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(ipv4.GetDestination()), m_port));
-            if ((m_socket->Send (p)) >= 0)
+            if ((m_socket->Send (pp)) >= 0)
             {
 
                 NS_LOG_INFO ("SUCCESSFUL TX from : " << host_address
@@ -240,7 +240,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
             }
 
-            Ptr<Packet> item = p; //m_sendQueue->Dequeue();
+            Ptr<Packet> item = p; //m_sendQueue->Remove();
 
             if (!itemSent) //we push it back at the rear of the queue
             {

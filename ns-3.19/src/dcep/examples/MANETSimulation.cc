@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
 			"MaxRange", StringValue("350.0"));
     wifiPhy.SetChannel (wifiChannel.Create ());
 
-    NqosWifiMacHelper wifiMac;
+    QosWifiMacHelper wifiMac;
     wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                   "DataMode",StringValue (phyMode),
                                   "ControlMode",StringValue (phyMode));

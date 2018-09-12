@@ -383,11 +383,13 @@ void ProcessCEPEngine::InsertEvent(string event) {
 }
 
 void ProcessCEPEngine::AddOperator(string type) {
-    if (type == "OR") {
+    if (type == "or") {
         Ptr<OrCEPOp> or_op = CreateObject<OrCEPOp>();
         operators.push_back(or_op);
-    } else if (type == "THEN") {
+    } else if (type == "then") {
         Ptr<ThenCEPOp> then_op = CreateObject<ThenCEPOp>();
         operators.push_back(then_op);
+    } else if (type == "true") {
+        // Atomic operator
     }
 }

@@ -19,7 +19,7 @@ NS_LOG_COMPONENT_DEFINE ("DcepExample");
 NetDeviceContainer SetupWirelessNetwork (NodeContainer& n) 
 {
     std::string phyMode ("DsssRate1Mbps");
-    WifiHelper wifi; //WifiHelper wifi;
+    WifiHelper wifi;
 
     YansWifiPhyHelper wifiPhy =  YansWifiPhyHelper::Default ();
     // set it to zero; otherwise, gain will be added
@@ -36,7 +36,7 @@ NetDeviceContainer SetupWirelessNetwork (NodeContainer& n)
     
     
     // Add an upper mac and disable rate control
-    NqosWifiMacHelper wifiMac; //WifiMacHelper wifiMac;
+    QosWifiMacHelper wifiMac;
     wifi.SetStandard (WIFI_PHY_STANDARD_80211b);
     wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager",
                                   "DataMode",StringValue (phyMode),

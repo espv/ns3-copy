@@ -296,13 +296,13 @@ namespace ns3 {
         else if (dstate->GetNextHop(eType).IsEqual(GetObject<Communication>()->GetLocalAddress()))
         {
             
-            if(dstate->GetQuery(eType)->isAtomic)
+            /*if(dstate->GetQuery(eType)->isAtomic)
             {
                  GetObject<Dcep>()->ActivateDatasource(dstate->GetQuery(eType));
             }
                
                 
-            else/* Send to local CEP engine*/
+            else*//* Send to local CEP engine*/
                 SendQueryToCepEngine (dstate->GetQuery(eType));
         }
         else
@@ -441,8 +441,6 @@ namespace ns3 {
         if (placed) 
         {
             NS_LOG_INFO ("QUERY PLACED");
-            // Call ProcessCEPEngine.AddOperator
-            GetObject<CEPEngine>()->GetObject<ProcessCEPEngine>()->AddOperator("THEN");
             newLocalPlacement(q->eventType);
             if(dstate->GetNextHop(q->eventType).IsEqual(cm->GetLocalAddress()))
             {
