@@ -70,6 +70,7 @@ CONDITIONS
 
 TRIGGERS
 LOC send_event_loc do_send_event
+LOC received_event_loc received_event
 #SERVICE sendTask sendtask
 
 # Entrypoint function for the PEU defined above
@@ -106,8 +107,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x TTWAKEUP packet_thread
+#x TTWAKEUP packet_thread
 x PROCESS 1000 0
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 0 STOP
 
 SIGEND
@@ -152,8 +154,9 @@ FRACTION 100% 1 1
 
 0 START
 x SLEEP
+x PROCESS 1000 0
 x HANDLEINCOMINGCEPEVENT
-received_event PROCESS 1000 0
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 x SEMUP process_event_SEM global
 0 STOP
 

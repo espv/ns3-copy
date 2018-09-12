@@ -263,6 +263,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 // Invoke SEM that delays the execution of p->RcvCepEvent
+                GetNode()->GetObject<ExecEnv>()->queues["h1-h2"]->Enqueue(pkt);
                 ScheduleInterrupt (GetNode()->GetObject<ExecEnv>(), pkt, "HIRQ-1", Seconds(0));
                 GetNode()->GetObject<ExecEnv>()->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
 
