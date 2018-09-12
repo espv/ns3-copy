@@ -30,6 +30,8 @@
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
 #include "ns3/trex.h"
+#include "../../processing/model/execenv.h"
+
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("MANETSimulation");
@@ -148,6 +150,27 @@ int main(int argc, char** argv) {
     wifiInterfaces = ipv4.Assign (devices);
     
     DcepAppHelper dcepApphelper;
+
+    // Espen
+    Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
+            "cacheLineSize", UintegerValue(64), "tracingOverhead",
+            UintegerValue(0));
+    for (NodeContainer::Iterator i = allNodesContainer.Begin (); i != allNodesContainer.End (); ++i)
+    {
+        Ptr<Node> node = *i;
+        eeh->Install(ps.deviceFile, node);
+        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+        //new TRex(node, &ps);
+    }
+    // Espen
+
+    for (NodeContainer::Iterator i = allNodesContainer.Begin (); i != allNodesContainer.End (); ++i)
+    {
+        Ptr<Node> node = *i;
+        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+        new TRex(node, &ps);
+    }
+
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
     Ipv4Address sinkAddress = wifiInterfaces.GetAddress (0);
     
@@ -169,19 +192,11 @@ int main(int argc, char** argv) {
 
         }
     }
-
-    // Espen
-    Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
-            "cacheLineSize", UintegerValue(64), "tracingOverhead",
-            UintegerValue(0));
-    // Espen
     
     for(uint32_t i = numStationary; i < allNodesContainer.GetN(); i++)
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement policy", StringValue(placementPolicy));
-        new TRex(allNodesContainer.Get(i), &ps);
-        eeh->Install(ps.deviceFile, allNodesContainer.Get(i));
     }
     
     

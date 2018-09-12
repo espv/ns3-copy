@@ -32,6 +32,7 @@
 #include "ns3/boolean.h"
 #include "ns3/processing-module.h"
 #include "src/core/model/object-base.h"
+#include "../../processing/model/execenv.h"
 
 #include <ctime>
 #include <chrono>
@@ -44,8 +45,7 @@ namespace ns3 {
 
     // ScheduleInterrupt schedules an interrupt on the node.
     // interruptId is the service name of the interrupt, such as HIRQ-123
-    void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interruptId, Time time) {
-        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+    void ScheduleInterrupt(Ptr<ExecEnv> ee, Ptr<Packet> packet, const char* interruptId, Time time) {
 
         // TODO: Model the interrupt distribution somehow
         static int cpu = 0;
@@ -263,9 +263,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 // Invoke SEM that delays the execution of p->RcvCepEvent
-                ScheduleInterrupt (GetNode(), pkt, "HIRQ-1", Seconds(0));
-                Ptr<ExecEnv> execenv = GetNode()->GetObject<ExecEnv>();
-                execenv->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
+                ScheduleInterrupt (GetNode()->GetObject<ExecEnv>(), pkt, "HIRQ-1", Seconds(0));
+                GetNode()->GetObject<ExecEnv>()->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
 
                 //p->RcvCepEvent(event); // This function is called within a SEM
                 break; 
