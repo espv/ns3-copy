@@ -675,8 +675,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 										index++;
 
 									// If all queues were empty, pop program and return.
-									if (it
-											== newLc->stateQueuesServed.end())
+									if (it == newLc->stateQueuesServed.end())
 										// We do not pop thread of execution, as we did not push it yet
 										return true;
 									else

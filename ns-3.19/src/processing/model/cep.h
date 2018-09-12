@@ -24,11 +24,13 @@ namespace ns3 {
 
     class OrCEPOpHelper : public Object {
     public:
+        vector<string> event_sequences;
         static TypeId GetTypeId (void);
     };
 
     class ThenCEPOpHelper : public Object {
     public:
+        vector<string> event_sequences;
         static TypeId GetTypeId (void);
     };
 
@@ -40,9 +42,8 @@ namespace ns3 {
     };
 
     class OrCEPOp : public CEPOp {
-        Ptr<OrCEPOpHelper> helper;
-
     public:
+        Ptr<OrCEPOpHelper> helper;
         static TypeId GetTypeId (void);
         OrCEPOp();
     };
@@ -52,9 +53,8 @@ namespace ns3 {
     };*/
 
     class ThenCEPOp : public CEPOp {
-        Ptr<ThenCEPOpHelper> helper;
-
     public:
+        Ptr<ThenCEPOpHelper> helper;
         static TypeId GetTypeId (void);
         ThenCEPOp();
     };
@@ -69,7 +69,7 @@ namespace ns3 {
 
         void InsertEvent(string event);
 
-        void AddOperator(string type);
+        void AddOperator(string type, vector<string> event_sequences);
     };
 }
 #endif //PROCESSING_DELAY_MODELS_CEP_H

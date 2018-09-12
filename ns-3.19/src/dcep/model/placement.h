@@ -141,7 +141,7 @@ class Placement : public Object
         void SendQueryToCepEngine (Ptr<Query> q);
         
         
-        
+
         
         
         void RecvQuery(Ptr<Query> q);

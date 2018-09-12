@@ -62,6 +62,7 @@ ExecEnv::ExecEnv() :
 	WifiMacHeader *hdr = &hdrCopy;
 	/* STEIN */
 
+	/* NOT NEEDED FOR CEP OR TelosB
 	Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
 
 	// Create packet, and specify ReceivePacketTest to be
@@ -106,7 +107,7 @@ ExecEnv::ExecEnv() :
 			return;
 		} else
 			packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-	}
+	}*/
 
 
 	NS_LOG_FUNCTION (this << packet << hdr);

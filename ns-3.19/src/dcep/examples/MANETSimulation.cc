@@ -29,9 +29,12 @@
 #include "ns3/stats-module.h"
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
+#include "ns3/trex.h"
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("MANETSimulation");
+
+static TRexProtocolStack ps;
 
 int main(int argc, char** argv) {
     
@@ -166,12 +169,19 @@ int main(int argc, char** argv) {
 
         }
     }
+
+    // Espen
+    Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
+            "cacheLineSize", UintegerValue(64), "tracingOverhead",
+            UintegerValue(0));
+    // Espen
     
     for(uint32_t i = numStationary; i < allNodesContainer.GetN(); i++)
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement policy", StringValue(placementPolicy));
-        
+        new TRex(allNodesContainer.Get(i), &ps);
+        eeh->Install(ps.deviceFile, allNodesContainer.Get(i));
     }
     
     

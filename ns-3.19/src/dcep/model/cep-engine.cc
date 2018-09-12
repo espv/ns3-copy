@@ -170,7 +170,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
 
         std::cout << "Adding operator to CEPEngine" << std::endl;
-        GetObject<ProcessCEPEngine>()->AddOperator(q->op);
+        GetObject<ProcessCEPEngine>()->AddOperator(q->op, {q->inevent1, q->inevent2});
             
     }
     

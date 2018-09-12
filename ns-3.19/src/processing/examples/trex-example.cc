@@ -43,6 +43,7 @@ void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interrupt
   dummyProgramLoc = new ProgramLocation();
   dummyProgramLoc->tempvar = tempVar();
   dummyProgramLoc->curPkt = packet;
+  // dummyProgramLoc->curEvent = event;
   dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
   dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
 

@@ -193,11 +193,19 @@ class ThenCEPOpHelper : Object {
     }*/
 
     deque <then_sm> sequences;
+    vector<string> event_sequences;
 
 public:
     void InsertEvent(string event) {
         //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
         for (deque<then_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+            vector<string>::iterator itr = find(this->event_sequences.begin(), this->event_sequences.end(), event);
+            if (itr != this->event_sequences.end()) {
+
+            } else {
+
+            }
+
             then_sm sm(*it);
             if (event == "first")
                 sm.process_event(first_event());
@@ -332,11 +340,19 @@ class OrCEPOpHelper : Object {
     }*/
 
     deque <or_sm> sequences;
+    vector<string> event_sequences;
 
 public:
     void InsertEvent(string event) {
         //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
         for (deque<or_sm>::iterator it = sequences.begin(); it != sequences.end(); ++it) {
+            vector<string>::iterator itr = find(this->event_sequences.begin(), this->event_sequences.end(), event);
+            if (itr != this->event_sequences.end()) {
+
+            } else {
+
+            }
+
             or_sm sm(*it);
             if (event == "first")
                 sm.process_event(first_event());
@@ -360,14 +376,13 @@ public:
         or_sm first_sm;
         sequences.push_back(first_sm);
         first_sm.start();
-        /*InsertEvent("first");  // Test
-        InsertEvent("second");*/
+        InsertEvent("a");  // Test
+        InsertEvent("b");
     }
 };
 
 OrCEPOp::OrCEPOp() {
     helper = CreateObject<OrCEPOpHelper>();
-
 };
 
 ThenCEPOp::ThenCEPOp() {
@@ -382,14 +397,19 @@ void ProcessCEPEngine::InsertEvent(string event) {
     }
 }
 
-void ProcessCEPEngine::AddOperator(string type) {
+void ProcessCEPEngine::AddOperator(string type, vector<string> event_sequences) {
     if (type == "or") {
         Ptr<OrCEPOp> or_op = CreateObject<OrCEPOp>();
+        or_op->helper->event_sequences = event_sequences;
         operators.push_back(or_op);
     } else if (type == "then") {
         Ptr<ThenCEPOp> then_op = CreateObject<ThenCEPOp>();
+        then_op->helper->event_sequences = event_sequences;
         operators.push_back(then_op);
     } else if (type == "true") {
         // Atomic operator
+        Ptr<OrCEPOp> or_op = CreateObject<OrCEPOp>();
+        or_op->helper->event_sequences = event_sequences;
+        operators.push_back(or_op);
     }
 }
