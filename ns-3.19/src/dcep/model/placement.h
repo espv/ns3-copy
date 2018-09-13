@@ -128,7 +128,8 @@ class Placement : public Object
          * 
          */
         void RcvCepEvent(Ptr<Event> e);
-        
+        void DoRcvCepEvent(Ptr<Event> e);
+
         /*
          * All CEP events produced by this node are forwarded from here.
          */

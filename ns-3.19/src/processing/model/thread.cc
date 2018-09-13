@@ -139,6 +139,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 		case PROCESS: 
 			// PROCESS: Passed to the HWModels for handling.
 			return HandleProcessingEvent(e);
+		case INCOMINGCEPEVENT:
+			return HandleIncomingCEPEvent(e);
 		case EXECUTE:
 			return HandleExecuteEvent(e);
 		case QUEUE: 
@@ -519,6 +521,10 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 
 		return false;
 	}
+}
+
+bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
+	InsertEventIntoCEPOp *ieiceop = static_cast<InsertEventIntoCEPOp *>(e);
 }
 
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {

@@ -115,6 +115,7 @@ public:
 	bool HandleCondition(ExecutionEvent* e);
 	bool HandleInterrupt(ExecutionEvent* e);
 	bool HandleTempSync(ExecutionEvent* e);
+	bool HandleIncomingCEPEvent(ExecutionEvent* e);
 
 	// For debug
 	void PrintGlobalTempvars(Ptr<ExecEnv> ee);

@@ -96,6 +96,7 @@ enum ExecutionEventType {
   DEBUG,
   MEASURE,
   LASTTYPE,
+  INCOMINGCEPEVENT,
 };
 
 class Program;
@@ -347,6 +348,23 @@ class ProcessingStage : public ExecutionEvent {
   Ptr<Queue> pktqueue;  // Queue to dequeue from and set factor to multiply with that packet.
 
   friend std::ostream& operator<<(std::ostream& out, ProcessingStage& event);
+};
+
+class InsertEventIntoFSM : public ExecutionEvent {
+public:
+    //InsertEventIntoFSM(ProcessingStage *ps);
+    InsertEventIntoFSM();
+
+    ProcessingInstance ps;
+};
+
+class InsertEventIntoCEPOp : public ExecutionEvent {
+public:
+    //InsertEventIntoCEPOp(ProcessingStage *ps, InsertEventIntoFSM *ieifsm);
+    InsertEventIntoCEPOp();
+
+    ProcessingStage ps;
+    InsertEventIntoFSM ieifsm;
 };
 
 class SchedulerExecutionEvent : public ExecutionEvent {

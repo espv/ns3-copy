@@ -113,18 +113,15 @@ namespace ns3 {
      * ********************* EVENT FORWARDING ************************************
      * ***************************************************************************
      */
-    
     void
-    Placement::RcvCepEvent(Ptr<Event> e) 
+    Placement::DoRcvCepEvent(Ptr<Event> e)
     {
         remoteEventReceived (e);
 
-        GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
-        
         if (e->event_class == FINAL_EVENT) {
             SendEventToSink(e);
         }
-        else 
+        else
         {
             if(GetObject<DcepState>()->IsExpected(e))
             {
@@ -135,6 +132,14 @@ namespace ns3 {
                 NS_ABORT_MSG("PLACEMENT: UNEXPECTED EVENT");
             }
         }
+    }
+
+
+    void
+    Placement::RcvCepEvent(Ptr<Event> e) 
+    {
+        GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
+        DoRcvCepEvent(e);
     }
     
     
