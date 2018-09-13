@@ -159,16 +159,6 @@ int main(int argc, char** argv) {
     {
         Ptr<Node> node = *i;
         eeh->Install(ps.deviceFile, node);
-        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        //new TRex(node, &ps);
-    }
-    // Espen
-
-    for (NodeContainer::Iterator i = allNodesContainer.Begin (); i != allNodesContainer.End (); ++i)
-    {
-        Ptr<Node> node = *i;
-        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        new TRex(node, &ps);
     }
 
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);

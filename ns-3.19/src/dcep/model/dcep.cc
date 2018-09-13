@@ -32,7 +32,7 @@
 #include "ns3/boolean.h"
 #include "ns3/processing-module.h"
 #include "src/core/model/object-base.h"
-#include "../../processing/model/execenv.h"
+#include "ns3/processing-module.h"
 
 #include <ctime>
 #include <chrono>

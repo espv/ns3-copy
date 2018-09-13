@@ -37,7 +37,6 @@ namespace ns3 {
           Ptr<Dcep> dcep = m_factory.Create<Dcep> ();
           node->AddApplication (dcep);
           apps.Add (dcep);
-          std::cout<<std::endl;
         }
       return apps;
     }

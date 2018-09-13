@@ -1109,7 +1109,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 	// Handle incoming CEP event
 	if (!tokens[1].compare("HANDLEINCOMINGCEPEVENT")) {
-
+		Ptr<Node> node = GetObject<Node>();
 	}
 
 	// Remember: unless the queue is explicitly specified,

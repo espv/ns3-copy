@@ -14,8 +14,6 @@ using namespace ns3;
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 
-NS_OBJECT_ENSURE_REGISTERED(ProcessCEPEngine);
-
 ProcessCEPEngine::ProcessCEPEngine() {
 
 };
@@ -30,7 +28,6 @@ TypeId ProcessCEPEngine::GetTypeId(void) {
 }
 
 
-NS_OBJECT_ENSURE_REGISTERED(OrCEPOp);
 TypeId OrCEPOp::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::OrCEPOp")
             .SetParent<CEPOp> ()
@@ -41,7 +38,6 @@ TypeId OrCEPOp::GetTypeId(void) {
 }
 
 
-NS_OBJECT_ENSURE_REGISTERED(OrCEPOpHelper);
 TypeId OrCEPOpHelper::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::OrCEPOpHelper")
             .SetParent<CEPOp> ()
@@ -52,7 +48,6 @@ TypeId OrCEPOpHelper::GetTypeId(void) {
 }
 
 
-NS_OBJECT_ENSURE_REGISTERED(ThenCEPOp);
 TypeId ThenCEPOp::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::ThenCEPOp")
             .SetParent<CEPOp> ()
@@ -63,7 +58,6 @@ TypeId ThenCEPOp::GetTypeId(void) {
 }
 
 
-NS_OBJECT_ENSURE_REGISTERED(ThenCEPOpHelper);
 TypeId ThenCEPOpHelper::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::ThenCEPOpHelper")
             .SetParent<Object> ()
@@ -392,7 +386,7 @@ ThenCEPOp::ThenCEPOp() {
 void ProcessCEPEngine::InsertEvent(string event) {
     //for (std::vector<T>::iterator it = v.begin(); it != v.end(); ++it) {
     for (vector< Ptr<CEPOp> >::iterator it = operators.begin(); it != operators.end(); ++it) {
-        Ptr<CEPOp> op = (CEPOp*)&(*it);
+        Ptr<CEPOp> op = *it;
         op->InsertEvent(event);
     }
 }

@@ -35,7 +35,8 @@
 #include "resource-manager.h"
 #include "src/network/utils/ipv4-address.h"
 #include "dcep-state.h"
-#include "ns3/cep.h"
+#include "ns3/processing-module.h"
+#include "../../processing/model/cep.h"
 
 namespace ns3 {
 
@@ -117,6 +118,8 @@ namespace ns3 {
     Placement::RcvCepEvent(Ptr<Event> e) 
     {
         remoteEventReceived (e);
+
+        GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
         
         if (e->event_class == FINAL_EVENT) {
             SendEventToSink(e);
