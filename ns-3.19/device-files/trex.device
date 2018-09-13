@@ -107,9 +107,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x TTWAKEUP packet_thread
+x TTWAKEUP packet_thread
 x PROCESS 1000 0
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 0 STOP
 
 SIGEND
@@ -140,6 +139,7 @@ x PROCESS 1000 0
 x CALL process_received_packet
 x TTWAKEUP event_thread
 x SEMDOWN process_event_SEM global
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 x CALL send_event
 0 STOP
 
@@ -156,7 +156,6 @@ FRACTION 100% 1 1
 x SLEEP
 x PROCESS 1000 0
 x HANDLEINCOMINGCEPEVENT
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 x SEMUP process_event_SEM global
 0 STOP
 
