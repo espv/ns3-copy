@@ -322,8 +322,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Sink::receiveFinalEvent(Ptr<Event> e)
     {
-        std::cout << "COMPLEX EVENT NOTIFIED HOPSCOUNT " << e->hopsCount << " DELAY " << e->delay << " TYPE " << e->type << std::endl;
-        NS_LOG_INFO("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ COMPLEX EVENT $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+        std::cout << Simulator::Now() << " COMPLEX EVENT NOTIFIED HOPSCOUNT " << e->hopsCount << " DELAY " << e->delay << " TYPE " << e->type << std::endl;
+        NS_LOG_INFO(Simulator::Now() << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ COMPLEX EVENT $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
         
     }
 

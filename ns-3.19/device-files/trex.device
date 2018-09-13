@@ -108,7 +108,6 @@ FRACTION 100% 1 1
 
 0 START
 x TTWAKEUP packet_thread
-x PROCESS 1000 0
 0 STOP
 
 SIGEND
@@ -121,7 +120,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-send_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+#send_event_loc DEQUEUE PKTQUEUE 0 h3
 0 STOP
 
 SIGEND
@@ -134,13 +133,26 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x QUEUECOND h1-h2 h1-h2 empty
 x SLEEP
-x PROCESS 1000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME packet_processing_thread  # Wake up when packet is received
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND h1-h2 h1-h2 notempty
 x CALL process_received_packet
 x TTWAKEUP event_thread
-x SEMDOWN process_event_SEM global
+x SLEEP
 received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
-x CALL send_event
+#x CALL send_event
 0 STOP
 
 SIGEND
@@ -153,15 +165,29 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x QUEUECOND h1-h2 h1-h2 empty
 x SLEEP
-x PROCESS 1000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND h1-h2 h1-h2 notempty
+x PROCESS 1000000 0
 x HANDLEINCOMINGCEPEVENT
-x SEMUP process_event_SEM global
+x TTWAKEUP packet_thread
 0 STOP
 
 SIGEND
 
 
 THREADS
-packet_thread packet_processing_thread infinite -1
-event_thread event_processing_thread infinite -1
+packet_thread packet_processing_thread infinite -99
+event_thread event_processing_thread infinite -99
