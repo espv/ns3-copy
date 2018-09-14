@@ -355,7 +355,7 @@ public:
     //InsertEventIntoFSM(ProcessingStage *ps);
     InsertEventIntoFSM();
 
-    ProcessingInstance ps;
+    ProcessingStage *ps;
 };
 
 class InsertEventIntoCEPOp : public ExecutionEvent {
@@ -363,8 +363,8 @@ public:
     //InsertEventIntoCEPOp(ProcessingStage *ps, InsertEventIntoFSM *ieifsm);
     InsertEventIntoCEPOp();
 
-    ProcessingStage ps;
-    InsertEventIntoFSM ieifsm;
+    ProcessingStage *ps;
+    InsertEventIntoFSM *ieifsm;
 };
 
 class SchedulerExecutionEvent : public ExecutionEvent {

@@ -1219,7 +1219,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// ProcessingStage ps1(cycles_per_cepop, deviation_per_cepop);
 		// ProcessingStage ps2(cycles_per_fsm, deviation_per_fsm);
 		InsertEventIntoFSM *ieifsm = new InsertEventIntoFSM(/*ps2*/);
+		ieifsm->ps = ps2;
 		InsertEventIntoCEPOp *ieiceop = new InsertEventIntoCEPOp(/*ps1, ieifsm*/);
+		ieiceop->ieifsm = ieifsm;
+		ieiceop->ps = ps1;
 		// currentProgram->events.push_back(ieiceop);
 		// currentProgram->events.push_back(ieifsm);
 		// ieiceop.evaluate(tid, event); // Calls ieifsm.evaluate(event);
