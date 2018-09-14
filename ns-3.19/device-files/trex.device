@@ -11,7 +11,7 @@
 ############################### HEADER ######################################
 #############################################################################
 
-#CEPENABLED
+CEPENABLED
 
 QUEUES
 # Format: name
@@ -47,7 +47,7 @@ etq-etq FIFO -1 packets
 
 send-queue FIFO -1 packets
 
-cepops FIFO -1 CEPOps
+event-queue FIFO -1 cepevents
 
 
 

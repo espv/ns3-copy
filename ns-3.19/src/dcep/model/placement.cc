@@ -138,7 +138,7 @@ namespace ns3 {
     void
     Placement::RcvCepEvent(Ptr<Event> e) 
     {
-        GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
+        //GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
         DoRcvCepEvent(e);
     }
     

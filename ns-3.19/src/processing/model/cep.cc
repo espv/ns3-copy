@@ -14,6 +14,7 @@ using namespace ns3;
 namespace msm = boost::msm;
 namespace mpl = boost::mpl;
 
+NS_OBJECT_ENSURE_REGISTERED(ProcessCEPEngine);
 ProcessCEPEngine::ProcessCEPEngine() {
 
 };

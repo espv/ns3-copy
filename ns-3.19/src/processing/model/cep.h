@@ -60,9 +60,9 @@ namespace ns3 {
     };
 
     class ProcessCEPEngine : public Object {
+    public:
         vector< Ptr<CEPOp> > operators;
 
-    public:
         static TypeId GetTypeId (void);
 
         ProcessCEPEngine();

@@ -11,6 +11,7 @@
 #include "sem.h"
 #include "interrupt-controller.h"
 #include "condition.h"
+#include "cep.h"
 // #include "ns3/schedsim-linsched.h"
 #include "ns3/rrscheduler.h"
 #include <ns3/drop-tail-queue.h>
@@ -1122,7 +1123,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// the parsing of the header.
 		// First, create the processing stage
 		ProcessingStage *ps1 = new ProcessingStage();
-		execEvent = ps1;
 		ps1->samples = nrSamples;
 
 		int intField = 0;
@@ -1174,7 +1174,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// the parsing of the header.
 		// First, create the processing stage
 		ProcessingStage *ps2 = new ProcessingStage();
-		execEvent = ps2;
 		ps2->samples = nrSamples;
 
 		for (int i = 0; i < numHWEs; i++) {
@@ -1223,6 +1222,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		InsertEventIntoCEPOp *ieiceop = new InsertEventIntoCEPOp(/*ps1, ieifsm*/);
 		ieiceop->ieifsm = ieifsm;
 		ieiceop->ps = ps1;
+		ieiceop->pCEPEngine = node->GetObject<ProcessCEPEngine>();
+		execEvent = ieiceop;
+
+		// Add the event to the current program
+		currentProgram->events.push_back(ieiceop);
 		// currentProgram->events.push_back(ieiceop);
 		// currentProgram->events.push_back(ieifsm);
 		// ieiceop.evaluate(tid, event); // Calls ieifsm.evaluate(event);
@@ -1835,6 +1839,11 @@ void ExecEnv::Parse(std::string device) {
 					|| !tokens[0].compare("TRIGGERS")) {
 
 				mode = tokens[0];
+				continue;
+			}
+
+			if (!tokens[0].compare("CEPENABLED")) {
+				GetObject<Node>()->AggregateObject( CreateObject<ProcessCEPEngine>() );
 				continue;
 			}
 

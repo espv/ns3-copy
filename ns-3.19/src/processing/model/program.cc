@@ -346,6 +346,7 @@ ProcessingStage::Instantiate() {
 }
 
 InsertEventIntoCEPOp::InsertEventIntoCEPOp() {
+    ExecutionEvent::type = INCOMINGCEPEVENT;
 }
 
 /*

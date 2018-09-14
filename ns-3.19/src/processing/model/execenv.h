@@ -68,6 +68,7 @@ public:
   // Holds all intra-node queues used during
   // execution.
   std::map<std::string, Ptr<Queue> > queues;
+  std::map<std::string, std::vector<std::string> > eventqueues;
   std::map<Ptr<Queue>, std::string> queueNames;
   std::vector<Ptr<Queue> > queueOrder;
 

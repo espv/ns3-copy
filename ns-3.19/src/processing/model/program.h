@@ -12,6 +12,7 @@
 #include "ns3/condition.h"
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
+#include "ns3/cep.h"
 
 #include <vector>
 #include <stack>
@@ -95,8 +96,8 @@ enum ExecutionEventType {
   END,
   DEBUG,
   MEASURE,
-  LASTTYPE,
   INCOMINGCEPEVENT,
+  LASTTYPE,
 };
 
 class Program;
@@ -356,6 +357,7 @@ public:
     InsertEventIntoFSM();
 
     ProcessingStage *ps;
+    CEPOp cepop;
 };
 
 class InsertEventIntoCEPOp : public ExecutionEvent {
@@ -364,6 +366,7 @@ public:
     InsertEventIntoCEPOp();
 
     ProcessingStage *ps;
+    Ptr<ProcessCEPEngine> pCEPEngine;
     InsertEventIntoFSM *ieifsm;
 };
 

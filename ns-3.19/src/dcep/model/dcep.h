@@ -55,7 +55,7 @@ class Dcep : public Application
         void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
         void SendFinalEventToSink(Ptr<Event>);
 
-        Ptr<ExecEnv> execenv;
+        Ptr<Node> node;
 private:
     
         virtual void StartApplication (void);

@@ -32,7 +32,6 @@
 #include "ns3/boolean.h"
 #include "ns3/processing-module.h"
 #include "src/core/model/object-base.h"
-#include "ns3/processing-module.h"
 
 #include <ctime>
 #include <chrono>
@@ -264,6 +263,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 // Invoke SEM that delays the execution of p->RcvCepEvent
                 GetNode()->GetObject<ExecEnv>()->queues["h1-h2"]->Enqueue(pkt);
+                GetNode()->GetObject<ExecEnv>()->eventqueues["event-queue"].push_back(event->type);
                 ScheduleInterrupt (GetNode()->GetObject<ExecEnv>(), pkt, "HIRQ-1", Seconds(0));
                 GetNode()->GetObject<ExecEnv>()->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
 
