@@ -39,9 +39,19 @@ TypeId OrCEPOp::GetTypeId(void) {
 }
 
 
+TypeId CEPOpHelper::GetTypeId(void) {
+    static TypeId tid = TypeId("ns3::CEPOpHelper")
+            .SetParent<Object> ()
+            .AddConstructor<CEPOpHelper> ()
+    ;
+
+    return tid;
+}
+
+
 TypeId OrCEPOpHelper::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::OrCEPOpHelper")
-            .SetParent<CEPOp> ()
+            .SetParent<CEPOpHelper> ()
             .AddConstructor<OrCEPOpHelper> ()
     ;
 
@@ -51,7 +61,7 @@ TypeId OrCEPOpHelper::GetTypeId(void) {
 
 TypeId ThenCEPOp::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::ThenCEPOp")
-            .SetParent<CEPOp> ()
+            .SetParent<CEPOpHelper> ()
             .AddConstructor<ThenCEPOp> ()
     ;
 
@@ -70,100 +80,176 @@ TypeId ThenCEPOpHelper::GetTypeId(void) {
 
 bool thenop_something_happened = true;
 bool thenop_in_final_state = false;
+bool orop_something_happend = true;
+bool orop_in_final_state = false;
 
-class ThenCEPOpHelper : Object {
-    // Espen's THEN events
-    struct first_event {
-    };
-    struct second_event {
+// Espen's OR events
+struct first_event {
+};
+struct second_event {
+};
+
+
+// front-end: define the FSM structure
+struct or_ : public msm::front::state_machine_def<or_> {
+    template<class Event, class FSM>
+    void on_entry(Event const &, FSM &) {
+        std::cout << "entering: Then" << std::endl;
+    }
+
+    template<class Event, class FSM>
+    void on_exit(Event const &, FSM &) {
+        std::cout << "leaving: Then" << std::endl;
+    }
+
+    // The list of FSM states
+    struct Empty : public msm::front::state<> {
+        // every (optional) entry/exit methods get the event passed.
+        template<class Event, class FSM>
+        void on_entry(Event const &, FSM &) { std::cout << "entering: Empty" << std::endl; }
+
+        template<class Event, class FSM>
+        void on_exit(Event const &, FSM &) { std::cout << "leaving: Empty" << std::endl; }
     };
 
-    // front-end: define the FSM structure
-    struct then_ : public msm::front::state_machine_def<then_> {
+    struct ReceivedEvent : public msm::front::state<> {
         template<class Event, class FSM>
         void on_entry(Event const &, FSM &) {
-            std::cout << "entering: Then" << std::endl;
+            orop_in_final_state = true;
+            cout << "entering: ReceivedEvent" << std::endl;
         }
 
         template<class Event, class FSM>
-        void on_exit(Event const &, FSM &) {
-            std::cout << "leaving: Then" << std::endl;
-        }
-
-        // The list of FSM states
-        struct Empty : public msm::front::state<> {
-            // every (optional) entry/exit methods get the event passed.
-            template<class Event, class FSM>
-            void on_entry(Event const &, FSM &) { std::cout << "entering: Empty" << std::endl; }
-
-            template<class Event, class FSM>
-            void on_exit(Event const &, FSM &) { std::cout << "leaving: Empty" << std::endl; }
-        };
-
-        struct ReceivedFirstEvent : public msm::front::state<> {
-            template<class Event, class FSM>
-            void on_entry(Event const &, FSM &) { std::cout << "entering: ReceivedFirstEvent" << std::endl; }
-
-            template<class Event, class FSM>
-            void on_exit(Event const &, FSM &) { std::cout << "leaving: ReceivedFirstEvent" << std::endl; }
-        };
-
-        // sm_ptr still supported but deprecated as functors are a much better way to do the same thing
-        struct ReceivedSecondEvent : public msm::front::state<msm::front::default_base_state, msm::front::sm_ptr> {
-            template<class Event, class FSM>
-            void on_entry(Event const &, FSM &) {
-                thenop_in_final_state = true;
-                std::cout << "entering: ReceivedSecondEvent" << std::endl;
-            }
-
-            template<class Event, class FSM>
-            void on_exit(Event const &, FSM &) { std::cout << "leaving: ReceivedSecondEvent" << std::endl; }
-
-            void set_sm_ptr(then_ *th) {
-                m_then = th;
-            }
-
-            then_ *m_then;
-        };
-
-        // the initial state of the player SM. Must be defined
-        typedef Empty initial_state;
-
-        // transition actions
-        void receive_first_event(first_event const &) { std::cout << "then::receive_first_event\n"; }
-
-        // Guard condition on first transition
-        bool first_event_guard(first_event const &) { return true; }
-
-        void receive_second_event(second_event const &) { std::cout << "then::receive_second_event\n"; }
-
-        // Guard condition on second transition
-        bool second_event_guard(second_event const &) { return true; }
-
-        typedef then_ t; // makes transition table cleaner
-
-        // Transition table for player
-        struct transition_table : mpl::vector<
-                //    Start     Event         Next      Action				 Guard
-                //  +---------+-------------+---------+---------------------+----------------------+
-                row < Empty, first_event, ReceivedFirstEvent, &t::receive_first_event, &t::first_event_guard>,
-                //  +---------+-------------+---------+---------------------+----------------------+
-                                  row<ReceivedFirstEvent, second_event, ReceivedSecondEvent, &t::receive_second_event, &t::second_event_guard>
-        //  +---------+-------------+---------+---------------------+----------------------+
-        > {};
-
-        // Replaces the default no-transition response.
-        template<class FSM, class Event>
-        void no_transition(Event const &e, FSM &, int state) {
-            thenop_something_happened = false;
-            std::cout << "no transition from state " << state
-                      << " on event " << typeid(e).name() << std::endl;
-        }
+        void on_exit(Event const &, FSM &) { std::cout << "leaving: ReceivedEvent" << std::endl; }
     };
 
-    // Pick a back-end
-    // Each ThenCEPOp object should have a vector of the state machine below
-    typedef msm::back::state_machine <then_> then_sm;
+    // the initial state of the player SM. Must be defined
+    typedef Empty initial_state;
+
+    // transition actions
+    void receive_first_event(first_event const &) { std::cout << "or_sm::receive_first_event\n"; }
+
+    // Guard condition on first transition
+    bool first_event_guard(first_event const &) { return true; }
+
+    void receive_second_event(second_event const &) { std::cout << "or_sm::receive_second_event\n"; }
+
+    // Guard condition on second transition
+    bool second_event_guard(second_event const &) { return true; }
+
+    typedef or_ o; // makes transition table cleaner
+
+    // Transition table for player
+    struct transition_table : mpl::vector<
+            //    Start     Event         Next      Action				 Guard
+            //  +---------+-------------+---------+---------------------+----------------------+
+            row < Empty, first_event, ReceivedEvent, &o::receive_first_event, &o::first_event_guard>,
+            //  +---------+-------------+---------+---------------------+----------------------+
+                              row<Empty, second_event, ReceivedEvent, &o::receive_second_event, &o::second_event_guard>
+    //  +---------+-------------+---------+---------------------+----------------------+
+    > {};
+
+    // Replaces the default no-transition response.
+    template<class FSM, class Event>
+    void no_transition(Event const &e, FSM &, int state) {
+        orop_something_happend = false;
+        std::cout << "no transition from state " << state
+                  << " on event " << typeid(e).name() << std::endl;
+    }
+};
+
+// front-end: define the FSM structure
+struct then_ : public msm::front::state_machine_def<then_> {
+    template<class Event, class FSM>
+    void on_entry(Event const &, FSM &) {
+        std::cout << "entering: Then" << std::endl;
+    }
+
+    template<class Event, class FSM>
+    void on_exit(Event const &, FSM &) {
+        std::cout << "leaving: Then" << std::endl;
+    }
+
+    // The list of FSM states
+    struct Empty : public msm::front::state<> {
+        // every (optional) entry/exit methods get the event passed.
+        template<class Event, class FSM>
+        void on_entry(Event const &, FSM &) { std::cout << "entering: Empty" << std::endl; }
+
+        template<class Event, class FSM>
+        void on_exit(Event const &, FSM &) { std::cout << "leaving: Empty" << std::endl; }
+    };
+
+    struct ReceivedFirstEvent : public msm::front::state<> {
+        template<class Event, class FSM>
+        void on_entry(Event const &, FSM &) { std::cout << "entering: ReceivedFirstEvent" << std::endl; }
+
+        template<class Event, class FSM>
+        void on_exit(Event const &, FSM &) { std::cout << "leaving: ReceivedFirstEvent" << std::endl; }
+    };
+
+    // sm_ptr still supported but deprecated as functors are a much better way to do the same thing
+    struct ReceivedSecondEvent : public msm::front::state<msm::front::default_base_state, msm::front::sm_ptr> {
+        template<class Event, class FSM>
+        void on_entry(Event const &, FSM &) {
+            thenop_in_final_state = true;
+            std::cout << "entering: ReceivedSecondEvent" << std::endl;
+        }
+
+        template<class Event, class FSM>
+        void on_exit(Event const &, FSM &) { std::cout << "leaving: ReceivedSecondEvent" << std::endl; }
+
+        void set_sm_ptr(then_ *th) {
+            m_then = th;
+        }
+
+        then_ *m_then;
+    };
+
+    // the initial state of the player SM. Must be defined
+    typedef Empty initial_state;
+
+    // transition actions
+    void receive_first_event(first_event const &) { std::cout << "then::receive_first_event\n"; }
+
+    // Guard condition on first transition
+    bool first_event_guard(first_event const &) { return true; }
+
+    void receive_second_event(second_event const &) { std::cout << "then::receive_second_event\n"; }
+
+    // Guard condition on second transition
+    bool second_event_guard(second_event const &) { return true; }
+
+    typedef then_ t; // makes transition table cleaner
+
+    // Transition table for player
+    struct transition_table : mpl::vector<
+            //    Start     Event         Next      Action				 Guard
+            //  +---------+-------------+---------+---------------------+----------------------+
+            row < Empty, first_event, ReceivedFirstEvent, &t::receive_first_event, &t::first_event_guard>,
+            //  +---------+-------------+---------+---------------------+----------------------+
+                              row<ReceivedFirstEvent, second_event, ReceivedSecondEvent, &t::receive_second_event, &t::second_event_guard>
+    //  +---------+-------------+---------+---------------------+----------------------+
+    > {};
+
+    // Replaces the default no-transition response.
+    template<class FSM, class Event>
+    void no_transition(Event const &e, FSM &, int state) {
+        thenop_something_happened = false;
+        std::cout << "no transition from state " << state
+                  << " on event " << typeid(e).name() << std::endl;
+    }
+};
+
+// Pick a back-end
+// Each ThenCEPOp object should have a vector of the state machine below
+typedef msm::back::state_machine <then_> then_sm;
+
+// Pick a back-end
+// Each ThenCEPOp object should have a vector of the state machine below
+typedef msm::back::state_machine <or_> or_sm;
+
+class ThenCEPOpHelper : virtual CEPOpHelper {
 
     //
     // Testing utilities.
@@ -220,6 +306,15 @@ public:
         }
     }
 
+    int GetNumberSequences() {
+        int nr = 0;
+        for (auto it = sequences.begin(); it != sequences.end(); ++it) {
+            ++nr;
+        }
+
+        return nr;
+    }
+
     ThenCEPOpHelper() {
         then_sm first_sm;
         sequences.push_back(first_sm);
@@ -229,88 +324,7 @@ public:
     }
 };
 
-bool orop_something_happend = true;
-bool orop_in_final_state = false;
-
-class OrCEPOpHelper : Object {
-    // Espen's OR events
-    struct first_event {
-    };
-    struct second_event {
-    };
-
-
-    // front-end: define the FSM structure
-    struct or_ : public msm::front::state_machine_def<or_> {
-        template<class Event, class FSM>
-        void on_entry(Event const &, FSM &) {
-            std::cout << "entering: Then" << std::endl;
-        }
-
-        template<class Event, class FSM>
-        void on_exit(Event const &, FSM &) {
-            std::cout << "leaving: Then" << std::endl;
-        }
-
-        // The list of FSM states
-        struct Empty : public msm::front::state<> {
-            // every (optional) entry/exit methods get the event passed.
-            template<class Event, class FSM>
-            void on_entry(Event const &, FSM &) { std::cout << "entering: Empty" << std::endl; }
-
-            template<class Event, class FSM>
-            void on_exit(Event const &, FSM &) { std::cout << "leaving: Empty" << std::endl; }
-        };
-
-        struct ReceivedEvent : public msm::front::state<> {
-            template<class Event, class FSM>
-            void on_entry(Event const &, FSM &) {
-                orop_in_final_state = true;
-                cout << "entering: ReceivedEvent" << std::endl;
-            }
-
-            template<class Event, class FSM>
-            void on_exit(Event const &, FSM &) { std::cout << "leaving: ReceivedEvent" << std::endl; }
-        };
-
-        // the initial state of the player SM. Must be defined
-        typedef Empty initial_state;
-
-        // transition actions
-        void receive_first_event(first_event const &) { std::cout << "or_sm::receive_first_event\n"; }
-
-        // Guard condition on first transition
-        bool first_event_guard(first_event const &) { return true; }
-
-        void receive_second_event(second_event const &) { std::cout << "or_sm::receive_second_event\n"; }
-
-        // Guard condition on second transition
-        bool second_event_guard(second_event const &) { return true; }
-
-        typedef or_ o; // makes transition table cleaner
-
-        // Transition table for player
-        struct transition_table : mpl::vector<
-                //    Start     Event         Next      Action				 Guard
-                //  +---------+-------------+---------+---------------------+----------------------+
-                row < Empty, first_event, ReceivedEvent, &o::receive_first_event, &o::first_event_guard>,
-                //  +---------+-------------+---------+---------------------+----------------------+
-                                  row<Empty, second_event, ReceivedEvent, &o::receive_second_event, &o::second_event_guard>
-        //  +---------+-------------+---------+---------------------+----------------------+
-        > {};
-
-        // Replaces the default no-transition response.
-        template<class FSM, class Event>
-        void no_transition(Event const &e, FSM &, int state) {
-            orop_something_happend = false;
-            std::cout << "no transition from state " << state
-                      << " on event " << typeid(e).name() << std::endl;
-        }
-    };
-
-    // Pick a back-end
-    // Each ThenCEPOp object should have a vector of the state machine below
-    typedef msm::back::state_machine <or_> or_sm;
+class OrCEPOpHelper : virtual CEPOpHelper {
 
     //
     // Testing utilities.
@@ -367,6 +381,15 @@ public:
         }
     }
 
+    int GetNumberSequences() {
+        int nr = 0;
+        for (auto it = sequences.begin(); it != sequences.end(); ++it) {
+            ++nr;
+        }
+
+        return nr;
+    }
+
     OrCEPOpHelper() {
         or_sm first_sm;
         sequences.push_back(first_sm);
@@ -375,6 +398,9 @@ public:
         InsertEvent("b");
     }
 };
+
+typedef msm::back::state_machine <or_> or_sm;
+typedef msm::back::state_machine <then_> then_sm;
 
 OrCEPOp::OrCEPOp() {
     helper = CreateObject<OrCEPOpHelper>();

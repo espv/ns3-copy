@@ -535,6 +535,9 @@ bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
     for (vector< Ptr<CEPOp> >::iterator it = ieiceop->pCEPEngine->operators.begin(); it != ieiceop->pCEPEngine->operators.end(); ++it) {
         Ptr<CEPOp> op = *it;
         op->InsertEvent(event);
+		for (int i = 0; i != op->helper->GetNumberSequences(); ++i) {
+			HandleProcessingEvent(ieiceop->ieifsm->ps);
+		}
         HandleProcessingEvent(ieiceop->ps);
     }
     return false;

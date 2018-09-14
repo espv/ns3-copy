@@ -22,13 +22,19 @@ namespace ns3 {
     //class AndCEPOp;
     class ThenCEPOp;
 
-    class OrCEPOpHelper : public Object {
+    class CEPOpHelper : public Object {
+    public:
+        int GetNumberSequences(void) {return 0;}
+        static TypeId GetTypeId (void);
+    };
+
+    class OrCEPOpHelper : public CEPOpHelper {
     public:
         vector<string> event_sequences;
         static TypeId GetTypeId (void);
     };
 
-    class ThenCEPOpHelper : public Object {
+    class ThenCEPOpHelper : public CEPOpHelper {
     public:
         vector<string> event_sequences;
         static TypeId GetTypeId (void);
@@ -36,6 +42,7 @@ namespace ns3 {
 
     class CEPOp : public Object {
     public:
+        Ptr<CEPOpHelper> helper;
         virtual void InsertEvent(string event) {
 
         }
