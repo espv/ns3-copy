@@ -16,6 +16,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/telosb.h"
+#include "ns3/gnuplot.h"
 
 #include <sstream>
 
@@ -23,9 +24,12 @@
         ( std::ostringstream() << std::dec << x ) ).str()
 
 namespace ns3 {
-NS_LOG_COMPONENT_DEFINE("TelosBExample");
+    NS_LOG_COMPONENT_DEFINE("TelosBExample");
 // For debug
-extern bool debugOn;
+    extern bool debugOn;
+}
+
+using namespace ns3;
 
 
 static ProgramLocation *dummyProgramLoc;
@@ -43,7 +47,7 @@ void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interrupt
   dummyProgramLoc->tempvar = tempVar();
   dummyProgramLoc->curPkt = packet;
   dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-  dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
+  dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
 
   Simulator::Schedule(time,
                       &InterruptController::IssueInterruptWithServiceOnCPU,
@@ -625,5 +629,4 @@ int main(int argc, char *argv[])
 #endif
 
   return 0;
-}
 }
