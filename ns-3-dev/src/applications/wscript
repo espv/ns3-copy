@@ -44,6 +44,7 @@ def build(bld):
         'model/onoff-cc2420-application.h',
         'model/udp-client.h',
         'model/packet-sink-cc2420.h',
+        'model/packet-sink.h',
         'model/udp-server.h',
         'model/seq-ts-header.h',
         'model/udp-trace-client.h',
