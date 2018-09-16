@@ -3590,6 +3590,33 @@ ns-3-dev/src/applications/helper/bulk-send-helper.cc.s:
 	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/bulk-send-helper.cc.s
 .PHONY : ns-3-dev/src/applications/helper/bulk-send-helper.cc.s
 
+ns-3-dev/src/applications/helper/on-off-cc2420-helper.o: ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.o
+
+.PHONY : ns-3-dev/src/applications/helper/on-off-cc2420-helper.o
+
+# target to build an object file
+ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.o:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.o
+.PHONY : ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.o
+
+ns-3-dev/src/applications/helper/on-off-cc2420-helper.i: ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.i
+
+.PHONY : ns-3-dev/src/applications/helper/on-off-cc2420-helper.i
+
+# target to preprocess a source file
+ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.i:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.i
+.PHONY : ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.i
+
+ns-3-dev/src/applications/helper/on-off-cc2420-helper.s: ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.s
+
+.PHONY : ns-3-dev/src/applications/helper/on-off-cc2420-helper.s
+
+# target to generate assembly for a file
+ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.s:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.s
+.PHONY : ns-3-dev/src/applications/helper/on-off-cc2420-helper.cc.s
+
 ns-3-dev/src/applications/helper/on-off-helper.o: ns-3-dev/src/applications/helper/on-off-helper.cc.o
 
 .PHONY : ns-3-dev/src/applications/helper/on-off-helper.o
@@ -3616,6 +3643,33 @@ ns-3-dev/src/applications/helper/on-off-helper.s: ns-3-dev/src/applications/help
 ns-3-dev/src/applications/helper/on-off-helper.cc.s:
 	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/on-off-helper.cc.s
 .PHONY : ns-3-dev/src/applications/helper/on-off-helper.cc.s
+
+ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.o: ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.o
+
+.PHONY : ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.o
+
+# target to build an object file
+ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.o:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.o
+.PHONY : ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.o
+
+ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.i: ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.i
+
+.PHONY : ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.i
+
+# target to preprocess a source file
+ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.i:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.i
+.PHONY : ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.i
+
+ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.s: ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.s
+
+.PHONY : ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.s
+
+# target to generate assembly for a file
+ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.s:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.s
+.PHONY : ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.cc.s
 
 ns-3-dev/src/applications/helper/packet-sink-helper.o: ns-3-dev/src/applications/helper/packet-sink-helper.cc.o
 
@@ -3806,6 +3860,33 @@ ns-3-dev/src/applications/model/onoff-application.cc.s:
 	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/onoff-application.cc.s
 .PHONY : ns-3-dev/src/applications/model/onoff-application.cc.s
 
+ns-3-dev/src/applications/model/onoff-cc2420-application.o: ns-3-dev/src/applications/model/onoff-cc2420-application.cc.o
+
+.PHONY : ns-3-dev/src/applications/model/onoff-cc2420-application.o
+
+# target to build an object file
+ns-3-dev/src/applications/model/onoff-cc2420-application.cc.o:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/onoff-cc2420-application.cc.o
+.PHONY : ns-3-dev/src/applications/model/onoff-cc2420-application.cc.o
+
+ns-3-dev/src/applications/model/onoff-cc2420-application.i: ns-3-dev/src/applications/model/onoff-cc2420-application.cc.i
+
+.PHONY : ns-3-dev/src/applications/model/onoff-cc2420-application.i
+
+# target to preprocess a source file
+ns-3-dev/src/applications/model/onoff-cc2420-application.cc.i:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/onoff-cc2420-application.cc.i
+.PHONY : ns-3-dev/src/applications/model/onoff-cc2420-application.cc.i
+
+ns-3-dev/src/applications/model/onoff-cc2420-application.s: ns-3-dev/src/applications/model/onoff-cc2420-application.cc.s
+
+.PHONY : ns-3-dev/src/applications/model/onoff-cc2420-application.s
+
+# target to generate assembly for a file
+ns-3-dev/src/applications/model/onoff-cc2420-application.cc.s:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/onoff-cc2420-application.cc.s
+.PHONY : ns-3-dev/src/applications/model/onoff-cc2420-application.cc.s
+
 ns-3-dev/src/applications/model/packet-loss-counter.o: ns-3-dev/src/applications/model/packet-loss-counter.cc.o
 
 .PHONY : ns-3-dev/src/applications/model/packet-loss-counter.o
@@ -3832,6 +3913,33 @@ ns-3-dev/src/applications/model/packet-loss-counter.s: ns-3-dev/src/applications
 ns-3-dev/src/applications/model/packet-loss-counter.cc.s:
 	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/packet-loss-counter.cc.s
 .PHONY : ns-3-dev/src/applications/model/packet-loss-counter.cc.s
+
+ns-3-dev/src/applications/model/packet-sink-cc2420.o: ns-3-dev/src/applications/model/packet-sink-cc2420.cc.o
+
+.PHONY : ns-3-dev/src/applications/model/packet-sink-cc2420.o
+
+# target to build an object file
+ns-3-dev/src/applications/model/packet-sink-cc2420.cc.o:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/packet-sink-cc2420.cc.o
+.PHONY : ns-3-dev/src/applications/model/packet-sink-cc2420.cc.o
+
+ns-3-dev/src/applications/model/packet-sink-cc2420.i: ns-3-dev/src/applications/model/packet-sink-cc2420.cc.i
+
+.PHONY : ns-3-dev/src/applications/model/packet-sink-cc2420.i
+
+# target to preprocess a source file
+ns-3-dev/src/applications/model/packet-sink-cc2420.cc.i:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/packet-sink-cc2420.cc.i
+.PHONY : ns-3-dev/src/applications/model/packet-sink-cc2420.cc.i
+
+ns-3-dev/src/applications/model/packet-sink-cc2420.s: ns-3-dev/src/applications/model/packet-sink-cc2420.cc.s
+
+.PHONY : ns-3-dev/src/applications/model/packet-sink-cc2420.s
+
+# target to generate assembly for a file
+ns-3-dev/src/applications/model/packet-sink-cc2420.cc.s:
+	$(MAKE) -f CMakeFiles/ns_3_extended_with_execution_environment.dir/build.make CMakeFiles/ns_3_extended_with_execution_environment.dir/ns-3-dev/src/applications/model/packet-sink-cc2420.cc.s
+.PHONY : ns-3-dev/src/applications/model/packet-sink-cc2420.cc.s
 
 ns-3-dev/src/applications/model/packet-sink.o: ns-3-dev/src/applications/model/packet-sink.cc.o
 
@@ -40945,9 +41053,15 @@ help:
 	@echo "... ns-3-dev/src/applications/helper/bulk-send-helper.o"
 	@echo "... ns-3-dev/src/applications/helper/bulk-send-helper.i"
 	@echo "... ns-3-dev/src/applications/helper/bulk-send-helper.s"
+	@echo "... ns-3-dev/src/applications/helper/on-off-cc2420-helper.o"
+	@echo "... ns-3-dev/src/applications/helper/on-off-cc2420-helper.i"
+	@echo "... ns-3-dev/src/applications/helper/on-off-cc2420-helper.s"
 	@echo "... ns-3-dev/src/applications/helper/on-off-helper.o"
 	@echo "... ns-3-dev/src/applications/helper/on-off-helper.i"
 	@echo "... ns-3-dev/src/applications/helper/on-off-helper.s"
+	@echo "... ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.o"
+	@echo "... ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.i"
+	@echo "... ns-3-dev/src/applications/helper/packet-sink-cc2420-helper.s"
 	@echo "... ns-3-dev/src/applications/helper/packet-sink-helper.o"
 	@echo "... ns-3-dev/src/applications/helper/packet-sink-helper.i"
 	@echo "... ns-3-dev/src/applications/helper/packet-sink-helper.s"
@@ -40969,9 +41083,15 @@ help:
 	@echo "... ns-3-dev/src/applications/model/onoff-application.o"
 	@echo "... ns-3-dev/src/applications/model/onoff-application.i"
 	@echo "... ns-3-dev/src/applications/model/onoff-application.s"
+	@echo "... ns-3-dev/src/applications/model/onoff-cc2420-application.o"
+	@echo "... ns-3-dev/src/applications/model/onoff-cc2420-application.i"
+	@echo "... ns-3-dev/src/applications/model/onoff-cc2420-application.s"
 	@echo "... ns-3-dev/src/applications/model/packet-loss-counter.o"
 	@echo "... ns-3-dev/src/applications/model/packet-loss-counter.i"
 	@echo "... ns-3-dev/src/applications/model/packet-loss-counter.s"
+	@echo "... ns-3-dev/src/applications/model/packet-sink-cc2420.o"
+	@echo "... ns-3-dev/src/applications/model/packet-sink-cc2420.i"
+	@echo "... ns-3-dev/src/applications/model/packet-sink-cc2420.s"
 	@echo "... ns-3-dev/src/applications/model/packet-sink.o"
 	@echo "... ns-3-dev/src/applications/model/packet-sink.i"
 	@echo "... ns-3-dev/src/applications/model/packet-sink.s"
