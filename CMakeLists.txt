@@ -126,12 +126,6 @@ include_directories(ns-3-dev/src/wimax/model)
 include_directories(ns-3-dev/utils)
 
 add_executable(ns_3_extended_with_execution_environment
-        cmake-build-debug/cmake_install.cmake
-        cmake-build-debug/CMakeCache.txt
-        cmake-build-debug/Makefile
-        cmake-build-debug/ns_3_extended_with_execution_environment.cbp
-        cmake-build-debug/processing-delay-models.cbp
-        cmake-build-debug/Project.cbp
         ns-3-dev/bindings/python/ns/_placeholder_
         ns-3-dev/bindings/python/ns3/_placeholder_
         ns-3-dev/bindings/python/pch/_placeholder_
@@ -520,7 +514,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/lib/libns3-dev-sixlowpan-debug.dylib
         ns-3-dev/build/lib/libns3-dev-spectrum-debug.dylib
         ns-3-dev/build/lib/libns3-dev-stats-debug.dylib
-        ns-3-dev/build/lib/libns3-dev-test-debug.dylib
         ns-3-dev/build/lib/libns3-dev-traffic-control-debug.dylib
         ns-3-dev/build/lib/libns3-dev-uan-debug.dylib
         ns-3-dev/build/lib/libns3-dev-virtual-net-device-debug.dylib
@@ -1473,7 +1466,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/antenna/model/cosine-antenna-model.cc.1.o
         ns-3-dev/build/src/antenna/model/isotropic-antenna-model.cc.1.o
         ns-3-dev/build/src/antenna/model/parabolic-antenna-model.cc.1.o
-        ns-3-dev/build/src/aodv/examples/aodv.cc.1.o
         ns-3-dev/build/src/aodv/helper/aodv-helper.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-dpd.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-id-cache.cc.1.o
@@ -1482,7 +1474,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/aodv/model/aodv-routing-protocol.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-rqueue.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-rtable.cc.1.o
-        ns-3-dev/build/src/applications/examples/three-gpp-http-example.cc.1.o
         ns-3-dev/build/src/applications/helper/bulk-send-helper.cc.1.o
         ns-3-dev/build/src/applications/helper/on-off-helper.cc.1.o
         ns-3-dev/build/src/applications/helper/packet-sink-helper.cc.1.o
@@ -1504,7 +1495,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/applications/model/udp-echo-server.cc.1.o
         ns-3-dev/build/src/applications/model/udp-server.cc.1.o
         ns-3-dev/build/src/applications/model/udp-trace-client.cc.1.o
-        ns-3-dev/build/src/bridge/examples/csma-bridge.cc.1.o
         ns-3-dev/build/src/bridge/helper/bridge-helper.cc.1.o
         ns-3-dev/build/src/bridge/model/bridge-channel.cc.1.o
         ns-3-dev/build/src/bridge/model/bridge-net-device.cc.1.o
@@ -2087,7 +2077,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/processing/model/peu.cc.1.o
         ns-3-dev/build/src/processing/model/program.cc.1.o
         ns-3-dev/build/src/processing/model/rrscheduler.cc.1.o
-        ns-3-dev/build/src/processing/model/sem.cc.1.o
         ns-3-dev/build/src/processing/model/sharedresource.cc.1.o
         ns-3-dev/build/src/processing/model/sync.cc.1.o
         ns-3-dev/build/src/processing/model/taskscheduler.cc.1.o
@@ -2154,11 +2143,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/stats/model/uinteger-16-probe.cc.1.o
         ns-3-dev/build/src/stats/model/uinteger-32-probe.cc.1.o
         ns-3-dev/build/src/stats/model/uinteger-8-probe.cc.1.o
-        ns-3-dev/build/src/topology-read/helper/topology-reader-helper.cc.1.o
-        ns-3-dev/build/src/topology-read/model/inet-topology-reader.cc.1.o
-        ns-3-dev/build/src/topology-read/model/orbis-topology-reader.cc.1.o
-        ns-3-dev/build/src/topology-read/model/rocketfuel-topology-reader.cc.1.o
-        ns-3-dev/build/src/topology-read/model/topology-reader.cc.1.o
         ns-3-dev/build/src/traffic-control/helper/queue-disc-container.cc.1.o
         ns-3-dev/build/src/traffic-control/helper/traffic-control-helper.cc.1.o
         ns-3-dev/build/src/traffic-control/model/codel-queue-disc.cc.1.o
