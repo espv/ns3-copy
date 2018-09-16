@@ -486,195 +486,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/bonn-motion/bonnmotion-3.0.1/install.bat
         ns-3-dev/build/c4che/_cache.py
         ns-3-dev/build/c4che/build.config.py
-        ns-3-dev/build/examples/energy/energy-model-example.cc.1.o
-        ns-3-dev/build/examples/energy/energy-model-with-harvesting-example.cc.2.o
-        ns-3-dev/build/examples/energy/ns3-dev-energy-model-example-debug
-        ns-3-dev/build/examples/energy/ns3-dev-energy-model-with-harvesting-example-debug
-        ns-3-dev/build/examples/error-model/ns3-dev-simple-error-model-debug
-        ns-3-dev/build/examples/error-model/simple-error-model.cc.1.o
-        ns-3-dev/build/examples/ipv6/fragmentation-ipv6-two-MTU.cc.7.o
-        ns-3-dev/build/examples/ipv6/fragmentation-ipv6.cc.6.o
-        ns-3-dev/build/examples/ipv6/icmpv6-redirect.cc.1.o
-        ns-3-dev/build/examples/ipv6/loose-routing-ipv6.cc.8.o
-        ns-3-dev/build/examples/ipv6/ns3-dev-fragmentation-ipv6-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-fragmentation-ipv6-two-MTU-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-icmpv6-redirect-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-loose-routing-ipv6-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-ping6-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-radvd-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-radvd-two-prefix-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-test-ipv6-debug
-        ns-3-dev/build/examples/ipv6/ns3-dev-wsn-ping6-debug
-        ns-3-dev/build/examples/ipv6/ping6.cc.2.o
-        ns-3-dev/build/examples/ipv6/radvd-two-prefix.cc.4.o
-        ns-3-dev/build/examples/ipv6/radvd.cc.3.o
-        ns-3-dev/build/examples/ipv6/test-ipv6.cc.5.o
-        ns-3-dev/build/examples/ipv6/wsn-ping6.cc.9.o
-        ns-3-dev/build/examples/matrix-topology/matrix-topology.cc.1.o
-        ns-3-dev/build/examples/matrix-topology/ns3-dev-matrix-topology-debug
-        ns-3-dev/build/examples/naming/ns3-dev-object-names-debug
-        ns-3-dev/build/examples/naming/object-names.cc.1.o
-        ns-3-dev/build/examples/routing/dynamic-global-routing.cc.1.o
-        ns-3-dev/build/examples/routing/global-injection-slash32.cc.4.o
-        ns-3-dev/build/examples/routing/global-routing-multi-switch-plus-router.cc.12.o
-        ns-3-dev/build/examples/routing/global-routing-slash32.cc.3.o
-        ns-3-dev/build/examples/routing/manet-routing-compare.cc.9.o
-        ns-3-dev/build/examples/routing/mixed-global-routing.cc.7.o
-        ns-3-dev/build/examples/routing/ns3-dev-dynamic-global-routing-debug
-        ns-3-dev/build/examples/routing/ns3-dev-global-injection-slash32-debug
-        ns-3-dev/build/examples/routing/ns3-dev-global-routing-multi-switch-plus-router-debug
-        ns-3-dev/build/examples/routing/ns3-dev-global-routing-slash32-debug
-        ns-3-dev/build/examples/routing/ns3-dev-manet-routing-compare-debug
-        ns-3-dev/build/examples/routing/ns3-dev-mixed-global-routing-debug
-        ns-3-dev/build/examples/routing/ns3-dev-rip-simple-network-debug
-        ns-3-dev/build/examples/routing/ns3-dev-ripng-simple-network-debug
-        ns-3-dev/build/examples/routing/ns3-dev-simple-alternate-routing-debug
-        ns-3-dev/build/examples/routing/ns3-dev-simple-global-routing-debug
-        ns-3-dev/build/examples/routing/ns3-dev-simple-routing-ping6-debug
-        ns-3-dev/build/examples/routing/ns3-dev-static-routing-slash32-debug
-        ns-3-dev/build/examples/routing/rip-simple-network.cc.11.o
-        ns-3-dev/build/examples/routing/ripng-simple-network.cc.10.o
-        ns-3-dev/build/examples/routing/simple-alternate-routing.cc.6.o
-        ns-3-dev/build/examples/routing/simple-global-routing.cc.5.o
-        ns-3-dev/build/examples/routing/simple-routing-ping6.cc.8.o
-        ns-3-dev/build/examples/routing/static-routing-slash32.cc.2.o
-        ns-3-dev/build/examples/socket/ns3-dev-socket-bound-static-routing-debug
-        ns-3-dev/build/examples/socket/ns3-dev-socket-bound-tcp-static-routing-debug
-        ns-3-dev/build/examples/socket/ns3-dev-socket-options-ipv4-debug
-        ns-3-dev/build/examples/socket/ns3-dev-socket-options-ipv6-debug
-        ns-3-dev/build/examples/socket/socket-bound-static-routing.cc.1.o
-        ns-3-dev/build/examples/socket/socket-bound-tcp-static-routing.cc.2.o
-        ns-3-dev/build/examples/socket/socket-options-ipv4.cc.3.o
-        ns-3-dev/build/examples/socket/socket-options-ipv6.cc.4.o
-        ns-3-dev/build/examples/stats/ns3-dev-wifi-example-sim-debug
-        ns-3-dev/build/examples/stats/wifi-example-apps.cc.1.o
-        ns-3-dev/build/examples/stats/wifi-example-sim.cc.1.o
-        ns-3-dev/build/examples/tcp/ns3-dev-star-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-bulk-send-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-large-transfer-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-nsc-comparison-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-nsc-lfn-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-nsc-zoo-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-pacing-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-pcap-nanosec-example-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-star-server-debug
-        ns-3-dev/build/examples/tcp/ns3-dev-tcp-variants-comparison-debug
-        ns-3-dev/build/examples/tcp/star.cc.5.o
-        ns-3-dev/build/examples/tcp/tcp-bulk-send.cc.6.o
-        ns-3-dev/build/examples/tcp/tcp-large-transfer.cc.1.o
-        ns-3-dev/build/examples/tcp/tcp-nsc-comparison.cc.8.o
-        ns-3-dev/build/examples/tcp/tcp-nsc-lfn.cc.2.o
-        ns-3-dev/build/examples/tcp/tcp-nsc-zoo.cc.3.o
-        ns-3-dev/build/examples/tcp/tcp-pacing.cc.10.o
-        ns-3-dev/build/examples/tcp/tcp-pcap-nanosec-example.cc.7.o
-        ns-3-dev/build/examples/tcp/tcp-star-server.cc.4.o
-        ns-3-dev/build/examples/tcp/tcp-variants-comparison.cc.9.o
-        ns-3-dev/build/examples/traffic-control/ns3-dev-queue-discs-benchmark-debug
-        ns-3-dev/build/examples/traffic-control/ns3-dev-red-vs-fengadaptive-debug
-        ns-3-dev/build/examples/traffic-control/ns3-dev-red-vs-nlred-debug
-        ns-3-dev/build/examples/traffic-control/ns3-dev-tbf-example-debug
-        ns-3-dev/build/examples/traffic-control/ns3-dev-traffic-control-debug
-        ns-3-dev/build/examples/traffic-control/queue-discs-benchmark.cc.2.o
-        ns-3-dev/build/examples/traffic-control/red-vs-fengadaptive.cc.3.o
-        ns-3-dev/build/examples/traffic-control/red-vs-nlred.cc.4.o
-        ns-3-dev/build/examples/traffic-control/tbf-example.cc.5.o
-        ns-3-dev/build/examples/traffic-control/traffic-control.cc.1.o
-        ns-3-dev/build/examples/tutorial/fifth.cc.6.o
-        ns-3-dev/build/examples/tutorial/first.cc.2.o
-        ns-3-dev/build/examples/tutorial/fourth.cc.5.o
-        ns-3-dev/build/examples/tutorial/hello-simulator.cc.1.o
-        ns-3-dev/build/examples/tutorial/ns3-dev-fifth-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-first-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-fourth-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-hello-simulator-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-second-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-seventh-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-sixth-debug
-        ns-3-dev/build/examples/tutorial/ns3-dev-third-debug
-        ns-3-dev/build/examples/tutorial/second.cc.3.o
-        ns-3-dev/build/examples/tutorial/seventh.cc.8.o
-        ns-3-dev/build/examples/tutorial/sixth.cc.7.o
-        ns-3-dev/build/examples/tutorial/third.cc.4.o
-        ns-3-dev/build/examples/udp/ns3-dev-udp-echo-debug
-        ns-3-dev/build/examples/udp/udp-echo.cc.1.o
-        ns-3-dev/build/examples/udp-client-server/ns3-dev-udp-client-server-debug
-        ns-3-dev/build/examples/udp-client-server/ns3-dev-udp-trace-client-server-debug
-        ns-3-dev/build/examples/udp-client-server/udp-client-server.cc.1.o
-        ns-3-dev/build/examples/udp-client-server/udp-trace-client-server.cc.2.o
-        ns-3-dev/build/examples/wireless/80211e-txop.cc.29.o
-        ns-3-dev/build/examples/wireless/80211n-mimo.cc.26.o
-        ns-3-dev/build/examples/wireless/dsss-validation.cc.12.o
-        ns-3-dev/build/examples/wireless/he-wifi-network.cc.34.o
-        ns-3-dev/build/examples/wireless/ht-wifi-network.cc.17.o
-        ns-3-dev/build/examples/wireless/mixed-network.cc.27.o
-        ns-3-dev/build/examples/wireless/mixed-wired-wireless.cc.1.o
-        ns-3-dev/build/examples/wireless/multirate.cc.6.o
-        ns-3-dev/build/examples/wireless/ns3-dev-80211e-txop-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-80211n-mimo-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-dsss-validation-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-he-wifi-network-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-ht-wifi-network-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-mixed-network-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-mixed-wired-wireless-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-multirate-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-ofdm-he-validation-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-ofdm-ht-validation-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-ofdm-validation-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-ofdm-vht-validation-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-power-adaptation-distance-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-power-adaptation-interference-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-rate-adaptation-distance-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-simple-ht-hidden-stations-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-vht-wifi-network-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-adhoc-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-aggregation-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-ap-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-backward-compatibility-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-blockack-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-clear-channel-cmu-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-hidden-terminal-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-multi-tos-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-pcf-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-simple-adhoc-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-simple-adhoc-grid-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-simple-infra-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-simple-interference-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-sleep-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-spectrum-per-example-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-spectrum-per-interference-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-spectrum-saturation-example-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-tcp-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-timing-attributes-debug
-        ns-3-dev/build/examples/wireless/ns3-dev-wifi-wired-bridging-debug
-        ns-3-dev/build/examples/wireless/ofdm-he-validation.cc.33.o
-        ns-3-dev/build/examples/wireless/ofdm-ht-validation.cc.14.o
-        ns-3-dev/build/examples/wireless/ofdm-validation.cc.13.o
-        ns-3-dev/build/examples/wireless/ofdm-vht-validation.cc.15.o
-        ns-3-dev/build/examples/wireless/power-adaptation-distance.cc.21.o
-        ns-3-dev/build/examples/wireless/power-adaptation-interference.cc.22.o
-        ns-3-dev/build/examples/wireless/rate-adaptation-distance.cc.23.o
-        ns-3-dev/build/examples/wireless/simple-ht-hidden-stations.cc.25.o
-        ns-3-dev/build/examples/wireless/vht-wifi-network.cc.18.o
-        ns-3-dev/build/examples/wireless/wifi-adhoc.cc.2.o
-        ns-3-dev/build/examples/wireless/wifi-aggregation.cc.24.o
-        ns-3-dev/build/examples/wireless/wifi-ap.cc.4.o
-        ns-3-dev/build/examples/wireless/wifi-backward-compatibility.cc.36.o
-        ns-3-dev/build/examples/wireless/wifi-blockack.cc.11.o
-        ns-3-dev/build/examples/wireless/wifi-clear-channel-cmu.cc.3.o
-        ns-3-dev/build/examples/wireless/wifi-hidden-terminal.cc.16.o
-        ns-3-dev/build/examples/wireless/wifi-multi-tos.cc.35.o
-        ns-3-dev/build/examples/wireless/wifi-pcf.cc.37.o
-        ns-3-dev/build/examples/wireless/wifi-simple-adhoc-grid.cc.8.o
-        ns-3-dev/build/examples/wireless/wifi-simple-adhoc.cc.7.o
-        ns-3-dev/build/examples/wireless/wifi-simple-infra.cc.9.o
-        ns-3-dev/build/examples/wireless/wifi-simple-interference.cc.10.o
-        ns-3-dev/build/examples/wireless/wifi-sleep.cc.20.o
-        ns-3-dev/build/examples/wireless/wifi-spectrum-per-example.cc.30.o
-        ns-3-dev/build/examples/wireless/wifi-spectrum-per-interference.cc.31.o
-        ns-3-dev/build/examples/wireless/wifi-spectrum-saturation-example.cc.32.o
-        ns-3-dev/build/examples/wireless/wifi-tcp.cc.28.o
-        ns-3-dev/build/examples/wireless/wifi-timing-attributes.cc.19.o
-        ns-3-dev/build/examples/wireless/wifi-wired-bridging.cc.5.o
         ns-3-dev/build/lib/libns3-dev-antenna-debug.dylib
         ns-3-dev/build/lib/libns3-dev-aodv-debug.dylib
         ns-3-dev/build/lib/libns3-dev-applications-debug.dylib
@@ -705,13 +516,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/lib/libns3-dev-olsr-debug.dylib
         ns-3-dev/build/lib/libns3-dev-point-to-point-debug.dylib
         ns-3-dev/build/lib/libns3-dev-point-to-point-layout-debug.dylib
-        ns-3-dev/build/lib/libns3-dev-processing-debug.dylib
         ns-3-dev/build/lib/libns3-dev-propagation-debug.dylib
         ns-3-dev/build/lib/libns3-dev-sixlowpan-debug.dylib
         ns-3-dev/build/lib/libns3-dev-spectrum-debug.dylib
         ns-3-dev/build/lib/libns3-dev-stats-debug.dylib
         ns-3-dev/build/lib/libns3-dev-test-debug.dylib
-        ns-3-dev/build/lib/libns3-dev-topology-read-debug.dylib
         ns-3-dev/build/lib/libns3-dev-traffic-control-debug.dylib
         ns-3-dev/build/lib/libns3-dev-uan-debug.dylib
         ns-3-dev/build/lib/libns3-dev-virtual-net-device-debug.dylib
@@ -1520,6 +1329,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/ns3/tdbet-ff-mac-scheduler.h
         ns-3-dev/build/ns3/tdmt-ff-mac-scheduler.h
         ns-3-dev/build/ns3/tdtbfq-ff-mac-scheduler.h
+        ns-3-dev/build/ns3/telosb.h
         ns-3-dev/build/ns3/test.h
         ns-3-dev/build/ns3/thread.h
         ns-3-dev/build/ns3/three-gpp-http-client.h
@@ -1658,18 +1468,12 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/ns3/yans-wifi-channel.h
         ns-3-dev/build/ns3/yans-wifi-helper.h
         ns-3-dev/build/ns3/yans-wifi-phy.h
-        ns-3-dev/build/scratch/subdir/scratch-simulator-subdir.cc.2.o
-        ns-3-dev/build/scratch/subdir/subdir
-        ns-3-dev/build/scratch/scratch-simulator
-        ns-3-dev/build/scratch/scratch-simulator.cc.1.o
         ns-3-dev/build/src/antenna/model/angles.cc.1.o
         ns-3-dev/build/src/antenna/model/antenna-model.cc.1.o
         ns-3-dev/build/src/antenna/model/cosine-antenna-model.cc.1.o
         ns-3-dev/build/src/antenna/model/isotropic-antenna-model.cc.1.o
         ns-3-dev/build/src/antenna/model/parabolic-antenna-model.cc.1.o
-        ns-3-dev/build/src/antenna/libns3-dev-antenna-debug.pc
         ns-3-dev/build/src/aodv/examples/aodv.cc.1.o
-        ns-3-dev/build/src/aodv/examples/ns3-dev-aodv-debug
         ns-3-dev/build/src/aodv/helper/aodv-helper.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-dpd.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-id-cache.cc.1.o
@@ -1678,8 +1482,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/aodv/model/aodv-routing-protocol.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-rqueue.cc.1.o
         ns-3-dev/build/src/aodv/model/aodv-rtable.cc.1.o
-        ns-3-dev/build/src/aodv/libns3-dev-aodv-debug.pc
-        ns-3-dev/build/src/applications/examples/ns3-dev-three-gpp-http-example-debug
         ns-3-dev/build/src/applications/examples/three-gpp-http-example.cc.1.o
         ns-3-dev/build/src/applications/helper/bulk-send-helper.cc.1.o
         ns-3-dev/build/src/applications/helper/on-off-helper.cc.1.o
@@ -1702,17 +1504,10 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/applications/model/udp-echo-server.cc.1.o
         ns-3-dev/build/src/applications/model/udp-server.cc.1.o
         ns-3-dev/build/src/applications/model/udp-trace-client.cc.1.o
-        ns-3-dev/build/src/applications/libns3-dev-applications-debug.pc
-        ns-3-dev/build/src/bridge/examples/csma-bridge-one-hop.cc.2.o
         ns-3-dev/build/src/bridge/examples/csma-bridge.cc.1.o
-        ns-3-dev/build/src/bridge/examples/ns3-dev-csma-bridge-debug
-        ns-3-dev/build/src/bridge/examples/ns3-dev-csma-bridge-one-hop-debug
         ns-3-dev/build/src/bridge/helper/bridge-helper.cc.1.o
         ns-3-dev/build/src/bridge/model/bridge-channel.cc.1.o
         ns-3-dev/build/src/bridge/model/bridge-net-device.cc.1.o
-        ns-3-dev/build/src/bridge/libns3-dev-bridge-debug.pc
-        ns-3-dev/build/src/buildings/examples/buildings-pathloss-profiler.cc.1.o
-        ns-3-dev/build/src/buildings/examples/ns3-dev-buildings-pathloss-profiler-debug
         ns-3-dev/build/src/buildings/helper/building-allocator.cc.1.o
         ns-3-dev/build/src/buildings/helper/building-container.cc.1.o
         ns-3-dev/build/src/buildings/helper/building-position-allocator.cc.1.o
@@ -1724,11 +1519,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/buildings/model/itu-r-1238-propagation-loss-model.cc.1.o
         ns-3-dev/build/src/buildings/model/mobility-building-info.cc.1.o
         ns-3-dev/build/src/buildings/model/oh-buildings-propagation-loss-model.cc.1.o
-        ns-3-dev/build/src/buildings/libns3-dev-buildings-debug.pc
-        ns-3-dev/build/src/cc2420/examples/cc2420-example.cc.1.o
-        ns-3-dev/build/src/cc2420/examples/ns3-dev-cc2420-example-debug
-        ns-3-dev/build/src/cc2420/examples/ns3-dev-play-debug
-        ns-3-dev/build/src/cc2420/examples/play.cc.2.o
         ns-3-dev/build/src/cc2420/helper/cc2420-helper.cc.1.o
         ns-3-dev/build/src/cc2420/model/address-tag.cc.1.o
         ns-3-dev/build/src/cc2420/model/cc2420-channel.cc.1.o
@@ -1740,35 +1530,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/cc2420/model/cc2420-trailer.cc.1.o
         ns-3-dev/build/src/cc2420/model/crc-tag.cc.1.o
         ns-3-dev/build/src/cc2420/model/cripple-tag.cc.1.o
-        ns-3-dev/build/src/cc2420/libns3-dev-cc2420-debug.pc
-        ns-3-dev/build/src/config-store/examples/config-store-save.cc.1.o
-        ns-3-dev/build/src/config-store/examples/ns3-dev-config-store-save-debug
         ns-3-dev/build/src/config-store/model/attribute-default-iterator.cc.2.o
         ns-3-dev/build/src/config-store/model/attribute-iterator.cc.2.o
         ns-3-dev/build/src/config-store/model/config-store.cc.2.o
         ns-3-dev/build/src/config-store/model/file-config.cc.2.o
         ns-3-dev/build/src/config-store/model/raw-text-config.cc.2.o
-        ns-3-dev/build/src/config-store/libns3-dev-config-store-debug.pc
-        ns-3-dev/build/src/core/examples/command-line-example.cc.7.o
-        ns-3-dev/build/src/core/examples/hash-example.cc.8.o
-        ns-3-dev/build/src/core/examples/main-callback.cc.1.o
-        ns-3-dev/build/src/core/examples/main-ptr.cc.3.o
-        ns-3-dev/build/src/core/examples/main-random-variable-stream.cc.4.o
-        ns-3-dev/build/src/core/examples/ns3-dev-command-line-example-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-hash-example-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-main-callback-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-main-ptr-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-main-random-variable-stream-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-sample-log-time-format-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-sample-random-variable-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-sample-random-variable-stream-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-sample-simulator-debug
-        ns-3-dev/build/src/core/examples/ns3-dev-test-string-value-formatting-debug
-        ns-3-dev/build/src/core/examples/sample-log-time-format.cc.9.o
-        ns-3-dev/build/src/core/examples/sample-random-variable-stream.cc.6.o
-        ns-3-dev/build/src/core/examples/sample-random-variable.cc.5.o
-        ns-3-dev/build/src/core/examples/sample-simulator.cc.2.o
-        ns-3-dev/build/src/core/examples/test-string-value-formatting.cc.10.o
         ns-3-dev/build/src/core/helper/event-garbage-collector.cc.2.o
         ns-3-dev/build/src/core/helper/random-variable-stream-helper.cc.2.o
         ns-3-dev/build/src/core/model/attribute-construction-list.cc.2.o
@@ -1830,32 +1596,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/core/model/unix-system-wall-clock-ms.cc.2.o
         ns-3-dev/build/src/core/model/vector.cc.2.o
         ns-3-dev/build/src/core/model/watchdog.cc.2.o
-        ns-3-dev/build/src/core/libns3-dev-core-debug.pc
-        ns-3-dev/build/src/csma/examples/csma-broadcast.cc.2.o
-        ns-3-dev/build/src/csma/examples/csma-multicast.cc.4.o
-        ns-3-dev/build/src/csma/examples/csma-one-subnet.cc.1.o
-        ns-3-dev/build/src/csma/examples/csma-packet-socket.cc.3.o
-        ns-3-dev/build/src/csma/examples/csma-ping.cc.6.o
-        ns-3-dev/build/src/csma/examples/csma-raw-ip-socket.cc.5.o
-        ns-3-dev/build/src/csma/examples/ns3-dev-csma-broadcast-debug
-        ns-3-dev/build/src/csma/examples/ns3-dev-csma-multicast-debug
-        ns-3-dev/build/src/csma/examples/ns3-dev-csma-one-subnet-debug
-        ns-3-dev/build/src/csma/examples/ns3-dev-csma-packet-socket-debug
-        ns-3-dev/build/src/csma/examples/ns3-dev-csma-ping-debug
-        ns-3-dev/build/src/csma/examples/ns3-dev-csma-raw-ip-socket-debug
         ns-3-dev/build/src/csma/helper/csma-helper.cc.1.o
         ns-3-dev/build/src/csma/model/backoff.cc.1.o
         ns-3-dev/build/src/csma/model/csma-channel.cc.1.o
         ns-3-dev/build/src/csma/model/csma-net-device.cc.1.o
-        ns-3-dev/build/src/csma/libns3-dev-csma-debug.pc
-        ns-3-dev/build/src/csma-layout/examples/csma-star.cc.1.o
-        ns-3-dev/build/src/csma-layout/examples/ns3-dev-csma-star-debug
         ns-3-dev/build/src/csma-layout/model/csma-star-helper.cc.1.o
-        ns-3-dev/build/src/csma-layout/libns3-dev-csma-layout-debug.pc
-        ns-3-dev/build/src/dcep/examples/dcep-example.cc.1.o
-        ns-3-dev/build/src/dcep/examples/MANETSimulation.cc.2.o
-        ns-3-dev/build/src/dcep/examples/ns3-dev-dcep-example-debug
-        ns-3-dev/build/src/dcep/examples/ns3-dev-MANETSimulation-debug
         ns-3-dev/build/src/dcep/helper/dcep-app-helper.cc.1.o
         ns-3-dev/build/src/dcep/model/cep-engine.cc.1.o
         ns-3-dev/build/src/dcep/model/communication.cc.1.o
@@ -1864,17 +1609,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/dcep/model/dcep.cc.1.o
         ns-3-dev/build/src/dcep/model/placement.cc.1.o
         ns-3-dev/build/src/dcep/model/resource-manager.cc.1.o
-        ns-3-dev/build/src/dcep/libns3-dev-dcep-debug.pc
-        ns-3-dev/build/src/dsdv/examples/dsdv-manet.cc.1.o
-        ns-3-dev/build/src/dsdv/examples/ns3-dev-dsdv-manet-debug
         ns-3-dev/build/src/dsdv/helper/dsdv-helper.cc.1.o
         ns-3-dev/build/src/dsdv/model/dsdv-packet-queue.cc.1.o
         ns-3-dev/build/src/dsdv/model/dsdv-packet.cc.1.o
         ns-3-dev/build/src/dsdv/model/dsdv-routing-protocol.cc.1.o
         ns-3-dev/build/src/dsdv/model/dsdv-rtable.cc.1.o
-        ns-3-dev/build/src/dsdv/libns3-dev-dsdv-debug.pc
-        ns-3-dev/build/src/dsr/examples/dsr.cc.1.o
-        ns-3-dev/build/src/dsr/examples/ns3-dev-dsr-debug
         ns-3-dev/build/src/dsr/helper/dsr-helper.cc.1.o
         ns-3-dev/build/src/dsr/helper/dsr-main-helper.cc.1.o
         ns-3-dev/build/src/dsr/model/dsr-errorbuff.cc.1.o
@@ -1889,13 +1628,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/dsr/model/dsr-routing.cc.1.o
         ns-3-dev/build/src/dsr/model/dsr-rreq-table.cc.1.o
         ns-3-dev/build/src/dsr/model/dsr-rsendbuff.cc.1.o
-        ns-3-dev/build/src/dsr/libns3-dev-dsr-debug.pc
-        ns-3-dev/build/src/energy/examples/basic-energy-model-test.cc.3.o
-        ns-3-dev/build/src/energy/examples/li-ion-energy-source.cc.1.o
-        ns-3-dev/build/src/energy/examples/ns3-dev-basic-energy-model-test-debug
-        ns-3-dev/build/src/energy/examples/ns3-dev-li-ion-energy-source-debug
-        ns-3-dev/build/src/energy/examples/ns3-dev-rv-battery-model-test-debug
-        ns-3-dev/build/src/energy/examples/rv-battery-model-test.cc.2.o
         ns-3-dev/build/src/energy/helper/basic-energy-harvester-helper.cc.1.o
         ns-3-dev/build/src/energy/helper/basic-energy-source-helper.cc.1.o
         ns-3-dev/build/src/energy/helper/energy-harvester-container.cc.1.o
@@ -1913,16 +1645,10 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/energy/model/li-ion-energy-source.cc.1.o
         ns-3-dev/build/src/energy/model/rv-battery-model.cc.1.o
         ns-3-dev/build/src/energy/model/simple-device-energy-model.cc.1.o
-        ns-3-dev/build/src/energy/libns3-dev-energy-debug.pc
-        ns-3-dev/build/src/fd-net-device/examples/dummy-network.cc.1.o
-        ns-3-dev/build/src/fd-net-device/examples/fd2fd-onoff.cc.2.o
-        ns-3-dev/build/src/fd-net-device/examples/ns3-dev-dummy-network-debug
-        ns-3-dev/build/src/fd-net-device/examples/ns3-dev-fd2fd-onoff-debug
         ns-3-dev/build/src/fd-net-device/helper/creator-utils.cc.1.o
         ns-3-dev/build/src/fd-net-device/helper/encode-decode.cc.1.o
         ns-3-dev/build/src/fd-net-device/helper/fd-net-device-helper.cc.1.o
         ns-3-dev/build/src/fd-net-device/model/fd-net-device.cc.1.o
-        ns-3-dev/build/src/fd-net-device/libns3-dev-fd-net-device-debug.pc
         ns-3-dev/build/src/flow-monitor/helper/flow-monitor-helper.cc.1.o
         ns-3-dev/build/src/flow-monitor/model/flow-classifier.cc.1.o
         ns-3-dev/build/src/flow-monitor/model/flow-monitor.cc.1.o
@@ -1932,9 +1658,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/flow-monitor/model/ipv4-flow-probe.cc.1.o
         ns-3-dev/build/src/flow-monitor/model/ipv6-flow-classifier.cc.1.o
         ns-3-dev/build/src/flow-monitor/model/ipv6-flow-probe.cc.1.o
-        ns-3-dev/build/src/flow-monitor/libns3-dev-flow-monitor-debug.pc
-        ns-3-dev/build/src/internet/examples/main-simple.cc.1.o
-        ns-3-dev/build/src/internet/examples/ns3-dev-main-simple-debug
         ns-3-dev/build/src/internet/helper/internet-stack-helper.cc.1.o
         ns-3-dev/build/src/internet/helper/internet-trace-helper.cc.1.o
         ns-3-dev/build/src/internet/helper/ipv4-address-helper.cc.1.o
@@ -2056,9 +1779,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/internet/model/udp-socket-factory.cc.1.o
         ns-3-dev/build/src/internet/model/udp-socket-impl.cc.1.o
         ns-3-dev/build/src/internet/model/udp-socket.cc.1.o
-        ns-3-dev/build/src/internet/libns3-dev-internet-debug.pc
-        ns-3-dev/build/src/internet-apps/examples/dhcp-example.cc.1.o
-        ns-3-dev/build/src/internet-apps/examples/ns3-dev-dhcp-example-debug
         ns-3-dev/build/src/internet-apps/helper/dhcp-helper.cc.1.o
         ns-3-dev/build/src/internet-apps/helper/ping6-helper.cc.1.o
         ns-3-dev/build/src/internet-apps/helper/radvd-helper.cc.1.o
@@ -2071,17 +1791,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/internet-apps/model/radvd-prefix.cc.1.o
         ns-3-dev/build/src/internet-apps/model/radvd.cc.1.o
         ns-3-dev/build/src/internet-apps/model/v4ping.cc.1.o
-        ns-3-dev/build/src/internet-apps/libns3-dev-internet-apps-debug.pc
-        ns-3-dev/build/src/lr-wpan/examples/lr-wpan-data.cc.3.o
-        ns-3-dev/build/src/lr-wpan/examples/lr-wpan-error-distance-plot.cc.5.o
-        ns-3-dev/build/src/lr-wpan/examples/lr-wpan-error-model-plot.cc.4.o
-        ns-3-dev/build/src/lr-wpan/examples/lr-wpan-packet-print.cc.1.o
-        ns-3-dev/build/src/lr-wpan/examples/lr-wpan-phy-test.cc.2.o
-        ns-3-dev/build/src/lr-wpan/examples/ns3-dev-lr-wpan-data-debug
-        ns-3-dev/build/src/lr-wpan/examples/ns3-dev-lr-wpan-error-distance-plot-debug
-        ns-3-dev/build/src/lr-wpan/examples/ns3-dev-lr-wpan-error-model-plot-debug
-        ns-3-dev/build/src/lr-wpan/examples/ns3-dev-lr-wpan-packet-print-debug
-        ns-3-dev/build/src/lr-wpan/examples/ns3-dev-lr-wpan-phy-test-debug
         ns-3-dev/build/src/lr-wpan/helper/lr-wpan-helper.cc.1.o
         ns-3-dev/build/src/lr-wpan/model/lr-wpan-csmaca.cc.1.o
         ns-3-dev/build/src/lr-wpan/model/lr-wpan-error-model.cc.1.o
@@ -2094,47 +1803,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/lr-wpan/model/lr-wpan-phy.cc.1.o
         ns-3-dev/build/src/lr-wpan/model/lr-wpan-spectrum-signal-parameters.cc.1.o
         ns-3-dev/build/src/lr-wpan/model/lr-wpan-spectrum-value-helper.cc.1.o
-        ns-3-dev/build/src/lr-wpan/libns3-dev-lr-wpan-debug.pc
-        ns-3-dev/build/src/lte/examples/lena-cqi-threshold.cc.1.o
-        ns-3-dev/build/src/lte/examples/lena-deactivate-bearer.cc.15.o
-        ns-3-dev/build/src/lte/examples/lena-distributed-ffr.cc.19.o
-        ns-3-dev/build/src/lte/examples/lena-dual-stripe.cc.2.o
-        ns-3-dev/build/src/lte/examples/lena-fading.cc.3.o
-        ns-3-dev/build/src/lte/examples/lena-frequency-reuse.cc.18.o
-        ns-3-dev/build/src/lte/examples/lena-intercell-interference.cc.4.o
-        ns-3-dev/build/src/lte/examples/lena-ipv6-addr-conf.cc.5.o
-        ns-3-dev/build/src/lte/examples/lena-ipv6-ue-rh.cc.6.o
-        ns-3-dev/build/src/lte/examples/lena-ipv6-ue-ue.cc.7.o
-        ns-3-dev/build/src/lte/examples/lena-pathloss-traces.cc.8.o
-        ns-3-dev/build/src/lte/examples/lena-profiling.cc.9.o
-        ns-3-dev/build/src/lte/examples/lena-rem-sector-antenna.cc.11.o
-        ns-3-dev/build/src/lte/examples/lena-rem.cc.10.o
-        ns-3-dev/build/src/lte/examples/lena-rlc-traces.cc.12.o
-        ns-3-dev/build/src/lte/examples/lena-simple-epc.cc.14.o
-        ns-3-dev/build/src/lte/examples/lena-simple.cc.13.o
-        ns-3-dev/build/src/lte/examples/lena-uplink-power-control.cc.20.o
-        ns-3-dev/build/src/lte/examples/lena-x2-handover-measures.cc.17.o
-        ns-3-dev/build/src/lte/examples/lena-x2-handover.cc.16.o
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-cqi-threshold-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-deactivate-bearer-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-distributed-ffr-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-dual-stripe-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-fading-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-frequency-reuse-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-intercell-interference-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-ipv6-addr-conf-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-ipv6-ue-rh-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-ipv6-ue-ue-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-pathloss-traces-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-profiling-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-rem-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-rem-sector-antenna-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-rlc-traces-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-simple-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-simple-epc-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-uplink-power-control-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-x2-handover-debug
-        ns-3-dev/build/src/lte/examples/ns3-dev-lena-x2-handover-measures-debug
         ns-3-dev/build/src/lte/helper/cc-helper.cc.1.o
         ns-3-dev/build/src/lte/helper/epc-helper.cc.1.o
         ns-3-dev/build/src/lte/helper/lte-global-pathloss-database.cc.1.o
@@ -2260,9 +1928,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/lte/model/tdtbfq-ff-mac-scheduler.cc.1.o
         ns-3-dev/build/src/lte/model/trace-fading-loss-model.cc.1.o
         ns-3-dev/build/src/lte/model/tta-ff-mac-scheduler.cc.1.o
-        ns-3-dev/build/src/lte/libns3-dev-lte-debug.pc
-        ns-3-dev/build/src/mesh/examples/mesh.cc.1.o
-        ns-3-dev/build/src/mesh/examples/ns3-dev-mesh-debug
         ns-3-dev/build/src/mesh/helper/dot11s/dot11s-installer.cc.1.o
         ns-3-dev/build/src/mesh/helper/flame/flame-installer.cc.1.o
         ns-3-dev/build/src/mesh/helper/mesh-helper.cc.1.o
@@ -2296,23 +1961,9 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/mesh/model/mesh-point-device.cc.1.o
         ns-3-dev/build/src/mesh/model/mesh-wifi-beacon.cc.1.o
         ns-3-dev/build/src/mesh/model/mesh-wifi-interface-mac.cc.1.o
-        ns-3-dev/build/src/mesh/libns3-dev-mesh-debug.pc
         ns-3-dev/build/src/message/model/cc2420-messages.cc.1.o
         ns-3-dev/build/src/message/model/external-ns3-message.cc.1.o
         ns-3-dev/build/src/message/model/raw-data-message.cc.1.o
-        ns-3-dev/build/src/message/libns3-dev-message-debug.pc
-        ns-3-dev/build/src/mobility/examples/bonnmotion-ns2-example.cc.6.o
-        ns-3-dev/build/src/mobility/examples/main-grid-topology.cc.1.o
-        ns-3-dev/build/src/mobility/examples/main-random-topology.cc.2.o
-        ns-3-dev/build/src/mobility/examples/main-random-walk.cc.3.o
-        ns-3-dev/build/src/mobility/examples/mobility-trace-example.cc.4.o
-        ns-3-dev/build/src/mobility/examples/ns2-mobility-trace.cc.5.o
-        ns-3-dev/build/src/mobility/examples/ns3-dev-bonnmotion-ns2-example-debug
-        ns-3-dev/build/src/mobility/examples/ns3-dev-main-grid-topology-debug
-        ns-3-dev/build/src/mobility/examples/ns3-dev-main-random-topology-debug
-        ns-3-dev/build/src/mobility/examples/ns3-dev-main-random-walk-debug
-        ns-3-dev/build/src/mobility/examples/ns3-dev-mobility-trace-example-debug
-        ns-3-dev/build/src/mobility/examples/ns3-dev-ns2-mobility-trace-debug
         ns-3-dev/build/src/mobility/helper/mobility-helper.cc.1.o
         ns-3-dev/build/src/mobility/helper/ns2-mobility-helper.cc.1.o
         ns-3-dev/build/src/mobility/model/box.cc.1.o
@@ -2332,15 +1983,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/mobility/model/steady-state-random-waypoint-mobility-model.cc.1.o
         ns-3-dev/build/src/mobility/model/waypoint-mobility-model.cc.1.o
         ns-3-dev/build/src/mobility/model/waypoint.cc.1.o
-        ns-3-dev/build/src/mobility/libns3-dev-mobility-debug.pc
-        ns-3-dev/build/src/mpi/examples/nms-p2p-nix-distributed.cc.3.o
-        ns-3-dev/build/src/mpi/examples/ns3-dev-nms-p2p-nix-distributed-debug
-        ns-3-dev/build/src/mpi/examples/ns3-dev-simple-distributed-debug
-        ns-3-dev/build/src/mpi/examples/ns3-dev-simple-distributed-empty-node-debug
-        ns-3-dev/build/src/mpi/examples/ns3-dev-third-distributed-debug
-        ns-3-dev/build/src/mpi/examples/simple-distributed-empty-node.cc.4.o
-        ns-3-dev/build/src/mpi/examples/simple-distributed.cc.1.o
-        ns-3-dev/build/src/mpi/examples/third-distributed.cc.2.o
         ns-3-dev/build/src/mpi/model/distributed-simulator-impl.cc.1.o
         ns-3-dev/build/src/mpi/model/granted-time-window-mpi-interface.cc.1.o
         ns-3-dev/build/src/mpi/model/mpi-interface.cc.1.o
@@ -2349,29 +1991,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/mpi/model/null-message-simulator-impl.cc.1.o
         ns-3-dev/build/src/mpi/model/remote-channel-bundle-manager.cc.1.o
         ns-3-dev/build/src/mpi/model/remote-channel-bundle.cc.1.o
-        ns-3-dev/build/src/mpi/libns3-dev-mpi-debug.pc
-        ns-3-dev/build/src/netanim/examples/colors-link-description.cc.6.o
-        ns-3-dev/build/src/netanim/examples/dumbbell-animation.cc.1.o
-        ns-3-dev/build/src/netanim/examples/grid-animation.cc.2.o
-        ns-3-dev/build/src/netanim/examples/ns3-dev-colors-link-description-debug
-        ns-3-dev/build/src/netanim/examples/ns3-dev-dumbbell-animation-debug
-        ns-3-dev/build/src/netanim/examples/ns3-dev-grid-animation-debug
-        ns-3-dev/build/src/netanim/examples/ns3-dev-resources-counters-debug
-        ns-3-dev/build/src/netanim/examples/ns3-dev-star-animation-debug
-        ns-3-dev/build/src/netanim/examples/ns3-dev-uan-animation-debug
-        ns-3-dev/build/src/netanim/examples/ns3-dev-wireless-animation-debug
-        ns-3-dev/build/src/netanim/examples/resources-counters.cc.7.o
-        ns-3-dev/build/src/netanim/examples/star-animation.cc.3.o
-        ns-3-dev/build/src/netanim/examples/uan-animation.cc.5.o
-        ns-3-dev/build/src/netanim/examples/wireless-animation.cc.4.o
         ns-3-dev/build/src/netanim/model/animation-interface.cc.1.o
-        ns-3-dev/build/src/netanim/libns3-dev-netanim-debug.pc
-        ns-3-dev/build/src/network/examples/main-packet-header.cc.1.o
-        ns-3-dev/build/src/network/examples/main-packet-tag.cc.2.o
-        ns-3-dev/build/src/network/examples/ns3-dev-main-packet-header-debug
-        ns-3-dev/build/src/network/examples/ns3-dev-main-packet-tag-debug
-        ns-3-dev/build/src/network/examples/ns3-dev-packet-socket-apps-debug
-        ns-3-dev/build/src/network/examples/packet-socket-apps.cc.3.o
         ns-3-dev/build/src/network/helper/application-container.cc.1.o
         ns-3-dev/build/src/network/helper/delay-jitter-estimation.cc.1.o
         ns-3-dev/build/src/network/helper/net-device-container.cc.1.o
@@ -2442,35 +2062,20 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/network/utils/simple-channel.cc.1.o
         ns-3-dev/build/src/network/utils/simple-net-device.cc.1.o
         ns-3-dev/build/src/network/utils/sll-header.cc.1.o
-        ns-3-dev/build/src/network/libns3-dev-network-debug.pc
-        ns-3-dev/build/src/nix-vector-routing/examples/nix-simple.cc.1.o
-        ns-3-dev/build/src/nix-vector-routing/examples/nms-p2p-nix.cc.2.o
-        ns-3-dev/build/src/nix-vector-routing/examples/ns3-dev-nix-simple-debug
-        ns-3-dev/build/src/nix-vector-routing/examples/ns3-dev-nms-p2p-nix-debug
         ns-3-dev/build/src/nix-vector-routing/helper/ipv4-nix-vector-helper.cc.1.o
         ns-3-dev/build/src/nix-vector-routing/model/ipv4-nix-vector-routing.cc.1.o
-        ns-3-dev/build/src/nix-vector-routing/libns3-dev-nix-vector-routing-debug.pc
-        ns-3-dev/build/src/olsr/examples/ns3-dev-olsr-hna-debug
-        ns-3-dev/build/src/olsr/examples/ns3-dev-simple-point-to-point-olsr-debug
-        ns-3-dev/build/src/olsr/examples/olsr-hna.cc.2.o
-        ns-3-dev/build/src/olsr/examples/simple-point-to-point-olsr.cc.1.o
         ns-3-dev/build/src/olsr/helper/olsr-helper.cc.1.o
         ns-3-dev/build/src/olsr/model/olsr-header.cc.1.o
         ns-3-dev/build/src/olsr/model/olsr-routing-protocol.cc.1.o
         ns-3-dev/build/src/olsr/model/olsr-state.cc.1.o
-        ns-3-dev/build/src/olsr/libns3-dev-olsr-debug.pc
-        ns-3-dev/build/src/point-to-point/examples/main-attribute-value.cc.1.o
-        ns-3-dev/build/src/point-to-point/examples/ns3-dev-main-attribute-value-debug
         ns-3-dev/build/src/point-to-point/helper/point-to-point-helper.cc.1.o
         ns-3-dev/build/src/point-to-point/model/point-to-point-channel.cc.1.o
         ns-3-dev/build/src/point-to-point/model/point-to-point-net-device.cc.1.o
         ns-3-dev/build/src/point-to-point/model/point-to-point-remote-channel.cc.1.o
         ns-3-dev/build/src/point-to-point/model/ppp-header.cc.1.o
-        ns-3-dev/build/src/point-to-point/libns3-dev-point-to-point-debug.pc
         ns-3-dev/build/src/point-to-point-layout/model/point-to-point-dumbbell.cc.1.o
         ns-3-dev/build/src/point-to-point-layout/model/point-to-point-grid.cc.1.o
         ns-3-dev/build/src/point-to-point-layout/model/point-to-point-star.cc.1.o
-        ns-3-dev/build/src/point-to-point-layout/libns3-dev-point-to-point-layout-debug.pc
         ns-3-dev/build/src/processing/model/condition.cc.1.o
         ns-3-dev/build/src/processing/model/execenv-helper.cc.1.o
         ns-3-dev/build/src/processing/model/execenv.cc.1.o
@@ -2487,11 +2092,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/processing/model/sync.cc.1.o
         ns-3-dev/build/src/processing/model/taskscheduler.cc.1.o
         ns-3-dev/build/src/processing/model/thread.cc.1.o
-        ns-3-dev/build/src/processing/libns3-dev-processing-debug.pc
-        ns-3-dev/build/src/propagation/examples/jakes-propagation-model-example.cc.2.o
-        ns-3-dev/build/src/propagation/examples/main-propagation-loss.cc.1.o
-        ns-3-dev/build/src/propagation/examples/ns3-dev-jakes-propagation-model-example-debug
-        ns-3-dev/build/src/propagation/examples/ns3-dev-main-propagation-loss-debug
         ns-3-dev/build/src/propagation/model/cost231-propagation-loss-model.cc.1.o
         ns-3-dev/build/src/propagation/model/itu-r-1411-los-propagation-loss-model.cc.1.o
         ns-3-dev/build/src/propagation/model/itu-r-1411-nlos-over-rooftop-propagation-loss-model.cc.1.o
@@ -2501,25 +2101,9 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/propagation/model/okumura-hata-propagation-loss-model.cc.1.o
         ns-3-dev/build/src/propagation/model/propagation-delay-model.cc.1.o
         ns-3-dev/build/src/propagation/model/propagation-loss-model.cc.1.o
-        ns-3-dev/build/src/propagation/libns3-dev-propagation-debug.pc
-        ns-3-dev/build/src/sixlowpan/examples/example-ping-lr-wpan.cc.2.o
-        ns-3-dev/build/src/sixlowpan/examples/example-sixlowpan.cc.1.o
-        ns-3-dev/build/src/sixlowpan/examples/ns3-dev-example-ping-lr-wpan-debug
-        ns-3-dev/build/src/sixlowpan/examples/ns3-dev-example-sixlowpan-debug
         ns-3-dev/build/src/sixlowpan/helper/sixlowpan-helper.cc.1.o
         ns-3-dev/build/src/sixlowpan/model/sixlowpan-header.cc.1.o
         ns-3-dev/build/src/sixlowpan/model/sixlowpan-net-device.cc.1.o
-        ns-3-dev/build/src/sixlowpan/libns3-dev-sixlowpan-debug.pc
-        ns-3-dev/build/src/spectrum/examples/adhoc-aloha-ideal-phy-matrix-propagation-loss-model.cc.2.o
-        ns-3-dev/build/src/spectrum/examples/adhoc-aloha-ideal-phy-with-microwave-oven.cc.3.o
-        ns-3-dev/build/src/spectrum/examples/adhoc-aloha-ideal-phy.cc.1.o
-        ns-3-dev/build/src/spectrum/examples/ns3-dev-adhoc-aloha-ideal-phy-debug
-        ns-3-dev/build/src/spectrum/examples/ns3-dev-adhoc-aloha-ideal-phy-matrix-propagation-loss-model-debug
-        ns-3-dev/build/src/spectrum/examples/ns3-dev-adhoc-aloha-ideal-phy-with-microwave-oven-debug
-        ns-3-dev/build/src/spectrum/examples/ns3-dev-tv-trans-example-debug
-        ns-3-dev/build/src/spectrum/examples/ns3-dev-tv-trans-regional-example-debug
-        ns-3-dev/build/src/spectrum/examples/tv-trans-example.cc.4.o
-        ns-3-dev/build/src/spectrum/examples/tv-trans-regional-example.cc.5.o
         ns-3-dev/build/src/spectrum/helper/adhoc-aloha-noack-ideal-phy-helper.cc.1.o
         ns-3-dev/build/src/spectrum/helper/spectrum-analyzer-helper.cc.1.o
         ns-3-dev/build/src/spectrum/helper/spectrum-helper.cc.1.o
@@ -2550,21 +2134,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/spectrum/model/tv-spectrum-transmitter.cc.1.o
         ns-3-dev/build/src/spectrum/model/waveform-generator.cc.1.o
         ns-3-dev/build/src/spectrum/model/wifi-spectrum-value-helper.cc.1.o
-        ns-3-dev/build/src/spectrum/libns3-dev-spectrum-debug.pc
-        ns-3-dev/build/src/stats/examples/double-probe-example.cc.2.o
-        ns-3-dev/build/src/stats/examples/file-aggregator-example.cc.6.o
-        ns-3-dev/build/src/stats/examples/file-helper-example.cc.7.o
-        ns-3-dev/build/src/stats/examples/gnuplot-aggregator-example.cc.4.o
-        ns-3-dev/build/src/stats/examples/gnuplot-example.cc.1.o
-        ns-3-dev/build/src/stats/examples/gnuplot-helper-example.cc.5.o
-        ns-3-dev/build/src/stats/examples/ns3-dev-double-probe-example-debug
-        ns-3-dev/build/src/stats/examples/ns3-dev-file-aggregator-example-debug
-        ns-3-dev/build/src/stats/examples/ns3-dev-file-helper-example-debug
-        ns-3-dev/build/src/stats/examples/ns3-dev-gnuplot-aggregator-example-debug
-        ns-3-dev/build/src/stats/examples/ns3-dev-gnuplot-example-debug
-        ns-3-dev/build/src/stats/examples/ns3-dev-gnuplot-helper-example-debug
-        ns-3-dev/build/src/stats/examples/ns3-dev-time-probe-example-debug
-        ns-3-dev/build/src/stats/examples/time-probe-example.cc.3.o
         ns-3-dev/build/src/stats/helper/file-helper.cc.1.o
         ns-3-dev/build/src/stats/helper/gnuplot-helper.cc.1.o
         ns-3-dev/build/src/stats/model/boolean-probe.cc.1.o
@@ -2585,30 +2154,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/stats/model/uinteger-16-probe.cc.1.o
         ns-3-dev/build/src/stats/model/uinteger-32-probe.cc.1.o
         ns-3-dev/build/src/stats/model/uinteger-8-probe.cc.1.o
-        ns-3-dev/build/src/stats/libns3-dev-stats-debug.pc
-        ns-3-dev/build/src/test/libns3-dev-test-debug.pc
-        ns-3-dev/build/src/topology-read/examples/ns3-dev-topology-example-sim-debug
-        ns-3-dev/build/src/topology-read/examples/topology-example-sim.cc.1.o
         ns-3-dev/build/src/topology-read/helper/topology-reader-helper.cc.1.o
         ns-3-dev/build/src/topology-read/model/inet-topology-reader.cc.1.o
         ns-3-dev/build/src/topology-read/model/orbis-topology-reader.cc.1.o
         ns-3-dev/build/src/topology-read/model/rocketfuel-topology-reader.cc.1.o
         ns-3-dev/build/src/topology-read/model/topology-reader.cc.1.o
-        ns-3-dev/build/src/topology-read/libns3-dev-topology-read-debug.pc
-        ns-3-dev/build/src/traffic-control/examples/adaptive-red-tests.cc.3.o
-        ns-3-dev/build/src/traffic-control/examples/codel-vs-pfifo-asymmetric.cc.6.o
-        ns-3-dev/build/src/traffic-control/examples/codel-vs-pfifo-basic-test.cc.5.o
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-adaptive-red-tests-debug
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-codel-vs-pfifo-asymmetric-debug
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-codel-vs-pfifo-basic-test-debug
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-pfifo-vs-red-debug
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-pie-example-debug
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-red-tests-debug
-        ns-3-dev/build/src/traffic-control/examples/ns3-dev-red-vs-ared-debug
-        ns-3-dev/build/src/traffic-control/examples/pfifo-vs-red.cc.4.o
-        ns-3-dev/build/src/traffic-control/examples/pie-example.cc.7.o
-        ns-3-dev/build/src/traffic-control/examples/red-tests.cc.1.o
-        ns-3-dev/build/src/traffic-control/examples/red-vs-ared.cc.2.o
         ns-3-dev/build/src/traffic-control/helper/queue-disc-container.cc.1.o
         ns-3-dev/build/src/traffic-control/helper/traffic-control-helper.cc.1.o
         ns-3-dev/build/src/traffic-control/model/codel-queue-disc.cc.1.o
@@ -2623,19 +2173,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/traffic-control/model/red-queue-disc.cc.1.o
         ns-3-dev/build/src/traffic-control/model/tbf-queue-disc.cc.1.o
         ns-3-dev/build/src/traffic-control/model/traffic-control-layer.cc.1.o
-        ns-3-dev/build/src/traffic-control/libns3-dev-traffic-control-debug.pc
-        ns-3-dev/build/src/uan/examples/ns3-dev-uan-6lowpan-example-debug
-        ns-3-dev/build/src/uan/examples/ns3-dev-uan-cw-example-debug
-        ns-3-dev/build/src/uan/examples/ns3-dev-uan-ipv4-example-debug
-        ns-3-dev/build/src/uan/examples/ns3-dev-uan-ipv6-example-debug
-        ns-3-dev/build/src/uan/examples/ns3-dev-uan-raw-example-debug
-        ns-3-dev/build/src/uan/examples/ns3-dev-uan-rc-example-debug
-        ns-3-dev/build/src/uan/examples/uan-6lowpan-example.cc.6.o
-        ns-3-dev/build/src/uan/examples/uan-cw-example.cc.1.o
-        ns-3-dev/build/src/uan/examples/uan-ipv4-example.cc.4.o
-        ns-3-dev/build/src/uan/examples/uan-ipv6-example.cc.5.o
-        ns-3-dev/build/src/uan/examples/uan-raw-example.cc.3.o
-        ns-3-dev/build/src/uan/examples/uan-rc-example.cc.2.o
         ns-3-dev/build/src/uan/helper/acoustic-modem-energy-model-helper.cc.1.o
         ns-3-dev/build/src/uan/helper/uan-helper.cc.1.o
         ns-3-dev/build/src/uan/model/acoustic-modem-energy-model.cc.1.o
@@ -2659,17 +2196,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/uan/model/uan-transducer-hd.cc.1.o
         ns-3-dev/build/src/uan/model/uan-transducer.cc.1.o
         ns-3-dev/build/src/uan/model/uan-tx-mode.cc.1.o
-        ns-3-dev/build/src/uan/libns3-dev-uan-debug.pc
-        ns-3-dev/build/src/virtual-net-device/examples/ns3-dev-virtual-net-device-debug
-        ns-3-dev/build/src/virtual-net-device/examples/virtual-net-device.cc.1.o
         ns-3-dev/build/src/virtual-net-device/model/virtual-net-device.cc.1.o
-        ns-3-dev/build/src/virtual-net-device/libns3-dev-virtual-net-device-debug.pc
-        ns-3-dev/build/src/wave/examples/ns3-dev-vanet-routing-compare-debug
-        ns-3-dev/build/src/wave/examples/ns3-dev-wave-simple-80211p-debug
-        ns-3-dev/build/src/wave/examples/ns3-dev-wave-simple-device-debug
-        ns-3-dev/build/src/wave/examples/vanet-routing-compare.cc.3.o
-        ns-3-dev/build/src/wave/examples/wave-simple-80211p.cc.1.o
-        ns-3-dev/build/src/wave/examples/wave-simple-device.cc.2.o
         ns-3-dev/build/src/wave/helper/wave-bsm-helper.cc.1.o
         ns-3-dev/build/src/wave/helper/wave-bsm-stats.cc.1.o
         ns-3-dev/build/src/wave/helper/wave-helper.cc.1.o
@@ -2686,17 +2213,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/wave/model/vsa-manager.cc.1.o
         ns-3-dev/build/src/wave/model/wave-mac-low.cc.1.o
         ns-3-dev/build/src/wave/model/wave-net-device.cc.1.o
-        ns-3-dev/build/src/wave/libns3-dev-wave-debug.pc
-        ns-3-dev/build/src/wifi/examples/ns3-dev-test-interference-helper-debug
-        ns-3-dev/build/src/wifi/examples/ns3-dev-wifi-manager-example-debug
-        ns-3-dev/build/src/wifi/examples/ns3-dev-wifi-phy-configuration-debug
-        ns-3-dev/build/src/wifi/examples/ns3-dev-wifi-phy-test-debug
-        ns-3-dev/build/src/wifi/examples/ns3-dev-wifi-trans-example-debug
-        ns-3-dev/build/src/wifi/examples/test-interference-helper.cc.2.o
-        ns-3-dev/build/src/wifi/examples/wifi-manager-example.cc.3.o
-        ns-3-dev/build/src/wifi/examples/wifi-phy-configuration.cc.5.o
-        ns-3-dev/build/src/wifi/examples/wifi-phy-test.cc.1.o
-        ns-3-dev/build/src/wifi/examples/wifi-trans-example.cc.4.o
         ns-3-dev/build/src/wifi/helper/athstats-helper.cc.1.o
         ns-3-dev/build/src/wifi/helper/spectrum-wifi-helper.cc.1.o
         ns-3-dev/build/src/wifi/helper/wifi-helper.cc.1.o
@@ -2787,13 +2303,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/wifi/model/yans-error-rate-model.cc.1.o
         ns-3-dev/build/src/wifi/model/yans-wifi-channel.cc.1.o
         ns-3-dev/build/src/wifi/model/yans-wifi-phy.cc.1.o
-        ns-3-dev/build/src/wifi/libns3-dev-wifi-debug.pc
-        ns-3-dev/build/src/wimax/examples/ns3-dev-wimax-ipv4-debug
-        ns-3-dev/build/src/wimax/examples/ns3-dev-wimax-multicast-debug
-        ns-3-dev/build/src/wimax/examples/ns3-dev-wimax-simple-debug
-        ns-3-dev/build/src/wimax/examples/wimax-ipv4.cc.1.o
-        ns-3-dev/build/src/wimax/examples/wimax-multicast.cc.2.o
-        ns-3-dev/build/src/wimax/examples/wimax-simple.cc.3.o
         ns-3-dev/build/src/wimax/helper/wimax-helper.cc.1.o
         ns-3-dev/build/src/wimax/model/bandwidth-manager.cc.1.o
         ns-3-dev/build/src/wimax/model/bs-link-manager.cc.1.o
@@ -2842,28 +2351,10 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/src/wimax/model/wimax-net-device.cc.1.o
         ns-3-dev/build/src/wimax/model/wimax-phy.cc.1.o
         ns-3-dev/build/src/wimax/model/wimax-tlv.cc.1.o
-        ns-3-dev/build/src/wimax/libns3-dev-wimax-debug.pc
-        ns-3-dev/build/utils/bench-packets.cc.3.o
-        ns-3-dev/build/utils/bench-simulator.cc.2.o
-        ns-3-dev/build/utils/ns3-dev-bench-packets-debug
-        ns-3-dev/build/utils/ns3-dev-bench-simulator-debug
-        ns-3-dev/build/utils/ns3-dev-print-introspected-doxygen-debug
-        ns-3-dev/build/utils/ns3-dev-test-runner-debug
-        ns-3-dev/build/utils/print-introspected-doxygen.cc.4.o
-        ns-3-dev/build/utils/test-runner.cc.1.o
-        ns-3-dev/build/build-status.py
-        ns-3-dev/build/compile_commands.json
         ns-3-dev/build/config.log
-        ns-3-dev/cmake-build-debug/cmake_install.cmake
-        ns-3-dev/cmake-build-debug/CMakeCache.txt
-        ns-3-dev/cmake-build-debug/Makefile
-        ns-3-dev/cmake-build-debug/processing-delay-models.cbp
         ns-3-dev/configure-waf-scripts/configure_debug_waf.sh
         ns-3-dev/configure-waf-scripts/configure_optimized_waf.sh
         ns-3-dev/contrib/wscript
-        ns-3-dev/doc/manual/figures/plot-2d-with-error-bars.png
-        ns-3-dev/doc/manual/figures/plot-2d.png
-        ns-3-dev/doc/manual/figures/plot-3d.png
         ns-3-dev/doc/manual/figures/README
         ns-3-dev/doc/manual/figures/software-organization.dia
         ns-3-dev/doc/manual/source/attributes.rst
@@ -2895,7 +2386,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/doc/manual/source/tests.rst
         ns-3-dev/doc/manual/source/tracing.rst
         ns-3-dev/doc/manual/source/troubleshoot.rst
-        ns-3-dev/doc/manual/Makefile
         ns-3-dev/doc/models/figures/emulated-channel.dia
         ns-3-dev/doc/models/figures/testbed.dia
         ns-3-dev/doc/models/source/conf.py
@@ -2907,7 +2397,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/doc/models/source/README
         ns-3-dev/doc/models/source/replace.txt
         ns-3-dev/doc/models/source/traffic-control.rst
-        ns-3-dev/doc/models/Makefile
         ns-3-dev/doc/ns3_html_theme/static/bar-top.png
         ns-3-dev/doc/ns3_html_theme/static/bc_s.png
         ns-3-dev/doc/ns3_html_theme/static/default.css_t
@@ -2928,14 +2417,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/doc/ns3_html_theme/ns3_doxy_header.html
         ns-3-dev/doc/ns3_html_theme/README.rst
         ns-3-dev/doc/ns3_html_theme/theme.conf
-        ns-3-dev/doc/tutorial/figures/cwnd.png
         ns-3-dev/doc/tutorial/figures/dumbbell.dia
         ns-3-dev/doc/tutorial/figures/helpers.dia
-        ns-3-dev/doc/tutorial/figures/oneobj.png
         ns-3-dev/doc/tutorial/figures/pp.dia
         ns-3-dev/doc/tutorial/figures/README
         ns-3-dev/doc/tutorial/figures/star.dia
-        ns-3-dev/doc/tutorial/figures/threeobj.png
         ns-3-dev/doc/tutorial/source/building-topologies.rst
         ns-3-dev/doc/tutorial/source/conceptual-overview.rst
         ns-3-dev/doc/tutorial/source/conclusion.rst
@@ -2948,16 +2434,12 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/doc/tutorial/source/resources.rst
         ns-3-dev/doc/tutorial/source/tracing.rst
         ns-3-dev/doc/tutorial/source/tweaking.rst
-        ns-3-dev/doc/tutorial/Makefile
         ns-3-dev/doc/tutorial/pickle-to-xml.py
-        ns-3-dev/doc/tutorial-pt-br/figures/cwnd.png
         ns-3-dev/doc/tutorial-pt-br/figures/dumbbell.dia
         ns-3-dev/doc/tutorial-pt-br/figures/helpers.dia
-        ns-3-dev/doc/tutorial-pt-br/figures/oneobj.png
         ns-3-dev/doc/tutorial-pt-br/figures/pp.dia
         ns-3-dev/doc/tutorial-pt-br/figures/README
         ns-3-dev/doc/tutorial-pt-br/figures/star.dia
-        ns-3-dev/doc/tutorial-pt-br/figures/threeobj.png
         ns-3-dev/doc/tutorial-pt-br/locale/language/LC_MESSAGES/sphinx.mo
         ns-3-dev/doc/tutorial-pt-br/source/building-topologies.rst
         ns-3-dev/doc/tutorial-pt-br/source/conceptual-overview.rst
@@ -2970,7 +2452,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/doc/tutorial-pt-br/source/resources.rst
         ns-3-dev/doc/tutorial-pt-br/source/tracing.rst
         ns-3-dev/doc/tutorial-pt-br/source/tweaking.rst
-        ns-3-dev/doc/tutorial-pt-br/Makefile
         ns-3-dev/doc/tutorial-pt-br/pickle-to-xml.py
         ns-3-dev/doc/build.txt
         ns-3-dev/doc/codingstd.txt
@@ -3132,7 +2613,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/antenna/doc/source/conf.py
         ns-3-dev/src/antenna/doc/source/index.rst
         ns-3-dev/src/antenna/doc/source/replace.txt
-        ns-3-dev/src/antenna/doc/Makefile
         ns-3-dev/src/antenna/model/angles.cc
         ns-3-dev/src/antenna/model/angles.h
         ns-3-dev/src/antenna/model/antenna-model.cc
@@ -3172,18 +2652,10 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/aodv/model/aodv-rqueue.h
         ns-3-dev/src/aodv/model/aodv-rtable.cc
         ns-3-dev/src/aodv/model/aodv-rtable.h
-        ns-3-dev/src/aodv/test/aodv-chain-regression-test-0-0.pcap
-        ns-3-dev/src/aodv/test/aodv-chain-regression-test-1-0.pcap
-        ns-3-dev/src/aodv/test/aodv-chain-regression-test-2-0.pcap
-        ns-3-dev/src/aodv/test/aodv-chain-regression-test-3-0.pcap
-        ns-3-dev/src/aodv/test/aodv-chain-regression-test-4-0.pcap
         ns-3-dev/src/aodv/test/aodv-id-cache-test-suite.cc
         ns-3-dev/src/aodv/test/aodv-regression.cc
         ns-3-dev/src/aodv/test/aodv-regression.h
         ns-3-dev/src/aodv/test/aodv-test-suite.cc
-        ns-3-dev/src/aodv/test/bug-606-test-0-0.pcap
-        ns-3-dev/src/aodv/test/bug-606-test-1-0.pcap
-        ns-3-dev/src/aodv/test/bug-606-test-2-0.pcap
         ns-3-dev/src/aodv/test/bug-772.cc
         ns-3-dev/src/aodv/test/bug-772.h
         ns-3-dev/src/aodv/test/examples-to-run.py
@@ -3196,11 +2668,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/applications/bindings/scan-header.h
         ns-3-dev/src/applications/doc/applications.h
         ns-3-dev/src/applications/doc/applications.rst
-        ns-3-dev/src/applications/doc/http-embedded-object-size.png
-        ns-3-dev/src/applications/doc/http-main-object-size.png
-        ns-3-dev/src/applications/doc/http-num-of-embedded-objects.png
-        ns-3-dev/src/applications/doc/http-parsing-time.png
-        ns-3-dev/src/applications/doc/http-reading-time.png
         ns-3-dev/src/applications/examples/three-gpp-http-example.cc
         ns-3-dev/src/applications/examples/wscript
         ns-3-dev/src/applications/helper/bulk-send-helper.cc
@@ -3296,7 +2763,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/buildings/doc/source/conf.py
         ns-3-dev/src/buildings/doc/source/index.rst
         ns-3-dev/src/buildings/doc/source/replace.txt
-        ns-3-dev/src/buildings/doc/Makefile
         ns-3-dev/src/buildings/examples/buildings-pathloss-profiler.cc
         ns-3-dev/src/buildings/examples/wscript
         ns-3-dev/src/buildings/helper/building-allocator.cc
@@ -3654,35 +3120,11 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/csma-layout/model/csma-star-helper.h
         ns-3-dev/src/csma-layout/wscript
         ns-3-dev/src/dcep/doc/dcep.rst
-        ns-3-dev/src/dcep/doc/dcep.rst-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e-e-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e-e-e-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e-e-e-e-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e-e-e-e-e-e
-        ns-3-dev/src/dcep/doc/dcep.rst-e-e-e-e-e-e-e-e
         ns-3-dev/src/dcep/examples/dcep-example.cc
         ns-3-dev/src/dcep/examples/MANETSimulation.cc
         ns-3-dev/src/dcep/examples/wscript
         ns-3-dev/src/dcep/helper/dcep-app-helper.cc
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e-e-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.cc-e-e-e-e-e-e-e-e
         ns-3-dev/src/dcep/helper/dcep-app-helper.h
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e-e-e-e-e-e
-        ns-3-dev/src/dcep/helper/dcep-app-helper.h-e-e-e-e-e-e-e-e
         ns-3-dev/src/dcep/model/cep-engine.cc
         ns-3-dev/src/dcep/model/cep-engine.h
         ns-3-dev/src/dcep/model/common.h
@@ -3702,14 +3144,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/dcep/model/seq-ts-header.cc
         ns-3-dev/src/dcep/model/seq-ts-header.h
         ns-3-dev/src/dcep/test/dcep-test-suite.cc
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e-e-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e-e-e-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e-e-e-e-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e-e-e-e-e-e
-        ns-3-dev/src/dcep/test/dcep-test-suite.cc-e-e-e-e-e-e-e-e
         ns-3-dev/src/dcep/wscript
         ns-3-dev/src/dsdv/bindings/callbacks_list.py
         ns-3-dev/src/dsdv/bindings/modulegen__gcc_ILP32.py
@@ -4299,7 +3733,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/bindings/modulegen__gcc_ILP32.py
         ns-3-dev/src/lte/bindings/modulegen__gcc_LP64.py
         ns-3-dev/src/lte/bindings/modulegen_customizations.py
-        ns-3-dev/src/lte/doc/source/figures/ca-downlink-bsr.pdf
         ns-3-dev/src/lte/doc/source/figures/ca-downlink-bsr.png
         ns-3-dev/src/lte/doc/source/figures/ca-downlink-bsr.seqdiag
         ns-3-dev/src/lte/doc/source/figures/ca-enb-ctrl-plane.dia
@@ -4308,24 +3741,18 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/doc/source/figures/ca-lte-ue-net-device-changes.dia
         ns-3-dev/src/lte/doc/source/figures/ca-rrc-messages.png
         ns-3-dev/src/lte/doc/source/figures/ca-rrc-reconf.dia
-        ns-3-dev/src/lte/doc/source/figures/ca-setup-radio-bearer.pdf
         ns-3-dev/src/lte/doc/source/figures/ca-setup-radio-bearer.png
         ns-3-dev/src/lte/doc/source/figures/ca-setup-radio-bearer.seqdiag
         ns-3-dev/src/lte/doc/source/figures/ca-some-diagram.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/ca-test-example-dl.pdf
         ns-3-dev/src/lte/doc/source/figures/ca-test-example-dl.png
-        ns-3-dev/src/lte/doc/source/figures/ca-test-example-ul.pdf
         ns-3-dev/src/lte/doc/source/figures/ca-test-example-ul.png
         ns-3-dev/src/lte/doc/source/figures/ca-ue-ctrl-plane.dia
         ns-3-dev/src/lte/doc/source/figures/ca-ue-data-plane.dia
-        ns-3-dev/src/lte/doc/source/figures/ca-uplink-bsr.pdf
         ns-3-dev/src/lte/doc/source/figures/ca-uplink-bsr.png
         ns-3-dev/src/lte/doc/source/figures/ca-uplink-bsr.seqdiag
         ns-3-dev/src/lte/doc/source/figures/carrier-aggregation-impact.jpg
-        ns-3-dev/src/lte/doc/source/figures/carrier-aggregation-impact.pdf
         ns-3-dev/src/lte/doc/source/figures/carrier-aggregation-impact.png
         ns-3-dev/src/lte/doc/source/figures/carrier-aggregation-mac-impact.jpg
-        ns-3-dev/src/lte/doc/source/figures/carrier-aggregation-mac-impact.pdf
         ns-3-dev/src/lte/doc/source/figures/carrier-aggregation-mac-impact.png
         ns-3-dev/src/lte/doc/source/figures/CarrierAggregationDownlinkDataPlane.png
         ns-3-dev/src/lte/doc/source/figures/CarrierAggregationUlTxOpportunity.png
@@ -4336,15 +3763,9 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/doc/source/figures/epc-profiling-scenario.dia
         ns-3-dev/src/lte/doc/source/figures/epc-topology-x2-enhanced.dia
         ns-3-dev/src/lte/doc/source/figures/epc-topology.dia
-        ns-3-dev/src/lte/doc/source/figures/epcEutranRunningTime.eps
-        ns-3-dev/src/lte/doc/source/figures/epcRunningTime.eps
-        ns-3-dev/src/lte/doc/source/figures/epcSimulationTime.eps
         ns-3-dev/src/lte/doc/source/figures/eutran-profiling-scenario.dia
-        ns-3-dev/src/lte/doc/source/figures/fading_pedestrian.pdf
         ns-3-dev/src/lte/doc/source/figures/fading_pedestrian.png
-        ns-3-dev/src/lte/doc/source/figures/fading_urban_3kmph.pdf
         ns-3-dev/src/lte/doc/source/figures/fading_urban_3kmph.png
-        ns-3-dev/src/lte/doc/source/figures/fading_vehicular.pdf
         ns-3-dev/src/lte/doc/source/figures/fading_vehicular.png
         ns-3-dev/src/lte/doc/source/figures/ff-example.dia
         ns-3-dev/src/lte/doc/source/figures/ff-mac-saps.dia
@@ -4356,12 +3777,8 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/doc/source/figures/fr-soft-frequency-reuse-scheme-v1.dia
         ns-3-dev/src/lte/doc/source/figures/fr-soft-frequency-reuse-scheme-v2.dia
         ns-3-dev/src/lte/doc/source/figures/fr-strict-frequency-reuse-scheme.dia
-        ns-3-dev/src/lte/doc/source/figures/helpers.pdf
         ns-3-dev/src/lte/doc/source/figures/helpers.png
         ns-3-dev/src/lte/doc/source/figures/helpers.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/lena-dual-stripe.eps
-        ns-3-dev/src/lte/doc/source/figures/lenaThrTestCase1.eps
-        ns-3-dev/src/lte/doc/source/figures/lenaThrTestCase2.eps
         ns-3-dev/src/lte/doc/source/figures/lte-arch-enb-ctrl-rrc-phy.dia
         ns-3-dev/src/lte/doc/source/figures/lte-arch-enb-ctrl.dia
         ns-3-dev/src/lte/doc/source/figures/lte-arch-enb-data.dia
@@ -4375,37 +3792,26 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/doc/source/figures/lte-enb-cphy-sap.png
         ns-3-dev/src/lte/doc/source/figures/lte-enb-phy.dia
         ns-3-dev/src/lte/doc/source/figures/lte-enb-rrc-states.dot
-        ns-3-dev/src/lte/doc/source/figures/lte-enb-rrc-states.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-enb-rrc-states.png
         ns-3-dev/src/lte/doc/source/figures/lte-epc-e2e-data-protocol-stack.dia
         ns-3-dev/src/lte/doc/source/figures/lte-epc-x2-entity-saps.dia
         ns-3-dev/src/lte/doc/source/figures/lte-epc-x2-handover-seq-diagram.dia
         ns-3-dev/src/lte/doc/source/figures/lte-epc-x2-interface.dia
         ns-3-dev/src/lte/doc/source/figures/lte-ffr-scheduling.dia
-        ns-3-dev/src/lte/doc/source/figures/lte-ffr-soft-2-spectrum-trace.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-ffr-soft-2-spectrum-trace.png
-        ns-3-dev/src/lte/doc/source/figures/lte-fr-hard-1-rem.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-fr-hard-1-rem.png
-        ns-3-dev/src/lte/doc/source/figures/lte-fr-hard-2-rem.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-fr-hard-2-rem.png
-        ns-3-dev/src/lte/doc/source/figures/lte-fr-hard-3-rem.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-fr-hard-3-rem.png
-        ns-3-dev/src/lte/doc/source/figures/lte-fr-soft-1-rem.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-fr-soft-1-rem.png
-        ns-3-dev/src/lte/doc/source/figures/lte-handover-algorithm.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-handover-algorithm.png
-        ns-3-dev/src/lte/doc/source/figures/lte-handover-campaign-rem.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-handover-campaign-rem.png
         ns-3-dev/src/lte/doc/source/figures/lte-handover-target-scenario.dia
         ns-3-dev/src/lte/doc/source/figures/lte-harq-architecture.dia
         ns-3-dev/src/lte/doc/source/figures/lte-harq-processes-scheme.dia
         ns-3-dev/src/lte/doc/source/figures/lte-interference-test-scenario.dia
         ns-3-dev/src/lte/doc/source/figures/lte-legacy-handover-algorithm.dot
-        ns-3-dev/src/lte/doc/source/figures/lte-legacy-handover-algorithm.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-legacy-handover-algorithm.png
-        ns-3-dev/src/lte/doc/source/figures/lte-mcs-index.eps
         ns-3-dev/src/lte/doc/source/figures/lte-net-phy-relation.png
-        ns-3-dev/src/lte/doc/source/figures/lte-phy-interference.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-phy-interference.png
         ns-3-dev/src/lte/doc/source/figures/lte-phy-interference.seqdiag
         ns-3-dev/src/lte/doc/source/figures/lte-rlc-data-retx-dl.dia
@@ -4413,61 +3819,35 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/doc/source/figures/lte-rlc-data-txon-dl.dia
         ns-3-dev/src/lte/doc/source/figures/lte-rlc-data-txon-ul.dia
         ns-3-dev/src/lte/doc/source/figures/lte-rlc-implementation-model.dia
-        ns-3-dev/src/lte/doc/source/figures/lte-strongest-cell-handover-algorithm.eps
         ns-3-dev/src/lte/doc/source/figures/lte-subframe-structure.dia
         ns-3-dev/src/lte/doc/source/figures/lte-ue-phy.dia
         ns-3-dev/src/lte/doc/source/figures/lte-ue-rrc-states.dot
-        ns-3-dev/src/lte/doc/source/figures/lte-ue-rrc-states.pdf
         ns-3-dev/src/lte/doc/source/figures/lte-ue-rrc-states.png
-        ns-3-dev/src/lte/doc/source/figures/mac-random-access-contention.pdf
         ns-3-dev/src/lte/doc/source/figures/mac-random-access-contention.png
         ns-3-dev/src/lte/doc/source/figures/mac-random-access-contention.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/mac-random-access-noncontention.pdf
         ns-3-dev/src/lte/doc/source/figures/mac-random-access-noncontention.png
         ns-3-dev/src/lte/doc/source/figures/mac-random-access-noncontention.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/MCS_12_test.eps
-        ns-3-dev/src/lte/doc/source/figures/MCS_12_test.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_12_test.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_13_16.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_13_16.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_16_test.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_16_test.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_17_20.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_17_20.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_1_4.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_1_4.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_21_24.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_21_24.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_25_28.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_25_28.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_29_29.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_29_29.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_2_test.eps
-        ns-3-dev/src/lte/doc/source/figures/MCS_2_test.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_2_test.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_5_8.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_5_8.png
-        ns-3-dev/src/lte/doc/source/figures/MCS_9_12.pdf
         ns-3-dev/src/lte/doc/source/figures/MCS_9_12.png
-        ns-3-dev/src/lte/doc/source/figures/miesm_scheme.pdf
         ns-3-dev/src/lte/doc/source/figures/miesm_scheme.png
-        ns-3-dev/src/lte/doc/source/figures/nas-attach.pdf
         ns-3-dev/src/lte/doc/source/figures/nas-attach.png
         ns-3-dev/src/lte/doc/source/figures/nas-attach.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/profiling-memory.eps
-        ns-3-dev/src/lte/doc/source/figures/propagationModel.eps
-        ns-3-dev/src/lte/doc/source/figures/rrc-connection-establishment.pdf
         ns-3-dev/src/lte/doc/source/figures/rrc-connection-establishment.png
         ns-3-dev/src/lte/doc/source/figures/rrc-connection-establishment.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/rrc-connection-reconfiguration-handover.pdf
         ns-3-dev/src/lte/doc/source/figures/rrc-connection-reconfiguration-handover.png
         ns-3-dev/src/lte/doc/source/figures/rrc-connection-reconfiguration-handover.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/rrc-connection-reconfiguration.pdf
         ns-3-dev/src/lte/doc/source/figures/rrc-connection-reconfiguration.png
         ns-3-dev/src/lte/doc/source/figures/rrc-connection-reconfiguration.seqdiag
-        ns-3-dev/src/lte/doc/source/figures/runningTime10s.eps
         ns-3-dev/src/lte/doc/source/figures/setupRadioBearerCarrierAggregation.png
-        ns-3-dev/src/lte/doc/source/figures/simulationTime.eps
         ns-3-dev/src/lte/doc/source/figures/ue-meas-consumer.dia
         ns-3-dev/src/lte/doc/source/figures/ue-meas-piecewise-a1-hys.dia
         ns-3-dev/src/lte/doc/source/figures/ue-meas-piecewise-a1.dia
@@ -4483,7 +3863,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/doc/source/replace.txt
         ns-3-dev/src/lte/doc/source/rlc_buffer_status_report_downlink.seqdiag
         ns-3-dev/src/lte/doc/source/rlc_buffer_status_report_uplink.seqdiag
-        ns-3-dev/src/lte/doc/Makefile
         ns-3-dev/src/lte/examples/lena-cc-helper.cc
         ns-3-dev/src/lte/examples/lena-cqi-threshold.cc
         ns-3-dev/src/lte/examples/lena-deactivate-bearer.cc
@@ -4769,7 +4148,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/lte/test/reference/generate_test_data_lte_spectrum_model.m
         ns-3-dev/src/lte/test/reference/generate_test_data_lte_spectrum_value_noise.m
         ns-3-dev/src/lte/test/reference/generate_test_data_lte_spectrum_value_txpsd.m
-        ns-3-dev/src/lte/test/reference/lte-mcs-index.dat
         ns-3-dev/src/lte/test/reference/lte-mcs-index.eps
         ns-3-dev/src/lte/test/reference/lte-mcs-index.gnuplot
         ns-3-dev/src/lte/test/reference/lte-mcs-index.pdf
@@ -4904,9 +4282,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/mesh/doc/source/mesh-user.rst
         ns-3-dev/src/mesh/doc/source/mesh.rst
         ns-3-dev/src/mesh/doc/source/replace.txt
-        ns-3-dev/src/mesh/doc/Makefile
         ns-3-dev/src/mesh/doc/mesh.h
-        ns-3-dev/src/mesh/doc/MeshArchitecture.png
         ns-3-dev/src/mesh/examples/mesh.cc
         ns-3-dev/src/mesh/examples/wscript
         ns-3-dev/src/mesh/helper/dot11s/dot11s-installer.cc
@@ -4978,39 +4354,17 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/mesh/model/mesh-wifi-interface-mac.cc
         ns-3-dev/src/mesh/model/mesh-wifi-interface-mac.h
         ns-3-dev/src/mesh/test/dot11s/dot11s-test-suite.cc
-        ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression-test-0-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression-test-1-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression-test-2-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression-test-3-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression-test-4-1.pcap
         ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression.cc
         ns-3-dev/src/mesh/test/dot11s/hwmp-proactive-regression.h
-        ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression-test-0-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression-test-1-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression-test-2-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression-test-3-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression-test-4-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression-test-5-1.pcap
         ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression.cc
         ns-3-dev/src/mesh/test/dot11s/hwmp-reactive-regression.h
-        ns-3-dev/src/mesh/test/dot11s/hwmp-simplest-regression-test-0-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-simplest-regression-test-1-1.pcap
         ns-3-dev/src/mesh/test/dot11s/hwmp-simplest-regression.cc
         ns-3-dev/src/mesh/test/dot11s/hwmp-simplest-regression.h
-        ns-3-dev/src/mesh/test/dot11s/hwmp-target-flags-regression-test-0-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-target-flags-regression-test-1-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-target-flags-regression-test-2-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/hwmp-target-flags-regression-test-3-1.pcap
         ns-3-dev/src/mesh/test/dot11s/hwmp-target-flags-regression.cc
         ns-3-dev/src/mesh/test/dot11s/hwmp-target-flags-regression.h
-        ns-3-dev/src/mesh/test/dot11s/pmp-regression-test-0-1.pcap
-        ns-3-dev/src/mesh/test/dot11s/pmp-regression-test-1-1.pcap
         ns-3-dev/src/mesh/test/dot11s/pmp-regression.cc
         ns-3-dev/src/mesh/test/dot11s/pmp-regression.h
         ns-3-dev/src/mesh/test/dot11s/regression.cc
-        ns-3-dev/src/mesh/test/flame/flame-regression-test-0-1.pcap
-        ns-3-dev/src/mesh/test/flame/flame-regression-test-1-1.pcap
-        ns-3-dev/src/mesh/test/flame/flame-regression-test-2-1.pcap
         ns-3-dev/src/mesh/test/flame/flame-regression.cc
         ns-3-dev/src/mesh/test/flame/flame-regression.h
         ns-3-dev/src/mesh/test/flame/flame-test-suite.cc
@@ -5082,7 +4436,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/mobility/test/examples-to-run.py
         ns-3-dev/src/mobility/test/geo-to-cartesian-test.cc
         ns-3-dev/src/mobility/test/mobility-test-suite.cc
-        ns-3-dev/src/mobility/test/mobility-trace-example.mob
         ns-3-dev/src/mobility/test/mobility-trace-test-suite.cc
         ns-3-dev/src/mobility/test/ns2-mobility-helper-test-suite.cc
         ns-3-dev/src/mobility/test/rand-cart-around-geo-test.cc
@@ -5230,7 +4583,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/network/test/error-model-test-suite.cc
         ns-3-dev/src/network/test/examples-to-run.py
         ns-3-dev/src/network/test/ipv6-address-test-suite.cc
-        ns-3-dev/src/network/test/known.pcap
         ns-3-dev/src/network/test/packet-metadata-test.cc
         ns-3-dev/src/network/test/packet-socket-apps-test-suite.cc
         ns-3-dev/src/network/test/packet-test-suite.cc
@@ -5412,6 +4764,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/point-to-point-layout/model/point-to-point-star.cc
         ns-3-dev/src/point-to-point-layout/model/point-to-point-star.h
         ns-3-dev/src/point-to-point-layout/wscript
+        ns-3-dev/src/processing/examples/telosb-example.cc
         ns-3-dev/src/processing/examples/wscript
         ns-3-dev/src/processing/model/apic.cc
         ns-3-dev/src/processing/model/apic.h
@@ -5458,6 +4811,8 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/processing/model/sync.h
         ns-3-dev/src/processing/model/taskscheduler.cc
         ns-3-dev/src/processing/model/taskscheduler.h
+        ns-3-dev/src/processing/model/telosb.cc
+        ns-3-dev/src/processing/model/telosb.h
         ns-3-dev/src/processing/model/temp
         ns-3-dev/src/processing/model/thread.cc
         ns-3-dev/src/processing/model/thread.h
@@ -5529,13 +4884,9 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/spectrum/bindings/callbacks_list.py
         ns-3-dev/src/spectrum/bindings/modulegen__gcc_ILP32.py
         ns-3-dev/src/spectrum/bindings/modulegen__gcc_LP64.py
-        ns-3-dev/src/spectrum/doc/Makefile
         ns-3-dev/src/spectrum/doc/spectrum-analyzer-example.eps
         ns-3-dev/src/spectrum/doc/spectrum-channel-phy-interface.pdf
-        ns-3-dev/src/spectrum/doc/spectrum-channel-phy-interface.png
         ns-3-dev/src/spectrum/doc/spectrum-channel-phy-interface.seqdiag
-        ns-3-dev/src/spectrum/doc/spectrum-tv-8vsb.png
-        ns-3-dev/src/spectrum/doc/spectrum-tv-cofdm.png
         ns-3-dev/src/spectrum/doc/spectrum-tv-rand-geo-points.eps
         ns-3-dev/src/spectrum/doc/spectrum.rst
         ns-3-dev/src/spectrum/examples/adhoc-aloha-ideal-phy-matrix-propagation-loss-model.cc
@@ -5625,16 +4976,9 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/stats/doc/data-collection.rst
         ns-3-dev/src/stats/doc/dcf-overview-with-aggregation.dia
         ns-3-dev/src/stats/doc/dcf-overview.dia
-        ns-3-dev/src/stats/doc/file-example.png
-        ns-3-dev/src/stats/doc/gnuplot-aggregator.png
-        ns-3-dev/src/stats/doc/gnuplot-example.png
-        ns-3-dev/src/stats/doc/gnuplot-helper-example.png
         ns-3-dev/src/stats/doc/probe.rst
         ns-3-dev/src/stats/doc/scope-and-limitations.rst
-        ns-3-dev/src/stats/doc/seventh-packet-byte-count.png
-        ns-3-dev/src/stats/doc/Stat-framework-arch.png
         ns-3-dev/src/stats/doc/statistics.rst
-        ns-3-dev/src/stats/doc/Wifi-default.png
         ns-3-dev/src/stats/examples/double-probe-example.cc
         ns-3-dev/src/stats/examples/file-aggregator-example.cc
         ns-3-dev/src/stats/examples/file-helper-example.cc
@@ -5721,31 +5065,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/tap-bridge/wscript
         ns-3-dev/src/test/ns3tc/fq-codel-queue-disc-test-suite.cc
         ns-3-dev/src/test/ns3tc/pfifo-fast-queue-disc-test-suite.cc
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-interop-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-NewReno0-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-NewReno1-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-NewReno2-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-NewReno3-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-NewReno4-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-Westwood0-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-Westwood1-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-Westwood2-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-Westwood3-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-Westwood4-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-WestwoodPlus0-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-WestwoodPlus1-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-WestwoodPlus2-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-WestwoodPlus3-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-loss-WestwoodPlus4-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state0-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state1-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state2-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state3-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state4-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state5-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state6-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state7-response-vectors.pcap
-        ns-3-dev/src/test/ns3tcp/response-vectors/ns3tcp-state8-response-vectors.pcap
         ns-3-dev/src/test/ns3tcp/ns3tcp-cwnd-test-suite.cc
         ns-3-dev/src/test/ns3tcp/ns3tcp-interop-test-suite.cc
         ns-3-dev/src/test/ns3tcp/ns3tcp-loss-test-suite.cc
@@ -5957,7 +5276,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/wave/bindings/modulegen__gcc_ILP32.py
         ns-3-dev/src/wave/bindings/modulegen__gcc_LP64.py
         ns-3-dev/src/wave/doc/wave.rst
-        ns-3-dev/src/wave/examples/low99-ct-unterstrass-1day.filt.7.adj.mob
         ns-3-dev/src/wave/examples/vanet-routing-compare.cc
         ns-3-dev/src/wave/examples/wave-simple-80211p.cc
         ns-3-dev/src/wave/examples/wave-simple-device.cc
@@ -6003,11 +5321,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/wifi/bindings/modulegen__gcc_LP64.py
         ns-3-dev/src/wifi/bindings/modulegen_customizations.py
         ns-3-dev/src/wifi/bindings/scan-header.h
-        ns-3-dev/src/wifi/doc/source/figures/clear-channel.eps
-        ns-3-dev/src/wifi/doc/source/figures/nist-frame-success-rate-ac.eps
-        ns-3-dev/src/wifi/doc/source/figures/nist-frame-success-rate-ax.eps
-        ns-3-dev/src/wifi/doc/source/figures/nist-frame-success-rate-n.eps
-        ns-3-dev/src/wifi/doc/source/figures/nist-frame-success-rate.eps
         ns-3-dev/src/wifi/doc/source/figures/snir.dia
         ns-3-dev/src/wifi/doc/source/figures/WifiArchitecture.dia
         ns-3-dev/src/wifi/doc/source/conf.py
@@ -6017,7 +5330,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/wifi/doc/source/wifi-testing.rst
         ns-3-dev/src/wifi/doc/source/wifi-user.rst
         ns-3-dev/src/wifi/doc/source/wifi.rst
-        ns-3-dev/src/wifi/doc/Makefile
         ns-3-dev/src/wifi/examples/test-interference-helper.cc
         ns-3-dev/src/wifi/examples/wifi-manager-example.cc
         ns-3-dev/src/wifi/examples/wifi-phy-configuration.cc
@@ -6212,7 +5524,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/wifi/model/yans-wifi-phy.cc
         ns-3-dev/src/wifi/model/yans-wifi-phy.h
         ns-3-dev/src/wifi/test/80211b.c
-        ns-3-dev/src/wifi/test/80211b.plt
         ns-3-dev/src/wifi/test/block-ack-test-suite.cc
         ns-3-dev/src/wifi/test/channel-access-manager-test.cc
         ns-3-dev/src/wifi/test/examples-to-run.py
@@ -6372,7 +5683,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/AUTHORS
         ns-3-dev/CHANGES.html
         ns-3-dev/LICENSE
-        ns-3-dev/Makefile
         ns-3-dev/qt-ns3.config
         ns-3-dev/qt-ns3.creator
         ns-3-dev/qt-ns3.creator.user
@@ -6388,6 +5698,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/waf.bat
         ns-3-dev/wscript
         ns-3-dev/wutils.py
+        CMakeLists.txt
         README.md)
 
 add_custom_target(
