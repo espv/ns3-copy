@@ -16,8 +16,8 @@ PacketSinkCC2420::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::PacketSinkCC2420")
     .SetParent<Application> ()
     .AddConstructor<PacketSinkCC2420> ()
-    .AddTraceSource ("Rx", "A packet has been received",
-                     MakeTraceSourceAccessor (&PacketSinkCC2420::m_rxTrace))
+    /*.AddTraceSource ("Rx", "A packet has been received",
+                     MakeTraceSourceAccessor (&PacketSinkCC2420::m_rxTrace))*/
   ;
   return tid;
 }

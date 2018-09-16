@@ -46,8 +46,8 @@ OnOffCC2420Application::GetTypeId (void)
                    UintegerValue (0),
                    MakeUintegerAccessor (&OnOffCC2420Application::m_maxBytes),
                    MakeUintegerChecker<uint32_t> ())
-    .AddTraceSource ("Tx", "A new packet is created and is sent",
-                     MakeTraceSourceAccessor (&OnOffCC2420Application::m_txTrace))
+    /*.AddTraceSource ("Tx", "A new packet is created and is sent",
+                     MakeTraceSourceAccessor (&OnOffCC2420Application::m_txTrace))*/
   ;
   return tid;
 }
