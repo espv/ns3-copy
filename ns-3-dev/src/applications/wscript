@@ -58,6 +58,7 @@ def build(bld):
         'helper/bulk-send-helper.h',
         'helper/on-off-helper.h',
         'helper/on-off-cc2420-helper.h',
+        'helper/packet-sink-helper.h',
         'helper/packet-sink-cc2420-helper.h',
         'helper/udp-client-server-helper.h',
         'helper/udp-echo-helper.h',
