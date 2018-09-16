@@ -10,6 +10,7 @@
 #include "onoff-cc2420-application.h"
 #include "ns3/string.h"
 #include "ns3/pointer.h"
+#include "ns3/cc2420-messages.h"
 
 NS_LOG_COMPONENT_DEFINE ("OnOffCC2420Application");
 
