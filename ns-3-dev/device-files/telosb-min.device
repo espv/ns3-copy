@@ -482,4 +482,4 @@ SIGEND
 
 
 THREADS
-scheduler main_thread infinite -99
+scheduler main_thread infinite 0
