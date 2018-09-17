@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended
 include CMakeFiles/TelosB.dir/progress.make
 
 CMakeFiles/TelosB:
-	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3.19 && ./waf
+	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3-dev && ./waf
 
 TelosB: CMakeFiles/TelosB
 TelosB: CMakeFiles/TelosB.dir/build.make
