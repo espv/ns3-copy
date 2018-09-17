@@ -27,6 +27,8 @@ QUEUES
 # NIC Tx memory: 32kb
 
 HIRQ	 FIFO 	 -1    services
+cepops	 FIFO 	 -1    services
+fsms	 FIFO 	 -1    fsm
 
 nic_rx FIFO -1 bytes
 
@@ -157,6 +159,115 @@ x SLEEPTHREAD
 received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 #x CALL send_event
 0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME or_cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 fsms fsms 1
+x PROCESS 1000 0
+insert_event HANDLEINCOMINGEVENT
+x STATECOND hit read local 1
+x PROCESS 1000 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME or_cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 fsms fsms 1
+x PROCESS 1000 0
+insert_event HANDLEINCOMINGEVENT
+x STATECOND hit read local 0
+x PROCESS 100 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME then_cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 fsms fsms 1
+x PROCESS 800 0
+insert_event HANDLEINCOMINGEVENT
+x STATECOND hit read local 1
+x PROCESS 2000 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME then_cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 fsms fsms 1
+x PROCESS 800 0
+insert_event HANDLEINCOMINGEVENT
+x STATECOND hit read local 0
+x PROCESS 200 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME and_cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 fsms fsms 1
+x PROCESS 1200 0
+insert_event HANDLEINCOMINGEVENT
+x STATECOND hit read local 1
+x PROCESS 3000 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME and_cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 fsms fsms 1
+x PROCESS 1200 0
+insert_event HANDLEINCOMINGEVENT
+x STATECOND hit read local 0
+x PROCESS 300 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME insert_event_into_cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		1 cepops cepops 1
+x DEQUEUE SRVQUEUE 0 0  # Execute and_cepop, then_cepop or or_cepop
+0 RESTART
 
 SIGEND
 
