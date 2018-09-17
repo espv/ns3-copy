@@ -11,6 +11,7 @@
 #include "sem.h"
 #include "interrupt-controller.h"
 #include "condition.h"
+#include "cep.h"
 // #include "ns3/schedsim-linsched.h"
 #include "ns3/rrscheduler.h"
 #include <ns3/drop-tail-queue2.h>
@@ -64,6 +65,7 @@ ExecEnv::ExecEnv() :
 	WifiMacHeader *hdr = &hdrCopy;
 	/* STEIN */
 
+	/* NOT NEEDED FOR CEP OR TelosB
 	Ptr<ExecEnv> ee = node->GetObject<ExecEnv> ();
 
 	// Create packet, and specify ReceivePacketTest to be
@@ -108,7 +110,7 @@ ExecEnv::ExecEnv() :
 			return;
 		} else
 			packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-	}
+	}*/
 
 
 	NS_LOG_FUNCTION (this << packet << hdr);
@@ -741,6 +743,10 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			std::cout << *((ProcessingStage *) curEvt) << std::endl;
 			break;
 		}
+		case INCOMINGCEPEVENT: {
+			std::cout << *((InsertEventIntoCEPOp *) curEvt) << std::endl;
+			break;
+		}
 		case SCHEDULER: {
 			std::cout << *((SchedulerExecutionEvent *) curEvt) << std::endl;
 			break;
@@ -1106,6 +1112,127 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// Add this PS to the current program
 		currentProgram->events.push_back(ps);
+	}
+
+	// Handle incoming CEP event
+	if (!tokens[1].compare("HANDLEINCOMINGCEPEVENT")) {
+		Ptr<Node> node = GetObject<Node>();
+		std::string cycles_per_fsm = tokens[2];
+		std::string deviation_per_fsm = tokens[3];
+		std::string cycles_per_cepop = tokens[4];
+		std::string deviation_per_cepop = tokens[5];
+
+		// Iterate all HWE aggregates obtained during
+		// the parsing of the header.
+		// First, create the processing stage
+		ProcessingStage *ps1 = new ProcessingStage();
+		ps1->samples = nrSamples;
+
+		int intField = 0;
+
+		// Then, iterate according to all HWE aggregates
+		// specified in the header parsed above.
+		int numHWEs = currentResources.size();
+		int tokenIndex = 0;
+		for (int i = 0; i < numHWEs; i++) {
+			// Obtain the parameters of the given distribution
+			if (!currentDistributions[i].compare("normal")) {
+				// The normal distribution takes two parameters:
+				// average and standard deviation
+				double average = stringToDouble(
+						tokens[intField + 2 + tokenIndex++]);
+				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
+				ps1->resourcesUsed[currentResources[i]].defined = true;
+				ps1->resourcesUsed[currentResources[i]].consumption =
+						NormalVariable(average, sd * sd);
+				ps1->resourcesUsed[currentResources[i]].distributionType =
+						"normal";
+				ps1->resourcesUsed[currentResources[i]].param1 = average;
+				ps1->resourcesUsed[currentResources[i]].param2 = sd * sd;
+				ps1->samples = nrSamples;
+			} else if (!currentDistributions[i].compare("lognormal")) {
+				// The normal distribution takes two parameters:
+				// average and standard deviation
+				double logaverage = stringToDouble(
+						tokens[intField + 2 + tokenIndex++]);
+				double logsd = stringToDouble(
+						tokens[intField + 2 + tokenIndex++]);
+				ps1->resourcesUsed[currentResources[i]].defined = true;
+				ps1->resourcesUsed[currentResources[i]].consumption =
+						LogNormalVariable(logaverage, logsd);
+				ps1->resourcesUsed[currentResources[i]].distributionType =
+						"lognormal";
+				ps1->resourcesUsed[currentResources[i]].param1 = logaverage;
+				ps1->resourcesUsed[currentResources[i]].param2 = logsd;
+				ps1->samples = nrSamples;
+			}
+
+			//
+			// TODO: other distributions - we currently only support normal and lognormal
+			// distributions. Lognormal appears to be the better estimator for cycles.
+			//
+		}
+
+		// Iterate all HWE aggregates obtained during
+		// the parsing of the header.
+		// First, create the processing stage
+		ProcessingStage *ps2 = new ProcessingStage();
+		ps2->samples = nrSamples;
+
+		for (int i = 0; i < numHWEs; i++) {
+			// Obtain the parameters of the given distribution
+			if (!currentDistributions[i].compare("normal")) {
+				// The normal distribution takes two parameters:
+				// average and standard deviation
+				double average = stringToDouble(
+						tokens[intField + 2 + tokenIndex++]);
+				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
+				ps2->resourcesUsed[currentResources[i]].defined = true;
+				ps2->resourcesUsed[currentResources[i]].consumption =
+						NormalVariable(average, sd * sd);
+				ps2->resourcesUsed[currentResources[i]].distributionType =
+						"normal";
+				ps2->resourcesUsed[currentResources[i]].param1 = average;
+				ps2->resourcesUsed[currentResources[i]].param2 = sd * sd;
+				ps2->samples = nrSamples;
+			} else if (!currentDistributions[i].compare("lognormal")) {
+				// The normal distribution takes two parameters:
+				// average and standard deviation
+				double logaverage = stringToDouble(
+						tokens[intField + 2 + tokenIndex++]);
+				double logsd = stringToDouble(
+						tokens[intField + 2 + tokenIndex++]);
+				ps2->resourcesUsed[currentResources[i]].defined = true;
+				ps2->resourcesUsed[currentResources[i]].consumption =
+						LogNormalVariable(logaverage, logsd);
+				ps2->resourcesUsed[currentResources[i]].distributionType =
+						"lognormal";
+				ps2->resourcesUsed[currentResources[i]].param1 = logaverage;
+				ps2->resourcesUsed[currentResources[i]].param2 = logsd;
+				ps2->samples = nrSamples;
+			}
+
+			//
+			// TODO: other distributions - we currently only support normal and lognormal
+			// distributions. Lognormal appears to be the better estimator for cycles.
+			//
+		}
+
+		// ProcessingStage ps1(cycles_per_cepop, deviation_per_cepop);
+		// ProcessingStage ps2(cycles_per_fsm, deviation_per_fsm);
+		InsertEventIntoFSM *ieifsm = new InsertEventIntoFSM(/*ps2*/);
+		ieifsm->ps = ps2;
+		InsertEventIntoCEPOp *ieiceop = new InsertEventIntoCEPOp(/*ps1, ieifsm*/);
+		ieiceop->ieifsm = ieifsm;
+		ieiceop->ps = ps1;
+		ieiceop->pCEPEngine = node->GetObject<ProcessCEPEngine>();
+		execEvent = ieiceop;
+
+		// Add the event to the current program
+		currentProgram->events.push_back(ieiceop);
+		// currentProgram->events.push_back(ieiceop);
+		// currentProgram->events.push_back(ieifsm);
+		// ieiceop.evaluate(tid, event); // Calls ieifsm.evaluate(event);
 	}
 
 	// Remember: unless the queue is explicitly specified,
@@ -1715,6 +1842,11 @@ void ExecEnv::Parse(std::string device) {
 					|| !tokens[0].compare("TRIGGERS")) {
 
 				mode = tokens[0];
+				continue;
+			}
+
+			if (!tokens[0].compare("CEPENABLED")) {
+				GetObject<Node>()->AggregateObject( CreateObject<ProcessCEPEngine>() );
 				continue;
 			}
 

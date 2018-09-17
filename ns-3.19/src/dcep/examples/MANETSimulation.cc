@@ -29,9 +29,14 @@
 #include "ns3/stats-module.h"
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
+#include "ns3/trex.h"
+#include "../../processing/model/execenv.h"
+
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("MANETSimulation");
+
+static TRexProtocolStack ps;
 
 int main(int argc, char** argv) {
     
@@ -145,6 +150,17 @@ int main(int argc, char** argv) {
     wifiInterfaces = ipv4.Assign (devices);
     
     DcepAppHelper dcepApphelper;
+
+    // Espen
+    Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
+            "cacheLineSize", UintegerValue(64), "tracingOverhead",
+            UintegerValue(0));
+    for (NodeContainer::Iterator i = allNodesContainer.Begin (); i != allNodesContainer.End (); ++i)
+    {
+        Ptr<Node> node = *i;
+        eeh->Install(ps.deviceFile, node);
+    }
+
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
     Ipv4Address sinkAddress = wifiInterfaces.GetAddress (0);
     

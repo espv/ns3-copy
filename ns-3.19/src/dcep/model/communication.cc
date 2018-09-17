@@ -219,13 +219,13 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 //            SeqTsHeader sth;
 //            sth.SetSeq(m_sent);
 
-            p->AddHeader(dcepHeader);
-            p->AddHeader(ipv4);
-//            p->AddHeader(sth);
+            pp->AddHeader(dcepHeader);
+            pp->AddHeader(ipv4);
+//            pp->AddHeader(sth);
             bool itemSent = false;
 
             m_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(ipv4.GetDestination()), m_port));
-            if ((m_socket->Send (p)) >= 0)
+            if ((m_socket->Send (pp)) >= 0)
             {
 
                 NS_LOG_INFO ("SUCCESSFUL TX from : " << host_address

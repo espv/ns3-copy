@@ -27,6 +27,7 @@
 #include "ns3/application.h"
 #include "ns3/traced-callback.h"
 #include "resource-manager.h"
+#include "ns3/execenv.h"
 
 namespace ns3 {
 
@@ -53,6 +54,8 @@ class Dcep : public Application
         void DispatchAtomicCepEvent (Ptr<CepEvent> e);
         void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
         void SendFinalCepEventToSink(Ptr<CepEvent>);
+
+        Ptr<Node> node;
 private:
     
         virtual void StartApplication (void);

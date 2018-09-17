@@ -32,6 +32,8 @@
 #include "message-types.h"
 #include "ns3/abort.h"
 #include "ns3/placement.h"
+#include "ns3/dcep.h"
+#include "../../processing/model/cep.h"
 
 
 namespace ns3 {
@@ -64,6 +66,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Forwarder> forwarder = CreateObject<Forwarder>();
         Ptr<Detector> detector = CreateObject<Detector>();
         Ptr<Producer> producer = CreateObject<Producer>();
+
         AggregateObject(forwarder);
         AggregateObject(detector);
         AggregateObject(producer);
@@ -143,6 +146,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(q->isAtomic)
         {
             /* instantiate atomic event */
+            GetObject<Dcep>()->ActivateDatasource(q);
         }
         else
         {
@@ -162,6 +166,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             cepOp->Configure(q);
             this->ops_queue.push_back(cepOp);
         }
+
+        std::cout << "Adding operator to CEPEngine" << std::endl;
+        GetObject<Dcep>()->node->GetObject<ProcessCEPEngine>()->AddOperator(q->op, {q->inevent1, q->inevent2});
             
     }
     

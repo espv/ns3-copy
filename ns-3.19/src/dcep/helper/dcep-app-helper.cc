@@ -8,6 +8,7 @@
 #include "ns3/string.h"
 #include "ns3/names.h"
 #include "ns3/dcep.h"
+#include "ns3/execenv.h"
 
 namespace ns3 {
 
@@ -35,8 +36,8 @@ namespace ns3 {
 
           Ptr<Dcep> dcep = m_factory.Create<Dcep> ();
           node->AddApplication (dcep);
+          dcep->node = node;
           apps.Add (dcep);
-
         }
       return apps;
     }

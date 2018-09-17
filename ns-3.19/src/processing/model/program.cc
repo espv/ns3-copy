@@ -345,6 +345,24 @@ ProcessingStage::Instantiate() {
   return toReturn;
 }
 
+InsertEventIntoCEPOp::InsertEventIntoCEPOp() {
+    ExecutionEvent::type = INCOMINGCEPEVENT;
+}
+
+/*
+InsertEventIntoCEPOp::InsertEventIntoCEPOp(ProcessingStage *ps, InsertEventIntoFSM *ieifsm) {
+	this->ps = ps;
+	this->ieifsm = ieifsm;
+}*/
+
+/*
+InsertEventIntoFSM::InsertEventIntoFSM(ProcessingStage *ps) {
+	this->ps = ps;
+}*/
+
+InsertEventIntoFSM::InsertEventIntoFSM() {
+}
+
 InterruptExecutionEvent::InterruptExecutionEvent(int IRQNr)
   : number(IRQNr)
 {
@@ -420,6 +438,10 @@ std::ostream& operator<<(std::ostream& out, ExecutionEvent& event)
 	}
 	case PROCESS: {
 		out << "PROCESS";
+		break;
+	}
+	case INCOMINGCEPEVENT: {
+		out << "INCOMINGCEPEVENT";
 		break;
 	}
 	case SCHEDULER: {

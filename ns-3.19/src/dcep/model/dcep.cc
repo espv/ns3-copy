@@ -30,6 +30,7 @@
 #include "ns3/config.h"
 #include "ns3/string.h"
 #include "ns3/boolean.h"
+#include "ns3/processing-module.h"
 #include "src/core/model/object-base.h"
 
 #include <ctime>
@@ -38,6 +39,30 @@
 #include <fstream>
 
 namespace ns3 {
+
+    static ProgramLocation *dummyProgramLoc;
+
+    // ScheduleInterrupt schedules an interrupt on the node.
+    // interruptId is the service name of the interrupt, such as HIRQ-123
+    void ScheduleInterrupt(Ptr<ExecEnv> ee, Ptr<Packet> packet, const char* interruptId, Time time) {
+
+        // TODO: Model the interrupt distribution somehow
+        static int cpu = 0;
+
+        dummyProgramLoc = new ProgramLocation();
+        dummyProgramLoc->tempvar = tempVar();
+        dummyProgramLoc->curPkt = packet;
+        dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
+        dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
+
+        Simulator::Schedule(time,
+                            &InterruptController::IssueInterruptWithServiceOnCPU,
+                            ee->hwModel->m_interruptController,
+                            cpu,
+                            ee->m_serviceMap[interruptId],
+                            dummyProgramLoc);
+
+    }
 
 NS_OBJECT_ENSURE_REGISTERED(Dcep);
 NS_LOG_COMPONENT_DEFINE ("Dcep");
@@ -234,8 +259,15 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 event->deserialize(data, size);
                 /* setting link delay from source to this node*/
                 event->delay = delay;
-                
-                p->RcvCepCepEvent(event);
+
+                Ptr<Packet> pkt = Create<Packet>(data, size);
+                // Invoke SEM that delays the execution of p->RcvCepEvent
+                GetNode()->GetObject<ExecEnv>()->queues["h1-h2"]->Enqueue(pkt);
+                GetNode()->GetObject<ExecEnv>()->eventqueues["event-queue"].push_back(event->type);
+                ScheduleInterrupt (GetNode()->GetObject<ExecEnv>(), pkt, "HIRQ-1", Seconds(0));
+                GetNode()->GetObject<ExecEnv>()->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
+
+                //p->RcvCepEvent(event); // This function is called within a SEM
                 break; 
             }
                 
@@ -291,8 +323,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Sink::receiveFinalCepEvent(Ptr<CepEvent> e)
     {
-        std::cout << "COMPLEX EVENT NOTIFIED HOPSCOUNT " << e->hopsCount << " DELAY " << e->delay << " TYPE " << e->type << std::endl;
-        NS_LOG_INFO("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ COMPLEX EVENT $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+        std::cout << Simulator::Now() << " COMPLEX EVENT NOTIFIED HOPSCOUNT " << e->hopsCount << " DELAY " << e->delay << " TYPE " << e->type << std::endl;
+        NS_LOG_INFO(Simulator::Now() << "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ COMPLEX EVENT $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
         
     }
 

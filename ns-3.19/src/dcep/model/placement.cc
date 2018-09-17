@@ -35,6 +35,8 @@
 #include "resource-manager.h"
 #include "src/network/utils/ipv4-address.h"
 #include "dcep-state.h"
+#include "ns3/processing-module.h"
+#include "../../processing/model/cep.h"
 
 namespace ns3 {
 
@@ -111,16 +113,15 @@ namespace ns3 {
      * ********************* EVENT FORWARDING ************************************
      * ***************************************************************************
      */
-    
     void
-    Placement::RcvCepCepEvent(Ptr<CepEvent> e) 
+    Placement::RcvCepCepEvent(Ptr<CepEvent> e)
     {
         remoteCepEventReceived (e);
         
         if (e->event_class == FINAL_EVENT) {
             SendCepEventToSink(e);
         }
-        else 
+        else
         {
             if(GetObject<DcepState>()->IsExpected(e))
             {
@@ -132,10 +133,18 @@ namespace ns3 {
             }
         }
     }
-    
+
+
+    void
+    Placement::RcvCepEvent(Ptr<Event> e)
+    {
+        //GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
+        DoRcvCepEvent(e);
+    }
+
     
     void
-    Placement::ForwardProducedCepEvent(Ptr<CepEvent> e) 
+    Placement::ForwardProducedCepEvent(Ptr<CepEvent> e)
     {
         Ptr<DcepState> dstate = GetObject<DcepState>();
         Ipv4Address dest = dstate->GetOuputDest(e->type);
@@ -295,13 +304,13 @@ namespace ns3 {
         else if (dstate->GetNextHop(eType).IsEqual(GetObject<Communication>()->GetLocalAddress()))
         {
             
-            if(dstate->GetQuery(eType)->isAtomic)
+            /*if(dstate->GetQuery(eType)->isAtomic)
             {
                  GetObject<Dcep>()->ActivateDatasource(dstate->GetQuery(eType));
             }
                
                 
-            else/* Send to local CEP engine*/
+            else*//* Send to local CEP engine*/
                 SendQueryToCepEngine (dstate->GetQuery(eType));
         }
         else

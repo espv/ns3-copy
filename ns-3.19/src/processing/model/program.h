@@ -12,6 +12,7 @@
 #include "ns3/condition.h"
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
+#include "ns3/cep.h"
 
 #include <vector>
 #include <stack>
@@ -95,6 +96,7 @@ enum ExecutionEventType {
   END,
   DEBUG,
   MEASURE,
+  INCOMINGCEPEVENT,
   LASTTYPE,
 };
 
@@ -347,6 +349,25 @@ class ProcessingStage : public ExecutionEvent {
   Ptr<Queue2> pktqueue;  // Queue2 to dequeue from and set factor to multiply with that packet.
 
   friend std::ostream& operator<<(std::ostream& out, ProcessingStage& event);
+};
+
+class InsertEventIntoFSM : public ExecutionEvent {
+public:
+    //InsertEventIntoFSM(ProcessingStage *ps);
+    InsertEventIntoFSM();
+
+    ProcessingStage *ps;
+    CEPOp cepop;
+};
+
+class InsertEventIntoCEPOp : public ExecutionEvent {
+public:
+    //InsertEventIntoCEPOp(ProcessingStage *ps, InsertEventIntoFSM *ieifsm);
+    InsertEventIntoCEPOp();
+
+    ProcessingStage *ps;
+    Ptr<ProcessCEPEngine> pCEPEngine;
+    InsertEventIntoFSM *ieifsm;
 };
 
 class SchedulerExecutionEvent : public ExecutionEvent {
