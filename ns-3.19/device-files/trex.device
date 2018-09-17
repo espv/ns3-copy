@@ -137,7 +137,7 @@ FRACTION 100% 1 1
 
 0 START
 x QUEUECOND h1-h2 h1-h2 empty
-x SLEEP
+x SLEEPTHREAD
 0 STOP
 
 SIGEND
@@ -153,7 +153,7 @@ FRACTION 100% 1 1
 x QUEUECOND h1-h2 h1-h2 notempty
 x CALL process_received_packet
 x TTWAKEUP event_thread
-x SLEEP
+x SLEEPTHREAD
 received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 #x CALL send_event
 0 STOP
@@ -169,7 +169,7 @@ FRACTION 100% 1 1
 
 0 START
 x QUEUECOND h1-h2 h1-h2 empty
-x SLEEP
+x SLEEPTHREAD
 0 STOP
 
 SIGEND
@@ -183,18 +183,19 @@ FRACTION 100% 1 1
 
 0 START
 x QUEUECOND h1-h2 h1-h2 notempty
-x PROCESS 1000000 0
+x PROCESS 8000000 0
 # Which CEPOp belongs to the thread is customizable and depends on the system being modeled.
 # In T-Rex, CepOps are delegated to each core to maximize CPU utilization.
 # Perhaps we need another event called ADDCEPOP that adds a CEPOp in whichever way the modeled system does.
 # Additionally, REMOVECEPOP can be useful.
 x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
 x TTWAKEUP packet_thread
+x SLEEPTHREAD
 0 STOP
 
 SIGEND
 
 
 THREADS
-packet_thread packet_processing_thread infinite -99
-event_thread event_processing_thread infinite -99
+packet_thread packet_processing_thread infinite 0
+event_thread event_processing_thread infinite 0

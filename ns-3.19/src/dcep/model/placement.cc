@@ -12,7 +12,7 @@
  * GNU General Public License for more details.
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * 
  */
 
@@ -114,7 +114,7 @@ namespace ns3 {
      * ***************************************************************************
      */
     void
-    Placement::RcvCepCepEvent(Ptr<CepEvent> e)
+    Placement::DoRcvCepEvent(Ptr<CepEvent> e)
     {
         remoteCepEventReceived (e);
         
@@ -136,7 +136,7 @@ namespace ns3 {
 
 
     void
-    Placement::RcvCepEvent(Ptr<Event> e)
+    Placement::RcvCepEvent(Ptr<CepEvent> e)
     {
         //GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
         DoRcvCepEvent(e);
@@ -172,7 +172,7 @@ namespace ns3 {
             {
                 if(!dest.IsAny())
                 {
-                    SendCepCepEvent (e, dest);
+                    SendCepEvent (e, dest);
                 }
                 else
                 {
@@ -187,7 +187,7 @@ namespace ns3 {
     void
     Placement::SendCepEventToCepEngine (Ptr<CepEvent> e)
     {
-        GetObject<CEPEngine>()->ProcessCepCepEvent(e);
+        GetObject<CEPEngine>()->ProcessCepEvent(e);
     }
     
     void
@@ -198,7 +198,7 @@ namespace ns3 {
     
     
     void
-    Placement::SendCepCepEvent(Ptr<CepEvent> e, Ipv4Address dest)
+    Placement::SendCepEvent(Ptr<CepEvent> e, Ipv4Address dest)
     {
         olsr::RoutingTableEntry entry;
         
@@ -225,7 +225,7 @@ namespace ns3 {
         else
         {
            eventsList.push_back(e);
-            Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepCepEvent, this, e, dest);
+            Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
         }
     }
     

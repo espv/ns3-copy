@@ -30,7 +30,7 @@
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
 #include "ns3/trex.h"
-#include "../../processing/model/execenv.h"
+#include "ns3/execenv.h"
 
 using namespace ns3;
 using namespace std;

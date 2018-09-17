@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended
 include CMakeFiles/gnex.dir/progress.make
 
 CMakeFiles/gnex:
-	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3-dev && ./waf
+	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3.19 && ./waf
 
 gnex: CMakeFiles/gnex
 gnex: CMakeFiles/gnex.dir/build.make

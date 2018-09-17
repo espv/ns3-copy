@@ -52,6 +52,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/gnex.dir/DependInfo.cmake"
   "CMakeFiles/DCEP-Sim.dir/DependInfo.cmake"
+  "CMakeFiles/TRex.dir/DependInfo.cmake"
   "CMakeFiles/Build-debug-configuration.dir/DependInfo.cmake"
   "CMakeFiles/TelosB.dir/DependInfo.cmake"
   "CMakeFiles/Build-optimized-configuration.dir/DependInfo.cmake"

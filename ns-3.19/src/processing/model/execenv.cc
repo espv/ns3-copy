@@ -1711,14 +1711,14 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
         currentProgram->events.push_back(me);
     }
 
-	if (!tokens[1].compare("TTWAKEUP") || !tokens[1].compare("SLEEP")) {
+	if (!tokens[1].compare("TTWAKEUP") || !tokens[1].compare("SLEEPTHREAD")) {
 		std::vector<uint32_t> arguments;
 		std::string threadName = ""; // Used only if TTWAKEUP
 		if (!tokens[1].compare("TTWAKEUP"))
 			threadName = tokens[2];
 
 		SchedulerExecutionEvent *se = new SchedulerExecutionEvent(
-				!tokens[1].compare("TTWAKEUP") ? AWAKE : SLEEP, arguments,
+				!tokens[1].compare("TTWAKEUP") ? AWAKE : SLEEPTHREAD, arguments,
 				threadName);
 
 		execEvent = se;

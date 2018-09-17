@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended
 include CMakeFiles/Build-optimized-configuration.dir/progress.make
 
 CMakeFiles/Build-optimized-configuration:
-	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3-dev && configure-waf-scripts/configure_optimized_waf.sh
+	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3.19 && configure-waf-scripts/configure_optimized_waf.sh
 
 Build-optimized-configuration: CMakeFiles/Build-optimized-configuration
 Build-optimized-configuration: CMakeFiles/Build-optimized-configuration.dir/build.make

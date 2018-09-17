@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended
 include CMakeFiles/Build-debug-configuration.dir/progress.make
 
 CMakeFiles/Build-debug-configuration:
-	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3-dev && configure-waf-scripts/configure_debug_waf.sh
+	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3.19 && configure-waf-scripts/configure_debug_waf.sh
 
 Build-debug-configuration: CMakeFiles/Build-debug-configuration
 Build-debug-configuration: CMakeFiles/Build-debug-configuration.dir/build.make

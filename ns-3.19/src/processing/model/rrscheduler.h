@@ -4,7 +4,7 @@
 // TODO: Move to taskscheduler
 enum RequestType {
   AWAKE = 0,
-  SLEEP
+  SLEEPTHREAD
 };
 
 #include "ns3/object.h"

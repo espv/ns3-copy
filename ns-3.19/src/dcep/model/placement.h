@@ -127,7 +127,7 @@ class Placement : public Object
          * All CEP events from remote nodes are received here
          * 
          */
-        void RcvCepCepEvent(Ptr<CepEvent> e);
+        void RcvCepEvent(Ptr<CepEvent> e);
         void DoRcvCepEvent(Ptr<CepEvent> e);
 
         /*
@@ -163,7 +163,7 @@ class Placement : public Object
          * All events to be processed by remote CEP engine(s)
          * are sendt from here.
          */
-        void SendCepCepEvent (Ptr<CepEvent> e, Ipv4Address dest);
+        void SendCepEvent (Ptr<CepEvent> e, Ipv4Address dest);
         /*
          * events to be processed by the local CEP engine are
          * sendt from here

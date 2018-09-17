@@ -54,7 +54,7 @@ CMAKE_BINARY_DIR = /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended
 include CMakeFiles/DCEP-Sim.dir/progress.make
 
 CMakeFiles/DCEP-Sim:
-	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3-dev && ./waf
+	cd /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/ns-3.19 && ./waf
 
 DCEP-Sim: CMakeFiles/DCEP-Sim
 DCEP-Sim: CMakeFiles/DCEP-Sim.dir/build.make

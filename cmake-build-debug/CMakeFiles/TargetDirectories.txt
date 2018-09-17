@@ -1,6 +1,7 @@
 /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/gnex.dir
 /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/edit_cache.dir
 /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/DCEP-Sim.dir
+/Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/TRex.dir
 /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/Build-debug-configuration.dir
 /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/rebuild_cache.dir
 /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles/TelosB.dir

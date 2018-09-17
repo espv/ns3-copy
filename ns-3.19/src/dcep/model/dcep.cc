@@ -53,7 +53,7 @@ namespace ns3 {
         dummyProgramLoc->tempvar = tempVar();
         dummyProgramLoc->curPkt = packet;
         dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-        dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
+        dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
 
         Simulator::Schedule(time,
                             &InterruptController::IssueInterruptWithServiceOnCPU,

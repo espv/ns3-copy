@@ -157,7 +157,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x SLEEP
+x SLEEPTHREAD
 0 STOP
 
 SIGEND
@@ -464,7 +464,7 @@ FRACTION 100% 1 1
 0 START
 x CALL scheduler_start
 x QUEUECOND softirq::hi softirq::hrtimer empty
-x SLEEP
+x SLEEPTHREAD
 0 STOP
 
 SIGSTART

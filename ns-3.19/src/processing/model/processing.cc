@@ -594,7 +594,7 @@ Processing::HandleSignature(std::vector<std::string> tokens) {
     if(!tokens[1].compare("TTWAKEUP")) {
     }
 
-    if(!tokens[1].compare("SLEEP")) {
+    if(!tokens[1].compare("SLEEPTHREAD")) {
     }
 
     if(!tokens[1].compare("SEMUP") ||

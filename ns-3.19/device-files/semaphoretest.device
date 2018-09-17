@@ -44,7 +44,7 @@ FRACTION 100%  884 884
 x			PROCESS			504 59
 driver_rx+1		QUEUECOND		nic_rx nic_rx empty
 x			PROCESS	 		504 59
-driver_rx+1.5	SLEEP
+driver_rx+1.5	SLEEPTHREAD
 x			PROCESS			504 59
 0 STOP
 
@@ -149,7 +149,7 @@ FRACTION 100%  1 1
 
 0 START
 x                                PROCESS                676 63
-# x SLEEP
+# x SLEEPTHREAD
 # x                                PROCESS                10000 186
 test_thread_stream+1             CALL                   driver_rx
 x                                PROCESS                676 63

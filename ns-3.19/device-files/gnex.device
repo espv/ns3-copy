@@ -135,7 +135,7 @@ x                                PROCESS		27343 1480
 omap_start_dma+380 PEUSTART HIRQ-44 10049 321
 mmc_wait_for_req+114                             WAITCOMPL	(TEMP)
 x                                PROCESS		33610 662
-# 0                                                SLEEP
+# 0                                                SLEEPTHREAD
 x                                PROCESS		647 91
 dhdsdio_readframes+24c8                          DEQUEUE		PKTQUEUE 0 nic::Q
 x                                PROCESS		9843 253
@@ -164,7 +164,7 @@ omap_start_dma+380 PEUSTART HIRQ-91
 x                                PROCESS		16777 1645
 mmc_wait_for_req+114                             WAITCOMPL	(TEMP)
 x                                PROCESS		744 289
-0                                                SLEEP
+0                                                SLEEPTHREAD
 x                                PROCESS		24837 1956
 mmc_wait_for_req+4c                              TEMPSYNCH	-1 dhdsdio_readframes+2ae4 1 omap_hsmmc_dma_cb
 x                                PROCESS		11725 668
@@ -172,7 +172,7 @@ omap_start_dma+380 PEUSTART HIRQ-44
 x                                PROCESS		10601 1230
 mmc_wait_for_req+114                             WAITCOMPL	(TEMP)
 x                                PROCESS		41281 16457
-0                                                SLEEP
+0                                                SLEEPTHREAD
 x                                PROCESS		873 433
 dhdsdio_readframes+24c8                          DEQUEUE		PKTQUEUE 0 nic::Q
 x                                PROCESS		13031 3776
@@ -269,14 +269,14 @@ x                                PROCESS		9930 1285
 omap_start_dma+380 PEUSTART HIRQ-91 20967 2965
 mmc_wait_for_req+114                             WAITCOMPL	(TEMP)
 x                                PROCESS		908 283
-# 0                                                SLEEP
+# 0                                                SLEEPTHREAD
 x                                PROCESS		29891 3866
 mmc_wait_for_req+4c                              TEMPSYNCH	-1 dhd_dpc_thread 1 HIRQ-91
 x                                PROCESS		8453 986
 omap_start_dma+380 PEUSTART HIRQ-91 8836 1563
 mmc_wait_for_req+114                             WAITCOMPL	(TEMP)
 x                                PROCESS		16239 2738
-# 0                                                SLEEP
+# 0                                                SLEEPTHREAD
 x                                PROCESS		615 13
 # dhdsdio_readframes+2a58                          CALL		dhdsdio_readframes
 x                                PROCESS		22925 2782

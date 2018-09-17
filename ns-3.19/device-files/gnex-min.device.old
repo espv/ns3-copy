@@ -286,7 +286,7 @@ SIGEND
 # omap_start_dma+380 PEUSTART HIRQ-44 10049 321
 # mmc_wait_for_req+114                             WAITCOMPL	(TEMP) global
 # x                                PROCESS		33610 662
-# # 0                                                SLEEP
+# # 0                                                SLEEPTHREAD
 # x                                PROCESS		647 91
 # dhdsdio_readframes+24c8                          DEQUEUE		PKTQUEUE 0 nic::Q
 # x                                PROCESS		9843 253

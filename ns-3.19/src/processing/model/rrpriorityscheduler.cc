@@ -34,7 +34,7 @@ static unsigned int g_nextPid = NUM_CPU + 1; // First pid after idle threads
 
 enum RequestType {
   AWAKE,
-  SLEEP
+  SLEEPTHREAD
 };
 
 NS_LOG_COMPONENT_DEFINE ("RoundRobinPriorityScheduler");
@@ -238,9 +238,9 @@ int RoundRobinPriorityScheduler::DoRequest(int cpu, int type, std::vector<uint32
                 m_runqueue.push_back(pid);
                 break;
             }
-        case SLEEP:
+        case SLEEPTHREAD:
             pid = arguments[0];
-            NS_LOG_INFO("SLEEP PID " << pid << " " << m_currentRunning[0] << " " <<  m_currentRunning[1]);
+            NS_LOG_INFO("SLEEPTHREAD PID " << pid << " " << m_currentRunning[0] << " " <<  m_currentRunning[1]);
 
             if (m_runqueue.empty()) {
                 // TODO: Assign an idle thread instead

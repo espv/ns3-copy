@@ -129,6 +129,38 @@ clean: CMakeFiles/DCEP-Sim.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/TRex.dir
+
+# All Build rule for target.
+CMakeFiles/TRex.dir/all:
+	$(MAKE) -f CMakeFiles/TRex.dir/build.make CMakeFiles/TRex.dir/depend
+	$(MAKE) -f CMakeFiles/TRex.dir/build.make CMakeFiles/TRex.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles --progress-num= "Built target TRex"
+.PHONY : CMakeFiles/TRex.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/TRex.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles 0
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/TRex.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/espenvol/Research/CSE-Modeling-Framework/ns-3-extended-with-execution-environment/cmake-build-debug/CMakeFiles 0
+.PHONY : CMakeFiles/TRex.dir/rule
+
+# Convenience name for target.
+TRex: CMakeFiles/TRex.dir/rule
+
+.PHONY : TRex
+
+# clean rule for target.
+CMakeFiles/TRex.dir/clean:
+	$(MAKE) -f CMakeFiles/TRex.dir/build.make CMakeFiles/TRex.dir/clean
+.PHONY : CMakeFiles/TRex.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/TRex.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/Build-debug-configuration.dir
 
 # All Build rule for target.

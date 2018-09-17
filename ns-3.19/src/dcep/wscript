@@ -7,7 +7,7 @@
 #     conf.check_nonfatal(header_name='stdint.h', define_name='HAVE_STDINT_H')
 
 def build(bld):
-    module = bld.create_ns3_module('dcep', ['core', 'wifi', 'internet', 'olsr', 'processing'])
+    module = bld.create_ns3_module('dcep', ['core', 'olsr', 'processing'])
     module.source = [
         'model/communication.cc',
         'model/placement.cc',

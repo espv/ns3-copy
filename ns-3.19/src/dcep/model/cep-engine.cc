@@ -88,7 +88,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    CEPEngine::ProcessCepCepEvent(Ptr<CepEvent> e){
+    CEPEngine::ProcessCepEvent(Ptr<CepEvent> e){
         
         GetObject<Detector>()->ProcessCepEvent(e);
     }
