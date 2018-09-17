@@ -12,6 +12,7 @@
 #include "interrupt-controller.h"
 #include "condition.h"
 #include "cep.h"
+#include "automata.h"
 // #include "ns3/schedsim-linsched.h"
 #include "ns3/rrscheduler.h"
 #include <ns3/drop-tail-queue2.h>
@@ -194,6 +195,10 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 				stateQueue2s[tokens[0]] = Create<StateVariableQueue2>();
 				stateQueue2Names[stateQueue2s[tokens[0]]] = tokens[0];
 			}
+		}
+		else if (!tokens[3].compare("fsms")) {
+			// Sequence state machines - for modeling CEP
+			fsmQueues[tokens[0]] = Create<Automata>();
 		}
 
 		// We have a packet queue.

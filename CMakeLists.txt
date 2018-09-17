@@ -6299,14 +6299,19 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/wscript
         ns-3-dev/wutils.py
         CMakeLists.txt
-        README.md)
+        README.md
+        ns-3-dev/src/processing/model/automata.cc
+        ns-3-dev/src/processing/model/automata.h
+        #ns-3-dev/build/ns3/automata.cpp
+        #ns-3-dev/build/ns3//automata.h
+)
 
 add_custom_target(
-        Build-debug-configuration COMMAND configure-waf-scripts/configure_debug_waf.sh
+        Debug-configuration COMMAND configure-waf-scripts/configure_debug_waf.sh
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )
 add_custom_target(
-        Build-optimized-configuration COMMAND configure-waf-scripts/configure_optimized_waf.sh
+        Optimized-configuration COMMAND configure-waf-scripts/configure_optimized_waf.sh
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )
 add_custom_target(

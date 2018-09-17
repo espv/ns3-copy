@@ -78,5 +78,10 @@ namespace ns3 {
 
         void AddOperator(string type, vector<string> event_sequences);
     };
+
+    class CEPSequence : public Object {
+    public:
+        static TypeId GetTypeId (void);
+    };
 }
 #endif //PROCESSING_DELAY_MODELS_CEP_H

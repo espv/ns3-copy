@@ -28,7 +28,7 @@ QUEUES
 
 HIRQ	 FIFO 	 -1    services
 cepops	 FIFO 	 -1    services
-fsms	 FIFO 	 -1    fsm
+sequence-fsms	 FIFO 	 -1    fsms
 
 nic_rx FIFO -1 bytes
 
@@ -185,7 +185,7 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsms fsms 1
+0 LOOPSTART		1 sequence-fsms sequence-fsms 1
 x PROCESS 1000 0
 insert_event HANDLEINCOMINGEVENT
 x STATECOND hit read local 0
@@ -201,7 +201,7 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsms fsms 1
+0 LOOPSTART		1 sequence-fsms sequence-fsms 1
 x PROCESS 800 0
 insert_event HANDLEINCOMINGEVENT
 x STATECOND hit read local 1
@@ -217,7 +217,7 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsms fsms 1
+0 LOOPSTART		1 fsequence-fsms sequence-fsms 1
 x PROCESS 800 0
 insert_event HANDLEINCOMINGEVENT
 x STATECOND hit read local 0
@@ -233,7 +233,7 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsms fsms 1
+0 LOOPSTART		1 sequence-fsms sequence-fsms 1
 x PROCESS 1200 0
 insert_event HANDLEINCOMINGEVENT
 x STATECOND hit read local 1
@@ -249,7 +249,7 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsms fsms 1
+0 LOOPSTART		1 sequence-fsms sequence-fsms 1
 x PROCESS 1200 0
 insert_event HANDLEINCOMINGEVENT
 x STATECOND hit read local 0

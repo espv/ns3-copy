@@ -27,6 +27,7 @@ def build(bld):
         'model/telosb.cc',
         'model/trex.cc',
         'model/cep.cc',
+        'model/automata.cc',
 
         ]
 
@@ -56,6 +57,7 @@ def build(bld):
         'model/telosb.h',
         'model/trex.h',
         'model/cep.h',
+        'model/automata.h',
 
     ]
 

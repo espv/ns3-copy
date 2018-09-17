@@ -19,6 +19,15 @@ ProcessCEPEngine::ProcessCEPEngine() {
 
 };
 
+TypeId CEPSequence::GetTypeId(void) {
+    static TypeId tid = TypeId("ns3::CEPSequence")
+            .SetParent<Object> ()
+            .AddConstructor<CEPSequence> ()
+    ;
+
+    return tid;
+}
+
 TypeId ProcessCEPEngine::GetTypeId(void) {
     static TypeId tid = TypeId("ns3::ProcessCEPEngine")
             .SetParent<Object> ()
