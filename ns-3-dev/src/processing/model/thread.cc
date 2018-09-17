@@ -532,15 +532,20 @@ bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
 	std::string event = ee->eventqueues["event-queue"].at(0);
 	ee->eventqueues["event-queue"].erase(ee->eventqueues["event-queue"].begin());
 
+    ieiceop->ieifsm->ps->factor = 0;
+    ieiceop->ps->factor = 0;
     for (vector< Ptr<CEPOp> >::iterator it = ieiceop->pCEPEngine->operators.begin(); it != ieiceop->pCEPEngine->operators.end(); ++it) {
         Ptr<CEPOp> op = *it;
         op->InsertEvent(event);
 		for (int i = 0; i != op->helper->GetNumberSequences(); ++i) {
-			HandleProcessingEvent(ieiceop->ieifsm->ps);
+            //HandleProcessingEvent(ieiceop->ieifsm->ps);
+            // The factor determines how much processing happens
+            ++ieiceop->ieifsm->ps->factor;
 		}
-        HandleProcessingEvent(ieiceop->ps);
+		// The factor determines how much processing happens
+		++ieiceop->ps->factor;
+        //HandleProcessingEvent(ieiceop->ps);
     }
-    return false;
 }
 
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {

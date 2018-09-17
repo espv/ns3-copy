@@ -1230,6 +1230,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// Add the event to the current program
 		currentProgram->events.push_back(ieiceop);
+		currentProgram->events.push_back(ieiceop->ps);
+		currentProgram->events.push_back(ieiceop->ieifsm->ps);
 		// currentProgram->events.push_back(ieiceop);
 		// currentProgram->events.push_back(ieifsm);
 		// ieiceop.evaluate(tid, event); // Calls ieifsm.evaluate(event);
