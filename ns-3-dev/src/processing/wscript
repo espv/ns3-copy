@@ -25,6 +25,7 @@ def build(bld):
         # 'model/apic.cc',
         # 'model/rrpriorityscheduler.cc',
         'model/telosb.cc',
+        'model/trex.cc',
         'model/cep.cc',
 
         ]
@@ -53,6 +54,7 @@ def build(bld):
         # 'model/apic.h',
         # 'model/rrpriorityscheduler.h',
         'model/telosb.h',
+        'model/trex.h',
         'model/cep.h',
 
     ]
