@@ -26,9 +26,15 @@ QUEUES
 # NIC Rx memory: 10kb
 # NIC Tx memory: 32kb
 
-HIRQ	 FIFO 	 -1    services
-cepops	 FIFO 	 -1    services
-sequence-fsms	 FIFO 	 -1    fsms
+HIRQ	            FIFO 	-1    services
+cepops	            FIFO 	-1    services
+then-cepops         FIFO 	-1    services
+or-cepops           FIFO 	-1    services
+and-cepops          FIFO 	-1    services
+sequence-fsms	    FIFO 	-1    fsms
+and-sequence-queue      FIFO    -1    and-fsm-queues
+or-sequence-queue      FIFO    -1    or-fsm-queues
+then-sequence-queue      FIFO    -1    then-fsm-queues
 
 nic_rx FIFO -1 bytes
 
@@ -138,6 +144,11 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x CALL process_received_packet
+x TTWAKEUP event_thread
+x SLEEPTHREAD
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+#x CALL send_event
 x QUEUECOND h1-h2 h1-h2 empty
 x SLEEPTHREAD
 0 STOP
@@ -152,109 +163,113 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND h1-h2 h1-h2 notempty
 x CALL process_received_packet
 x TTWAKEUP event_thread
 x SLEEPTHREAD
 received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 #x CALL send_event
+x QUEUECOND h1-h2 h1-h2 notempty
 0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME or_cepop
+NAME add-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsms fsms 1
+0 START
 x PROCESS 1000 0
-insert_event HANDLEINCOMINGEVENT
-x STATECOND hit read local 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-or-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
 x PROCESS 1000 0
-0 RESTART
+x STATECOND done-yet read local 1
+0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME or_cepop
+NAME process-or-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 sequence-fsms sequence-fsms 1
+0 START
 x PROCESS 1000 0
-insert_event HANDLEINCOMINGEVENT
-x STATECOND hit read local 0
-x PROCESS 100 0
-0 RESTART
+x STATECOND done-yet read local 0
+x CALL process-or-cepop
+0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME then_cepop
+NAME process-then-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 sequence-fsms sequence-fsms 1
-x PROCESS 800 0
-insert_event HANDLEINCOMINGEVENT
-x STATECOND hit read local 1
-x PROCESS 2000 0
-0 RESTART
+0 START
+x PROCESS 1000 0
+x STATECOND done-yet read local 1
+0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME then_cepop
+NAME process-then-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 fsequence-fsms sequence-fsms 1
-x PROCESS 800 0
-insert_event HANDLEINCOMINGEVENT
-x STATECOND hit read local 0
-x PROCESS 200 0
-0 RESTART
+0 START
+x PROCESS 1000 0
+x STATECOND done-yet read local 0
+x CALL process-then-cepop
+0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME and_cepop
+NAME process-and-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 sequence-fsms sequence-fsms 1
-x PROCESS 1200 0
-insert_event HANDLEINCOMINGEVENT
-x STATECOND hit read local 1
-x PROCESS 3000 0
-0 RESTART
+0 START
+insert-event PROCESS 1200 0
+x STATECOND done-yet read local 1
+0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME and_cepop
+NAME process-and-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 sequence-fsms sequence-fsms 1
-x PROCESS 1200 0
-insert_event HANDLEINCOMINGEVENT
-x STATECOND hit read local 0
-x PROCESS 300 0
-0 RESTART
+0 START
+insert-event PROCESS 1200 0
+x STATECOND done-yet read local 0
+x CALL process-and-cepop
+0 STOP
 
 SIGEND
 
@@ -265,22 +280,61 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART		1 cepops cepops 1
-x DEQUEUE SRVQUEUE 0 0  # Execute and_cepop, then_cepop or or_cepop
+0 LOOPSTART		0 cepops cepops 0
+x DEQUEUE SRVQUEUE 0 0  # Execute process-and-cepop, process-then-cepop or process-or-cepop
 0 RESTART
 
 SIGEND
 
 
 SIGSTART
-NAME event_processing_thread
+NAME populate-then-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 then-cepops then-cepops 0
+x                  ENQUEUE		SRVQUEUE process-then-cepop cepops
+0 RESTART
+
+SIGEND
+
+SIGSTART
+NAME populate-or-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 or-cepops or-cepops 0
+x                  ENQUEUE		SRVQUEUE process-or-cepop cepops
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME populate-and-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 and-cepops and-cepops 0
+x                  ENQUEUE		SRVQUEUE process-and-cepop cepops
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME populate-cepops
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND h1-h2 h1-h2 empty
-x SLEEPTHREAD
+x LOOP populate-and-cepops 0 and-cepops and-cepops 0
+x LOOP populate-or-cepops 0 or-cepops or-cepops 0
+x LOOP populate-then-cepops 0 then-cepops then-cepops 0
 0 STOP
 
 SIGEND
@@ -293,13 +347,14 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND h1-h2 h1-h2 notempty
 x PROCESS 8000000 0
 # Which CEPOp belongs to the thread is customizable and depends on the system being modeled.
 # In T-Rex, CepOps are delegated to each core to maximize CPU utilization.
 # Perhaps we need another event called ADDCEPOP that adds a CEPOp in whichever way the modeled system does.
 # Additionally, REMOVECEPOP can be useful.
-x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
+#x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
+x CALL populate-cepops
+x LOOP insert_event_into_cepops 0 cepops cepops 0
 x TTWAKEUP packet_thread
 x SLEEPTHREAD
 0 STOP
