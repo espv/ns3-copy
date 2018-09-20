@@ -251,7 +251,7 @@ void TRexProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TRex
   if (ns3::debugOn)
     NS_LOG_INFO ("Generating packet " << curSeqNr);
 
-  m1->SendPacket(toSend, m2, m3);
+  //m1->SendPacket(toSend, m2, m3);
 }
 
 // GenerateTraffic schedules the generation of packets according to the duration

@@ -82,10 +82,9 @@ CONDITIONS
 TRIGGERS
 LOC send_event_loc do_send_event
 LOC received_event_loc received_event
-SERVICE do-process-or-cepop process-or-cepop
-SERVICE do-process-and-cepop process-and-cepop
-SERVICE do-process-then-cepop process-then-cepop
-#SERVICE sendTask sendtask
+SERVICE process-or-cepop do-process-or-cepop
+SERVICE process-and-cepop do-process-and-cepop
+SERVICE process-then-cepop do-process-then-cepop
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -147,11 +146,6 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x CALL process_received_packet
-x TTWAKEUP event_thread
-x SLEEPTHREAD
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
-#x CALL send_event
 x QUEUECOND h1-h2 h1-h2 empty
 x SLEEPTHREAD
 0 STOP
@@ -166,12 +160,12 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x QUEUECOND h1-h2 h1-h2 notempty
 x CALL process_received_packet
 x TTWAKEUP event_thread
 x SLEEPTHREAD
 received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 #x CALL send_event
-x QUEUECOND h1-h2 h1-h2 notempty
 0 STOP
 
 SIGEND
@@ -376,6 +370,21 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x QUEUECOND h1-h2 h1-h2 empty
+x SLEEPTHREAD
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND h1-h2 h1-h2 notempty
 x PROCESS 8000000 0
 # Which CEPOp belongs to the thread is customizable and depends on the system being modeled.
 # In T-Rex, CepOps are delegated to each core to maximize CPU utilization.
@@ -385,7 +394,6 @@ x PROCESS 8000000 0
 x CALL populate-cepops
 x LOOP insert_event_into_cepops 0 cepops cepops 0
 x TTWAKEUP packet_thread
-x SLEEPTHREAD
 0 STOP
 
 SIGEND

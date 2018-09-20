@@ -261,11 +261,12 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 event->delay = delay;
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
+                Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
                 // Invoke SEM that delays the execution of p->RcvCepEvent
-                GetNode()->GetObject<ExecEnv>()->queues["h1-h2"]->Enqueue(pkt);
-                GetNode()->GetObject<ExecEnv>()->eventqueues["event-queue"].push_back(event->type);
-                GetNode()->GetObject<ExecEnv>()->ScheduleInterrupt (pkt, "HIRQ-1", Seconds(0));
-                GetNode()->GetObject<ExecEnv>()->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
+                ee->queues["h1-h2"]->Enqueue(pkt);
+                ee->eventqueues["event-queue"].push_back(event->type);
+                ee->ScheduleInterrupt (pkt, "HIRQ-1", Seconds(0));
+                ee->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
 
                 //p->RcvCepEvent(event); // This function is called within a SEM
                 break; 
