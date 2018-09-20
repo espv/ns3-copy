@@ -71,6 +71,7 @@ softirq::hrtimer        FIFO   -1   services
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 4 cpu0 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
+PEU 4 cpu1 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
 
 SYNCH
 # name type arguments
