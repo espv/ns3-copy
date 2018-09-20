@@ -21,7 +21,7 @@ uint32_t ConditionFunctions::PacketL4Protocol(Ptr<Thread> t) {
 uint32_t ConditionFunctions::Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last)
 {
 	if(first == last)
-		return first->IsEmpty();
+		return first->IsEmpty() ? QUEUEEMPTY : QUEUENOTEMPTY;
 	else {
 		std::vector<Ptr<Queue2> > *queueOrder = &node->GetObject<ExecEnv> ()->queueOrder;
 		 std::vector<Ptr<Queue2> >::iterator firstFound =
