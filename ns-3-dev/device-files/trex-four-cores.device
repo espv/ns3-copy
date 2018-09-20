@@ -1,0 +1,367 @@
+#
+# Lines starting with "#" are regarded as comments, and disregarded during parsing.
+#
+# The order of sections matter - they must be in the following order:
+# QUEUES, HARDWARE, SYNCH, CONDITIONS, TRIGGERS,
+# {SIGSTART ... SIGEND},
+# THREADS
+#
+
+#############################################################################
+############################### HEADER ######################################
+#############################################################################
+
+CEPENABLED
+
+QUEUES
+# Format: name
+#	  queuing policy (only currently supported: "FIFO")
+#	  size
+#	  type of queued entries ("packet" or "service")
+# order matters, since queue conditions work on sets of queues specified
+# by the name of the first and the last queue
+
+# BCM4430 TRS: http://linux-sunxi.org/images/0/05/4330-DS206-R.pdf
+# Page 84, figure 34
+# NIC Rx memory: 10kb
+# NIC Tx memory: 32kb
+
+HIRQ	            FIFO 	-1    services
+cepops	            FIFO 	-1    services
+then-cepops         FIFO 	-1    services
+or-cepops           FIFO 	-1    services
+and-cepops          FIFO 	-1    services
+sequence-fsms	    FIFO 	-1    fsms
+and-sequence-queue      FIFO    -1    and-fsm-queues
+or-sequence-queue      FIFO    -1    or-fsm-queues
+then-sequence-queue      FIFO    -1    then-fsm-queues
+
+nic_rx FIFO -1 bytes
+
+h1-h2 FIFO -1 packets
+h2-h3 FIFO -1 packets
+h3-h4 FIFO -1 packets
+h3-bytes FIFO -1 packets
+h12-h14 FIFO -1 packets
+h11-h12 FIFO -1 packets
+h4-rcvd FIFO -1 packets
+rcvd-send FIFO -1 packets
+send-bytes FIFO -1 packets
+ip-bytes FIFO -1 packets
+send-senddone FIFO -1 packets
+h8-h9 FIFO -1 packets
+h9-h10 FIFO -1 packets
+etq-etq FIFO -1 packets
+
+send-queue FIFO -1 packets
+
+event-queue FIFO -1 cepevents
+
+
+
+
+# Queue for posted tasks
+softirq::hi             FIFO   -1   services
+softirq::receive        FIFO    -1   services
+softirq::send           FIFO    -1   services
+softirq::sendDone       FIFO    -1   services
+softirq::gotosleep      FIFO    -1 services
+softirq::hrtimer        FIFO   -1   services
+
+HARDWARE
+# Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
+PEU 4 cpu0 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
+
+SYNCH
+# name type arguments
+# type 0 is a semaphore
+process_event_SEM 0 0
+
+CONDITIONS
+
+TRIGGERS
+LOC send_event_loc do_send_event
+LOC received_event_loc received_event
+#SERVICE sendTask sendtask
+
+# Entrypoint function for the PEU defined above
+SIGSTART
+NAME irq_enter
+PEU cpu
+RESOURCES cycles normal
+FRACTION 50%  1940 3880
+
+0 START
+x                      DEQUEUE		SRVQUEUE 0 HIRQ
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process_received_packet
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME HIRQ-1 # Receiving part
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x TTWAKEUP packet_thread
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME send_event # Sending part
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+#send_event_loc DEQUEUE PKTQUEUE 0 h3
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME packet_processing_thread  # Wake up when packet is received
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x CALL process_received_packet
+x TTWAKEUP event_thread
+x SLEEPTHREAD
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+#x CALL send_event
+x QUEUECOND h1-h2 h1-h2 empty
+x SLEEPTHREAD
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME packet_processing_thread  # Wake up when packet is received
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x CALL process_received_packet
+x TTWAKEUP event_thread
+x SLEEPTHREAD
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+#x CALL send_event
+x QUEUECOND h1-h2 h1-h2 notempty
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME add-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-or-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+x STATECOND done-yet read local 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-or-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+x STATECOND done-yet read local 0
+x CALL process-or-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-then-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+x STATECOND done-yet read local 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-then-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+x STATECOND done-yet read local 0
+x CALL process-then-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-and-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+insert-event PROCESS 1200 0
+x STATECOND done-yet read local 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-and-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+insert-event PROCESS 1200 0
+x STATECOND done-yet read local 0
+x CALL process-and-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME insert_event_into_cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 cepops cepops 0
+x DEQUEUE SRVQUEUE 0 0  # Execute process-and-cepop, process-then-cepop or process-or-cepop
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME populate-then-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 then-cepops then-cepops 0
+x                  ENQUEUE		SRVQUEUE process-then-cepop cepops
+0 RESTART
+
+SIGEND
+
+SIGSTART
+NAME populate-or-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 or-cepops or-cepops 0
+x                  ENQUEUE		SRVQUEUE process-or-cepop cepops
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME populate-and-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART		0 and-cepops and-cepops 0
+x                  ENQUEUE		SRVQUEUE process-and-cepop cepops
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME populate-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x LOOP populate-and-cepops 0 and-cepops and-cepops 0
+x LOOP populate-or-cepops 0 or-cepops or-cepops 0
+x LOOP populate-then-cepops 0 then-cepops then-cepops 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 8000000 0
+# Which CEPOp belongs to the thread is customizable and depends on the system being modeled.
+# In T-Rex, CepOps are delegated to each core to maximize CPU utilization.
+# Perhaps we need another event called ADDCEPOP that adds a CEPOp in whichever way the modeled system does.
+# Additionally, REMOVECEPOP can be useful.
+#x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
+x CALL populate-cepops
+x LOOP insert_event_into_cepops 0 cepops cepops 0
+x TTWAKEUP packet_thread
+x SLEEPTHREAD
+0 STOP
+
+SIGEND
+
+
+THREADS
+packet_thread packet_processing_thread infinite 0
+event_thread event_processing_thread infinite 0
