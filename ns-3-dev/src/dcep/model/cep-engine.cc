@@ -216,11 +216,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         Ptr<Packet> dummyPacket = Create<Packet>();
         Ptr<Node> node = GetObject<Dcep>()->GetNode();
+        ++it;
         if (it == ops.end())
             node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
         else {
             node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
-            node->GetObject<ExecEnv>()->Proceed(dummyPacket, "received_event", &Detector::CepOperatorProcessCepEvent, this, e, ++it, ops, cep, producer);
+            node->GetObject<ExecEnv>()->Proceed(dummyPacket, "do-process-or-cepop", &Detector::CepOperatorProcessCepEvent, this, e, it, ops, cep, producer);
         }
     }
     
@@ -241,7 +242,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
         else {
             node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
-            node->GetObject<ExecEnv>()->Proceed(dummyPacket, "received_event", &Detector::CepOperatorProcessCepEvent, this, e, ++it, ops, cep, producer);
+            node->GetObject<ExecEnv>()->Proceed(dummyPacket, "do-process-or-cepop", &Detector::CepOperatorProcessCepEvent, this, e, it, ops, cep, producer);
         }
     }
     

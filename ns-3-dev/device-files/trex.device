@@ -82,6 +82,9 @@ CONDITIONS
 TRIGGERS
 LOC send_event_loc do_send_event
 LOC received_event_loc received_event
+SERVICE do-process-or-cepop process-or-cepop
+SERVICE do-process-and-cepop process-and-cepop
+SERVICE do-process-then-cepop process-then-cepop
 #SERVICE sendTask sendtask
 
 # Entrypoint function for the PEU defined above
