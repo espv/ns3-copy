@@ -84,7 +84,7 @@ void RoundRobinScheduler::Schedule() {
             // Don't interrupt an interrupt
             if (TaskScheduler::peu->hwModel->cpus[cpu]->inInterrupt) {
                 NS_LOG_INFO("CPU " << cpu << " was in interrupt, not scheduling");
-                //continue;  // We do this to wake a thread from the end of a HIRQ
+                continue;  // We do this to wake a thread from the end of a HIRQ
             }
 
             if (m_runqueue.empty() || m_runqueue.front() == m_currentRunning[cpu]) {
@@ -237,7 +237,7 @@ int RoundRobinScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> argu
                 m_runqueue.push_back(pid);
                 this->need_scheduling = true;
 
-                WakeupIdle();
+                //WakeupIdle();  // This pops m_runqueue??
                 this->Schedule();
                 std::cout << "AWAKING" << std::endl;
 
