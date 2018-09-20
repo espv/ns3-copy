@@ -29,6 +29,7 @@ namespace ns3 {
     class CepOperator;
     class SerializedCepEvent;
     class SerializedQuery;
+    class Producer;
     
     class Window : public Object{
     public:
@@ -150,6 +151,7 @@ private:
     public:
         static TypeId GetTypeId (void);
         void ProcessCepEvent(Ptr<CepEvent> e);
+        void CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>>::iterator it, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
        
     };
     

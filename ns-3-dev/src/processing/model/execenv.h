@@ -53,6 +53,8 @@ public:
   template<class T1,class T2, class T3, class T4, class T5, class MEM, class OBJ> bool Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
   template<class T1,class T2, class T3, class T4, class T5, class T6, class MEM, class OBJ> bool Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 
+  void ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time);
+
   // The average number of CPU-cycles spent per trace-call
   // This is deducted during ProcessingStage::Instantiate()
   // for the resource "cycles" on the CPU.

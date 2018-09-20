@@ -114,7 +114,7 @@ namespace ns3 {
      * ***************************************************************************
      */
     void
-    Placement::DoRcvCepEvent(Ptr<CepEvent> e)
+    Placement::RcvCepEvent(Ptr<CepEvent> e)
     {
         remoteCepEventReceived (e);
         
@@ -132,14 +132,6 @@ namespace ns3 {
                 NS_ABORT_MSG("PLACEMENT: UNEXPECTED EVENT");
             }
         }
-    }
-
-
-    void
-    Placement::RcvCepEvent(Ptr<CepEvent> e)
-    {
-        //GetObject<ProcessCEPEngine>()->InsertEvent(e->type);
-        DoRcvCepEvent(e);
     }
 
     

@@ -52,6 +52,30 @@ ExecEnv::ExecEnv() :
 		m_traceOverhead(0) {
 }
 
+    static ProgramLocation *dummyProgramLoc;
+    // ScheduleInterrupt schedules an interrupt on the node.
+    // interruptId is the service name of the interrupt, such as HIRQ-123
+
+    void ExecEnv::ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time) {
+
+        // TODO: Model the interrupt distribution somehow
+        static int cpu = 0;
+
+        dummyProgramLoc = new ProgramLocation();
+        dummyProgramLoc->tempvar = tempVar();
+        dummyProgramLoc->curPkt = packet;
+        dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
+        dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
+
+        Simulator::Schedule(time,
+                            &InterruptController::IssueInterruptWithServiceOnCPU,
+                            this->hwModel->m_interruptController,
+                            cpu,
+							this->m_serviceMap[interruptId],
+                            dummyProgramLoc);
+
+    }
+
 
 	void
 /* STEIN */

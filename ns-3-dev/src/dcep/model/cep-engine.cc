@@ -33,7 +33,8 @@
 #include "ns3/abort.h"
 #include "ns3/placement.h"
 #include "ns3/dcep.h"
-#include "../../processing/model/cep.h"
+#include "ns3/cep.h"
+#include "ns3/processing-module.h"
 
 
 namespace ns3 {
@@ -192,6 +193,38 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         return tid;
     }
+
+    void
+    Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>>::iterator it, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
+    {
+        Ptr<CepOperator> op = (Ptr<CepOperator>) *it;
+
+        bool proceed = false;
+        std::vector<Ptr<CepEvent> > returned;
+
+        if(op->Evaluate(e, returned))
+        {
+            proceed = true;
+
+        }
+
+        if(proceed)
+        {
+            Ptr<Query> q = cep->GetQuery(op->queryId);
+
+            Ptr<Producer> producer = producer;
+            producer->HandleNewCepEvent(q, returned);
+        }
+
+        Ptr<Packet> dummyPacket = Create<Packet>();
+        Ptr<Node> node = GetObject<Dcep>()->GetNode();
+        if (it == ops.end())
+            node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
+        else {
+            node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
+            node->GetObject<ExecEnv>()->Proceed(dummyPacket, "received_event", &Detector::CepOperatorProcessCepEvent, this, e, ++it, ops, cep, producer);
+        }
+    }
     
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
@@ -202,27 +235,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         std::vector<Ptr<CepOperator>> ops;
         cep->GetOpsByInputCepEventType(e->type, ops);
         std::vector<Ptr<CepOperator>>::iterator it;
-        for(it = ops.begin(); it != ops.end(); it++)
-        {
-            Ptr<CepOperator> op = (Ptr<CepOperator>) *it;
-            
-            bool proceed = false;
-            std::vector<Ptr<CepEvent> > returned;
-            
-            if(op->Evaluate(e, returned))
-            {
-                proceed = true;
+        Ptr<Producer> producer = GetObject<Producer>();
 
-            }
-            
-            if(proceed)
-            {
-                Ptr<Query> q = cep->GetQuery(op->queryId);
-                
-                Ptr<Producer> producer = GetObject<Producer>();
-                producer->HandleNewCepEvent(q, returned);
-            }
-        }
+        CepOperatorProcessCepEvent(e, it, ops, cep, producer);
         
     }
     

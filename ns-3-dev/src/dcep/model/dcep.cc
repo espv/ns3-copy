@@ -31,7 +31,7 @@
 #include "ns3/string.h"
 #include "ns3/boolean.h"
 #include "ns3/processing-module.h"
-#include "src/core/model/object-base.h"
+#include "ns3/object-base.h"
 
 #include <ctime>
 #include <chrono>
@@ -264,7 +264,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 // Invoke SEM that delays the execution of p->RcvCepEvent
                 GetNode()->GetObject<ExecEnv>()->queues["h1-h2"]->Enqueue(pkt);
                 GetNode()->GetObject<ExecEnv>()->eventqueues["event-queue"].push_back(event->type);
-                ScheduleInterrupt (GetNode()->GetObject<ExecEnv>(), pkt, "HIRQ-1", Seconds(0));
+                GetNode()->GetObject<ExecEnv>()->ScheduleInterrupt (pkt, "HIRQ-1", Seconds(0));
                 GetNode()->GetObject<ExecEnv>()->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
 
                 //p->RcvCepEvent(event); // This function is called within a SEM
