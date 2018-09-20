@@ -211,17 +211,15 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(proceed)
         {
             Ptr<Query> q = cep->GetQuery(op->queryId);
-
-            Ptr<Producer> producer = producer;
             producer->HandleNewCepEvent(q, returned);
         }
 
         Ptr<Packet> dummyPacket = Create<Packet>();
         Ptr<Node> node = GetObject<Dcep>()->GetNode();
         if (it == ops.end())
-            node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
-        else {
             node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
+        else {
+            node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
             node->GetObject<ExecEnv>()->Proceed(dummyPacket, "received_event", &Detector::CepOperatorProcessCepEvent, this, e, ++it, ops, cep, producer);
         }
     }
@@ -231,14 +229,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         
         Ptr<CEPEngine> cep = GetObject<CEPEngine>();
-        
+
         std::vector<Ptr<CepOperator>> ops;
         cep->GetOpsByInputCepEventType(e->type, ops);
-        std::vector<Ptr<CepOperator>>::iterator it;
+        auto it = ops.begin();
         Ptr<Producer> producer = GetObject<Producer>();
 
-        CepOperatorProcessCepEvent(e, it, ops, cep, producer);
-        
+        Ptr<Packet> dummyPacket = Create<Packet>();
+        Ptr<Node> node = GetObject<Dcep>()->GetNode();
+        if (it == ops.end())
+            node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
+        else {
+            node->GetObject<ExecEnv>()->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
+            node->GetObject<ExecEnv>()->Proceed(dummyPacket, "received_event", &Detector::CepOperatorProcessCepEvent, this, e, ++it, ops, cep, producer);
+        }
     }
     
     
