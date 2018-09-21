@@ -101,7 +101,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                       UintegerValue (0),
                       MakeUintegerAccessor (&Dcep::event_code),
                       MakeUintegerChecker<uint16_t> ())
-        .AddAttribute ("number_of_eventss", "The number_of_eventss to be generated"
+        .AddAttribute ("number_of_events", "The number_of_events to be generated"
         "by a datasource",
                       UintegerValue (0),
                       MakeUintegerAccessor (&Dcep::events_load),
@@ -436,7 +436,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
       UintegerValue ecode, nevents;
       
       dcep->GetAttribute("event_code", ecode);
-      dcep->GetAttribute("number_of_eventss", nevents);
+      dcep->GetAttribute("number_of_events", nevents);
       eventCode = ecode.Get();
       numCepEvents = nevents.Get();
     }
