@@ -100,9 +100,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         
         Ptr<CepOperator> op;
-        
-        std::vector<Ptr<CepOperator> >::iterator it;
-        for( it = ops_queue.begin(); it != ops_queue.end(); ++it) 
+
+        for( auto it = ops_queue.begin(); it != ops_queue.end(); ++it)
         {
 
             op = (Ptr<CepOperator>) *it;
@@ -120,9 +119,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     CEPEngine::GetQuery(uint32_t id){
         
         Ptr<Query> q;
-        
-        std::vector<Ptr<Query> >::iterator it;
-        for( it = queryPool.begin(); it != queryPool.end(); ++it) {
+
+        for( auto it = queryPool.begin(); it != queryPool.end(); ++it) {
 
             q = (Ptr<Query>) *it;
             if(q->id == id)
@@ -243,6 +241,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
     {
+        // Have to sort the CepOperator vector by type of operator (then, or, and)
         std::cout << "Detector::ProcessCepEvent" << std::endl;
         Ptr<CEPEngine> cep = GetObject<CEPEngine>();
 
@@ -344,7 +343,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             if (e->type == events1.front()->type)
             {
-                std::vector<Ptr<CepEvent>>::iterator it = events2.begin();
+                auto it = events2.begin();
                 for (uint32_t i = 0; i < events2.size(); i++, it++)
                 {
                      
@@ -353,6 +352,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                         Ptr<CepEvent> e1 = CreateObject<CepEvent>();
                         Ptr<CepEvent> e2 = CreateObject<CepEvent>();
                         e->CopyCepEvent(e1);
+                        // Here we insert the incoming event into the sequence
                         events2[i]->CopyCepEvent(e2);
                         
                         bufman->events2.erase(it);
@@ -368,7 +368,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             }
             else
             {
-                std::vector<Ptr<CepEvent>>::iterator it = bufman->events1.begin();
+                auto it = bufman->events1.begin();
                 for (uint32_t i = 0; i < bufman->events1.size(); i++, it++)
                 {
                     if(e->m_seq == bufman->events1[i]->m_seq)
@@ -376,8 +376,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                         Ptr<CepEvent> e1 = CreateObject<CepEvent>();
                         Ptr<CepEvent> e2 = CreateObject<CepEvent>();
                         e->CopyCepEvent(e1);
+                        // Here we insert the incoming event into the sequence
                         bufman->events1[i]->CopyCepEvent(e2);
-                        
+
                         bufman->events1.erase(it);
                         returned.push_back(e1);
                         returned.push_back(e2);
@@ -396,6 +397,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         /* everything is a match*/
        returned.push_back(e);
+        // Here we insert the incoming event into the sequence
         return true; 
     }
     
@@ -538,7 +540,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             Ptr<CepEvent> new_event = CreateObject<CepEvent>();
             uint64_t delay = 0;
             uint32_t hops = 0;
-            for(std::vector<Ptr<CepEvent>>::iterator it = events.begin();
+            for(auto it = events.begin();
                     it != events.end(); it++)
             {
                 Ptr<CepEvent> e = *it;
