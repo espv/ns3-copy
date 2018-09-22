@@ -154,21 +154,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             {
                 NS_ABORT_MSG ("UNKNOWN OPERATOR");
             }
-            cepOp->Configure(q);
+            cepOp->Configure(q, this);
             this->ops_queue.push_back(cepOp);
         }
 
         std::cout << "Adding operator to CEPEngine" << std::endl;
         GetObject<Dcep>()->node->GetObject<ProcessCEPEngine>()->AddOperator(q->op, {q->inevent1, q->inevent2});
-            
     }
-    
+
     void
     CEPEngine::StoreQuery(Ptr<Query> q){
         queryPool.push_back(q);
     }
-    
-    
+
+
     /**************** DETECTOR ****************
      ***********************************************
      **********************************************/
@@ -283,6 +282,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         return tid;
     }
+
+    TypeId
+    ThenOperator::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::ThenOperator")
+                .SetParent<CepOperator> ()
+        ;
+
+        return tid;
+    }
     
     TypeId
     OrOperator::GetTypeId(void)
@@ -295,7 +304,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    AndOperator::Configure(Ptr<Query> q)
+    AndOperator::Configure(Ptr<Query> q, Ptr<CEPEngine> cep)
     {
         this->queryId = q->id;
         this->event1 = q->inevent1;
@@ -306,22 +315,45 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->consumption_policy = SELECTED_CONSUMPTION; //default
         bufman->selection_policy = SINGLE_SELECTION; //default
         bufman->Configure(this);
-        this->bufman = bufman; 
+        this->bufman = bufman;
+        AggregateObject(cep);
+    }
+
+    void
+    ThenOperator::Configure(Ptr<Query> q, Ptr<CEPEngine> cep)
+    {
+        this->queryId = q->id;
+        this->event1 = q->inevent1;
+        this->event2 = q->inevent2;
+
+        Ptr<BufferManager> bufman = CreateObject<BufferManager>();
+
+        bufman->consumption_policy = SELECTED_CONSUMPTION; //default
+        bufman->selection_policy = SINGLE_SELECTION; //default
+        bufman->Configure(this);
+        this->bufman = bufman;
+        AggregateObject(cep);
     }
     
     void
-    OrOperator::Configure(Ptr<Query> q)
+    OrOperator::Configure(Ptr<Query> q, Ptr<CEPEngine> cep)
     {
         this->queryId = q->id;
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
-            
+
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
         
         bufman->consumption_policy = SELECTED_CONSUMPTION; //default
         bufman->selection_policy = SINGLE_SELECTION; //default
         bufman->Configure(this);
-        this->bufman = bufman; 
+        this->bufman = bufman;
+        AggregateObject(cep);
+    }
+
+    bool
+    AndOperator::DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned) {
+
     }
     
     bool
@@ -351,9 +383,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                         bufman->events2.erase(it);
                         returned.push_back(e1);
                         returned.push_back(e2);
-                        
-                        
-                        
+
                         return true;
                     }
                 }
@@ -384,6 +414,70 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->put_event(e);//wait for event with corresponding sequence number
         return false;
     }
+
+    bool
+    ThenOperator::DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned) {
+
+    }
+
+    bool
+    ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned)
+    {
+        std::vector<Ptr<CepEvent>> events1;
+        std::vector<Ptr<CepEvent>> events2;
+        bufman->read_events(events1, events2);
+
+        if((!events1.empty()) && (!events2.empty()))
+        {
+            if (e->type == events1.front()->type)
+            {
+                auto it = events2.begin();
+                for (uint32_t i = 0; i < events2.size(); i++, it++)
+                {
+                    if(e->m_seq == bufman->events2[i]->m_seq)
+                    {
+                        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
+                        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
+                        e->CopyCepEvent(e1);
+                        // Here we insert the incoming event into the sequence
+                        // Split loop into recursion.
+                        // Return a recursive call to some function
+                        events2[i]->CopyCepEvent(e2);
+
+                        bufman->events2.erase(it);
+                        returned.push_back(e1);
+                        returned.push_back(e2);
+
+                        return true;
+                    }
+                }
+
+            }
+            else
+            {
+                auto it = bufman->events1.begin();
+                for (uint32_t i = 0; i < bufman->events1.size(); i++, it++)
+                {
+                    if(e->m_seq == bufman->events1[i]->m_seq)
+                    {
+                        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
+                        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
+                        e->CopyCepEvent(e1);
+                        // Here we insert the incoming event into the sequence
+                        bufman->events1[i]->CopyCepEvent(e2);
+
+                        bufman->events1.erase(it);
+                        returned.push_back(e1);
+                        returned.push_back(e2);
+                        return true;
+                    }
+                }
+            }
+
+        }
+        bufman->put_event(e);//wait for event with corresponding sequence number
+        return false;
+    }
     
     bool
     OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned)
@@ -391,6 +485,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         /* everything is a match*/
        returned.push_back(e);
         // Here we insert the incoming event into the sequence
+        Ptr<Packet> dp = Create<Packet>();
+        Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+        // Enqueue OrCepOp SEM and execute once
+        ee->globalStateVariables["cepOpDoneYet"] = 1;
         return true; 
     }
     
@@ -402,6 +501,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     
     bool
     OrOperator::ExpectingCepEvent(std::string eType)
+    {
+        return event1 == eType || event2 == eType;
+    }
+
+    bool
+    ThenOperator::ExpectingCepEvent(std::string eType)
     {
         return event1 == eType || event2 == eType;
     }
@@ -651,14 +756,14 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     uint32_t
     CepEvent::getSize()
     { 
-        return (type.size()+sizeof(int64_t)+sizeof(uint32_t));
+        return type.size()+sizeof(uint64_t)+sizeof(uint32_t);
     }
     
     SerializedCepEvent*
     CepEvent::serialize()
     {
         
-        SerializedCepEvent *message = new SerializedCepEvent();
+        auto message = new SerializedCepEvent();
         message->type = this->type;
         message->event_class = this->event_class;
         message->size = sizeof(SerializedCepEvent);
@@ -675,7 +780,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     CepEvent::deserialize(uint8_t *buffer, uint32_t size)
     {
-        SerializedCepEvent *message = new SerializedCepEvent;
+        auto message = new SerializedCepEvent;
         
         memcpy(message, buffer, size);
         this->type = message->type;

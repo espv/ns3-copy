@@ -54,8 +54,8 @@ namespace ns3 {
         uint64_t m_seq;
         uint64_t delay;
         uint32_t event_class;
-        int32_t hopsCount;
-        int32_t prevHopsCount;
+        uint32_t hopsCount;
+        uint32_t prevHopsCount;
     };
     
     class CepEventPattern : public Object{
@@ -178,7 +178,7 @@ private:
     public:
         static TypeId GetTypeId ();
         
-        virtual void Configure (Ptr<Query>) = 0;
+        virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
         virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&) = 0; 
         virtual bool ExpectingCepEvent (std::string) = 0;
         uint32_t queryId;
@@ -188,8 +188,9 @@ private:
     public:
         static TypeId GetTypeId ();
         
-        void Configure (Ptr<Query>);
-        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&); 
+        void Configure (Ptr<Query>, Ptr<CEPEngine>);
+        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&);
+        bool DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned);
         bool ExpectingCepEvent (std::string);
         std::string event1;
         std::string event2;
@@ -203,12 +204,27 @@ private:
     public:
         static TypeId GetTypeId ();
         
-        void Configure (Ptr<Query>);
+        void Configure (Ptr<Query>, Ptr<CEPEngine>);
         bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&); 
         bool ExpectingCepEvent (std::string);
         std::string event1;
         std::string event2;
     
+    private:
+        Ptr<BufferManager> bufman;
+    };
+
+    class ThenOperator: public CepOperator {
+    public:
+        static TypeId GetTypeId ();
+
+        void Configure (Ptr<Query>, Ptr<CEPEngine>);
+        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&);
+        bool DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned);
+        bool ExpectingCepEvent(std::string);
+        std::string event1;
+        std::string event2;
+
     private:
         Ptr<BufferManager> bufman;
     };
