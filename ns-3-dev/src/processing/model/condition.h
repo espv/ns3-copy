@@ -72,6 +72,13 @@ struct condition {
   uint32_t Wl1251RxLoop(Ptr<Thread> t);
   uint32_t sizeofnextrxfromnic(Ptr<Thread> t);
   uint32_t ReadNumTxToAck(Ptr<Thread> t);
+  uint32_t ReadOrCepOpDoneYet(Ptr<Thread> t);
+  uint32_t ReadAndCepOpDoneYet(Ptr<Thread> t);
+  uint32_t ReadThenCepOpDoneYet(Ptr<Thread> t);
+  uint32_t ReadInterruptsEnabled(Ptr<Thread> t);
+  void WriteOrCepOpDoneYet(Ptr<Thread> t, uint32_t value);
+  void WriteAndCepOpDoneYet(Ptr<Thread> t, uint32_t value);
+  void WriteThenCepOpDoneYet(Ptr<Thread> t, uint32_t value);
   void WriteInterruptsEnabled(Ptr<Thread> t, uint32_t value);
   void WriteWl1251Intr(Ptr<Thread> t, uint32_t value);
   void AckNICRx(Ptr<Thread> t, uint32_t value);
@@ -84,6 +91,10 @@ struct condition {
   // Used to model wl1251 NIC. Accessed from testprocmod, and thus is set to be global.
   uint32_t numTxToAck;
   uint32_t m_wl1251NICIntrReg;
+
+  uint32_t orcepopdoneyet;
+  uint32_t andcepopdoneyet;
+  uint32_t thencepopdoneyet;
  private:
 };
 

@@ -41,7 +41,7 @@ uint32_t ConditionFunctions::Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last
 uint32_t ConditionFunctions::ServiceQueue2Condition(std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *first, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last)
 {
 	if(first == last)
-		return first->empty();
+		return first->empty() ? QUEUEEMPTY : QUEUENOTEMPTY;
 	else {
 		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>  *serviceQueue2Order = &node->GetObject<ExecEnv> ()->serviceQueue2Order;
 		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> ::iterator firstFound =
@@ -151,6 +151,30 @@ void ConditionFunctions::WriteInterruptsEnabled(Ptr<Thread> t, uint32_t value) {
 	node->GetObject<ExecEnv>()->hwModel->m_interruptController->masked[202] = (value == 0);
 }
 
+void ConditionFunctions::WriteAndCepOpDoneYet(ns3::Ptr<ns3::Thread> t, uint32_t value) {
+    andcepopdoneyet = value;
+}
+
+void ConditionFunctions::WriteOrCepOpDoneYet(Ptr<Thread> t, uint32_t value) {
+    orcepopdoneyet = value;
+}
+
+void ConditionFunctions::WriteThenCepOpDoneYet(Ptr<Thread> t, uint32_t value) {
+    thencepopdoneyet = value;
+}
+
+uint32_t ConditionFunctions::ReadAndCepOpDoneYet(ns3::Ptr<ns3::Thread> t) {
+	return andcepopdoneyet;
+}
+
+uint32_t ConditionFunctions::ReadOrCepOpDoneYet(Ptr<Thread> t) {
+	return orcepopdoneyet;
+}
+
+uint32_t ConditionFunctions::ReadThenCepOpDoneYet(Ptr<Thread> t) {
+	return thencepopdoneyet;
+}
+
 void ConditionFunctions::AckNICRx(Ptr<Thread> t, uint32_t value) {
 	// Set intr-register to correct value
 	Ptr<ExecEnv> ee = t->peu->hwModel->node->GetObject<ExecEnv>();
@@ -202,7 +226,13 @@ ConditionFunctions::Initialize(Ptr<ExecEnv> execenv)
   //conditionMap["send_packets_empty"] = MakeCallback(&ConditionFunctions::IpPacketsEmpty, this);
 
   // Set the protocol-agnostic condition functions
-  /*conditionMap["pkt::ip::size"] = MakeCallback(&ConditionFunctions::PacketSize, this);
+  writeConditionMap["orCepOpDoneYet"] = MakeCallback(&ConditionFunctions::WriteOrCepOpDoneYet, this);
+  writeConditionMap["andCepOpDoneYet"] = MakeCallback(&ConditionFunctions::WriteAndCepOpDoneYet, this);
+  writeConditionMap["thenCepOpDoneYet"] = MakeCallback(&ConditionFunctions::WriteThenCepOpDoneYet, this);
+  conditionMap["orCepOpDoneYet"] = MakeCallback(&ConditionFunctions::ReadOrCepOpDoneYet, this);
+  conditionMap["andCepOpDoneYet"] = MakeCallback(&ConditionFunctions::ReadAndCepOpDoneYet, this);
+  conditionMap["thenCepOpDoneYet"] = MakeCallback(&ConditionFunctions::ReadThenCepOpDoneYet, this);
+  conditionMap["pkt::ip::size"] = MakeCallback(&ConditionFunctions::PacketSize, this);
   conditionMap["bcm4329::dataok"] = MakeCallback(&ConditionFunctions::BCM4329DataOk, this);
   conditionMap["readStatewl1251:interrupttype"] = MakeCallback(&ConditionFunctions::Wl1251Intr, this);
   conditionMap["readStatewl1251:readinterrupttype"] = MakeCallback(&ConditionFunctions::ReadWl1251Intr, this);
@@ -210,7 +240,7 @@ ConditionFunctions::Initialize(Ptr<ExecEnv> execenv)
   conditionMap["readStatewl1251:sizeofnextrxfromnic"] = MakeCallback(&ConditionFunctions::sizeofnextrxfromnic, this);
   writeConditionMap["writeStatewl1251:interruptenabled"] = MakeCallback(&ConditionFunctions::WriteInterruptsEnabled, this);
   writeConditionMap["writeStateacknicrx"] = MakeCallback(&ConditionFunctions::AckNICRx, this);
-  conditionMap["readStatewl1251:numtxcomplete"] = MakeCallback(&ConditionFunctions::ReadNumTxToAck, this);*/
+  conditionMap["readStatewl1251:numtxcomplete"] = MakeCallback(&ConditionFunctions::ReadNumTxToAck, this);
 
 
   // Add later, when the function is finished:

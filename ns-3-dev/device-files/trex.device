@@ -41,6 +41,7 @@ nic_rx FIFO -1 bytes
 h1-h2 FIFO -1 packets
 h2-h3 FIFO -1 packets
 h3-h4 FIFO -1 packets
+h4-h5 FIFO -1 packets
 h3-bytes FIFO -1 packets
 h12-h14 FIFO -1 packets
 h11-h12 FIFO -1 packets
@@ -82,9 +83,10 @@ CONDITIONS
 TRIGGERS
 LOC send_event_loc do_send_event
 LOC received_event_loc received_event
-SERVICE process-or-cepop do-process-or-cepop
-SERVICE process-and-cepop do-process-and-cepop
-SERVICE process-then-cepop do-process-then-cepop
+
+LOC process-or-cepop-loc loc-process-or-cepop
+LOC process-and-cepop-loc loc-process-and-cepop
+LOC process-then-cepop-loc loc-process-then-cepop
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -120,7 +122,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x TTWAKEUP packet_thread
+#x TTWAKEUP packet_thread
+x CALL process_received_packet
+x TTWAKEUP event_thread
 0 STOP
 
 SIGEND
@@ -164,7 +168,6 @@ x QUEUECOND h1-h2 h1-h2 notempty
 x CALL process_received_packet
 x TTWAKEUP event_thread
 x SLEEPTHREAD
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 #x CALL send_event
 0 STOP
 
@@ -191,7 +194,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND done-yet write local 1
+x STATECOND andCepOpDoneYet write global 1
+x STATECOND orCepOpDoneYet write global 1
+x STATECOND thenCepOpDoneYet write global 1
 0 STOP
 
 SIGEND
@@ -204,36 +209,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND done-yet write local 0
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-or-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-x STATECOND done-yet read local 1
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-or-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-x STATECOND done-yet read local 0
-x CALL process-or-cepop
+x STATECOND andCepOpDoneYet write global 0
+x STATECOND orCepOpDoneYet write global 0
+x STATECOND thenCepOpDoneYet write global 0
 0 STOP
 
 SIGEND
@@ -247,7 +225,8 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1000 0
-x STATECOND done-yet read local 1
+process-then-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
+x STATECOND thenCepOpDoneYet read global 1
 0 STOP
 
 SIGEND
@@ -261,7 +240,8 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1000 0
-x STATECOND done-yet read local 0
+process-then-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
+x STATECOND thenCepOpDoneYet read global 0
 x CALL process-then-cepop
 0 STOP
 
@@ -269,14 +249,31 @@ SIGEND
 
 
 SIGSTART
-NAME process-and-cepop
+NAME process-or-cepop
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-insert-event PROCESS 1200 0
-x STATECOND done-yet read local 1
+x PROCESS 1000 0
+process-or-cepop-loc DEQUEUE PKTQUEUE 0 h3-h4
+x STATECOND orCepOpDoneYet read global 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-or-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 1000 0
+process-or-cepop-loc DEQUEUE PKTQUEUE 0 h3-h4
+x STATECOND orCepOpDoneYet read global 0
+x CALL process-or-cepop
 0 STOP
 
 SIGEND
@@ -290,7 +287,23 @@ FRACTION 100% 1 1
 
 0 START
 insert-event PROCESS 1200 0
-x STATECOND done-yet read local 0
+process-and-cepop-loc DEQUEUE PKTQUEUE 0 h4-h5
+x STATECOND andCepOpDoneYet read global 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-and-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+insert-event PROCESS 1200 0
+process-and-cepop-loc DEQUEUE PKTQUEUE 0 h4-h5
+x STATECOND andCepOpDoneYet read global 0
 x CALL process-and-cepop
 0 STOP
 
@@ -321,6 +334,7 @@ x                  ENQUEUE		SRVQUEUE process-then-cepop cepops
 0 RESTART
 
 SIGEND
+
 
 SIGSTART
 NAME populate-or-cepops
@@ -385,20 +399,21 @@ FRACTION 100% 1 1
 
 0 START
 x QUEUECOND h1-h2 h1-h2 notempty
-x PROCESS 8000000 0
+#x PROCESS 8000000 0
 # Which CEPOp belongs to the thread is customizable and depends on the system being modeled.
 # In T-Rex, CepOps are delegated to each core to maximize CPU utilization.
 # Perhaps we need another event called ADDCEPOP that adds a CEPOp in whichever way the modeled system does.
 # Additionally, REMOVECEPOP can be useful.
 #x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
 x CALL populate-cepops
+received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 x LOOP insert_event_into_cepops 0 cepops cepops 0
-x TTWAKEUP packet_thread
+#x TTWAKEUP packet_thread
 0 STOP
 
 SIGEND
 
 
 THREADS
-packet_thread packet_processing_thread infinite 0
 event_thread event_processing_thread infinite 0
+packet_thread packet_processing_thread infinite 0

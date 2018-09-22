@@ -84,6 +84,10 @@ void RoundRobinScheduler::Schedule() {
             // Don't interrupt an interrupt
             if (TaskScheduler::peu->hwModel->cpus[cpu]->inInterrupt) {
                 NS_LOG_INFO("CPU " << cpu << " was in interrupt, not scheduling");
+                Simulator::Schedule(MicroSeconds(150), // TODO: make property?
+                                    &RoundRobinScheduler::Schedule,
+                                    this
+                );
                 continue;  // We do this to wake a thread from the end of a HIRQ
             }
 
@@ -105,11 +109,11 @@ void RoundRobinScheduler::Schedule() {
     //}
 
     // If there is more than one thread, they need to get preempted once in a while
-    /*if (m_runqueue.size() > 1)
+    if (m_runqueue.size() > 1)
         Simulator::Schedule(MicroSeconds(150), // TODO: make property?
                 &RoundRobinScheduler::Schedule,
                 this
-                );*/
+                );
 }
 
 void RoundRobinScheduler::WakeupIdle() {
@@ -248,29 +252,35 @@ int RoundRobinScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> argu
 
             pid = arguments[0];
 
+            int index = cpu+1;
+
             //std::cout << "Going to sleep" << std::endl;
             if (m_runqueue.empty()) {
                 // TODO: Assign an idle thread instead
-                NS_ASSERT(0);
-            }
+                m_currentRunning.push_back(index);
+                m_runqueue.push_back(index);
+                //NS_ASSERT(0);
+            } else {
 
-            int i;
-            for(i = 0; i < NUM_CPU; i++) {
-                if (m_currentRunning[i] == pid) {
-                    break;
+                int i;
+                for (i = 0; i < NUM_CPU; i++) {
+                    if (m_currentRunning[i] == pid) {
+                        break;
+                    }
                 }
+
+                NS_LOG_INFO("Removed from cpu" << i);
+
+                // Shocks, couldn't find this pid amongst any of the currently
+                // running pids. Better take it out of the run queue some day
+                if (i == NUM_CPU) NS_ASSERT(0);
+                index = i;
             }
 
-            NS_LOG_INFO("Removed from cpu" << i);
-
-            // Shocks, couldn't find this pid amongst any of the currently
-            // running pids. Better take it out of the run queue some day
-            if (i == NUM_CPU) NS_ASSERT(0);
-
-            m_blocked.insert( m_currentRunning[i] );
+            m_blocked.insert( m_currentRunning[index] );
 
             // TODO: Add support for idle threads when nothing else is available
-            m_currentRunning[i] = m_runqueue.front();
+            m_currentRunning[index] = m_runqueue.front();
             m_runqueue.pop_front();
             this->Schedule();
             WakeupIdle();

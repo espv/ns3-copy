@@ -166,7 +166,7 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 				return true;
 			}
 
-		case TEMPSYNCH: 
+		case TEMPSYNCH:
 			{
 				TempCompletion *tc = static_cast<TempCompletion *>(e);
 				struct tempVar tv;
@@ -554,6 +554,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	// Obtain target. If it is an empty string, the target must be in the
 	// packet.
 	std::string eeTarget = ee->service;
+	Ptr<ExecEnv> executionEnvironment = peu->hwModel->node->GetObject<ExecEnv>();
 
 	Ptr<SEM> newSem;
 	if (ee->sem != NULL) {
@@ -563,7 +564,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 			ExecutionInfo *pktEI =
 				&(m_currentLocation->curPkt->m_executionInfo);
 			if (newSem->trigger.length()
-					!= 0&& !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != NULL) {
+					!= 0 && !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != NULL) {
 				pktEI->executedByExecEnv = true;
 				EventImpl *toInvoke = pktEI->targetFPM;
 				toInvoke->Invoke();
@@ -589,7 +590,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		// Here, we know the target is that of this packet
 		ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 		if (newSem->trigger.length()
-				!= 0&& !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != NULL) {
+				!= 0 && !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != NULL) {
 			pktEI->executedByExecEnv = true;
 			EventImpl *toInvoke = pktEI->targetFPM;
 			toInvoke->Invoke();
@@ -801,16 +802,23 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 			queueToServe->pop();
 			// We need to execute the SEM, and thus before that
 			// check whether it is specified as a trigger in the current packet.
-			if (toExecute->trigger.length() != 0
-					&& !toExecute->trigger.compare(
-						m_currentLocation->curPkt->m_executionInfo.target)) {
-				Ptr<Packet> curPkt = m_currentLocation->curPkt;
-				curPkt->m_executionInfo.executedByExecEnv = true;
-				EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
-				toInvoke->Invoke();
-				toInvoke->Unref();
-				//					curPkt->m_executionInfo.targetFPM->Unref();
-			}
+            //Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
+            //if (toExecute->trigger.length() != 0) {
+            //    EventImpl *toInvoke = ee->serviceTriggers[]->m_executionInfo.targetFPM;
+            //    toInvoke->Invoke();
+            //    toInvoke->Unref();
+            //    //					curPkt->m_executionInfo.targetFPM->Unref();
+            //}
+			//f (toExecute->trigger.length() != 0
+			//		&& !toExecute->trigger.compare(
+			//			m_currentLocation->curPkt->m_executionInfo.target)) {
+			//	Ptr<Packet> curPkt = m_currentLocation->curPkt;
+			//	curPkt->m_executionInfo.executedByExecEnv = true;
+			//	EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
+			//	toInvoke->Invoke();
+			//	toInvoke->Unref();
+			//	//					curPkt->m_executionInfo.targetFPM->Unref();
+			//
 
 			// Now, its time to execute the de-queued service
 			// Note that it is not possible to en-queue loop services
