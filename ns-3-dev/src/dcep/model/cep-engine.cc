@@ -98,13 +98,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     CEPEngine::GetOpsByInputCepEventType(std::string eventType, std::vector<Ptr<CepOperator>>& ops)
     {
-        
-        Ptr<CepOperator> op;
-
-        for( auto it = ops_queue.begin(); it != ops_queue.end(); ++it)
+        for(auto op : ops_queue)
         {
-
-            op = (Ptr<CepOperator>) *it;
            // Ptr<CepEventPattern> ep = q->GetObject<CepEventPattern>();
             //Ptr<CepEventPattern> ep = q->ep;
             if(op->ExpectingCepEvent(eventType))
@@ -116,13 +111,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     Ptr<Query> 
-    CEPEngine::GetQuery(uint32_t id){
-        
-        Ptr<Query> q;
+    CEPEngine::GetQuery(uint32_t id)
+    {
+        for(auto q : queryPool) {
 
-        for( auto it = queryPool.begin(); it != queryPool.end(); ++it) {
-
-            q = (Ptr<Query>) *it;
             if(q->id == id)
             {
                 return q;
@@ -276,7 +268,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     CepOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::CepOperator")
-        .SetParent<Object> ()
+            .SetParent<Object> ()
         ;
         
         return tid;
@@ -286,7 +278,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     AndOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::AndOperator")
-        .SetParent<CepOperator> ()
+            .SetParent<CepOperator> ()
         ;
         
         return tid;
@@ -296,7 +288,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     OrOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::OrOperator")
-        .SetParent<CepOperator> ()
+            .SetParent<CepOperator> ()
         ;
         
         return tid;
@@ -346,7 +338,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 auto it = events2.begin();
                 for (uint32_t i = 0; i < events2.size(); i++, it++)
                 {
-                     
                     if(e->m_seq == bufman->events2[i]->m_seq)
                     {
                         Ptr<CepEvent> e1 = CreateObject<CepEvent>();
@@ -406,19 +397,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     AndOperator::ExpectingCepEvent(std::string eType)
     {
-        if((event1 == eType) || (event2 == eType))
-            return true;
-        else 
-            return false;
+       return event1 == eType || event2 == eType;
     }
     
     bool
     OrOperator::ExpectingCepEvent(std::string eType)
     {
-        if((event1 == eType) || (event2 == eType))
-            return true;
-        else 
-            return false;
+        return event1 == eType || event2 == eType;
     }
     
     
@@ -542,10 +527,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             Ptr<CepEvent> new_event = CreateObject<CepEvent>();
             uint64_t delay = 0;
             uint32_t hops = 0;
-            for(auto it = events.begin();
-                    it != events.end(); it++)
+            for(auto e : events)
             {
-                Ptr<CepEvent> e = *it;
                 delay = std::max(delay, e->delay);
                 hops = hops + e->hopsCount;
             }
