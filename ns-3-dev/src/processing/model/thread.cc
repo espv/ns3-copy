@@ -768,8 +768,7 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 			// the packet.
 			Ptr<SEM> semToEnqueue = NULL;
 			if (qe->semToEnqueue == NULL) {
-				Ptr<SEM> semToEnqueue =
-					ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
+				semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
