@@ -313,7 +313,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         bufman->consumption_policy = SELECTED_CONSUMPTION; //default
         bufman->selection_policy = SINGLE_SELECTION; //default
-        bufman->configure(this);
+        bufman->Configure(this);
         this->bufman = bufman; 
     }
     
@@ -328,7 +328,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         bufman->consumption_policy = SELECTED_CONSUMPTION; //default
         bufman->selection_policy = SINGLE_SELECTION; //default
-        bufman->configure(this);
+        bufman->Configure(this);
         this->bufman = bufman; 
     }
     
@@ -353,6 +353,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                         Ptr<CepEvent> e2 = CreateObject<CepEvent>();
                         e->CopyCepEvent(e1);
                         // Here we insert the incoming event into the sequence
+                        // Split loop into recursion.
+                        // Return a recursive call to some function
                         events2[i]->CopyCepEvent(e2);
                         
                         bufman->events2.erase(it);
@@ -437,7 +439,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    BufferManager::configure(Ptr<CepOperator> op)
+    BufferManager::Configure(Ptr<CepOperator> op)
     {
         /*
          * setup the buffers with their corresponding event types

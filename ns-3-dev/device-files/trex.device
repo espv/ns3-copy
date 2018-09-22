@@ -87,6 +87,7 @@ LOC received_event_loc received_event
 LOC process-or-cepop-loc loc-process-or-cepop
 LOC process-and-cepop-loc loc-process-and-cepop
 LOC process-then-cepop-loc loc-process-then-cepop
+LOC process-cepop-loc loc-process-cepop
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -212,6 +213,69 @@ FRACTION 100% 1 1
 x STATECOND andCepOpDoneYet write global 0
 x STATECOND orCepOpDoneYet write global 0
 x STATECOND thenCepOpDoneYet write global 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND cepOpDoneYet read global 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND cepOpDoneYet read global 1
+process-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
+x PROCESS 1000 0
+x CALL process-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND cepOpDoneYet read global 2
+x PROCESS 1000 0
+process-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
+x PROCESS 2000 0
+x CALL process-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND cepOpDoneYet read global 3
+x PROCESS 1000 0
+process-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
+x PROCESS 3000 0
+x CALL process-cepop
 0 STOP
 
 SIGEND

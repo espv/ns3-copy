@@ -159,7 +159,7 @@ private:
     public:
         static TypeId GetTypeId (void);
         
-        void configure(Ptr<CepOperator> op);
+        void Configure(Ptr<CepOperator> op);
         void read_events(std::vector<Ptr<CepEvent> >& event1, 
         std::vector<Ptr<CepEvent> >& event2);
         void put_event(Ptr<CepEvent>);
