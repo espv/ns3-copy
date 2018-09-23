@@ -181,7 +181,7 @@ void ExecEnv::Initialize(std::string device) {
 	hwModel->node = GetObject<Node>();
 	ic->hwModel = hwModel;
 #else
-	Ptr<InterruptController> ic = CreateObject<InterruptController>();
+	auto ic = CreateObject<InterruptController>();
 	hwModel->m_interruptController = ic;
 	hwModel->node = GetObject<Node>();
 	ic->hwModel = hwModel;
@@ -193,16 +193,15 @@ void ExecEnv::Initialize(std::string device) {
 
 void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 	// Go throught types (currently only support FIFO)
-	if (!tokens[1].compare("FIFO")) {
+	if (tokens[1] == "FIFO") {
 
 		// If we have a service queue, we don't need to do anything for now.
 		// Its using a standard C++ map, which will initialize the elements
 		// as they are being used
-		if (!tokens[3].compare("services")) {
+		if (tokens[3] == "services") {
 			//std::cout << "Encountered service FIFO queue" << tokens[0] << std::endl;
 			// Add empty vector (just to set the key)
-			this->serviceQueue2s[tokens[0]] = new std::queue<
-					std::pair<Ptr<SEM>, Ptr<ProgramLocation> > >();
+			this->serviceQueue2s[tokens[0]] = new std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > >();
 
 			// Add the queue to the end of queueOrder. This is used
 			// by conditions ("and" loops; they are really conditions
@@ -213,40 +212,33 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 			serviceQueue2Names[serviceQueue2s[tokens[0]]] = tokens[0];
 
 			return;
-		} else if (!tokens[3].compare("states")) {
+		} else if (tokens[3] == "states") {
 			stateQueue2Order.push_back(tokens[0]);
-			if (!tokens[4].compare("global")) {
+			if (tokens[4] == "global") {
 				stateQueue2s[tokens[0]] = Create<StateVariableQueue2>();
 				stateQueue2Names[stateQueue2s[tokens[0]]] = tokens[0];
 			}
-		}
-		else if (!tokens[3].compare("fsms")) {
-			// Sequence state machines - for modeling CEP
-			fsmQueues[tokens[0]] = Create<Automata>();
 		}
 
 		// We have a packet queue.
 		//
 		// No size = no upper bound on contents
-		else if (!tokens[2].compare("-1"))
-			queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>(
-					"MaxPackets", UintegerValue(4294967295));
+		else if (tokens[2] == "-1")
+			queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxPackets", UintegerValue(4294967295));
 
 		// We have a size
 		else {
 			// Get size
 			std::istringstream i(tokens[2]);
-			int size;
+			uint64_t size;
 			if (!(i >> size))
 				NS_FATAL_ERROR(
 						"Unable to convert queue size " << tokens[2] << " to integer" << std::endl);
 			// Act according to units
-			if (!tokens[3].compare("packets")) {
-				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>(
-						"MaxPackets", UintegerValue(size));
+			if (tokens[3] == "packets") {
+				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxPackets", UintegerValue(size));
 			} else {
-				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>(
-						"MaxBytes", UintegerValue(size));
+				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxBytes", UintegerValue(size));
 			}
 		}
 	} else {
@@ -276,8 +268,7 @@ void ExecEnv::HandleSynch(std::vector<std::string> tokens) {
 	std::vector<uint32_t> arguments;
 	for (; j < tokens.size(); j++) {
 		argvalue = stringToUint32(tokens[j]);
-		arguments.push_back((uint64_t) argvalue);
-		//std::cout << argvalue << " ";
+		arguments.push_back((unsigned int) argvalue);
 	}
 
 	//std::cout << std::endl;
@@ -291,9 +282,9 @@ void ExecEnv::HandleThreads(std::vector<std::string> tokens) {
 
 	// Create an infinite loop around the root program if
 	// so is specified
-	bool infinite = !tokens[2].compare("infinite");
+	bool infinite = tokens[2] == "infinite";
 	m_serviceMap[tokens[1]]->peu->taskScheduler->Fork(tokens[0], program,
-			stringToUint32(tokens[3]), NULL,
+			stringToUint32(tokens[3]), nullptr,
 			std::map<std::string, Ptr<StateVariable> >(),
 			std::map<std::string, Ptr<StateVariableQueue2> >(), infinite);
 }
@@ -312,22 +303,20 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 
 	// Act accordint to type
 	// If we have a membus, create and install in hardware
-	if (!tokens[0].compare("MEMBUS")) {
+	if (tokens[0] == "MEMBUS") {
 		// Create memory bus for the hwModel
-		Ptr<MemBus> membus = CreateObjectWithAttributes<MemBus>("frequency",
-				UintegerValue(freq));
+		Ptr<MemBus> membus = CreateObjectWithAttributes<MemBus>("frequency", UintegerValue(freq));
 		hwModel->m_memBus = membus;
 	}
 
 	// If we have a PEU, create and install.
-	else if (!tokens[0].compare("PEU")) {
+	else if (tokens[0] == "PEU") {
 		Ptr<PEU> newPEU;
 
 		// Treat the name CPU specially. As it is the only PEU that
 		// can be intteruted, is has its own type and member variable in hwModel.
 		ObjectFactory factory;
 		factory.SetTypeId(tokens[3]);
-		// if (!tokens[2].compare("cpu")) {
         if (is_prefix("cpu", tokens[2])) { // OYSTEDAL
 			uint32_t tracingOverhead = 0;
 			std::istringstream j;
@@ -338,9 +327,8 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 				exit(1);
 			}
 
-			newPEU = CreateObjectWithAttributes<CPU>("frequency",
-					UintegerValue(freq), "name", StringValue(tokens[2]),
-					"traceoverhead", UintegerValue(tracingOverhead));
+			newPEU = CreateObjectWithAttributes<CPU>("frequency", UintegerValue(freq), "name", StringValue(tokens[2]),
+					                                 "traceoverhead", UintegerValue(tracingOverhead));
 
 			// hwModel->cpus = newPEU->GetObject<CPU>();
             Ptr<CPU> cpu = newPEU->GetObject<CPU>();
@@ -350,8 +338,8 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 
             newPEU->hwModel = hwModel;
 
-            // static Ptr<TaskScheduler> ts = NULL;
-            if (cpuScheduler == NULL) {
+            // static Ptr<TaskScheduler> ts = nullptr;
+            if (cpuScheduler == nullptr) {
                 cpuScheduler = factory.Create()->GetObject<RoundRobinScheduler>();
                 cpuScheduler->Initialize(newPEU);
             }
@@ -365,11 +353,9 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 
 		// All other types of PEUs are treated the same
 		else {
-			newPEU = CreateObjectWithAttributes<PEU>("frequency",
-					UintegerValue(freq), "name", StringValue(tokens[2]));
+			newPEU = CreateObjectWithAttributes<PEU>("frequency", UintegerValue(freq), "name", StringValue(tokens[2]));
 			hwModel->m_PEUs[tokens[3]] = newPEU;
-			newPEU->taskScheduler =
-                    factory.Create()->GetObject<RoundRobinScheduler>();
+			newPEU->taskScheduler = factory.Create()->GetObject<RoundRobinScheduler>();
             newPEU->hwModel = hwModel;
             newPEU->taskScheduler->Initialize(newPEU);
 		}
@@ -380,25 +366,20 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 
 void ExecEnv::HandleConditions(std::vector<std::string> tokens) {
 	// Format: TYPE, location/name,[ scope if not loop,] condition name[, condition name 1, ..., condition name n-1 if packet characteristics]
-	if (!tokens[0].compare("VCLOC")) {
+	if (tokens[0] == "VCLOC") {
 		locationConditions[tokens[1]].condName = tokens[3];
-		locationConditions[tokens[1]].scope =
-				tokens[2].compare("global") ? CONDITIONLOCAL : CONDITIONGLOBAL;
-	} else if (!tokens[0].compare(
-			"ENQUEUE")/* || !tokens[0].compare("ENQUEUEN")*/) {
+		locationConditions[tokens[1]].scope = tokens[2] == "global" ? CONDITIONGLOBAL : CONDITIONLOCAL;
+	} else if (tokens[0] == "ENQUEUE") {
 		struct condition newEnQCond;
 		newEnQCond.condName = tokens[3];
-		newEnQCond.scope =
-				tokens[2].compare("global") ? CONDITIONLOCAL : CONDITIONGLOBAL;
+		newEnQCond.scope = tokens[2] == "global" ? CONDITIONGLOBAL : CONDITIONLOCAL;
 		enqueueConditions[tokens[1]].push_back(newEnQCond);
-	} else if (!tokens[0].compare(
-			"DEQUEUE")/* || !tokens[0].compare("DEQUEUEN")*/) {
+	} else if (tokens[0] == "DEQUEUE") {
 		struct condition newDeQCond;
 		newDeQCond.condName = tokens[3];
-		newDeQCond.scope =
-				tokens[2].compare("global") ? CONDITIONLOCAL : CONDITIONGLOBAL;
+		newDeQCond.scope = tokens[2] == "global" ? CONDITIONGLOBAL : CONDITIONLOCAL;
 		dequeueConditions[tokens[1]].push_back(newDeQCond);
-	} else if (!tokens[0].compare("LOOP")) {
+	} else if (tokens[0] == "LOOP") {
 		// Note that for loops, we regard it to be sufficient with
 		// only one codition function, because _it_ can work
 		// internally with compound conditions.
@@ -409,29 +390,27 @@ void ExecEnv::HandleConditions(std::vector<std::string> tokens) {
 }
 
 void ExecEnv::HandleTriggers(std::vector<std::string> tokens) {
-	if (!tokens[0].compare("LOC")) {
+	if (tokens[0] == "LOC") {
 		locationTriggers[tokens[1]] = tokens[2];
-	} else if (!tokens[0].compare("SERVICE")) {
+	} else if (tokens[0] == "SERVICE") {
 		serviceTriggers[tokens[1]] = tokens[2];
 		triggerToRWFunc[tokens[2]] = tokens[1];
 		RWFuncToTrigger[tokens[1]] = tokens[2];
-	} else if (!tokens[0].compare("QUEUE")) {
+	} else if (tokens[0] == "QUEUE") {
 		dequeueTriggers[tokens[1]] = tokens[2];
 	}
 }
 
 bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 	if(lc->stateQueue2s) {
-		std::vector<std::string>::iterator qIt = std::find(stateQueue2Order.begin(),
-				stateQueue2Order.end(), first);
-		std::vector<std::string>::iterator qItLast = std::find(
-				stateQueue2Order.begin(), stateQueue2Order.end(), last);
+		auto qIt = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), first);
+		auto qItLast = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), last);
 
 		// Iterate through all queues in between according
 		// to the queue order
 		while (true) {
 			if (std::find(lc->stateQueue2sServed.begin(), lc->stateQueue2sServed.end(),
-					stateQueue2s[*qIt]) != lc->stateQueue2sServed.end())
+					      stateQueue2s[*qIt]) != lc->stateQueue2sServed.end())
 				return true;
 			if (qIt == qItLast || qIt == stateQueue2Order.end())
 				break;
@@ -448,33 +427,24 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 		// Upon the first hit, set the
 		// dequeueOrLoopEncountered boolean variable
 		// to true.
-		std::vector<Ptr<Queue2> >::iterator qIt = std::find(queueOrder.begin(),
-				queueOrder.end(), firstQueue2);
-		std::vector<Ptr<Queue2> >::iterator qItLast = std::find(
-				queueOrder.begin(), queueOrder.end(), lastQueue2);
+		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue2);
+		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue2);
 
 		// Iterate through all queues in between according
 		// to the queue order
 		while (true) {
-			if (std::find(lc->queuesServed.begin(), lc->queuesServed.end(),
-					*qIt) != lc->queuesServed.end())
+			if (std::find(lc->queuesServed.begin(), lc->queuesServed.end(), *qIt) != lc->queuesServed.end())
 				return true;
 			if (qIt == qItLast || qIt == queueOrder.end())
 				break;
 			qIt++;
 		}
 	} else {
-		std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *firstQueue2 =
-				serviceQueue2s[first];
-		std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *lastQueue2 =
-				serviceQueue2s[last];
+		auto firstQueue2 = serviceQueue2s[first];
+		auto lastQueue2 = serviceQueue2s[last];
 
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator qIt =
-				std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(),
-						firstQueue2);
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator qItLast =
-				std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(),
-						lastQueue2);
+		auto qIt = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), firstQueue2);
+		auto qItLast = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), lastQueue2);
 
 		for (; qIt != qItLast; qIt++)
 			if (std::find(lc->serviceQueue2sServed.begin(),
@@ -487,20 +457,17 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 	return false;
 }
 
-void ExecEnv::fillQueue2s(std::string first, std::string last,
-		LoopCondition *lc) {
+void ExecEnv::fillQueue2s(std::string first, std::string last, LoopCondition *lc) {
 	// Assume first and last queues are of the same type
 	if (!lc->serviceQueue2s && !lc->stateQueue2s) {
-		Ptr<Queue2> firstQueue2 = queues[first];
-		Ptr<Queue2> lastQueue2 = queues[last];
+		auto firstQueue2 = queues[first];
+		auto lastQueue2 = queues[last];
 
 		// Iterate queues in the queue order, and
 		// insert each queue between and including
 		// firstQueue2 and lastQueue2 in lc->queues.
-		std::vector<Ptr<Queue2> >::iterator qIt = std::find(queueOrder.begin(),
-				queueOrder.end(), firstQueue2);
-		std::vector<Ptr<Queue2> >::iterator qItLast = std::find(
-				queueOrder.begin(), queueOrder.end(), lastQueue2);
+		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue2);
+		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue2);
 
 		// Push all _except_ the last one
 		for (; qIt != qItLast; qIt++)
@@ -513,10 +480,8 @@ void ExecEnv::fillQueue2s(std::string first, std::string last,
 		// Iterate queues in the queue order, and
 		// insert each queue between and including
 		// firstQueue2 and lastQueue2 in lc->queues.
-		std::vector<std::string>::iterator qIt = std::find(
-				stateQueue2Order.begin(), stateQueue2Order.end(), first);
-		std::vector<std::string>::iterator qItLast = std::find(
-				stateQueue2Order.begin(), stateQueue2Order.end(), last);
+		auto qIt = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), first);
+		auto qItLast = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), last);
 
 		// Push all _except_ the last one
 		for (; qIt != qItLast; qIt++)
@@ -526,20 +491,14 @@ void ExecEnv::fillQueue2s(std::string first, std::string last,
 		if (qIt != stateQueue2Order.end())
 			lc->stateQueue2sServed.push_back(stateQueue2s[*qIt]);
 	} else {
-		std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *firstQueue2 =
-				serviceQueue2s[first];
-		std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > * lastQueue2 =
-				serviceQueue2s[last];
+		auto firstQueue2 = serviceQueue2s[first];
+		auto lastQueue2 = serviceQueue2s[last];
 
 		// Iterate queues in the queue order, and
 		// insert each queue between and including
 		// firstQueue2 and lastQueue2 in lc->queues.
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator qIt =
-				std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(),
-						firstQueue2);
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator qItLast =
-				std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(),
-						lastQueue2);
+		auto qIt = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), firstQueue2);
+		auto qItLast = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), lastQueue2);
 
 		// Push all _except_ the last one
 		for (; qIt != qItLast; qIt++)
@@ -576,7 +535,7 @@ uint32_t ExecEnv::stringToUint32(const std::string& s) {
 
 std::string ExecEnv::deTokenize(std::vector<std::string> tokens) {
 	std::string result = "";
-	std::vector<std::string>::iterator it = tokens.begin();
+	auto it = tokens.begin();
 
 	while (it != tokens.end()) {
 		result.append(*it);
@@ -587,8 +546,7 @@ std::string ExecEnv::deTokenize(std::vector<std::string> tokens) {
 	return result;
 }
 
-ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a,
-		ProcessingStage b) {
+ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage b) {
 	ProcessingStage toReturn;
 	// Run through resources in both processing stages, and sum them
 	for (int i = 0; i < LASTRESOURCE; i++) {
@@ -626,8 +584,7 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a,
 						+ (sigma * sigma) * (counta * countb / countx);
 
 				// Create distribution and store in toReturn
-				toReturn.resourcesUsed[i].consumption = NormalVariable(combavg,
-						combvar);
+				toReturn.resourcesUsed[i].consumption = NormalVariable(combavg, combvar);
 				toReturn.resourcesUsed[i].defined = true;
 				toReturn.samples = countx;
 				toReturn.resourcesUsed[i].param1 = combavg;
@@ -672,15 +629,15 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 			// If we have a PROCESS event, we set the
 			// one in the existing program to be the
 			// sum of the existing and the new
-			ProcessingStage curPSNew = *(ProcessingStage *) (curEventNew);
-			ProcessingStage curPSExist = *(ProcessingStage *) (curEventExist);
+			auto curPSNew = *(ProcessingStage *) (curEventNew);
+			auto curPSExist = *(ProcessingStage *) (curEventExist);
 			*curEventExist = addProcessingStages(curPSNew, curPSExist);
 		} else if (curEventNew->type == CONDITION
 				&& !(((Condition *) curEventNew)->condType == STATECONDITION
 						&& ((StateCondition*) curEventNew)->operation
 								== CONDITIONWRITE)) {
-			Condition *curCond = (Condition *) (curEventNew);
-			Condition *existCond = (Condition *) (curEventExist);
+			auto curCond = (Condition *) (curEventNew);
+			auto existCond = (Condition *) (curEventExist);
 
 			// Make sure we have the same type of condition
 			if (curCond->condType != existCond->condType) {
@@ -700,11 +657,9 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 			// the program in this entry.
 			// First, get the value of the condition, which
 			// resides as the only value in the condition.
-			std::pair<uint32_t, Program *> newProgram =
-					curCond->getClosestEntryValue(0);
+			auto newProgram = curCond->getClosestEntryValue(0);
 			uint32_t conditionValue = newProgram.first;
-			std::pair<uint32_t, Program *> closest =
-					existCond->getClosestEntryValue(conditionValue);
+			auto closest = existCond->getClosestEntryValue(conditionValue);
 			if (closest.first == conditionValue) {
 				curPgm = newProgram.second;
 				existPgm = closest.second;
@@ -864,19 +819,19 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	// returns for each event, while the variables hold values
 	// regarding series of events, we must keep their values
 	// between runs. This is why they are declared static.
-	static Ptr<SEM> currentlyHandled = NULL;
+	static Ptr<SEM> currentlyHandled = nullptr;
 	static std::vector<std::string> currentDistributions;
 	static std::vector<enum ResourceType> currentResources;
-	static Program *rootProgram = NULL;
-	static Program *currentProgram = NULL;
+	static Program *rootProgram = nullptr;
+	static Program *currentProgram = nullptr;
 	static bool dequeueOrLoopEncountered = false;
 	static std::string currentName = "";
 	static uint32_t nrSamples = 0;
 
 	// Pointer to the execution event and prospective
 	// condition created
-	ExecutionEvent *execEvent = NULL;
-	Condition *c = NULL;
+	ExecutionEvent *execEvent = nullptr;
+	Condition *c = nullptr;
 
 	/******************************************/
 	/************** SEM HEADER ****************/
@@ -885,11 +840,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	if (!tokens[0].compare("NAME")) {
 		// Check if this sem allready exists. If not, create it.
 		Ptr<SEM> sem;
-		std::map<std::string, Ptr<SEM> >::iterator it = m_serviceMap.find(
-				tokens[1]);
+		auto it = m_serviceMap.find(tokens[1]);
 
 		// It did not exist: create it
-		if (it == m_serviceMap.end() || it->second == NULL) {
+		if (it == m_serviceMap.end() || it->second == nullptr) {
 			currentlyHandled = Create<SEM>();
 			m_serviceMap[tokens[1]] = currentlyHandled;
 			currentlyHandled->name = tokens[1];
@@ -899,8 +853,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// If we have a trigger specified on this service, we
 		// insert the string into the sem
-		std::map<std::string, std::string>::iterator foundTrigger =
-				serviceTriggers.find(tokens[1]);
+		auto foundTrigger = serviceTriggers.find(tokens[1]);
 
 		if (foundTrigger != serviceTriggers.end()) {
 			currentlyHandled->trigger = foundTrigger->second;
@@ -994,7 +947,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 	if (!tokens[1].compare("STOP") || !tokens[1].compare("RESTART")) {
 		// Append END-event to current program
-		ExecutionEvent *end = new ExecutionEvent();
+		auto end = new ExecutionEvent();
 		end->type = END;
 		currentProgram->events.push_back(end);
 		execEvent = end;
@@ -1007,7 +960,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// Get the program pointer of the current SEM
 		Program **existingProgram;
-		if (currentlyHandled->lc != NULL) {
+		if (currentlyHandled->lc != nullptr) {
 			uint32_t numQueue2s =
 					currentlyHandled->lc->serviceQueue2s ?
 							currentlyHandled->lc->serviceQueue2sServed.size() :
@@ -1031,8 +984,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// before returning. For other event types, this is done at the end
 		// of this member function.
 		execEvent->tokens = tokens;
-		std::map<std::string, std::string>::iterator foundTrigger =
-				locationTriggers.find(tokens[0]);
+		auto foundTrigger = locationTriggers.find(tokens[0]);
 		if (foundTrigger != locationTriggers.end())
 			execEvent->checkpoint = locationTriggers[foundTrigger->first];
 		execEvent->line = line;
@@ -1043,10 +995,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		} else
 			execEvent->hasDebug = false;
 
-		// If the existing program is NULL, we simply set it
+		// If the existing program is nullptr, we simply set it
 		// to our program. Else wise, we iterate the existing
 		// program to update probabilities and merge branch
-		if (*existingProgram == NULL)
+		if (*existingProgram == nullptr)
 			*existingProgram = rootProgram;
 		else
 			// addPgm will delete the parts of
@@ -1054,13 +1006,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			addPgm(rootProgram, *existingProgram);
 
 		// Reset static var
-		currentlyHandled = NULL;
-		currentDistributions.erase(currentDistributions.begin(),
-				currentDistributions.end());
-		currentResources.erase(currentResources.begin(),
-				currentResources.end());
-		rootProgram = NULL;
-		currentProgram = NULL;
+		currentlyHandled = nullptr;
+		currentDistributions.erase(currentDistributions.begin(), currentDistributions.end());
+		currentResources.erase(currentResources.begin(), currentResources.end());
+		rootProgram = nullptr;
+		currentProgram = nullptr;
 		dequeueOrLoopEncountered = false;
 		currentName = "";
 		nrSamples = 0;
@@ -1068,16 +1018,16 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		return;
 	}
 
-	if (!tokens[1].compare("PROCESS") || !tokens[1].compare("PEUSTART")) {
+	if (tokens[1] == "PROCESS" || tokens[1] == "PEUSTART") {
 		// Iterate all HWE aggregates obtained during
 		// the parsing of the header.
 		// First, create the processing stage
-		ProcessingStage *ps = new ProcessingStage();
+		auto ps = new ProcessingStage();
 		execEvent = ps;
 		ps->samples = nrSamples;
 
 		int intField = 0;
-		if (!tokens[1].compare("PEUSTART"))
+		if (tokens[1] == "PEUSTART")
 			intField = 1;
 
 		// Then, iterate according to all HWE aggregates
@@ -1124,9 +1074,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		}
 
 		// If we have a PEUSTART, we want insert the SEM of the interrupt specified
-		if (!tokens[1].compare("PEUSTART")) {
+		if (tokens[1] == "PEUSTART") {
 			ps->interrupt = m_serviceMap[tokens[2]];
-			if (ps->interrupt == NULL) {
+			if (ps->interrupt == nullptr) {
 				std::cout << "SEM " << tokens[2] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
 				exit(1);
 			}
@@ -1249,9 +1199,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// ProcessingStage ps1(cycles_per_cepop, deviation_per_cepop);
 		// ProcessingStage ps2(cycles_per_fsm, deviation_per_fsm);
-		InsertEventIntoFSM *ieifsm = new InsertEventIntoFSM(/*ps2*/);
+		auto ieifsm = new InsertEventIntoFSM(/*ps2*/);
 		ieifsm->ps = ps2;
-		InsertEventIntoCEPOp *ieiceop = new InsertEventIntoCEPOp(/*ps1, ieifsm*/);
+		auto ieiceop = new InsertEventIntoCEPOp(/*ps1, ieifsm*/);
 		ieiceop->ieifsm = ieifsm;
 		ieiceop->ps = ps1;
 		ieiceop->pCEPEngine = node->GetObject<ProcessCEPEngine>();
@@ -1277,7 +1227,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	// able to resolve the condition.
 	if (!tokens[1].compare("ENQUEUE") || !tokens[1].compare("DEQUEUE")) {
 		// Create an event, and insert the queue
-		Queue2ExecutionEvent *q = new Queue2ExecutionEvent();
+		auto q = new Queue2ExecutionEvent();
 		execEvent = q;
 		q->enqueue = !tokens[1].compare("ENQUEUE");
 		// If we have a service queue, set the SEM
@@ -1285,7 +1235,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			q->serviceQueue2 = true;
 			if (!tokens[1].compare("ENQUEUE")) {
 				q->semToEnqueue = m_serviceMap[tokens[3]];
-				if (q->semToEnqueue == NULL) {
+				if (q->semToEnqueue == nullptr) {
 					std::cout << "SEM " << tokens[2] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
 					exit(1);
 				}
@@ -1321,17 +1271,13 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// this event: (1) the one in the DEQUEUE event itself,
 		// and (2) the one in the SEM prospectively dequeued.
 		if (!tokens[1].compare("DEQUEUE")) {
-			std::map<std::string, std::string>::iterator dqTrigIt =
-					dequeueTriggers.find(tokens[3]);
+			auto dqTrigIt = dequeueTriggers.find(tokens[3]);
 			if (dqTrigIt != dequeueTriggers.end())
 				q->checkpoint = dqTrigIt->second;
 
 			// If we're inside a loop, update
 			// dequeueOrLoopEncountered
-			if (currentlyHandled->lc != NULL
-					&& (!tokens[4].compare("0")
-							|| queuesIn(tokens[4], tokens[4],
-									currentlyHandled->lc))) {
+			if (currentlyHandled->lc != nullptr && (tokens[4] == "0" || queuesIn(tokens[4], tokens[4], currentlyHandled->lc))) {
 				dequeueOrLoopEncountered = true;
 				currentProgram->hasDequeue = true; // See comments in program.h this member
 			}
@@ -1341,133 +1287,93 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(q);
 
 
-        if (q->serviceQueue2 == true && !tokens[1].compare("ENQUEUE") && tokens.size() > 5) {
+        if (q->serviceQueue2 == true && tokens[1] == "ENQUEUE" && tokens.size() > 5) {
 		    std::vector<uint32_t> arguments;
 		    std::string threadName = tokens[5];
 
-		    SchedulerExecutionEvent *se = new SchedulerExecutionEvent(
-				    AWAKE, arguments,
-				    threadName);
-
-		    //execEvent = se;
+		    auto se = new SchedulerExecutionEvent(AWAKE, arguments, threadName);
 
             currentProgram->events.push_back(se);
 		}
 	}
 
 	// Handle conditions
-	if (!tokens[1].compare("QUEUECOND") || !tokens[1].compare("THREADCOND")
-			|| !tokens[1].compare("STATECOND") || !tokens[1].compare("ENQUEUE")
-			|| !tokens[1].compare("DEQUEUE") || !tokens[1].compare("PKTEXTR")) {
+	if (tokens[1] == "QUEUECOND" || tokens[1] == "THREADCOND" || tokens[1] == "STATECOND" ||
+	    tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE" || tokens[1] == "PKTEXTR") {
 
-		Program *newProgram = new Program();
+		auto newProgram = new Program();
 		newProgram->sem = currentlyHandled;
 
 		// All conditions are assumed to be local.
 		// State-conditions can be used to create
 		// global conditions.
-		if (!tokens[1].compare("QUEUECOND")) {
+		if (tokens[1] == "QUEUECOND") {
 			// Assume that the first and last queues are of the same type: packet or service queue
 			if (queues.find(tokens[2]) != queues.end()) {
-				Queue2Condition *q = new Queue2Condition();
+				auto q = new Queue2Condition();
 				((ExecutionEvent *)q)-> lineNr = lineNr;
 				q->firstQueue2 = queues[tokens[2]];
 				q->lastQueue2 = queues[tokens[3]];
 				c = (Condition *) q;
 				c->scope = CONDITIONGLOBAL;
-				c->insertEntry(
-						!tokens[4].compare("empty") ?
-								QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
-				c->getConditionQueue2s = ns3::MakeCallback(
-						&ConditionFunctions::Queue2Condition,
-						conditionFunctions);
+				c->insertEntry(tokens[4] == "empty" ? QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
+				c->getConditionQueue2s = ns3::MakeCallback(&ConditionFunctions::Queue2Condition, conditionFunctions);
 			} else {
 				ServiceQueue2Condition *q = new ServiceQueue2Condition();
 				q->firstQueue2 = serviceQueue2s[tokens[2]];
 				q->lastQueue2 = serviceQueue2s[tokens[3]];
 				((ExecutionEvent *)q)-> lineNr = lineNr;
 				c = (Condition *) q;
-				c->insertEntry(
-						!tokens[4].compare("empty") ?
-								QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
-				c->getServiceConditionQueue2s = ns3::MakeCallback(
-						&ConditionFunctions::ServiceQueue2Condition,
-						conditionFunctions);
+				c->insertEntry(tokens[4] == "empty" ? QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
+				c->getServiceConditionQueue2s = ns3::MakeCallback(&ConditionFunctions::ServiceQueue2Condition, conditionFunctions);
 			}
 
-//			std::cout << "Adding CONDITION" << std::endl;
 			// Assume local: insert c into current program
 			currentProgram->events.push_back(c);
 			currentProgram = newProgram;
-		} else if (!tokens[1].compare("THREADCOND")) {
-//			std::cout << "Adding CONDITION" << std::endl;
-			ThreadCondition *t = new ThreadCondition();
-			((ExecutionEvent *)t)-> lineNr = lineNr;
-			c = (Condition *) t;
+		} else if (tokens[1] == "THREADCOND") {
+			auto t = new ThreadCondition();
+			t-> lineNr = lineNr;
+			c = t;
 			c->scope = CONDITIONGLOBAL;
-			c->insertEntry(
-					!tokens[4].compare("ready") ? THREADREADY : THREADNOTREADY,
-					newProgram);
+			c->insertEntry(tokens[4] == "ready" ? THREADREADY : THREADNOTREADY, newProgram);
 			t->threadId = tokens[2];
-			c->getConditionThread = ns3::MakeCallback(
-					&ConditionFunctions::ThreadCondition, conditionFunctions);
+			c->getConditionThread = ns3::MakeCallback(&ConditionFunctions::ThreadCondition, conditionFunctions);
 
 			// Assume local: insert c into current program
 			currentProgram->events.push_back(c);
 			currentProgram = newProgram;
-		} else if (!tokens[1].compare("STATECOND")) {
-//			std::cout << "Adding rCONDITION" << std::endl;
+		} else if (tokens[1] == "STATECOND") {
 			// Can be global or local
 			// First find out if we have a condition specified for this location
-			bool definedInDeviceFile = !tokens[2].compare(
-					"definedindevicefile");
+			bool definedInDeviceFile = tokens[2] == "definedindevicefile";
 			std::map<std::string, struct condition>::iterator foundCond;
 
 			if (definedInDeviceFile)
-				std::map<std::string, struct condition>::iterator foundCond =
-						locationConditions.find(tokens[0]);
+			    foundCond = locationConditions.find(tokens[0]);
 
 			if (!definedInDeviceFile || foundCond != locationConditions.end()) {
-				c = (Condition *) new StateCondition();
-				((ExecutionEvent *)c)-> lineNr = lineNr;
-				StateCondition* sc = (StateCondition *) c;
-				sc->name =
-						definedInDeviceFile ?
-								foundCond->second.condName : tokens[2];
-				sc->operation =
-						!tokens[3].compare("write") ?
-								CONDITIONWRITE : CONDITIONREAD;
-				sc->scope =
-						!tokens[4].compare("local") ?
-								CONDITIONLOCAL : CONDITIONGLOBAL;
+                auto sc = new StateCondition();
+				c = sc;
+				sc->lineNr = lineNr;
+				sc->name = definedInDeviceFile ? foundCond->second.condName : tokens[2];
+				sc->operation = tokens[3] == "write" ? CONDITIONWRITE : CONDITIONREAD;
+				sc->scope = tokens[4] == "local" ? CONDITIONLOCAL : CONDITIONGLOBAL;
 
 				// CONT HERE - TODO: add name of variable if local, add to gobal vars.
 				// structure if not local. We currently assume that the values are
 				// integers.
 
 				// See if state condition has read and/or write functions (TODO: Not tested yet!)
-				std::map<std::string,
-						Callback<uint32_t,
-								Ptr<Thread> > >::iterator foundCond =
-						conditionFunctions->conditionMap.find(
-								"readState" + sc->name);
+				auto foundCond = conditionFunctions->conditionMap.find("readState" + sc->name);
 				if (foundCond != conditionFunctions->conditionMap.end()) {
-					sc->getConditionState =
-							conditionFunctions->conditionMap["readState"
-									+ sc->name];
+					sc->getConditionState = conditionFunctions->conditionMap["readState" + sc->name];
 					sc->hasGetterFunction = true;
 				}
 
-				std::map<std::string,
-						Callback<void,
-								Ptr<Thread>, uint32_t> >::iterator foundCondWrite =
-						conditionFunctions->writeConditionMap.find(
-								"writeState" + sc->name);
-				if (foundCondWrite
-						!= conditionFunctions->writeConditionMap.end()) {
-					sc->setConditionState =
-							conditionFunctions->writeConditionMap["writeState"
-									+ sc->name];
+				auto foundCondWrite = conditionFunctions->writeConditionMap.find("writeState" + sc->name);
+				if (foundCondWrite != conditionFunctions->writeConditionMap.end()) {
+					sc->setConditionState = conditionFunctions->writeConditionMap["writeState" + sc->name];
 					sc->hasSetterFunction = true;
 				}
 
@@ -1484,35 +1390,30 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				}
 
 			}
-		} else if (!tokens[1].compare("PKTEXTR")) {
+		} else if (tokens[1] == "PKTEXTR") {
 //			std::cout << "Adding CONDITION" << std::endl;
 			// Can be global or local
 			// First find out if we have a condition specified for this location
-			std::map<std::string, struct condition>::iterator foundCond =
-					locationConditions.find(tokens[0]);
+			auto foundCond = locationConditions.find(tokens[0]);
 			if (foundCond != locationConditions.end()) {
 				c = (Condition *) new PacketCharacteristic();
 				((ExecutionEvent *)c)-> lineNr = lineNr;
 
 				// Set the packet extraction function id, and insert new program
-				c->getConditionState =
-						conditionFunctions->conditionMap[foundCond->second.condName];
+				c->getConditionState = conditionFunctions->conditionMap[foundCond->second.condName];
 				c->insertEntry(stringToUint32(tokens[2]), newProgram);
 
 				// Make newProgram the currentProgram after pushing this condition
 				currentProgram->events.push_back(c);
 				currentProgram = newProgram;
 			}
-		} else if (!tokens[1].compare("DEQUEUE") ||
-//				!tokens[1].compare("DEQUEUEN") ||
-				!tokens[1].compare("ENQUEUE")) {			// ||
-//				!tokens[1].compare("ENQUEUEN")) {
+		} else if (tokens[1] == "DEQUEUE" || tokens[1] == "ENQUEUE") {
 						// If queue is 0, we must first find the queue name.
 						// But before that, we must confirm that we are in
 						// fact within a loop.
 			std::string queueName;
-			if (!tokens[4].compare("0")) {
-				if (currentlyHandled->lc == NULL) {
+			if (tokens[4] == "0") {
+				if (currentlyHandled->lc == nullptr) {
 					NS_FATAL_ERROR("Got queue 0 outside of loop");
 					exit(1);
 
@@ -1521,35 +1422,27 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				} else {
 					// Differentiate between service and packet queues
 					if (currentlyHandled->lc->serviceQueue2s) {
-						std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *firstQueue2 =
-								currentlyHandled->lc->serviceQueue2sServed[0];
+						auto firstQueue2 = currentlyHandled->lc->serviceQueue2sServed[0];
 
 						// First, find the queue name
-						std::map<
-								std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *,
-								std::string>::iterator name =
-								serviceQueue2Names.find(firstQueue2);
+						auto name = serviceQueue2Names.find(firstQueue2);
 						if (name != serviceQueue2Names.end()) {
 							queueName = (*name).second;
 						}
 					} else if (currentlyHandled->lc->stateQueue2s) {
 						// First, find the queue name
-						Ptr<StateVariableQueue2> firstQueue2 =
-								currentlyHandled->lc->stateQueue2sServed[0];
+						auto firstQueue2 = currentlyHandled->lc->stateQueue2sServed[0];
 
 						// First, find the queue name
-						std::map<Ptr<StateVariableQueue2>, std::string>::iterator name =
-								stateQueue2Names.find(firstQueue2);
+						auto name = stateQueue2Names.find(firstQueue2);
 						if (name != stateQueue2Names.end()) {
 							queueName = (*name).second;
 						}
 					} else {
-						Ptr<Queue2> firstQueue2 =
-								currentlyHandled->lc->queuesServed[0];
+						auto firstQueue2 = currentlyHandled->lc->queuesServed[0];
 
 						// First, find the queue name
-						std::map<Ptr<Queue2>, std::string>::iterator name =
-								queueNames.find(firstQueue2);
+						auto name = queueNames.find(firstQueue2);
 						if (name != queueNames.end()) {
 							queueName = (*name).second;
 						}
@@ -1564,34 +1457,26 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				queueName = tokens[4];
 
 			// Now check if there is a condition on it.
-			std::map<std::string, std::vector<struct condition> >::iterator condition =
-					!tokens[1].compare(
-							"DEQUEUE")/* || !tokens[3].compare("DEQUEUEN")*/?
-							dequeueConditions.find(queueName) :
-							enqueueConditions.find(queueName);
+			auto condition = tokens[1] == "DEQUEUE" ? dequeueConditions.find(queueName) : enqueueConditions.find(queueName);
 
 			// If so, add the condition.
-			if (!(condition == dequeueConditions.end()
-					|| condition == enqueueConditions.end())) {
+			if (!(condition == dequeueConditions.end() || condition == enqueueConditions.end())) {
 
 				// Iterate all conditions on this queue, and chain together
-				std::vector<struct condition> allConditions = condition->second;
+				auto allConditions = condition->second;
 				struct condition cond;
-				for (std::vector<struct condition>::iterator it =
-						allConditions.begin(); it != allConditions.end();
-						++it) {
+				for (auto it = allConditions.begin(); it != allConditions.end(); ++it) {
 					newProgram = new Program();
 					newProgram->sem = currentlyHandled;
 
 					cond = *it;
-					PacketCharacteristic *pc = new PacketCharacteristic();
+					auto pc = new PacketCharacteristic();
 					c = (Condition *) pc;
 					((ExecutionEvent *)pc)-> lineNr = lineNr;
 					c->scope = CONDITIONGLOBAL;
 
 					// Set the packet extraction function id, and insert new program
-					c->getConditionState =
-							conditionFunctions->conditionMap[cond.condName];
+					c->getConditionState = conditionFunctions->conditionMap[cond.condName];
 					c->insertEntry(stringToUint32(tokens[3]), newProgram);
 
 					// Make newProgram the currentProgram after pushing this condition
@@ -1600,13 +1485,12 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				}
 			}
 
-			if (!tokens[2].compare("STATEQUEUE")
-					&& !tokens[1].compare("DEQUEUE")) {
+			if (tokens[2] == "STATEQUEUE" && tokens[1] == "DEQUEUE") {
 				// CONT HERE: move to thread.cc and handle the execution-part
 				newProgram = new Program();
 				newProgram->sem = currentlyHandled;
 
-				StateQueue2Condition *sc = new StateQueue2Condition();
+				auto sc = new StateQueue2Condition();
 				((ExecutionEvent *)sc)-> lineNr = lineNr;
 				sc->queueName = queueName;
 				c = (Condition *) sc;
@@ -1621,18 +1505,18 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		}
 	}
 
-	if (!tokens[1].compare("CALL") || !tokens[1].compare("LOOP")) {
+	if (tokens[1] == "CALL" || tokens[1] == "LOOP") {
 		// Here, we have one service calling another. We create
 		// an ExecutionEvent, where the service is inserted
 		// into the "service" member.
-		ExecuteExecutionEvent *e = new ExecuteExecutionEvent();
-		e->service = !tokens[2].compare("0") ? "" : tokens[2];
-		if (!tokens[2].compare("0"))
-			e->sem = NULL;
+		auto e = new ExecuteExecutionEvent();
+		e->service = tokens[2] == "0" ? "" : tokens[2];
+		if (tokens[2] == "0")
+			e->sem = nullptr;
 		else {
 			e->sem = m_serviceMap[tokens[2]];
 			// Device file is set up incorrectly
-			if (e->sem == NULL) {
+			if (e->sem == nullptr) {
 				std::cout << "SEM " << tokens[2] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
 				exit(1);
 			}
@@ -1642,7 +1526,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// If we have a call to a loop, prepare a loop condition,
 		// and set dequeueOrLoopEncountered to true if it regards
 		// queue(s) of a prospectively encapsulating loop.
-		if (!tokens[1].compare("LOOP")) {
+		if (tokens[1] == "LOOP") {
 			// We first copy the contents of the lc of the target
 			// service if it has one. Note that this includes the
 			// queues served, which may imply quite a bit of copying,
@@ -1650,21 +1534,20 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			// than repeatedly per execution during simulation.
 			e->lc = new LoopCondition();
 			LoopCondition *targetServiceLC = this->m_serviceMap[tokens[2]]->lc;
-			if (targetServiceLC != NULL)
+			if (targetServiceLC != nullptr)
 				*(e->lc) = *targetServiceLC;
 
 			// It is reasonable that parameters of the loop may
 			// change. This does not regard which queues served,
 			// though, as this is part of what defined the loop.
 			e->lc->maxIterations = stringToUint32(tokens[6]);
-			e->lc->perQueue2 = !tokens[3].compare("1");
+			e->lc->perQueue2 = tokens[3] == "1";
 
 			// If we have a nested loop then
 			// if we have a loop that servers one or more of the
 			// queues in currentlyHandled->lc, set
 			// dequeueOrLoopEncountered to true.
-			if (currentlyHandled->lc != NULL
-					&& queuesIn(tokens[3], tokens[4], currentlyHandled->lc)) {
+			if (currentlyHandled->lc != nullptr && queuesIn(tokens[3], tokens[4], currentlyHandled->lc)) {
 				dequeueOrLoopEncountered = true;
 				currentProgram->hasInternalLoop = true; // Se comments in program.h on this member
 			}
@@ -1674,8 +1557,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(e);
 	}
 
-	if (!tokens[1].compare("SEMUP") || !tokens[1].compare("SEMDOWN")
-			|| !tokens[1].compare("WAITCOMPL") || !tokens[1].compare("COMPL")) {
+	if (tokens[1] == "SEMUP" || tokens[1] == "SEMDOWN" || tokens[1] == "WAITCOMPL" || tokens[1] == "COMPL") {
 		// Note that this may be on a tempsynch
 		// This is currently how it works in Linux,
 		// but it could easily be changed to be
@@ -1687,30 +1569,28 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// Alternatively, just let the analyzer set
 		// the number according to the type of the
 		// event.
-		uint32_t synchType =
-				currentlyHandled->peu->taskScheduler->GetSynchReqType(
-						tokens[1]);
-		SynchronizationExecutionEvent *s = new SynchronizationExecutionEvent();
+		uint32_t synchType = currentlyHandled->peu->taskScheduler->GetSynchReqType(tokens[1]);
+		auto s = new SynchronizationExecutionEvent();
 		execEvent = s;
 		s->synchType = synchType;
 
-	NS_ASSERT_MSG(tokens.size() >= 4, "Expected at least 4 tokens in synch request on line " << lineNr);
+	    NS_ASSERT_MSG(tokens.size() >= 4, "Expected at least 4 tokens in synch request on line " << lineNr);
 
 		s->id = tokens[2];
-		s->temp = !tokens[2].compare("(TEMP)");
-		s->global = !tokens[3].compare("global"); // TODO: scope currently only supported for tempvars
+		s->temp = tokens[2] == "(TEMP)";
+		s->global = tokens[3] == "global"; // TODO: scope currently only supported for tempvars
 		// Currently, we don't use args, so we don't touch it.
 
 		// Add the event to the current program
 		currentProgram->events.push_back(s);
 	}
 
-	if (!tokens[1].compare("TEMPSYNCH")) {
+	if (tokens[1] == "TEMPSYNCH") {
 		// This is very simple - we just indicate its type.
 		// All of the action (creation of synch-prim. and
 		// setting the void-pointer in the packet to it <- NOT PACKET, IT MAY NOT EXIST!)
 		// happens in thread.cc
-		TempCompletion *tc = new TempCompletion();
+		auto tc = new TempCompletion();
 		execEvent = tc;
 
 		/* Go through list of users, and add to vector in the tempsynch statement */
@@ -1719,17 +1599,17 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		for (; i < tokens.size(); i += 2)
 			tc->users.push_back(tokens[i]);
 
-		tc->global = !tokens[tokens.size() - 1].compare("global");
+		tc->global = tokens[tokens.size() - 1] == "global";
 
 		currentProgram->events.push_back(tc);
 	}
 
-	if (!tokens[1].compare("DEBUG")) {
+	if (tokens[1] == "DEBUG") {
 		// This is very simple - we just indicate its type.
 		// All of the action (creation of synch-prim. and
 		// setting the void-pointer in the packet to it <- NOT PACKET, IT MAY NOT EXIST!)
 		// happens in thread.cc
-		DebugExecutionEvent *de = new DebugExecutionEvent();
+		auto de = new DebugExecutionEvent();
 		execEvent = de;
 		if (tokens.size() >= 2)
 			de->tag = tokens[2];
@@ -1737,20 +1617,18 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(de);
 	}
 
-    if (!tokens[1].compare("MEASURE")) {
-        MeasureExecutionEvent *me = new MeasureExecutionEvent();
+    if (tokens[1] == "MEASURE") {
+        auto me = new MeasureExecutionEvent();
         currentProgram->events.push_back(me);
     }
 
-	if (!tokens[1].compare("TTWAKEUP") || !tokens[1].compare("SLEEPTHREAD")) {
+	if (tokens[1] == "TTWAKEUP" || tokens[1] == "SLEEPTHREAD") {
 		std::vector<uint32_t> arguments;
-		std::string threadName = ""; // Used only if TTWAKEUP
-		if (!tokens[1].compare("TTWAKEUP"))
+		std::string threadName; // Used only if TTWAKEUP
+		if (tokens[1] == "TTWAKEUP")
 			threadName = tokens[2];
 
-		SchedulerExecutionEvent *se = new SchedulerExecutionEvent(
-				!tokens[1].compare("TTWAKEUP") ? AWAKE : SLEEPTHREAD, arguments,
-				threadName);
+		auto se = new SchedulerExecutionEvent(tokens[1] == "TTWAKEUP" ? AWAKE : SLEEPTHREAD, arguments, threadName);
 
 		execEvent = se;
 
@@ -1763,18 +1641,14 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// terms of the packet extract. Differing packet extracts does
 		// not mean that the events differ, only that the packets dequeued
 		// have diferent characteristics.
-		if (!tokens[1].compare("DEQUEUE") ||
-//				!tokens[1].compare("DEQUEUEN") ||
-				!tokens[1].compare("ENQUEUE"))		// ||
-//				!tokens[1].compare("ENQUEUEN"))
+		if (tokens[1] == "DEQUEUE" || tokens[1] == "ENQUEUE")
 			tokens[3] = "0";
 
 		execEvent->tokens = tokens;
 
 		// If we have a checkpoint specified on this location, we
 		// insert the string into the checkpoint value
-		std::map<std::string, std::string>::iterator foundTrigger =
-				locationTriggers.find(tokens[0]);
+		auto foundTrigger = locationTriggers.find(tokens[0]);
 
 		if (foundTrigger != locationTriggers.end())
 			execEvent->checkpoint = locationTriggers[foundTrigger->first];
@@ -1782,8 +1656,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// DEBUG
 		execEvent->line = line;
 		execEvent->lineNr = lineNr;
-//		std::cout << tokens.size() << " " << tokens[tokens.size() - 2] << std::endl;
-		if (tokens.size() > 1 && !tokens[tokens.size() - 2].compare("debug")) {
+		if (tokens.size() > 1 && tokens[tokens.size() - 2] == "debug") {
 			execEvent->hasDebug = true;
 			execEvent->debug = tokens[tokens.size() - 1];
 		} else
@@ -1798,14 +1671,12 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// If we have a checkpoint specified on this location, we
 		// insert the string into the checkpoint value
-		std::map<std::string, std::string>::iterator foundTrigger =
-				locationTriggers.find(tokens[0]);
+		auto foundTrigger = locationTriggers.find(tokens[0]);
 
 		if (foundTrigger != locationTriggers.end())
 			c->checkpoint = locationTriggers[foundTrigger->first];
 
-//		std::cout << tokens.size() << " " << tokens[tokens.size() - 2] << std::endl;
-		if (tokens.size() > 1 && !tokens[tokens.size() - 2].compare("debug")) {
+		if (tokens.size() > 1 && tokens[tokens.size() - 2] == "debug") {
 			c->hasDebug = true;
 			c->debug = tokens[tokens.size() - 1];
 		}
@@ -1823,7 +1694,7 @@ std::vector<std::string> split(const char *str, char c = ' ')
         while(*str != c && *str)
             str++;
 
-        result.push_back(std::string(begin, str));
+        result.emplace_back(std::string(begin, str));
     } while (0 != *str++);
 
     return result;
@@ -1864,43 +1735,38 @@ void ExecEnv::Parse(std::string device) {
 				continue;
 
 			// Mode changes with these keywords
-			if (!tokens[0].compare("QUEUES") || !tokens[0].compare("SYNCH")
-					|| !tokens[0].compare("THREADS")
-					|| !tokens[0].compare("SIGSTART")
-					|| !tokens[0].compare("SIGEND")
-					|| !tokens[0].compare("HARDWARE")
-					|| !tokens[0].compare("CONDITIONS")
-					|| !tokens[0].compare("TRIGGERS")) {
+			if (tokens[0] == "QUEUES" || tokens[0] == "SYNCH" || tokens[0] == "THREADS" || tokens[0] == "SIGSTART" ||
+			    tokens[0] == "SIGEND" || tokens[0] == "HARDWARE" || tokens[0] == "CONDITIONS" || tokens[0] == "TRIGGERS") {
 
 				mode = tokens[0];
 				continue;
 			}
 
-			if (!tokens[0].compare("CEPENABLED")) {
+			if (tokens[0] == "CEPENABLED") {
 				GetObject<Node>()->AggregateObject( CreateObject<ProcessCEPEngine>() );
 				continue;
 			}
 
 			// Parse the device header
-			if (!mode.compare("QUEUES")) {
+			if (mode == "QUEUES") {
 				HandleQueue2(tokens);
-			} else if (!mode.compare("SYNCH")) {
-				if (hwModel->cpus[0]->taskScheduler == NULL) {
+			} else if (mode == "SYNCH") {
+				if (hwModel->cpus[0]->taskScheduler == nullptr) {
 					NS_FATAL_ERROR(
 							"Attempting to create synchronization variable without having set the task scheduler\n");
 					exit(1);
 				}
 
 				HandleSynch(tokens);
-			} else if (!mode.compare("THREADS")) {
+			} else if (mode == "THREADS") {
 				HandleThreads(tokens);
-			} else if (!mode.compare("HARDWARE")) {
+			} else if (mode == "HARDWARE") {
 				HandleHardware(tokens);
-			} else if (!mode.compare("CONDITIONS")) {
+			} else if (mode == "CONDITIONS") {
 				HandleConditions(tokens);
-			} else if (!mode.compare("TRIGGERS")) {
+			} else if (mode == "TRIGGERS") {
 				HandleTriggers(tokens);
-			} else if (!mode.compare("SIGSTART")) {
+			} else if (mode == "SIGSTART") {
 				HandleSignature(tokens);
 			} else
 				continue;
