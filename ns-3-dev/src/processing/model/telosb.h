@@ -113,6 +113,8 @@ public:
 
     TelosB(Ptr<Node> node, ProtocolStack *ps);
 
+    void Configure(Ptr<ExecEnv>);
+
     // Models the radio's behavior before the packets are processed by the microcontroller.
     void ReceivePacket(Ptr<Packet> packet);
 

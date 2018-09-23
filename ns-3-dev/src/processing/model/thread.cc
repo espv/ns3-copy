@@ -586,10 +586,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newProgramLocation->program = newSem->rootProgram;
 		newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
 		newProgramLocation->curPkt = m_programStack.top()->curPkt;
-		newProgramLocation->localStateVariables =
-			m_programStack.top()->localStateVariables;
-		newProgramLocation->localStateVariableQueue2s =
-			m_programStack.top()->localStateVariableQueue2s;
+		newProgramLocation->localStateVariables = m_programStack.top()->localStateVariables;
+		newProgramLocation->localStateVariableQueue2s = m_programStack.top()->localStateVariableQueue2s;
 		newProgramLocation->tempvar = m_programStack.top()->tempvar;
 
 		// Set up loop state if this is a loop statement
@@ -641,7 +639,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 								// iterate queues until we find one which is not
 								// empty. If all are empty, return from LOOP.
 								if (newLc->serviceQueue2s) {
-									int index = 0;
+									uint32_t index = 0;
 									auto it = newLc->serviceQueue2sServed.begin();
 									for (;
 											it
@@ -658,7 +656,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 										m_currentLocation->curServedQueue2 =
 											index;
 								} else if (newLc->stateQueue2s) {
-									int index = 0;
+									uint32_t index = 0;
 									auto it = newLc->stateQueue2sServed.begin();
 									for (;
 											it
@@ -672,10 +670,9 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 										// We do not pop thread of execution, as we did not push it yet
 										return true;
 									else
-										m_currentLocation->curServedQueue2 =
-											index;
+										m_currentLocation->curServedQueue2 = index;
 								} else {
-									int index = 0;
+									uint32_t index = 0;
 									auto it = newLc->queuesServed.begin();
 									for (;
 											it != newLc->queuesServed.end()

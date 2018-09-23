@@ -96,8 +96,6 @@ protected:
   virtual uint32_t DoGetSynchReqType(std::string name);
 
   void MigrateThread(int pid, Ptr<Thread> thread);
-
-  Ptr<PEU> peu;
 private:
 
   std::map<std::string, Ptr<Semaphore> > m_semaphores;

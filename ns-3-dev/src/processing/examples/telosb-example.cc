@@ -25,7 +25,7 @@
 
 namespace ns3 {
     NS_LOG_COMPONENT_DEFINE("TelosBExample");
-// For debug
+    // For debug
     extern bool debugOn;
 }
 
@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
   LogComponentEnable ("TelosBExample", LOG_LEVEL_ALL);
   LogComponentEnable ("TelosB", LOG_LEVEL_INFO);
   LogComponentEnable ("OnOffCC2420Application", LOG_LEVEL_INFO);
+  LogComponentEnable ("RoundRobinScheduler", LOG_LEVEL_INFO);
 
   // Fetch from command line
   CommandLine cmd;
@@ -176,9 +177,12 @@ int main(int argc, char *argv[])
     Ptr<CC2420InterfaceNetDevice> netDevice2 = nodes.Get(1)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
     Ptr<CC2420InterfaceNetDevice> netDevice3 = nodes.Get(2)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
     TelosB *mote1 = new TelosB(nodes.Get(0), InetSocketAddress(interfaces.GetAddress(0), 9), netDevice1, &ps);
+    mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
     TelosB *mote2 = new TelosB(nodes.Get(1), InetSocketAddress(interfaces.GetAddress(1), 9),
                                InetSocketAddress(interfaces.GetAddress(2), 9), netDevice2, &ps);
+    mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
     TelosB *mote3 = new TelosB(nodes.Get(2), InetSocketAddress(interfaces.GetAddress(2), 9), netDevice3, &ps);
+    mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
     debugOn = false;
 
     Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
@@ -251,10 +255,13 @@ int main(int argc, char *argv[])
     ProtocolStack *protocolStack = &ps;
 
     TelosB *mote1 = new TelosB(c.Get(0), &ps);
+    mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
     ScheduleInterrupt (mote1->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
     TelosB *mote2 = new TelosB(c.Get(1), &ps);
+    mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
     ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
     TelosB *mote3 = new TelosB(c.Get(2), &ps);
+    mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
     ScheduleInterrupt (mote3->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
 
     debugOn = true;
@@ -319,10 +326,13 @@ int main(int argc, char *argv[])
   ProtocolStack *protocolStack = &ps;
 
   TelosB *mote1 = new TelosB(c.Get(0), &ps);
+  mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
   ScheduleInterrupt (mote1->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
   TelosB *mote2 = new TelosB(c.Get(1), &ps);
+  mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
   ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
   TelosB *mote3 = new TelosB(c.Get(2), &ps);
+  mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
   ScheduleInterrupt (mote3->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
 
   debugOn = true;
@@ -404,82 +414,18 @@ int main(int argc, char *argv[])
     eeh->Install(ps.deviceFile, c);
     for (int i = 0; i < numberMotes; i++) {
         ScheduleInterrupt (c.Get(i), Create<Packet>(0), "HIRQ-12", Seconds(0));
-        protocolStack->GenerateTraffic(c.Get(i), ps.packet_size, new TelosB(c.Get(i), &ps),
-                                       new TelosB(c.Get(i), &ps), new TelosB(c.Get(i), &ps));
+        TelosB *mote1 = new TelosB(c.Get(i), &ps);
+        mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
+        TelosB *mote2 = new TelosB(c.Get(i), &ps);
+        mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
+        TelosB *mote3 = new TelosB(c.Get(i), &ps);
+        mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
+
+        protocolStack->GenerateTraffic(c.Get(i), ps.packet_size, mote1, mote2, mote3);
     }
     install_time = clock() - install_time;
     debugOn = false;
-/*, &ps
-    TelosB *moteFrom0 = new TelosB(c.Get(0), &ps);
-    TelosB *moteFrom1 = new TelosB(c.Get(1), &ps);
-    TelosB *moteFrom2 = new TelosB(c.Get(2), &ps);
-    TelosB *moteFrom3 = new TelosB(c.Get(3), &ps);
-    TelosB *moteFrom4 = new TelosB(c.Get(4), &ps);
-    TelosB *moteFrom5 = new TelosB(c.Get(5), &ps);
-    TelosB *moteFrom6 = new TelosB(c.Get(6), &ps);
-    TelosB *moteFrom7 = new TelosB(c.Get(7), &ps);
-    TelosB *moteFrom8 = new TelosB(c.Get(8), &ps);
-    TelosB *moteFrom9 = new TelosB(c.Get(9), &ps);
 
-    TelosB *moteInt0 = new TelosB(c.Get(10), &ps);
-    TelosB *moteInt1 = new TelosB(c.Get(11), &ps);
-    TelosB *moteInt2 = new TelosB(c.Get(12), &ps);
-    TelosB *moteInt3 = new TelosB(c.Get(13), &ps);
-    TelosB *moteInt4 = new TelosB(c.Get(14), &ps);
-    TelosB *moteInt5 = new TelosB(c.Get(15), &ps);
-    TelosB *moteInt6 = new TelosB(c.Get(16), &ps);
-    TelosB *moteInt7 = new TelosB(c.Get(17), &ps);
-    TelosB *moteInt8 = new TelosB(c.Get(18), &ps);
-    TelosB *moteInt9 = new TelosB(c.Get(19), &ps);
-
-    TelosB *moteTo0 = new TelosB(c.Get(20), &ps);
-    TelosB *moteTo1 = new TelosB(c.Get(21), &ps);
-    TelosB *moteTo2 = new TelosB(c.Get(22), &ps);
-    TelosB *moteTo3 = new TelosB(c.Get(23), &ps);
-    TelosB *moteTo4 = new TelosB(c.Get(23), &ps);
-    TelosB *moteTo5 = new TelosB(c.Get(24), &ps);
-    TelosB *moteTo6 = new TelosB(c.Get(25), &ps);
-    TelosB *moteTo7 = new TelosB(c.Get(26), &ps);
-    TelosB *moteTo8 = new TelosB(c.Get(27), &ps);
-    TelosB *moteTo9 = new TelosB(c.Get(28), &ps);
-
-
-    debugOn = false;
-    protocolStack->GenerateTraffic(c.Get(0), ps.packet_size, moteFrom0, moteInt0, moteTo0);
-    protocolStack->GenerateTraffic(c.Get(1), ps.packet_size, moteFrom1, moteInt1, moteTo1);
-    protocolStack->GenerateTraffic(c.Get(2), ps.packet_size, moteFrom2, moteInt2, moteTo2);
-    protocolStack->GenerateTraffic(c.Get(3), ps.packet_size, moteFrom3, moteInt3, moteTo3);
-    protocolStack->GenerateTraffic(c.Get(4), ps.packet_size, moteFrom4, moteInt4, moteTo4);
-    protocolStack->GenerateTraffic(c.Get(5), ps.packet_size, moteFrom5, moteInt5, moteTo5);
-    protocolStack->GenerateTraffic(c.Get(6), ps.packet_size, moteFrom6, moteInt6, moteTo6);
-    protocolStack->GenerateTraffic(c.Get(7), ps.packet_size, moteFrom7, moteInt7, moteTo7);
-    protocolStack->GenerateTraffic(c.Get(8), ps.packet_size, moteFrom8, moteInt8, moteTo8);
-    protocolStack->GenerateTraffic(c.Get(9), ps.packet_size, moteFrom9, moteInt9, moteTo9);*/
-
-    /*protocolStack1->GenerateTraffic(c.Get(1), 0, moteFrom1, moteInt1, moteTo1);
-    protocolStack2->GenerateTraffic(c.Get(2), 0, moteFrom2, moteInt2, moteTo2);
-    protocolStack3->GenerateTraffic(c.Get(3), 0, moteFrom3, moteInt3, moteTo3);
-    protocolStack4->GenerateTraffic(c.Get(4), 0, moteFrom4, moteInt4, moteTo4);
-    protocolStack5->GenerateTraffic(c.Get(5), 0, moteFrom5, moteInt5, moteTo5);
-    protocolStack6->GenerateTraffic(c.Get(6), 0, moteFrom6, moteInt6, moteTo6);
-    protocolStack7->GenerateTraffic(c.Get(7), 0, moteFrom7, moteInt7, moteTo7);
-    protocolStack8->GenerateTraffic(c.Get(8), 0, moteFrom8, moteInt8, moteTo8);
-    protocolStack9->GenerateTraffic(c.Get(9), 0, moteFrom9, moteInt9, moteTo9);*/
-
-    /*protocolStack1->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote13, mote2);
-    protocolStack2->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote12, mote2);
-    protocolStack3->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote11, mote2);
-    protocolStack4->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote10, mote2);
-    protocolStack5->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote9, mote2);
-    protocolStack6->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote8, mote2);
-    protocolStack7->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote7, mote2);
-    //protocolStack8->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote6, mote2);
-    protocolStack9->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote5, mote2);
-    protocolStack10->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote4, mote2);
-    protocolStack11->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote3, mote2);
-    protocolStack12->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote2, mote2);
-    protocolStack13->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote1, mote2);
-    protocolStack14->GenerateTraffic2(c.Get(0), 0, Seconds(0), mote0, mote0, mote2);*/
     Simulator::Stop(Seconds(ps.duration));
     clock_t t;
     NS_LOG_INFO ("Before");
@@ -563,8 +509,11 @@ int main(int argc, char *argv[])
             ProtocolStack *protocolStack = &ps;
 
             TelosB *mote1 = new TelosB(node_container.Get(0));
+            mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
             TelosB *mote2 = new TelosB(node_container.Get(1));
+            mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
             TelosB *mote3 = new TelosB(node_container.Get(2));
+            mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
 
             ScheduleInterrupt (mote1->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
             ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));

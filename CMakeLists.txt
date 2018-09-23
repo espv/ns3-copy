@@ -3510,8 +3510,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/processing/examples/trex-example.cc
         ns-3-dev/src/processing/examples/trex-example.cc~feature_cep_functionality
         ns-3-dev/src/processing/examples/wscript
-        ns-3-dev/src/processing/model/apic.cc
-        ns-3-dev/src/processing/model/apic.h
         ns-3-dev/src/processing/model/cep.cc
         ns-3-dev/src/processing/model/cep.h
         ns-3-dev/src/processing/model/condition.cc
@@ -3530,29 +3528,14 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/processing/model/local-state-variable.h
         ns-3-dev/src/processing/model/membus.cc
         ns-3-dev/src/processing/model/membus.h
-        ns-3-dev/src/processing/model/parameter-extractors.h
-        ns-3-dev/src/processing/model/paramextr.c
-        ns-3-dev/src/processing/model/paramextr.h
-        ns-3-dev/src/processing/model/parser.cc
-        ns-3-dev/src/processing/model/parser.h
         ns-3-dev/src/processing/model/peu.cc
         ns-3-dev/src/processing/model/peu.h
-        ns-3-dev/src/processing/model/processing-callback.h
-        ns-3-dev/src/processing/model/processing-helper.cc
-        ns-3-dev/src/processing/model/processing-helper.h
-        ns-3-dev/src/processing/model/processing.cc
-        ns-3-dev/src/processing/model/processing.h
-        ns-3-dev/src/processing/model/processingevents.h
         ns-3-dev/src/processing/model/program.cc
         ns-3-dev/src/processing/model/program.h
-        ns-3-dev/src/processing/model/rrpriorityscheduler.cc
-        ns-3-dev/src/processing/model/rrpriorityscheduler.h
         ns-3-dev/src/processing/model/rrscheduler.cc
         ns-3-dev/src/processing/model/rrscheduler.h
         ns-3-dev/src/processing/model/sem.cc
         ns-3-dev/src/processing/model/sem.h
-        ns-3-dev/src/processing/model/sharedresource.cc
-        ns-3-dev/src/processing/model/sharedresource.h
         ns-3-dev/src/processing/model/sync.cc
         ns-3-dev/src/processing/model/sync.h
         ns-3-dev/src/processing/model/taskscheduler.cc
@@ -3563,8 +3546,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/processing/model/thread.h
         ns-3-dev/src/processing/model/trex.cc
         ns-3-dev/src/processing/model/trex.h
-        ns-3-dev/src/processing/model/trigger.cc
-        ns-3-dev/src/processing/model/trigger.h
         ns-3-dev/src/processing/wscript
         ns-3-dev/src/propagation/bindings/callbacks_list.py
         ns-3-dev/src/propagation/bindings/modulegen__gcc_ILP32.py
@@ -4447,10 +4428,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/wutils.py
         CMakeLists.txt
         README.md
-        ns-3-dev/src/processing/model/automata.cc
-        ns-3-dev/src/processing/model/automata.h
-        #ns-3-dev/build/ns3/automata.cpp
-        #ns-3-dev/build/ns3//automata.h
         ns-3-dev/scratch/gnex.cc)
 
 add_custom_target(

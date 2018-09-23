@@ -39,6 +39,8 @@ public:
   // The latter is used with scheduler requests.
   std::map<std::string, int> threadPids;
 
+  bool allowNestedInterrupts = false;
+
   // To start and handle the scheduling events
   virtual void Initialize(Ptr<PEU> cpuPEU);
   void HandleSchedulerEvent();

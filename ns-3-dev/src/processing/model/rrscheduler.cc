@@ -58,55 +58,38 @@ RoundRobinScheduler::RoundRobinScheduler() : TaskScheduler()
 RoundRobinScheduler::~RoundRobinScheduler () {
 }
 
-bool called_from_here = false;
 void RoundRobinScheduler::Schedule() {
     //NS_LOG_INFO("Schedule()");
     //return;
     //
     // OYSTEDAL: TODO: Add handling for idle threads.
 
-
-    /*int oldCr = m_runqueue.front();
-    m_runqueue.push_back( oldCr );
-    m_runqueue.pop_front();
-    int newCr = m_runqueue.front();
-
-    if (oldCr != newCr) {
-		NS_LOG_INFO("Preempt()");
-		NS_LOG_INFO("oldCr = " << oldCr << " newCr = " << newCr);
-	TaskScheduler::PreEmpt(0, newCr);
-    }*/
-
-    /*if (m_runqueue.empty()) {
-        // No other threads to run, no need to reschedule
-    } else {*/
-        for (unsigned int cpu = 0; cpu < TaskScheduler::peu->hwModel->cpus.size(); ++cpu) {
-            // Don't interrupt an interrupt
-            if (TaskScheduler::peu->hwModel->cpus[cpu]->inInterrupt) {
-                NS_LOG_INFO("CPU " << cpu << " was in interrupt, not scheduling");
-                Simulator::Schedule(MicroSeconds(150), // TODO: make property?
-                                    &RoundRobinScheduler::Schedule,
-                                    this
-                );
-                continue;  // We do this to wake a thread from the end of a HIRQ
-            }
-
-            if (m_runqueue.empty() || m_runqueue.front() == m_currentRunning[cpu]) {
-                m_currentRunning[cpu] = cpu + 1; // Assign idle thread if nothing to schedule
-            } else {
-                int oldCr = m_currentRunning[cpu];
-                int newCr = m_runqueue.front();
-
-                m_runqueue.pop_front();
-                if (oldCr > NUM_CPU) // Don't queue idle threads
-                    m_runqueue.push_back(oldCr);
-
-                m_currentRunning[cpu] = newCr;
-
-                TaskScheduler::PreEmpt(cpu, newCr);
-            }
+    for (unsigned int cpu = 0; cpu < peu->hwModel->cpus.size(); ++cpu) {
+        // Don't interrupt an interrupt
+        if (!allowNestedInterrupts && peu->hwModel->cpus[cpu]->inInterrupt) {
+            NS_LOG_INFO("CPU " << cpu << " was in interrupt, not scheduling");
+            Simulator::Schedule(MicroSeconds(100), // TODO: make property?
+                                &RoundRobinScheduler::Schedule,
+                                this
+            );
+            continue;  // We do this to wake a thread from the end of a HIRQ
         }
-    //}
+
+        if (m_runqueue.empty() || m_runqueue.front() == m_currentRunning[cpu]) {
+            m_currentRunning[cpu] = cpu + 1; // Assign idle thread if nothing to schedule
+        } else {
+            int oldCr = m_currentRunning[cpu];
+            int newCr = m_runqueue.front();
+
+            m_runqueue.pop_front();
+            if (oldCr > NUM_CPU) // Don't queue idle threads
+                m_runqueue.push_back(oldCr);
+
+            m_currentRunning[cpu] = newCr;
+
+            PreEmpt(cpu, newCr);
+        }
+    }
 
     // If there is more than one thread, they need to get preempted once in a while
     if (m_runqueue.size() > 1)
@@ -215,82 +198,45 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
     delete (Completion*)var;
 }
 
-int RoundRobinScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> arguments) {
-    int pid;
-    switch (type) {
-        case AWAKE:
+    int RoundRobinScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> arguments) {
+        int pid;
+        switch (type) {
+            case AWAKE:
             {
-                std::cout << "Awakening" << std::endl;
-                //return 1;
                 pid = arguments[0];
                 if (!m_blocked.erase(pid)) {
                     //std::cout << "But not really" << std::endl;
                     NS_LOG_ERROR( TaskScheduler::peu->m_name << " Tried to awake thread not present in the blocking queue! PID: " << pid);
-                    goto end;
-                }
-#if 0
-                // OYSTEDAL: This is just a sanity check, in most cases this can be disabled
-                // to avoid the additional complexity.
-                std::list<int>::iterator it = std::find(m_runqueue.begin(), m_runqueue.end(), pid);
-                if (it != m_runqueue.end()) {
-                    NS_LOG_ERROR("Tried to awake pid already present in runqueue!");
                     break;
                 }
-#endif
                 NS_LOG_INFO (TaskScheduler::peu->m_name << " Waking up " << pid);
                 m_runqueue.push_back(pid);
                 this->need_scheduling = true;
-
-                //WakeupIdle();  // This pops m_runqueue??
-                this->Schedule();
-                std::cout << "AWAKING" << std::endl;
-
                 break;
             }
-        case SLEEPTHREAD:
-            NS_LOG_INFO("SLEEPTHREAD PID " << pid << " " << m_currentRunning[0] << " " <<  m_currentRunning[1]);
+            case SLEEPTHREAD: {
+                // We insert the pid into the blocking queue, to be awakened later.
+                pid = arguments[0];
+                m_blocked.insert(pid);
 
-            pid = arguments[0];
+                auto it = std::find(m_currentRunning.begin(), m_currentRunning.end(), pid);
 
-            int index = cpu+1;
-
-            //std::cout << "Going to sleep" << std::endl;
-            if (m_runqueue.empty()) {
-                // TODO: Assign an idle thread instead
-                m_currentRunning.push_back(index);
-                m_runqueue.push_back(index);
-                //NS_ASSERT(0);
-            } else {
-
-                int i;
-                for (i = 0; i < NUM_CPU; i++) {
-                    if (m_currentRunning[i] == pid) {
-                        break;
-                    }
-                }
-
-                NS_LOG_INFO("Removed from cpu" << i);
-
-                // Shocks, couldn't find this pid amongst any of the currently
-                // running pids. Better take it out of the run queue some day
-                if (i == NUM_CPU) NS_ASSERT(0);
-                index = i;
+                if (m_runqueue.empty())
+                    m_runqueue.push_front(cpu + 1);
+                *it = m_runqueue.front();
+                m_runqueue.pop_front();
+                this->Schedule();
+                WakeupIdle();
+                return 1;
             }
-
-            m_blocked.insert( m_currentRunning[index] );
-
-            // TODO: Add support for idle threads when nothing else is available
-            m_currentRunning[index] = m_runqueue.front();
-            m_runqueue.pop_front();
-            this->Schedule();
-            WakeupIdle();
-
-            return 1;
+            default: {
+                NS_ASSERT(0);
+                break;
+            }
+        }
+        end:
+        return m_runqueue.front();
     }
-end:
-    // return m_runqueue.size() == 1;
-	return m_runqueue.front();
-}
 
 void RoundRobinScheduler::MigrateThread(int pid, Ptr<Thread> thread) {
     NS_ASSERT(0); // This should not be used.
@@ -369,7 +315,7 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
         case WAIT_COMPL:
             {
                 Completion* c = (Completion*)var;
-                
+
                 // When we arrive here, the completion may be either completed
                 // or not. If it is completed, just keep running.
                 if (!c->IsCompleted()) {
@@ -391,7 +337,7 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
 
                     WakeupIdle();
 
-                    // HACK: Because the dpc_thread runs with higher priority, 
+                    // HACK: Because the dpc_thread runs with higher priority,
                     // put it in the front of the runqueue, and enable immediately
                     // m_runqueue.push_front(pid);
                     // RescheduleCPU(cpu);
@@ -403,7 +349,7 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
             }
             break;
     }
-        
+
     NS_ASSERT(0); // Not implemented
     return 0;
 }

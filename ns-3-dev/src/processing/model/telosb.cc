@@ -86,6 +86,11 @@ TelosB::TelosB(Ptr<Node> node, ProtocolStack *ps) : Mote() {
   TelosB::ps = ps;
 }
 
+void
+TelosB::Configure(Ptr<ExecEnv> ee) {
+    ee->cpuScheduler->allowNestedInterrupts = true;
+}
+
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
   ps->firstNodeSendingtal = false;
@@ -228,7 +233,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
       execenv->queues["send-queue"]->Enqueue(packet);
       execenv->queues["rcvd-send"]->Enqueue(packet);
       if (first) {
-        ScheduleInterrupt(node, packet, "HIRQ-14", MicroSeconds(1));  // Problem with RXFIFO overflow with CCA off might be due to sendTask getting prioritized. IT SHOULD DEFINITELY NOT GET PRIORITIZED. Reading packets from RXFIFO is prioritized.
+        ScheduleInterrupt(node, packet, "HIRQ-14", MicroSeconds(1));
         execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
         if (ns3::debugOn)
           NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
@@ -240,7 +245,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     ++packets_in_send_queue;
     execenv->queues["send-queue"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);
-    ScheduleInterrupt(node, packet, "HIRQ-14", MicroSeconds(1));  // Problem with RXFIFO overflow with CCA off might be due to sendTask getting prioritized. IT SHOULD DEFINITELY NOT GET PRIORITIZED. Reading packets from RXFIFO is prioritized.
+    ScheduleInterrupt(node, packet, "HIRQ-14", MicroSeconds(1));
     execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
     if (ns3::debugOn)
       NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
