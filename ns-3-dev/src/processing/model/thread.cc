@@ -54,8 +54,6 @@ void Thread::SetPid(int pid) {
 	stringStream << "/tmp/ns3leu" << pid;
 	m_fifo_debugfiles[pid] = open(stringStream.str().c_str(),
 			O_WRONLY | O_NONBLOCK);
-//	int result = m_fifo_debugfiles[pid];
-//	std::cout << result << std::endl;
 }
 
 void Thread::DoneProcessing() {
@@ -66,11 +64,9 @@ void Thread::DoneProcessing() {
 
 bool recordExecStats;
 
-Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(
-		std::string queueID) {
+Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(std::string queueID) {
 	// Find the requested queue
-	std::map<std::string, Ptr<StateVariableQueue2> >::iterator it =
-			localStateVariableQueue2s.find(queueID);
+	auto it = localStateVariableQueue2s.find(queueID);
 
 	// If the queue does not exist, create it
 	// NOTE: this is the only mechanism by which new local state queues are created, i.e.,
@@ -86,8 +82,7 @@ Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(
 
 Ptr<StateVariable> ProgramLocation::getLocalStateVariable(std::string svID) {
 	// Find the requested queue
-	std::map<std::string, Ptr<StateVariable> >::iterator it =
-			localStateVariables.find(svID);
+	auto it = localStateVariables.find(svID);
 
 	// If the queue does not exist, create it
 	// NOTE: this is the only mechanism by which new local state queues are created, i.e.,
@@ -102,13 +97,10 @@ Ptr<StateVariable> ProgramLocation::getLocalStateVariable(std::string svID) {
 }
 
 void Thread::PrintGlobalTempvars(Ptr<ExecEnv> execEnv) {
-	for (std::vector<struct tempVar>::iterator it =
-			execEnv->tempVars.begin();
-			it != execEnv->tempVars.end(); it++) {
-		struct tempVar *tv = &(*it);
-		std::cout << "Tempvar " << tv->tempSynch << std::endl;
-		for (unsigned int i = 0; i < tv->users.size(); i++) {
-			std::cout << tv->users[i] << " " << std::endl;
+	for (auto tv : execEnv->tempVars) {
+		std::cout << "Tempvar " << tv.tempSynch << std::endl;
+		for (unsigned int i = 0; i < tv.users.size(); i++) {
+			std::cout << tv.users[i] << " " << std::endl;
 		}
 	}
 }
@@ -157,9 +149,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 				// For interrupts, called by PEUs other than the CPU. Sends a request
 				// for an interrupt to the interrupt controller, which will issue the
 				// interrupt to the CPU in due time.
-				InterruptExecutionEvent *ie = static_cast<InterruptExecutionEvent *>(e);
-				peu->hwModel->m_interruptController->IssueInterrupt(ie->number,
-						ie->service, m_programStack.top()->curPkt);
+				auto ie = static_cast<InterruptExecutionEvent *>(e);
+				peu->hwModel->m_interruptController->IssueInterrupt(ie->number, ie->service, m_programStack.top()->curPkt);
 
 				// Since only PEUs can issue interrupts, the PEU can continue our exeuction
 				// while the CPU (prospectively) handles the interrupt
@@ -168,14 +159,14 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 
 		case TEMPSYNCH:
 			{
-				TempCompletion *tc = static_cast<TempCompletion *>(e);
+				auto tc = static_cast<TempCompletion *>(e);
 				struct tempVar tv;
 				tv.users = tc->users;
 				std::vector<uint32_t> dummyArgs;
 				tv.tempSynch = m_scheduler->AllocateTempSynch(1, dummyArgs);
 
 				if (tc->global) {
-					Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+					auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 					execEnv->tempVars.push_back(tv);
 					if(traceOn)
 						PrintGlobalTempvars(execEnv);
@@ -193,7 +184,7 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
         case MEASURE:
             {
                 // OYSTEDAL: Used to measure time at specific points in the signature
-                if (m_currentLocation->curPkt != NULL)
+                if (m_currentLocation->curPkt != nullptr)
                     m_currentLocation->curPkt->m_executionInfo.timestamps.push_back(Simulator::Now());
             }
 
@@ -224,10 +215,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			 m_currentLocation->lc->queuesServed.size());
 		bool perQueue2 = m_currentLocation->lc->perQueue2;
 		Ptr<Packet> curPacket = m_currentLocation->curPkt;
-		bool condPassed =
-			!m_currentLocation->lc->hasAdditionalCondition ?
-			true :
-			m_currentLocation->lc->additionalCondition(this);
+		bool condPassed = !m_currentLocation->lc->hasAdditionalCondition ? true : m_currentLocation->lc->additionalCondition(this);
 
 		// If we did not pass the condition, break loop
 		if (!condPassed) {
@@ -242,12 +230,11 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		// pointer to the root program.
 		if (m_currentLocation->rootProgram) {
 			m_currentLocation->program = m_currentLocation->rootProgram;
-			m_currentLocation->rootProgram = NULL;
+			m_currentLocation->rootProgram = nullptr;
 		}
 
 		bool infiniteLoop = (maxIterations == 0);
-		bool iterationsToGo = infiniteLoop
-			|| (curIteration < maxIterations);
+		bool iterationsToGo = infiniteLoop || (curIteration < maxIterations);
 
 		// If we have no queues, continue if maxIterations allows
 		if (numQueue2s == 0) {
@@ -266,18 +253,15 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		// this loop is here only to continue to iterate
 		// until the queues are empty or we hit a maximum
 		// number of iterations.
-		LoopCondition *curLc = m_currentLocation->lc;
-		if (!m_currentLocation->program->hasDequeue
-				&& m_currentLocation->program->hasInternalLoop) {
+		auto curLc = m_currentLocation->lc;
+		if (!m_currentLocation->program->hasDequeue && m_currentLocation->program->hasInternalLoop) {
 			if (!iterationsToGo) {
 				m_programStack.pop();
 				return true;
 			}
 
 			if (curLc->serviceQueue2s) {
-				std::vector<
-					std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator it =
-					curLc->serviceQueue2sServed.begin();
+				auto it = curLc->serviceQueue2sServed.begin();
 				for (;
 						it != curLc->serviceQueue2sServed.end()
 						&& (*it)->empty(); it++)
@@ -290,8 +274,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 					return true;
 				}
 			} else if (curLc->stateQueue2s) {
-				std::vector<Ptr<StateVariableQueue2> >::iterator it =
-					curLc->stateQueue2sServed.begin();
+				auto it = curLc->stateQueue2sServed.begin();
 				for (;
 						it != curLc->stateQueue2sServed.end()
 						&& !(*it)->empty(); it++)
@@ -304,8 +287,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 					return true;
 				}
 			} else {
-				std::vector<Ptr<Queue2> >::iterator it =
-					curLc->queuesServed.begin();
+				auto it = curLc->queuesServed.begin();
 				for (; it != curLc->queuesServed.end() && (*it)->IsEmpty();
 						it++)
 					;
@@ -350,8 +332,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 
 			// Else wise, update m_currentLocation wrt. queue served
 			else {
-				queueServedIndex = m_currentLocation->curServedQueue2 =
-					nextQueue2;
+				queueServedIndex = m_currentLocation->curServedQueue2 = nextQueue2;
 				m_currentLocation->curIteration = 0;
 			}
 		}
@@ -364,7 +345,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			 m_currentLocation->lc->stateQueue2sServed[queueServedIndex]->empty() :
 			 m_currentLocation->lc->queuesServed[queueServedIndex]->IsEmpty());
 		if (queueEmpty) {
-			if (curLc->emptyQueue2s != NULL)
+			if (curLc->emptyQueue2s != nullptr)
 				m_currentLocation->program = curLc->emptyQueue2s;
 			else { // See commends in program.h on LoopCondition members hasInternalLoop and hasDequeue
 				m_currentLocation->program =
@@ -374,10 +355,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 					// empty. If all are empty, return from LOOP.
 					if (curLc->serviceQueue2s) {
 						int index = 0;
-						std::vector<
-							std::queue<
-							std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator it =
-							curLc->serviceQueue2sServed.begin();
+						auto it = curLc->serviceQueue2sServed.begin();
 						for (;
 								it != curLc->serviceQueue2sServed.end()
 								&& (*it)->empty(); it++)
@@ -392,8 +370,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 							m_currentLocation->curServedQueue2 = index;
 					} else if (curLc->stateQueue2s) {
 						int index = 0;
-						std::vector<Ptr<StateVariableQueue2> >::iterator it =
-							curLc->stateQueue2sServed.begin();
+						auto it = curLc->stateQueue2sServed.begin();
 						for (;
 								it != curLc->stateQueue2sServed.end()
 								&& (*it)->empty(); it++)
@@ -408,8 +385,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 							m_currentLocation->curServedQueue2 = index;
 					} else {
 						int index = 0;
-						std::vector<Ptr<Queue2> >::iterator it =
-							curLc->queuesServed.begin();
+						auto it = curLc->queuesServed.begin();
 						for (;
 								it != curLc->queuesServed.end()
 								&& (*it)->IsEmpty(); it++)
@@ -426,8 +402,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 				}
 			}
 		} else
-			m_currentLocation->program =
-				m_currentLocation->program->sem->rootProgram;
+			m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
 
 		// At this point, we know we should continue from the beginning of the loop.
 		// Set event index to -1 (incremented to 0 by dispatch) and return true.
@@ -444,13 +419,12 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 }
 
 bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
-	ProcessingStage *ps = static_cast<ProcessingStage *>(e);
+	auto ps = static_cast<ProcessingStage *>(e);
 
-	if (ps->interrupt != NULL) { // OYSTEDAL: We are in an interrupt
+	if (ps->interrupt != nullptr) { // OYSTEDAL: We are in an interrupt
 		// TODO: consume from a PEU. For now, use CPU.
 		// Dirty hack for now: sample cycles, and calculate based on CPU frequency
-		ProcessingInstance pi;
-		pi = ps->Instantiate();
+		auto pi = ps->Instantiate();
 		int cpu = peu->GetObject<CPU>()->GetId();
 
 		long m_freq = peu->hwModel->cpus[cpu]->m_freq;
@@ -516,17 +490,16 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 #endif
 
 		if (recordExecStats)
-			m_currentLocation->program->sem->cpuProcessing +=
-				m_currentProcessing.remaining[CYCLES].amount;
+			m_currentLocation->program->sem->cpuProcessing += m_currentProcessing.remaining[CYCLES].amount;
 
 		return false;
 	}
 }
 
 bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
-	InsertEventIntoCEPOp *ieiceop = static_cast<InsertEventIntoCEPOp *>(e);
+	auto ieiceop = static_cast<InsertEventIntoCEPOp *>(e);
 	std::cout << "In HandleIncomingCEPEvent()" << std::endl;
-	Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
+	auto ee = peu->hwModel->node->GetObject<ExecEnv>();
 	if (ee->eventqueues["event-queue"].size() == 0)
 		return false;
 	std::string event = ee->eventqueues["event-queue"].at(0);
@@ -554,17 +527,16 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	// Obtain target. If it is an empty string, the target must be in the
 	// packet.
 	std::string eeTarget = ee->service;
-	Ptr<ExecEnv> executionEnvironment = peu->hwModel->node->GetObject<ExecEnv>();
 
 	Ptr<SEM> newSem;
-	if (ee->sem != NULL) {
+	if (ee->sem != nullptr) {
 		newSem = ee->sem;
 
-		if (m_currentLocation->curPkt != NULL) {
+		if (m_currentLocation->curPkt != nullptr) {
 			ExecutionInfo *pktEI =
 				&(m_currentLocation->curPkt->m_executionInfo);
 			if (newSem->trigger.length()
-					!= 0 && !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != NULL) {
+					!= 0 && !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != nullptr) {
 				pktEI->executedByExecEnv = true;
 				EventImpl *toInvoke = pktEI->targetFPM;
 				toInvoke->Invoke();
@@ -573,10 +545,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		}
 	} else {
 		// Here, we assume there is an active packet specifying the target
-		Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-		std::map<std::string, Ptr<SEM> >::iterator it =
-			execEnv->serviceTriggerMap.find(
-					m_currentLocation->curPkt->m_executionInfo.target);
+		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+		auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo.target);
 		newSem = it->second;
 
 
@@ -588,9 +558,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
         }
 
 		// Here, we know the target is that of this packet
-		ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-		if (newSem->trigger.length()
-				!= 0 && !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != NULL) {
+		auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+		if (newSem->trigger.length() != 0 && !pktEI->target.compare(newSem->trigger) && pktEI->targetFPM != nullptr) {
 			pktEI->executedByExecEnv = true;
 			EventImpl *toInvoke = pktEI->targetFPM;
 			toInvoke->Invoke();
@@ -625,7 +594,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 
 		// Set up loop state if this is a loop statement
 		LoopCondition *lcPtr = ee->lc;
-		if (lcPtr != NULL) {
+		if (lcPtr != nullptr) {
 			newProgramLocation->curIteration = 0;
 			newProgramLocation->lc = lcPtr;
 
@@ -663,7 +632,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 					if (!firstQueue2Empty)
 						newProgramLocation->program = newSem->rootProgram;
 					else {
-						if (newLc->emptyQueue2s != NULL)
+						if (newLc->emptyQueue2s != nullptr)
 							newProgramLocation->program = newLc->emptyQueue2s;
 						else { // See commends in program.h on LoopCondition members hasInternalLoop and hasDequeue
 							newProgramLocation->program =
@@ -673,11 +642,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 								// empty. If all are empty, return from LOOP.
 								if (newLc->serviceQueue2s) {
 									int index = 0;
-									std::vector<
-										std::queue<
-										std::pair<Ptr<SEM>,
-										Ptr<ProgramLocation> > > *>::iterator it =
-											newLc->serviceQueue2sServed.begin();
+									auto it = newLc->serviceQueue2sServed.begin();
 									for (;
 											it
 											!= newLc->serviceQueue2sServed.end()
@@ -694,8 +659,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 											index;
 								} else if (newLc->stateQueue2s) {
 									int index = 0;
-									std::vector<Ptr<StateVariableQueue2> >::iterator it =
-										newLc->stateQueue2sServed.begin();
+									auto it = newLc->stateQueue2sServed.begin();
 									for (;
 											it
 											!= newLc->stateQueue2sServed.end()
@@ -712,8 +676,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 											index;
 								} else {
 									int index = 0;
-									std::vector<Ptr<Queue2> >::iterator it =
-										newLc->queuesServed.begin();
+									auto it = newLc->queuesServed.begin();
 									for (;
 											it != newLc->queuesServed.end()
 											&& (*it)->IsEmpty();
@@ -725,8 +688,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 										// We do not pop thread of execution, as we did not push it yet
 										return true;
 									else
-										m_currentLocation->curServedQueue2 =
-											index;
+										m_currentLocation->curServedQueue2 = index;
 								}
 							}
 						}
@@ -751,45 +713,39 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 }
 
 bool Thread::HandleQueue2Event(ExecutionEvent* e) {
-    Queue2ExecutionEvent *qe = static_cast<Queue2ExecutionEvent *>(e);
+    auto qe = static_cast<Queue2ExecutionEvent *>(e);
     if (qe->enqueue) {
 		// If we have an en-queue event, simply insert into queue.
 		// We assume that the queue extist, as it should have been
 		// created during parsing of the header in the device-file
 		// initialization.
-		Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
+		auto ee = peu->hwModel->node->GetObject<ExecEnv>();
         if (qe->serviceQueue2) {
 			// Here, we want to push a service onto the service
 			// queue specified in the event. This may however
 			// either be a service specified in the event OR
 			// a service specified in the current packet. In
-			// the latter case, the service in the event is NULL,
+			// the latter case, the service in the event is nullptr,
 			// meaning that we need to obtain the service from
 			// the packet.
-			Ptr<SEM> semToEnqueue = NULL;
-			if (qe->semToEnqueue == NULL) {
+			Ptr<SEM> semToEnqueue = nullptr;
+			if (qe->semToEnqueue == nullptr) {
 				semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
-            //std::cout << "Enqueueing service " << semToEnqueue->name << std::endl;
-
-			qe->servQueue2->push(
-					std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(semToEnqueue,
-						m_programStack.top()));
+			qe->servQueue2->push(std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(semToEnqueue, m_programStack.top()));
 		} else if (qe->stateQueue2) {
-			ee->stateQueue2s[qe->queueName]->stateVariableQueue2.push(
-					qe->valueToEnqueue);
+			ee->stateQueue2s[qe->queueName]->stateVariableQueue2.push(qe->valueToEnqueue);
 		} else
 			qe->queue->Enqueue(m_currentLocation->curPkt);
 	} else
 		// Check if we are dealing with a service queue
         if (qe->serviceQueue2) {
 			// Obtain queue from encapsulated loop if not defined in the event
-			std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *queueToServe =
-				(qe->servQueue2 == NULL) ?
-				m_currentLocation->lc->serviceQueue2sServed[m_currentLocation->curServedQueue2] :
-				qe->servQueue2;
+			auto queueToServe = (qe->servQueue2 == nullptr) ?
+					m_currentLocation->lc->serviceQueue2sServed[m_currentLocation->curServedQueue2] :
+				    qe->servQueue2;
 
 			// Here, we want to dequeue the service, then (below) execute it.
 			// Note that we resolved which sem to enqueue (which may be "0")
@@ -831,7 +787,7 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 				newProgramLocation->program = toExecute->rootProgram;
 				newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
 				newProgramLocation->curPkt = m_currentLocation->curPkt;
-				newProgramLocation->lc = NULL;
+				newProgramLocation->lc = nullptr;
 				newProgramLocation->localStateVariables =
 					newPl->localStateVariables;
 				newProgramLocation->localStateVariableQueue2s =
@@ -875,20 +831,16 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 			return true;
 		} else {
 			// Obtain queue from encapsulated loop if not defined in the event
-			Ptr<Queue2> queueToServe =
-				(qe->queue == NULL) ?
-				m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue2] :
-				qe->queue;
+			Ptr<Queue2> queueToServe = (qe->queue == nullptr) ?
+					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue2] :
+					qe->queue;
 
 			m_currentLocation->curPkt = queueToServe->Dequeue();
 
 			// We need call activate any prospective triggers on the queue
 			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-			std::string queueTarget =
-				execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
-			if (queueTarget.length() != 0
-					&& !m_currentLocation->curPkt->m_executionInfo.target.compare(
-						queueTarget)) {
+			std::string queueTarget = execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
+			if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo.target == queueTarget) {
 				Ptr<Packet> curPkt = m_currentLocation->curPkt;
 				curPkt->m_executionInfo.executedByExecEnv = true;
 				EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
@@ -904,7 +856,7 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 }
 
 bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {
-	SchedulerExecutionEvent *se = static_cast<SchedulerExecutionEvent *>(e);
+	auto se = static_cast<SchedulerExecutionEvent *>(e);
 	std::vector<uint32_t> arguments;
 
 	if (se->schedType == AWAKE) {
@@ -921,8 +873,7 @@ bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {
 }
 
 bool Thread::HandleSyncEvent(ExecutionEvent* e) {
-	SynchronizationExecutionEvent *se =
-		static_cast<SynchronizationExecutionEvent *>(e);
+	auto se = static_cast<SynchronizationExecutionEvent *>(e);
 
     const int cpu = peu->GetObject<CPU>()->GetId();
 
@@ -934,40 +885,30 @@ bool Thread::HandleSyncEvent(ExecutionEvent* e) {
 		if (!se->global) {
 			for (unsigned int i = 0; i < m_currentLocation->tempvar.users.size(); i++)
 				// Check all users in local tempvar
-				if (!m_currentLocation->tempvar.users[i].compare(
-							m_currentLocation->program->sem->name)) {
-					toReturn = m_scheduler->TempSynchRequest(cpu, se->synchType,
-							m_currentLocation->tempvar.tempSynch, se->args);
-					m_currentLocation->tempvar.users.erase(
-							m_currentLocation->tempvar.users.begin() + i);
+				if (m_currentLocation->tempvar.users[i] == m_currentLocation->program->sem->name) {
+					toReturn = m_scheduler->TempSynchRequest(cpu, se->synchType, m_currentLocation->tempvar.tempSynch, se->args);
+					m_currentLocation->tempvar.users.erase(m_currentLocation->tempvar.users.begin() + i);
 					if (m_currentLocation->tempvar.users.empty())
-						m_scheduler->DeallocateTempSynch(
-								m_currentLocation->tempvar.tempSynch);
+						m_scheduler->DeallocateTempSynch(m_currentLocation->tempvar.tempSynch);
 
 					if (recordExecStats)
 						if (!toReturn)
-							m_currentLocation->wasBlocked =
-								Simulator::Now().GetNanoSeconds();
+							m_currentLocation->wasBlocked = Simulator::Now().GetNanoSeconds();
 
 					// If there was a context switch, only return false (blocked) if we're not in an interrupt handler
-					return this->peu->hwModel->cpus[cpu]->inInterrupt ?
-						true : toReturn;
+					return this->peu->hwModel->cpus[cpu]->inInterrupt ? true : toReturn;
 				}
 		} else {
 			// Check all users among global tempvars
 			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 			if(traceOn)
 				PrintGlobalTempvars(execEnv);
-			for (std::vector<struct tempVar>::iterator it =
-					execEnv->tempVars.begin();
-					it != execEnv->tempVars.end();) {
+			for (auto it = execEnv->tempVars.begin(); it != execEnv->tempVars.end(); ++it) {
 				struct tempVar *tv = &(*it);
 				for (unsigned int i = 0; i < tv->users.size(); i++) {
 					if(traceOn) std::cout << tv->users[i] << std::endl;
-					if (!tv->users[i].compare(
-								m_currentLocation->program->sem->name)) {
-						toReturn = m_scheduler->TempSynchRequest(cpu,
-								se->synchType, tv->tempSynch, se->args);
+					if (tv->users[i] == m_currentLocation->program->sem->name) {
+						toReturn = m_scheduler->TempSynchRequest(cpu, se->synchType, tv->tempSynch, se->args);
 						tv->users.erase(tv->users.begin() + i);
 						if (tv->users.empty()) {
 							m_scheduler->DeallocateTempSynch(tv->tempSynch);
@@ -976,15 +917,13 @@ bool Thread::HandleSyncEvent(ExecutionEvent* e) {
 
 						if (recordExecStats)
 							if (!toReturn)
-								m_currentLocation->wasBlocked =
-									Simulator::Now().GetNanoSeconds();
+								m_currentLocation->wasBlocked = Simulator::Now().GetNanoSeconds();
 
 						// If there was a context switch, only return false (blocked) if we're not in an interrupt handler
 						return this->peu->hwModel->cpus[cpu]->inInterrupt ?
 							true : toReturn;
 					}
 				}
-				it++;
 			}
 		}
 	}
@@ -997,12 +936,10 @@ bool Thread::HandleSyncEvent(ExecutionEvent* e) {
 	// Synchrequest returns true if there was a task switch,
 	// in which case we must return false. The next thread is
 	// already scheduled to execute.
-	bool synchReturn = m_scheduler->SynchRequest(cpu, se->synchType, se->id,
-			se->args);
+	bool synchReturn = m_scheduler->SynchRequest(cpu, se->synchType, se->id, se->args);
 	if (recordExecStats)
 		if (!synchReturn)
-			m_currentLocation->wasBlocked =
-				Simulator::Now().GetNanoSeconds();
+			m_currentLocation->wasBlocked = Simulator::Now().GetNanoSeconds();
 
 	return this->peu->hwModel->cpus[cpu]->inInterrupt ? true : synchReturn;
 }
@@ -1021,8 +958,7 @@ bool Thread::HandleCondition(ExecutionEvent* e) {
 				if (sce->hasSetterFunction)
 					ce->setConditionState(this, sce->value);
 				else
-					m_currentLocation->getLocalStateVariable(sce->name)->value =
-						sce->value;
+					m_currentLocation->getLocalStateVariable(sce->name)->value = sce->value;
 			} else if (sce->scope == CONDITIONGLOBAL) {
 				if (sce->hasSetterFunction)
 					ce->setConditionState(this, sce->value);
@@ -1039,12 +975,11 @@ bool Thread::HandleCondition(ExecutionEvent* e) {
 	// so that if we are in a loop, and it re-starts, we can re-set
 	// the program pointer to the root program of that loop. But this
 	// should only happen if we have not already encountered a condition
-	// previously, which is indicated by rootCondition not being NULL.
-	if (m_currentLocation->rootProgram == NULL)
+	// previously, which is indicated by rootCondition not being nullptr.
+	if (m_currentLocation->rootProgram == nullptr)
 		m_currentLocation->rootProgram = m_currentLocation->program;
 
 	m_currentLocation->program = ce->getClosestEntry(this).second;
-	//		std::cout << " Got program: " << m_currentLocation->program << " " << m_currentLocation->program->sem->name << std::endl;
 	m_currentLocation->currentEvent = -1; // will be set to 0 in Dispatch()
 
 	return true;
@@ -1077,17 +1012,13 @@ void Thread::PreEmpt() {
 	//
 
 	if(m_currentProcessing.remaining[NANOSECONDS].amount != 0) {
-		uint64_t timeLeft = Simulator::GetDelayLeft(
-				m_currentProcessing.processingCompleted).GetMilliSeconds();
-		double fractionCompleted = (double) timeLeft
-				/ m_currentProcessing.remaining[NANOSECONDS].amount;
+		uint64_t timeLeft = Simulator::GetDelayLeft(m_currentProcessing.processingCompleted).GetMilliSeconds();
+		double fractionCompleted = (double) timeLeft / m_currentProcessing.remaining[NANOSECONDS].amount;
 
 		// Calculate remaining resource consumptions
 		for (int i = 0; i < LASTRESOURCE; i++)
 			if (m_currentProcessing.remaining[i].defined)
-				m_currentProcessing.remaining[i].amount =
-						m_currentProcessing.remaining[i].amount
-						* (1 - fractionCompleted);
+				m_currentProcessing.remaining[i].amount = m_currentProcessing.remaining[i].amount * (1 - fractionCompleted);
 	}
 
 	// Finally we cancel the event. If will be re-scheduled
@@ -1158,11 +1089,9 @@ void Thread::Dispatch() {
 			proceed = HandleExecutionEvent(e);
 
 			// OYSTEDAL: Is this where ee->Proceed() is "resumed" from?
-			if (m_currentLocation->curPkt != NULL) {
+			if (m_currentLocation->curPkt != nullptr) {
 				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-				if (e->checkpoint.length() != 0
-						&& !pktEI->target.compare(e->checkpoint)
-						&& pktEI->targetFPM != NULL) {
+				if (e->checkpoint.length() != 0 && !pktEI->target.compare(e->checkpoint) && pktEI->targetFPM != nullptr) {
 					pktEI->executedByExecEnv = true;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
@@ -1187,11 +1116,11 @@ void Thread::Dispatch() {
 }
 
 /*ProgramLocation::ProgramLocation() {
-	lc = NULL;
-	program = NULL;
-	rootProgram = NULL;
+	lc = nullptr;
+	program = nullptr;
+	rootProgram = nullptr;
 	currentEvent = 0;
-	curPkt = NULL;
+	curPkt = nullptr;
 	curIteration = 0;
 	curServedQueue2 = 0;
 	wasBlocked = 0;

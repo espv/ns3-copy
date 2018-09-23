@@ -20,7 +20,6 @@
 #include "peu.h"
 #include "program.h"
 #include "condition.h"
-#include "automata.h"
 
 // Constants used during parsing
 #define LOCAL_CONDITION 0
@@ -80,10 +79,6 @@ public:
   std::map<std::string, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2s;
   std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> serviceQueue2Names;
   std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2Order;
-
-  std::vector<std::string> fsmQueueOrder;
-  std::map<std::string, Ptr<Automata> > fsmQueues;
-  std::map<Ptr<Automata>, std::string> fsmQueueNames;
 
   // State queues only hold a set of values.
   //

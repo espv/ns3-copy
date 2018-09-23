@@ -9,7 +9,6 @@ def build(bld):
         'model/thread.cc',
         'model/hwmodel.cc',
         'model/peu.cc',
-        'model/sharedresource.cc',
         'model/membus.cc',
         'model/interrupt-controller.cc',
         'model/execenv.cc',
@@ -22,12 +21,9 @@ def build(bld):
         # OYSTEDAL
         'model/rrscheduler.cc',
         'model/sync.cc',
-        # 'model/apic.cc',
-        # 'model/rrpriorityscheduler.cc',
         'model/telosb.cc',
         'model/trex.cc',
         'model/cep.cc',
-        'model/automata.cc',
 
         ]
 
@@ -39,7 +35,6 @@ def build(bld):
         'model/thread.h',
         'model/hwmodel.h',
         'model/peu.h',
-        'model/sharedresource.h',
         'model/membus.h',
         'model/interrupt-controller.h',
         'model/execenv.h',
@@ -52,12 +47,9 @@ def build(bld):
         # OYSTEDAL
         'model/rrscheduler.h',
         'model/sync.h',
-        # 'model/apic.h',
-        # 'model/rrpriorityscheduler.h',
         'model/telosb.h',
         'model/trex.h',
         'model/cep.h',
-        'model/automata.h',
 
     ]
 

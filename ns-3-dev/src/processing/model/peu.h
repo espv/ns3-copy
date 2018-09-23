@@ -5,7 +5,6 @@
 #include "ns3/event-garbage-collector.h"
 #include "ns3/timer.h"
 #include "ns3/traced-callback.h"
-#include "sharedresource.h"
 #include "ns3/packet.h"
 
 #include "thread.h"

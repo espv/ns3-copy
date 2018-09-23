@@ -12,14 +12,11 @@
 #include "interrupt-controller.h"
 #include "condition.h"
 #include "cep.h"
-#include "automata.h"
 // #include "ns3/schedsim-linsched.h"
 #include "ns3/rrscheduler.h"
 #include <ns3/drop-tail-queue2.h>
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/adhoc-wifi-mac.h"
-
-#include "apic.h"
 
 #include <iostream>
 #include <fstream>
