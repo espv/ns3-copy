@@ -120,7 +120,7 @@ class ParallelThreadsScheduler : public TaskScheduler
   ParallelThreadsScheduler();
 
   virtual void Initialize(Ptr<PEU> noncpuPEU);
-  virtual void Terminate(unsigned int pid);
+  virtual void Terminate(Ptr<PEU> peu, unsigned int pid);
   virtual Ptr<Thread> Fork(std::string,
 			Program *,
 			int,

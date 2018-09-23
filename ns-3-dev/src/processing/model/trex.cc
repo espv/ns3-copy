@@ -159,7 +159,7 @@ bool TRex::HandleRead (Ptr<CC2420Message> msg)
   //NS_LOG_INFO ("Received message from CC2420InterfaceNetDevice");
 
   // What does it mean that it has not been received correctly? Bad CRC?
-  if(msg==NULL){
+  if(msg==nullptr){
     NS_LOG_INFO ("Message not correctly received!");
     return false;
   }
@@ -230,7 +230,7 @@ bool TRex::HandleRead (Ptr<CC2420Message> msg)
                     << ", power=" << (int) respMsg->getPower());*/
             return true;
           } else {
-            //unknown message or NULL-Pointer
+            //unknown message or nullptr-Pointer
             NS_LOG_INFO ("CC2420Message is of an unknown type!");
             return false;
           } //unknown

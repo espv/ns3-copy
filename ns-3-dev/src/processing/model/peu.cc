@@ -73,7 +73,7 @@ void PEU::Consume(ProcessingInstance *pi) {
 		// duration by means of dividing by frequency
 		else if (pi->remaining[CYCLES].defined) {
 			pi->remaining[NANOSECONDS].amount = ((pi->remaining[CYCLES].amount
-					* 1000) / m_freq) - ((m_tracingOverhead * 1000) / m_freq);
+					* 1000.0) / m_freq) - ((m_tracingOverhead * 1000.0) / m_freq);
 			if (pi->remaining[NANOSECONDS].amount < 0.0)
 				pi->remaining[NANOSECONDS].amount = 0;
 
@@ -93,26 +93,21 @@ void PEU::Consume(ProcessingInstance *pi) {
 
 			// Here, we must have both instructions and
 			// memory accesses defined. If not, complain!
-			NS_ASSERT(
-					pi->remaining[INSTRUCTIONS].defined
-							&& pi->remaining[MEMORYACCESSES].defined);
+			NS_ASSERT(pi->remaining[INSTRUCTIONS].defined && pi->remaining[MEMORYACCESSES].defined);
 
 			// TODO: we do not contend for now - one of the next steps if necessary.
 			hwModel->m_memBus->Contend(pi); // TODO: UPDATE freq TO NANOSECONDS INSTEAD!
-			pi->remaining[NANOSECONDS].amount =
-					pi->remaining[INSTRUCTIONS].amount / m_freq
-							+ pi->remaining[MEMSTALLCYCLES].amount
-									/ hwModel->m_memBus->freq;
+			pi->remaining[NANOSECONDS].amount = pi->remaining[INSTRUCTIONS].amount /
+			                                    m_freq + pi->remaining[MEMSTALLCYCLES].amount /
+			                                    hwModel->m_memBus->freq;
 		}
 	}
 
 	// Finally, schedule the completion function to run
 	// after the computed duration.
 
-    double amount = pi->remaining[NANOSECONDS].amount * pi->factor;
-	pi->processingCompleted = Simulator::Schedule(
-            NanoSeconds(amount),
-			&Thread::DoneProcessing, pi->thread);
+    auto amount = pi->remaining[NANOSECONDS].amount * pi->factor;
+	pi->processingCompleted = Simulator::Schedule(NanoSeconds((uint64_t)amount), &Thread::DoneProcessing, pi->thread);
 }
 
 /***************************************************/
@@ -141,8 +136,6 @@ CPU::CPU() {
 	stringStream << "/tmp/ns3leu" << -1;
 	m_fifo_debugfiles[-1] = open(stringStream.str().c_str(),
 			O_WRONLY | O_NONBLOCK);
-//  int result = m_fifo_debugfiles[-1];
-//  std::cout << result << std::endl;
 }
 
 int CPU::GetId() {
@@ -191,8 +184,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		newProgramLocation->tempvar = ir.tempsynch;
 		newProgramLocation->curPkt = ir.current;
 		newProgramLocation->localStateVariables = ir.localStateVariables;
-		newProgramLocation->localStateVariableQueue2s =
-				ir.localStateVariablesQueue2s;
+		newProgramLocation->localStateVariableQueue2s = ir.localStateVariablesQueue2s;
 
 		Ptr<ExecEnv> ee = this->hwModel->node->GetObject<ExecEnv>();
 
@@ -213,8 +205,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		irqProgramLocation->tempvar = ir.tempsynch;
 		irqProgramLocation->curPkt = ir.current;
 		irqProgramLocation->localStateVariables = ir.localStateVariables;
-		irqProgramLocation->localStateVariableQueue2s =
-				ir.localStateVariablesQueue2s;
+		irqProgramLocation->localStateVariableQueue2s = ir.localStateVariablesQueue2s;
 
 		interruptThread->m_programStack.push(irqProgramLocation);
 

@@ -61,7 +61,7 @@ public:
   // Inherited
   virtual void Destroy ();
   virtual bool IsFinished (void) const;
-  virtual Time Next (void) const; /* STEIN */
+  virtual Time Next (void); /* STEIN */
   virtual void Stop (void);
   virtual void Stop (const Time &delay);
   virtual EventId Schedule (const Time &delay, EventImpl *event);

@@ -15,11 +15,11 @@ class ProcessingInstance;
 class MemBus : public Object
 {
 public:
-  static TypeId GetTypeId (void);
+  static TypeId GetTypeId ();
 
-  MemBus();
-  MemBus (int contentionModel);
-  virtual ~MemBus () {};
+  MemBus () = default;
+  explicit MemBus (int contentionModel);
+  ~MemBus () override = default;
 
   void Contend(ProcessingInstance *pi);
 

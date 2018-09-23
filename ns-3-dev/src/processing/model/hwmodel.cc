@@ -11,7 +11,7 @@ NS_LOG_COMPONENT_DEFINE ("HWModel");
 NS_OBJECT_ENSURE_REGISTERED (HWModel);
 
 TypeId 
-HWModel::GetTypeId (void)
+HWModel::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::processing::HWModel")
     .SetParent<Object> ()

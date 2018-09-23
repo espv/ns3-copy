@@ -23,13 +23,11 @@ uint32_t ConditionFunctions::Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last
 	if(first == last)
 		return first->IsEmpty() ? QUEUEEMPTY : QUEUENOTEMPTY;
 	else {
-		std::vector<Ptr<Queue2> > *queueOrder = &node->GetObject<ExecEnv> ()->queueOrder;
-		 std::vector<Ptr<Queue2> >::iterator firstFound =
-				 std::find(queueOrder->begin(), queueOrder->end(), first);
-		 std::vector<Ptr<Queue2> >::iterator lastFound =
-				 std::find(queueOrder->begin(), queueOrder->end(), last);
+		auto queueOrder = &node->GetObject<ExecEnv> ()->queueOrder;
+		auto firstFound = std::find(queueOrder->begin(), queueOrder->end(), first);
+		auto lastFound = std::find(queueOrder->begin(), queueOrder->end(), last);
 
-		std::vector<Ptr<Queue2> >::iterator it = queueOrder->begin();
+		auto it = queueOrder->begin();
 		for(;firstFound != lastFound && it != queueOrder->end(); firstFound++)
 			if(!((*firstFound)->IsEmpty()))
 				return QUEUENOTEMPTY;
@@ -38,18 +36,18 @@ uint32_t ConditionFunctions::Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last
 	return QUEUEEMPTY;
 }
 
-uint32_t ConditionFunctions::ServiceQueue2Condition(std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *first, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last)
+uint32_t ConditionFunctions::ServiceQueue2Condition(std::queue<std::pair<Ptr<SEM>,
+                                                    Ptr<ProgramLocation> > > *first,
+                                                    std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last)
 {
 	if(first == last)
 		return first->empty() ? QUEUEEMPTY : QUEUENOTEMPTY;
 	else {
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>  *serviceQueue2Order = &node->GetObject<ExecEnv> ()->serviceQueue2Order;
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> ::iterator firstFound =
-				 std::find(serviceQueue2Order->begin(), serviceQueue2Order->end(), first);
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator lastFound =
-				 std::find(serviceQueue2Order->begin(), serviceQueue2Order->end(), last);
+		auto serviceQueue2Order = &node->GetObject<ExecEnv> ()->serviceQueue2Order;
+		auto firstFound = std::find(serviceQueue2Order->begin(), serviceQueue2Order->end(), first);
+		auto lastFound = std::find(serviceQueue2Order->begin(), serviceQueue2Order->end(), last);
 
-		std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *>::iterator it = serviceQueue2Order->begin();
+		auto it = serviceQueue2Order->begin();
 		for(;firstFound != lastFound && it != serviceQueue2Order->end(); firstFound++)
 		  if(!(*firstFound)->empty()) {
 				return QUEUENOTEMPTY;
@@ -83,8 +81,6 @@ ConditionFunctions::ConditionFunctions()
 }
 
 uint32_t ConditionFunctions::ReadNumTxToAck(Ptr<Thread> t) {
-//	std::cout << "wl1251_tx_complete: INTR = " << m_wl1251NICIntrReg;
-
 	// Clear tx complete bit
 	if(m_wl1251NICIntrReg == 2) {
 		m_wl1251NICIntrReg = 0;
@@ -94,13 +90,9 @@ uint32_t ConditionFunctions::ReadNumTxToAck(Ptr<Thread> t) {
 		m_wl1251NICIntrReg = 9;
 	}
 
-//	std::cout << " -> " << m_wl1251NICIntrReg << ", #toCompl = " << numTxToAck;
-
 	// Fetch and clear number to ack
 	uint32_t toReturn = numTxToAck;
 	numTxToAck = 0;
-
-//	std::cout << " -> " << numTxToAck << std::endl;
 
 	return toReturn;
 }
@@ -119,10 +111,6 @@ uint32_t
 ConditionFunctions::Wl1251RxLoop(Ptr<Thread> t) {
 	if(t->m_currentLocation->curIteration >= 10)
 		return 0;
-
-//node->GetObject<ExecEnv>()->globalStateVariables["wl1251:interrupttype"] = m_wl1251NICIntrReg;
-	//uint32_t retVal = m_wl1251NICIntrReg;
-	//m_wl1251NICIntrReg = 0;
 
 	return node->GetObject<ExecEnv>()->globalStateVariables["wl1251:interrupttype"];
 }
@@ -219,12 +207,6 @@ ConditionFunctions::Initialize(Ptr<ExecEnv> execenv)
   // Set the processing object
   node = execenv->GetObject<Node> ();
 
-  //conditionMap["send_info_empty"] = MakeCallback(&ConditionFunctions::IpSendInfoEmpty, this);
-  //conditionMap["send_info_full"] = MakeCallback(&ConditionFunctions::IpSendInfoFull, this);
-  //conditionMap["task_queue_empty"] = MakeCallback(&ConditionFunctions::TaskQueue2Empty, this);
-  //conditionMap["send_packets_full"] = MakeCallback(&ConditionFunctions::IpPacketsFull, this);
-  //conditionMap["send_packets_empty"] = MakeCallback(&ConditionFunctions::IpPacketsEmpty, this);
-
   // Set the protocol-agnostic condition functions
   writeConditionMap["orCepOpDoneYet"] = MakeCallback(&ConditionFunctions::WriteOrCepOpDoneYet, this);
   writeConditionMap["andCepOpDoneYet"] = MakeCallback(&ConditionFunctions::WriteAndCepOpDoneYet, this);
@@ -241,10 +223,6 @@ ConditionFunctions::Initialize(Ptr<ExecEnv> execenv)
   writeConditionMap["writeStatewl1251:interruptenabled"] = MakeCallback(&ConditionFunctions::WriteInterruptsEnabled, this);
   writeConditionMap["writeStateacknicrx"] = MakeCallback(&ConditionFunctions::AckNICRx, this);
   conditionMap["readStatewl1251:numtxcomplete"] = MakeCallback(&ConditionFunctions::ReadNumTxToAck, this);
-
-
-  // Add later, when the function is finished:
-  // conditionMap["pktl4protocol"] = MakeCallback(&ConditionFunctions::PacketL4Protocol, this);
 }
 
 }

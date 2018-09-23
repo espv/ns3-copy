@@ -14,9 +14,7 @@ StateVariableQueue2::StateVariableQueue2() {
 //	std::cout << "Creating local state variable queue " << this << std::endl;
 }
 
-StateVariableQueue2::~StateVariableQueue2() {
-//	std::cout << "Destroying local state variable queue " << this << std::endl;
-}
+StateVariableQueue2::~StateVariableQueue2() = default;
 
 bool StateVariableQueue2::empty(void) {
 	return stateVariableQueue2.empty();

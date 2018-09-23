@@ -228,7 +228,7 @@ DefaultSimulatorImpl::NextTs (void) const
 }
 
 Time
-DefaultSimulatorImpl::Next (void) const
+DefaultSimulatorImpl::Next (void)
 {
   return TimeStep (NextTs ());
 }

@@ -5,7 +5,7 @@
 namespace ns3 {
 
 TypeId
-MemBus::GetTypeId (void)
+MemBus::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::Processing::MemBus")
     .SetParent<Object> ()
@@ -16,10 +16,6 @@ MemBus::GetTypeId (void)
 		   MakeUintegerChecker<uint32_t> ())
   ;
   return tid;
-}
-
-MemBus::MemBus()
-{
 }
 
 MemBus::MemBus(int contentionModel)

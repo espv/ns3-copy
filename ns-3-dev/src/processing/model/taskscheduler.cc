@@ -83,7 +83,7 @@ TaskScheduler::Terminate(Ptr<PEU> peu, unsigned int pid)
 	} else {
         // OYSTEDAL: cr used to determine which thread to terminate.
         // Should come from the parameter instead.
-		m_threads[m_currentRunning->GetPid()] = NULL;
+		m_threads[m_currentRunning->GetPid()] = nullptr;
 		DoTerminate();
 	}
 #endif
@@ -683,12 +683,12 @@ ParallelThreadsScheduler::Initialize(Ptr<PEU> nonCPUPEU)
 // be removed, only be flagged as no longer active.
 // Can only be called by the running thread itself.
 void
-ParallelThreadsScheduler::Terminate(unsigned int pid)
+ParallelThreadsScheduler::Terminate(Ptr<PEU> peu, unsigned int pid)
 {
   m_freeList.push_back(pid);
 }
 
-// Returns NULL if no free thread, a smart pointer to thread elsewise.
+// Returns nullptr if no free thread, a smart pointer to thread elsewise.
 // Priority is not used, but must be there to override the base class
 // version of this function
 Ptr<Thread>
@@ -703,7 +703,7 @@ ParallelThreadsScheduler::Fork(
 {
   // If no more threads are free, return
   if (m_freeList.empty())
-    return NULL;
+    return nullptr;
 
   // Find first non-active thread
   unsigned int freePid = m_freeList.front();

@@ -176,43 +176,6 @@ Condition::insertEntry(uint32_t entry, Program *p) {
 
 }
 
-// Function used to get the distance to the closest entry
-// Returns maximum integer if no program is stored
-//uint32_t
-//Condition::getDistance(Ptr<Packet> p)
-//{
-//  // Obtain value
-//  uint32_t value = getCondition(p);
-//
-//  // Locate
-//  std::list<std::pair<uint32_t, Program *> >::iterator it = programs.begin();
-//
-//  // If we dont have any entries yet
-//  if(it == programs.end())
-//    return std::numeric_limits<uint32_t>::max();
-//
-//  // Find the first one larger than entry
-//  for(; it != programs.end() && value >= (*it).first; it++);
-//
-//  // If we hit the end, we are the largest one,
-//  // so return the difference to the one below (at
-//  // the end of the list)
-//  if(it == programs.end())
-//    return (*(--it)).first - value;
-//
-//  // If were at programs.begin(), we are the smallest
-//  else if (it == programs.begin())
-//    return (*(it)).first - value;
-//
-//  // Elsewise, we are between two programs. Returns the
-//  // smallest one
-//  else {
-//	  uint32_t belowdiff = value - (*(--it)).first;
-//	  uint32_t abovediff = (*++it).first - value;
-//	  return belowdiff < abovediff ? belowdiff : abovediff;
-//  }
-//}
-
 // Function used to obtain closest entry
 std::pair<uint32_t, Program *>
 Condition::getClosestEntryValue(uint32_t value)
@@ -277,7 +240,8 @@ Condition::getClosestEntry(Ptr<Thread> t)
 	else if(condType == QUEUECONDITION)
 		value = getConditionQueue2s(((Queue2Condition *)this)->firstQueue2, ((Queue2Condition *)this)->lastQueue2);
 	else if(condType == SERVICEQUEUECONDITION) {
-		value = getServiceConditionQueue2s(((ServiceQueue2Condition *)this)->firstQueue2, ((ServiceQueue2Condition *)this)->lastQueue2);
+		value = getServiceConditionQueue2s(((ServiceQueue2Condition *)this)->firstQueue2,
+				                           ((ServiceQueue2Condition *)this)->lastQueue2);
         //std::cout << "SERVICEQUEUECONDITION: empty: " << (value == QUEUEEMPTY) << std::endl;
 	} else if(condType == THREADCONDITION)
 		value = getConditionThread(((ThreadCondition *)this)->threadId);
@@ -348,17 +312,6 @@ ProcessingStage::Instantiate() {
 InsertEventIntoCEPOp::InsertEventIntoCEPOp() {
     ExecutionEvent::type = INCOMINGCEPEVENT;
 }
-
-/*
-InsertEventIntoCEPOp::InsertEventIntoCEPOp(ProcessingStage *ps, InsertEventIntoFSM *ieifsm) {
-	this->ps = ps;
-	this->ieifsm = ieifsm;
-}*/
-
-/*
-InsertEventIntoFSM::InsertEventIntoFSM(ProcessingStage *ps) {
-	this->ps = ps;
-}*/
 
 InsertEventIntoFSM::InsertEventIntoFSM() {
 }

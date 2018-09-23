@@ -46,7 +46,7 @@ RoundRobinScheduler::GetTypeId (void)
 
 RoundRobinScheduler::RoundRobinScheduler() : TaskScheduler()
 {
-    // m_currentRunning = NULL;
+    // m_currentRunning = nullptr;
     m_currentRunning.reserve(NUM_CPU);
 
     // Add idle threads
@@ -203,7 +203,7 @@ void* RoundRobinScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> a
 
     NS_LOG_ERROR(type << " is an unknown temp. synchronization type");
     NS_ASSERT(0);
-    return NULL;
+    return nullptr;
 }
 
 void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {

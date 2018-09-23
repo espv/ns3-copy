@@ -447,7 +447,7 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
   //NS_LOG_INFO ("Received message from CC2420InterfaceNetDevice");
 
   // What does it mean that it has not been received correctly? Bad CRC?
-  if(msg==NULL){
+  if(msg==nullptr){
     NS_LOG_INFO ("Message not correctly received!");
     return false;
   }
