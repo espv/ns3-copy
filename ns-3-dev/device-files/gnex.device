@@ -293,4 +293,4 @@ x                                PROCESS		990 347
 SIGEND
 
 THREADS
-dhd_dpc dhd_dpc_thread infinite -99
+dhd_dpc dhd_dpc_thread infinite 0

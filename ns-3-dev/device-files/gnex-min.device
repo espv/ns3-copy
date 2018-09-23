@@ -34,6 +34,7 @@ SYNCH
 dhd_dpc_sem 0 0
 
 CONDITIONS
+VCLOC dhdsdio_sendfromq+4c8 global measure::start
 
 TRIGGERS
 SERVICE ip_rcv ip::receive
@@ -43,7 +44,6 @@ SERVICE ip_rcv ip::receive
 LOC dhdsdio_readframes+22e4 nicdriver::receive
 LOC dhdsdio_txpkt.constprop.10+51c nic::transmit
 
-VCLOC dhdsdio_sendfromq+4c8 measure::start
 # QUEUE bcm4329::driver::tx nicdriver::transmit
 LOC dhdsdio_sendfromq+3bc nicdriver::transmit
 
@@ -627,7 +627,7 @@ x PROCESS 5000000 0
 SIGEND
 
 THREADS
-dhd_dpc dhd_dpc_thread infinite -99
+dhd_dpc dhd_dpc_thread infinite 0
 # peutest_thread peutest infinite 0
 # background1 background_work infinite 0
 # background2 background_work infinite 0
