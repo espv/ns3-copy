@@ -35,13 +35,11 @@ class HWModel;
 class SEM;
 class ConditionFunctions;
 
-#define PROCESSING_DEBUG 0
-
 class ExecEnv : public Object
 {
 public:
   ExecEnv();
-  static TypeId GetTypeId (void);
+  static TypeId GetTypeId ();
 
   /* Interface with FCMs */
   template<class MEM, class OBJ> bool Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object);
@@ -147,7 +145,6 @@ public:
   // Executed upon STOP/RESTART event to insert
   // newly created program into existing SEM
   void addPgm(Program *curPgm, Program* existPgm);
-  void delPgm(Program *toDelete);
   ProcessingStage addProcessingStages(ProcessingStage a, ProcessingStage b);
 
   // Used to store condition information temporarily
@@ -184,38 +181,31 @@ public:
      introduced. */
 
 template<class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false;}
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object); packet->m_executionInfo.executedByExecEnv = true; return true;}
+  packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object); return true;
 }
 
 template<class T1, class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false; }
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1); packet->m_executionInfo.executedByExecEnv = true; return true; }
+  packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1); return true;
 }
 
 template<class T1,class T2, class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false;}
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2); packet->m_executionInfo.executedByExecEnv = true; return true;}
+   packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2); return true;
 }
 
  template<class T1,class T2, class T3, class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false;}
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3); packet->m_executionInfo.executedByExecEnv = true; return true;}
+  packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3); return true;
 }
 
  template<class T1,class T2, class T3, class T4, class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false;}
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3, arg4); packet->m_executionInfo.executedByExecEnv = true; return true;}
+  packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3, arg4); return true;
 }
 
  template<class T1,class T2, class T3, class T4, class T5, class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false;}
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5); packet->m_executionInfo.executedByExecEnv = true; return true;}
+  packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5); return true;
 }
 
  template<class T1,class T2, class T3, class T4, class T5, class T6, class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
-  if(packet->m_executionInfo.executedByExecEnv) { packet->m_executionInfo.executedByExecEnv = false; return false;}
-  else { packet->m_executionInfo.target = target; packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6); packet->m_executionInfo.executedByExecEnv = true; return true;}
+  packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6); return true;
 }
 
 } // namespace ns3
