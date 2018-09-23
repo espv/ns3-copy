@@ -409,13 +409,13 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
 }
 
 uint32_t RoundRobinScheduler::DoGetSynchReqType(std::string name) {
-    if(!name.compare("SEMUP"))
+    if(name == "SEMUP")
         return SEM_UP;
-    else if(!name.compare("SEMDOWN"))
+    else if(name == "SEMDOWN")
         return SEM_DOWN;
-    else if(!name.compare("WAITCOMPL"))
+    else if(name == "WAITCOMPL")
         return WAIT_COMPL;
-    else if(!name.compare("COMPL"))
+    else if(name == "COMPL")
         return COMPL;
 
     NS_ASSERT(0); // Not implemented

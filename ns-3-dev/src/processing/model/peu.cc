@@ -185,7 +185,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		inInterrupt = true;
 
 		// Create new thread of execution
-		Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
+		auto newProgramLocation = Create<ProgramLocation>();
 		newProgramLocation->program = newProgram;
 		newProgramLocation->currentEvent = -1;
 		newProgramLocation->tempvar = ir.tempsynch;
@@ -206,7 +206,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
         NS_ASSERT_MSG(ee->serviceQueue2s[this->hirqQueue2],
                 "Unable to find interrupt handler named " << this->hirqHandler);
 
-		Ptr<ProgramLocation> irqProgramLocation = Create<ProgramLocation>();
+		auto irqProgramLocation = Create<ProgramLocation>();
 		irqProgramLocation->program =
 				ee->m_serviceMap[this->hirqHandler]->rootProgram;
 		irqProgramLocation->currentEvent = -1;
