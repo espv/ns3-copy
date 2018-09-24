@@ -22,6 +22,7 @@
 #include "ns3/object.h"
 #include "ns3/traced-callback.h"
 #include "ns3/ipv4-address.h"
+#include "ns3/event-impl.h"
 namespace ns3 {
 
     class CepEvent;
@@ -152,6 +153,8 @@ private:
         static TypeId GetTypeId (void);
         void ProcessCepEvent(Ptr<CepEvent> e);
         void CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
+
+        void ProceedFromEvaluate(Ptr<CEPEngine> cep, std::vector<Ptr<CepEvent> > &returned, Ptr<CepOperator> op, Ptr<Producer> producer);
        
     };
     
@@ -179,7 +182,7 @@ private:
         static TypeId GetTypeId ();
         
         virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
-        virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&) = 0; 
+        virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p) = 0;
         virtual bool ExpectingCepEvent (std::string) = 0;
         uint32_t queryId;
     };
@@ -189,8 +192,8 @@ private:
         static TypeId GetTypeId ();
         
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
-        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&);
-        bool DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned);
+        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
+        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents, Ptr<Query> q, Ptr<Producer> p);
         bool ExpectingCepEvent (std::string);
         std::string event1;
         std::string event2;
@@ -205,7 +208,7 @@ private:
         static TypeId GetTypeId ();
         
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&); 
+        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
         bool ExpectingCepEvent (std::string);
         std::string event1;
         std::string event2;
@@ -219,8 +222,8 @@ private:
         static TypeId GetTypeId ();
 
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&);
-        bool DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned);
+        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
+        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents);
         bool ExpectingCepEvent(std::string);
         std::string event1;
         std::string event2;
@@ -233,10 +236,10 @@ private:
     {
     public:
         static TypeId GetTypeId (void);
+        void HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> >&);
         
     private:
         friend class Detector;
-        void HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> >);
         
     };
     

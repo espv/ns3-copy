@@ -35,6 +35,7 @@
 #include "ns3/dcep.h"
 #include "ns3/cep.h"
 #include "ns3/processing-module.h"
+#include "ns3/event-impl.h"
 
 
 namespace ns3 {
@@ -184,6 +185,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     void
+    Detector::ProceedFromEvaluate(Ptr<CEPEngine> cep, std::vector<Ptr<CepEvent> > &returned, Ptr<CepOperator> op, Ptr<Producer> producer)
+    {
+        Ptr<Query> q = cep->GetQuery(op->queryId);
+        producer->HandleNewCepEvent(q, returned);
+    }
+
+    void
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
         if (ops.begin() == ops.end())
@@ -194,7 +202,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bool proceed = false;
         std::vector<Ptr<CepEvent> > returned;
 
-        if(op->Evaluate(e, returned))
+        /*if(op->Evaluate(e, returned))
         {
             proceed = true;
         }
@@ -203,12 +211,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             Ptr<Query> q = cep->GetQuery(op->queryId);
             producer->HandleNewCepEvent(q, returned);
-        }
+        }*/
 
-        /*Ptr<Packet> dummyPacket1 = Create<Packet>();
-        Ptr<Packet> dummyPacket2 = Create<Packet>();
-        Ptr<Packet> dummyPacket3 = Create<Packet>();
-        Ptr<Node> node = GetObject<Dcep>()->GetNode();*/
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         ops.erase(ops.begin());
         if (ops.begin() != ops.end()) {
@@ -218,25 +222,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->globalStateVariables["CepOpsLeft"] = 0;
         }
 
-        /*ee->Proceed("handle-cepops", &Placement::RcvCepEvent, p, event);
-        if (ops.begin() == ops.end()) {
-            //ee->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
-            ee->globalStateVariables["thenCepOpDoneYet"] = 1;
-            ee->globalStateVariables["orCepOpDoneYet"] = 1;
-            ee->globalStateVariables["andCepOpDoneYet"] = 1;
-        } else {
-            ops.erase(ops.begin());
-            //ee->ScheduleInterrupt (dummyPacket, "HIRQ-3", Seconds(0));
-            ee->globalStateVariables["thenCepOpDoneYet"] = 0;
-            ee->globalStateVariables["orCepOpDoneYet"] = 0;
-            ee->globalStateVariables["andCepOpDoneYet"] = 0;
-            ee->queues["h2-h3"]->Enqueue(dummyPacket1);
-            ee->queues["h3-h4"]->Enqueue(dummyPacket2);
-            ee->queues["h4-h5"]->Enqueue(dummyPacket2);
-            ee->Proceed(dummyPacket1, "loc-process-then-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->Proceed(dummyPacket2, "loc-process-or-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->Proceed(dummyPacket3, "loc-process-and-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-        }*/
+        //op->Evaluate(e, returned, MakeEvent(&Detector::ProceedFromEvaluate, this, cep, returned, op, producer));
+        op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer);
     }
     
     void
@@ -250,9 +237,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         cep->GetOpsByInputCepEventType(e->type, ops);
         Ptr<Producer> producer = GetObject<Producer>();
 
-        /*Ptr<Packet> dummyPacket1 = Create<Packet>();
-        Ptr<Packet> dummyPacket2 = Create<Packet>();
-        Ptr<Packet> dummyPacket3 = Create<Packet>();*/
         Ptr<Node> node = GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         if (ops.begin() != ops.end()) {
@@ -261,21 +245,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         } else {
             ee->globalStateVariables["CepOpsLeft"] = 0;
         }
-        /*if (ops.begin() == ops.end()) {
-            ee->globalStateVariables["thenCepOpDoneYet"] = 1;
-            ee->globalStateVariables["orCepOpDoneYet"] = 1;
-            ee->globalStateVariables["andCepOpDoneYet"] = 1;
-        } else {
-            ee->globalStateVariables["thenCepOpDoneYet"] = 0;
-            ee->globalStateVariables["orCepOpDoneYet"] = 0;
-            ee->globalStateVariables["andCepOpDoneYet"] = 0;
-            ee->queues["h2-h3"]->Enqueue(dummyPacket1);
-            ee->queues["h3-h4"]->Enqueue(dummyPacket2);
-            ee->queues["h4-h5"]->Enqueue(dummyPacket3);
-            ee->Proceed(dummyPacket1, "loc-process-then-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->Proceed(dummyPacket2, "loc-process-or-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->Proceed(dummyPacket3, "loc-process-and-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-        }*/
     }
     
     
@@ -368,12 +337,34 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     bool
-    AndOperator::DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned) {
+    AndOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> > &returned, std::vector<Ptr<CepEvent>> bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
+        if (events.empty())
+            return false;
 
+        Ptr<CepEvent> existingEvent = *events.begin();
+        if(newEvent->m_seq == existingEvent->m_seq) {
+            Ptr<CepEvent> e1 = CreateObject<CepEvent>();
+            Ptr<CepEvent> e2 = CreateObject<CepEvent>();
+            newEvent->CopyCepEvent(e1);
+            // Here we insert the incoming event into the sequence
+            // Split loop into recursion.
+            // Return a recursive call to some function
+
+            existingEvent->CopyCepEvent(e2);
+
+            bufmanEvents.erase(events.begin());
+            returned.push_back(e1);
+            returned.push_back(e2);
+
+            p->HandleNewCepEvent(q, returned);
+            return true;
+        }
+        events.erase(events.begin());
+        return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
     }
     
     bool
-    AndOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned)
+    AndOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p)
     {
         std::vector<Ptr<CepEvent>> events1;
         std::vector<Ptr<CepEvent>> events2;
@@ -383,47 +374,49 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             if (e->type == events1.front()->type)
             {
-                auto it = events2.begin();
-                for (uint32_t i = 0; i < events2.size(); i++, it++)
-                {
-                    if(e->m_seq == bufman->events2[i]->m_seq)
-                    {
-                        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-                        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-                        e->CopyCepEvent(e1);
-                        // Here we insert the incoming event into the sequence
-                        // Split loop into recursion.
-                        // Return a recursive call to some function
-                        events2[i]->CopyCepEvent(e2);
-                        
-                        bufman->events2.erase(it);
-                        returned.push_back(e1);
-                        returned.push_back(e2);
-
-                        return true;
-                    }
-                }
+                return DoEvaluate(e, events2, returned, bufman->events2, q, p);
+                //for (uint32_t i = 0; i < events2.size(); i++, it++)
+                //{
+                //    if(e->m_seq == bufman->events2[i]->m_seq)
+                //    {
+                //        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
+                //  //      Ptr<CepEvent> e2 = CreateObject<CepEvent>();
+                //        e->CopyCepEvent(e1);
+                //        // Here we insert the incoming event into the sequence
+                //        // Split loop into recursion.
+                //        // Return a recursive call to some function
+//
+                //        events2[i]->CopyCepEvent(e2);
+                //
+                //        bufman->events2.erase(it);
+                //        returned.push_back(e1);
+                //        returned.push_back(e2);
+//
+                //        return true;
+                //    }
+                //}
                 
             }
             else
             {
-                auto it = bufman->events1.begin();
-                for (uint32_t i = 0; i < bufman->events1.size(); i++, it++)
-                {
-                    if(e->m_seq == bufman->events1[i]->m_seq)
-                    {
-                        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-                        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-                        e->CopyCepEvent(e1);
-                        // Here we insert the incoming event into the sequence
-                        bufman->events1[i]->CopyCepEvent(e2);
-
-                        bufman->events1.erase(it);
-                        returned.push_back(e1);
-                        returned.push_back(e2);
-                        return true;
-                    }
-                }
+                //auto it = bufman->events1.begin();
+                return DoEvaluate(e, events1, returned, bufman->events1, q, p);
+                //for (uint32_t i = 0; i < bufman->events1.size(); i++, it++)
+                //{
+                //    if(e->m_seq == bufman->events1[i]->m_seq)
+                //    {
+                //        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
+                //        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
+                //        e->CopyCepEvent(e1);
+                //        // Here we insert the incoming event into the sequence
+                //        bufman->events1[i]->CopyCepEvent(e2);
+//
+                //        bufman->events1.erase(it);
+                //        returned.push_back(e1);
+                //        returned.push_back(e2);
+                //        return true;
+                //    }
+                //}
             }
             
         }
@@ -432,12 +425,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     bool
-    ThenOperator::DoEvaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned) {
+    ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents) {
 
     }
 
     bool
-    ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned)
+    ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p)
     {
         std::vector<Ptr<CepEvent>> events1;
         std::vector<Ptr<CepEvent>> events2;
@@ -496,7 +489,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     bool
-    OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned)
+    OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p)
     {
         /* everything is a match*/
        returned.push_back(e);
@@ -504,6 +497,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Packet> dp = Create<Packet>();
         Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+        p->HandleNewCepEvent(q, returned);
         // Enqueue OrCepOp SEM and execute once
         ee->globalStateVariables["cepOpDoneYet"] = 1;
         return true; 
@@ -641,7 +635,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    Producer::HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > events){
+    Producer::HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events){
         if(q->actionType == NOTIFICATION)
         {
             
