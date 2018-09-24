@@ -186,6 +186,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
+        if (ops.begin() == ops.end())
+            return;
         std::cout << "Detector::CepOperatorProcessCepEvent" << std::endl;
         Ptr<CepOperator> op = (Ptr<CepOperator>) *ops.begin();
 
@@ -195,7 +197,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(op->Evaluate(e, returned))
         {
             proceed = true;
-
         }
 
         if(proceed)
@@ -204,11 +205,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             producer->HandleNewCepEvent(q, returned);
         }
 
-        Ptr<Packet> dummyPacket1 = Create<Packet>();
+        /*Ptr<Packet> dummyPacket1 = Create<Packet>();
         Ptr<Packet> dummyPacket2 = Create<Packet>();
         Ptr<Packet> dummyPacket3 = Create<Packet>();
-        Ptr<Node> node = GetObject<Dcep>()->GetNode();
-        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+        Ptr<Node> node = GetObject<Dcep>()->GetNode();*/
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        ops.erase(ops.begin());
+        if (ops.begin() != ops.end()) {
+            ee->Proceed("handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            ee->globalStateVariables["CepOpsLeft"] = 1;
+        } else {
+            ee->globalStateVariables["CepOpsLeft"] = 0;
+        }
+
+        /*ee->Proceed("handle-cepops", &Placement::RcvCepEvent, p, event);
         if (ops.begin() == ops.end()) {
             //ee->ScheduleInterrupt (dummyPacket, "HIRQ-2", Seconds(0));
             ee->globalStateVariables["thenCepOpDoneYet"] = 1;
@@ -226,7 +236,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->Proceed(dummyPacket1, "loc-process-then-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->Proceed(dummyPacket2, "loc-process-or-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->Proceed(dummyPacket3, "loc-process-and-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-        }
+        }*/
     }
     
     void
@@ -240,12 +250,18 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         cep->GetOpsByInputCepEventType(e->type, ops);
         Ptr<Producer> producer = GetObject<Producer>();
 
-        Ptr<Packet> dummyPacket1 = Create<Packet>();
+        /*Ptr<Packet> dummyPacket1 = Create<Packet>();
         Ptr<Packet> dummyPacket2 = Create<Packet>();
-        Ptr<Packet> dummyPacket3 = Create<Packet>();
+        Ptr<Packet> dummyPacket3 = Create<Packet>();*/
         Ptr<Node> node = GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        if (ops.begin() == ops.end()) {
+        if (ops.begin() != ops.end()) {
+            ee->Proceed("handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            ee->globalStateVariables["CepOpsLeft"] = 1;
+        } else {
+            ee->globalStateVariables["CepOpsLeft"] = 0;
+        }
+        /*if (ops.begin() == ops.end()) {
             ee->globalStateVariables["thenCepOpDoneYet"] = 1;
             ee->globalStateVariables["orCepOpDoneYet"] = 1;
             ee->globalStateVariables["andCepOpDoneYet"] = 1;
@@ -259,7 +275,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->Proceed(dummyPacket1, "loc-process-then-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->Proceed(dummyPacket2, "loc-process-or-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->Proceed(dummyPacket3, "loc-process-and-cepop", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-        }
+        }*/
     }
     
     

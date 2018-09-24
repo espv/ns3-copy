@@ -52,6 +52,11 @@ public:
 
   template<class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object);
   template<class T1, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1);
+  template<class T1,class T2, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2);
+  template<class T1,class T2, class T3, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3);
+  template<class T1,class T2, class T3, class T4, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4);
+  template<class T1,class T2, class T3, class T4, class T5, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
+  template<class T1,class T2, class T3, class T4, class T5, class T6, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 
   void ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time);
 
@@ -192,6 +197,31 @@ template<class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service,
 
 template<class T1, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1) {
     targets[service] = MakeEvent(func, object, arg1);
+    return true;
+}
+
+template<class T1,class T2, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2) {
+    targets[service] = MakeEvent(func, object, arg1, arg2);
+    return true;
+}
+
+template<class T1,class T2, class T3, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3) {
+    targets[service] = MakeEvent(func, object, arg1, arg2, arg3);
+    return true;
+}
+
+template<class T1,class T2, class T3, class T4, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
+    targets[service] = MakeEvent(func, object, arg1, arg2, arg3, arg4);
+    return true;
+}
+
+template<class T1,class T2, class T3, class T4, class T5, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
+    targets[service] = MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5);
+    return true;
+}
+
+template<class T1,class T2, class T3, class T4, class T5, class T6, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
+    targets[service] = MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6);
     return true;
 }
 

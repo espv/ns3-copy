@@ -594,7 +594,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x DEQUEUE PKTQUEUE 0 h1-h2
+#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
 x STATECOND CepOpType read global 0
 x CALL handle-or-cepop
@@ -610,7 +610,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x DEQUEUE PKTQUEUE 0 h1-h2
+#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
 x STATECOND CepOpType read global 1
 x CALL handle-and-cepop
@@ -626,7 +626,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x DEQUEUE PKTQUEUE 0 h1-h2
+#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
 x STATECOND CepOpType read global 2
 x CALL handle-then-cepop
@@ -643,7 +643,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x DEQUEUE PKTQUEUE 0 h1-h2
+#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 0
 0 STOP
 
@@ -666,9 +666,9 @@ x SLEEPTHREAD
 # Additionally, REMOVECEPOP can be useful.
 #x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
 #received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
-received_event_loc CALL handle-cepops
+x CALL handle-cepops
 #x CALL populate-cepops
-x LOOP insert_event_into_cepops 0 cepops cepops 0
+#x LOOP insert_event_into_cepops 0 cepops cepops 0
 #x TTWAKEUP packet_thread
 0 STOP
 
