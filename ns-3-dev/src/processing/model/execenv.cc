@@ -39,7 +39,7 @@ bool is_prefix(std::string prefix, std::string str) {
     return std::mismatch(prefix.begin(), prefix.end(), str.begin()).first == prefix.end();
 }
 
-TypeId ExecEnv::GetTypeId(void) {
+TypeId ExecEnv::GetTypeId() {
 	static TypeId tid =
 			TypeId("ns3::ExecEnv").SetParent<Object>().AddConstructor<ExecEnv>();
 	return tid;
@@ -185,7 +185,7 @@ void ExecEnv::Initialize(std::string device) {
 #endif
 
 	// Parse device file to create the rest
-	Parse(device);
+	Parse(std::move(device));
 }
 
 void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
@@ -292,7 +292,7 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 
 	// Parse frequency
 	i.str(tokens[1]);
-	int freq;
+	uint64_t freq;
 	if (!(i >> freq)) {
 		NS_FATAL_ERROR("Unable to parse frequency " << tokens[1] << std::endl);
 		exit(1);
@@ -346,9 +346,7 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 			cpu->interruptThread = CreateObject<Thread>();
 			cpu->interruptThread->peu = newPEU;
 			cpu->interruptThread->m_scheduler = newPEU->taskScheduler;
-		}
-
-		// All other types of PEUs are treated the same
+		}  // All other types of PEUs are treated the same
 		else {
 			newPEU = CreateObjectWithAttributes<PEU>("frequency", UintegerValue(freq), "name", StringValue(tokens[2]));
 			hwModel->m_PEUs[tokens[3]] = newPEU;
@@ -531,7 +529,7 @@ uint32_t ExecEnv::stringToUint32(const std::string& s) {
 }
 
 std::string ExecEnv::deTokenize(std::vector<std::string> tokens) {
-	std::string result = "";
+	std::string result;
 	auto it = tokens.begin();
 
 	while (it != tokens.end()) {
@@ -549,9 +547,8 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 	for (int i = 0; i < LASTRESOURCE; i++) {
 		if (a.resourcesUsed[i].defined) {
 			// Check that both a and b are the same wrt. this resource
-			if (a.resourcesUsed[i].defined != b.resourcesUsed[i].defined
-					|| a.resourcesUsed[i].distributionType.compare(
-							b.resourcesUsed[i].distributionType)) {
+			if (a.resourcesUsed[i].defined != b.resourcesUsed[i].defined ||
+			    a.resourcesUsed[i].distributionType != b.resourcesUsed[i].distributionType) {
 				NS_FATAL_ERROR(
 						"Attempted to add different types of distributions");
 				exit(1);
@@ -561,7 +558,7 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 			// NOTE: we currently only support normal distributions, this should be
 			// extended to lognormal.
 			// For normal
-			if (!a.resourcesUsed[i].distributionType.compare("normal")) {
+			if (a.resourcesUsed[i].distributionType == "normal") {
 				// In normal distributions, param1 is average and param 2 the variance
 				double m2a = a.resourcesUsed[i].param2 * a.samples;
 				double m2b = b.resourcesUsed[i].param2 * b.samples;
@@ -583,12 +580,11 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 				// Create distribution and store in toReturn
 				toReturn.resourcesUsed[i].consumption = NormalVariable(combavg, combvar);
 				toReturn.resourcesUsed[i].defined = true;
-				toReturn.samples = countx;
+				toReturn.samples = (uint32_t)countx;
 				toReturn.resourcesUsed[i].param1 = combavg;
 				toReturn.resourcesUsed[i].param2 = combvar;
 
-			} else if (!a.resourcesUsed[i].distributionType.compare(
-					"lognormal")) {
+			} else if (a.resourcesUsed[i].distributionType == "lognormal") {
 				NS_FATAL_ERROR(
 						"combination of lognormal distributions not currently supported - to be supported soon\n");
 				exit(1);
@@ -685,7 +681,7 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 			noLocTokensExist[0] = "";
 			std::string curEventNewDesc = deTokenize(noLocTokensNew);
 			std::string curEventExistDesc = deTokenize(noLocTokensExist);
-			if (curEventNewDesc.compare(curEventExistDesc)) {
+			if (curEventNewDesc != curEventExistDesc) {
 				NS_FATAL_ERROR(
 						"Could not merge program models with differing event descriptors: " << std::endl << curEventNewDesc << std::endl << curEventExistDesc << std::endl);
 				exit(1);
@@ -702,7 +698,7 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 
 void ExecEnv::PrintProgram(Program *curPgm) {
 	//std::cout << "Listing of program " << curPgm->sem->name << ":" << std::endl;
-	unsigned int i = 0;
+	int i = 0;
 	unsigned int numIndent = 0;
 
 	//std::cout << curEvt->type;
@@ -749,7 +745,7 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			std::cout << *((Condition *) curEvt) << std::endl;
 
 			numIndent++;
-			Condition *curCnd = ((Condition *) curEvt);
+			auto curCnd = dynamic_cast<Condition *>(curEvt);
 			std::cout << std::endl << curCnd->programs.front().first << ":"
 					<< std::endl;
 			curPgm = curCnd->programs.front().second;
@@ -758,23 +754,23 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			break;
 		}
 		case TEMPSYNCH: {
-			std::cout << *((ExecutionEvent *) curEvt) << std::endl;
+			std::cout << curEvt << std::endl;
 			break;
 		}
 		case END: {
-			std::cout << *((ExecutionEvent *) curEvt) << std::endl;
+			std::cout << curEvt << std::endl;
 			break;
 		}
 		case DEBUG: {
-			std::cout << *((ExecutionEvent *) curEvt) << std::endl;
+			std::cout << curEvt << std::endl;
 			break;
 		}
         case MEASURE: {
-			std::cout << *((ExecutionEvent *) curEvt) << std::endl;
+			std::cout << curEvt << std::endl;
 			break;
         }
 		case LASTTYPE: {
-			std::cout << *((ExecutionEvent *) curEvt) << std::endl;
+			std::cout << curEvt << std::endl;
 			break;
 		}
 		}
@@ -782,8 +778,7 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 		i++;
 	}
 
-	std::cout << std::endl;
-	std::cout << std::endl;
+	std::cout << "\n" << std::endl;
 }
 
 void ExecEnv::PrintSEM(Program *curPgm, int numIndent) {
@@ -794,12 +789,9 @@ void ExecEnv::PrintSEM(Program *curPgm, int numIndent) {
 		std::cout << ExecutionEvent::typeStrings[curPgm->events[i]->type]
 				<< " ";
 		if (curPgm->events[i]->type == CONDITION) {
-			std::list<std::pair<uint32_t, Program *> >::iterator it =
-					((Condition *) curPgm->events[i])->programs.begin();
-			for (; it != ((Condition *) curPgm->events[i])->programs.end();
-					it++) {
-				std::cout << std::endl << (*it).first << ": ";
-				PrintSEM((*it).second, numIndent + 1);
+			for (auto it : ((Condition *) curPgm->events[i])->programs) {
+				std::cout << std::endl << it.first << ": ";
+				PrintSEM(it.second, numIndent + 1);
 			}
 		}
 		i++;
@@ -822,7 +814,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	static Program *rootProgram = nullptr;
 	static Program *currentProgram = nullptr;
 	static bool dequeueOrLoopEncountered = false;
-	static std::string currentName = "";
+	static std::string currentName;
 	static uint32_t nrSamples = 0;
 
 	// Pointer to the execution event and prospective
@@ -834,7 +826,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	/************** SEM HEADER ****************/
 	/******************************************/
 
-	if (!tokens[0].compare("NAME")) {
+	if (tokens[0] == "NAME") {
 		// Check if this sem allready exists. If not, create it.
 		Ptr<SEM> sem;
 		auto it = m_serviceMap.find(tokens[1]);
@@ -862,10 +854,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	// Just set the PEU in the currently handled SEM
-	if (!tokens[0].compare("PEU")) {
+	if (tokens[0] == "PEU") {
 		if (is_prefix("cpu", tokens[1])) {
 
-            if (!tokens[1].compare("cpu1")) {
+            if (tokens[1] == "cpu1") {
                 currentlyHandled->peu = hwModel->cpus[1];
             } else {
                 currentlyHandled->peu = hwModel->cpus[0];
@@ -875,18 +867,18 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			currentlyHandled->peu = hwModel->m_PEUs[tokens[1]];
 	}
 
-	if (!tokens[0].compare("RESOURCES")) {
-		if (!tokens[1].compare("cycles"))
+	if (tokens[0] == "RESOURCES") {
+		if (tokens[1] == "cycles")
 			currentResources.push_back(CYCLES);
-		else if (!tokens[1].compare("nanoseconds"))
+		else if (tokens[1] == "nanoseconds")
 			currentResources.push_back(NANOSECONDS);
-		else if (!tokens[1].compare("instructions"))
+		else if (tokens[1] == "instructions")
 			currentResources.push_back(INSTRUCTIONS);
-		else if (!tokens[1].compare("cachemisses"))
+		else if (tokens[1] == "cachemisses")
 			currentResources.push_back(CACHEMISSES);
-		else if (!tokens[1].compare("memoryaccesses"))
+		else if (tokens[1] == "memoryaccesses")
 			currentResources.push_back(MEMORYACCESSES);
-		else if (!tokens[1].compare("memorystallcycles"))
+		else if (tokens[1] == "memorystallcycles")
 			currentResources.push_back(MEMSTALLCYCLES);
 
 		// Easier if we just add the string here, and
@@ -895,7 +887,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentDistributions.push_back(tokens[2]);
 	}
 
-	if (!tokens[0].compare("FRACTION")) {
+	if (tokens[0] == "FRACTION") {
 		// Set samples
 		nrSamples = stringToUint32(tokens[2]);
 	}
@@ -906,7 +898,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 	// When we encounter START, instantiate
 	// a new root condition
-	if (!tokens[1].compare("START") || !tokens[1].compare("LOOPSTART")) {
+	if (tokens[1] == "START" || tokens[1] == "LOOPSTART") {
 		currentProgram = new Program();
 		rootProgram = currentProgram;
 
@@ -917,23 +909,21 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// If we have a LOOPSTART, set the queues
 		// served and any additional conditions in
 		// the loopcondition.
-		if (!tokens[1].compare("LOOPSTART") && !currentlyHandled->lc) {
+		if (tokens[1] == "LOOPSTART" && !currentlyHandled->lc) {
 			currentlyHandled->lc = new LoopCondition;
 
 			// Fill queues only if the loop is based on that
-			if (tokens[3].compare("noloc")) {
-				currentlyHandled->lc->serviceQueue2s = !(serviceQueue2s.find(
-						tokens[3]) == serviceQueue2s.end());
-				currentlyHandled->lc->stateQueue2s = !(std::find(
-						stateQueue2Order.begin(), stateQueue2Order.end(),
-						tokens[3]) == stateQueue2Order.end());
+			if (tokens[3] != "noloc") {
+				currentlyHandled->lc->serviceQueue2s = !(serviceQueue2s.find(tokens[3]) == serviceQueue2s.end());
+				currentlyHandled->lc->stateQueue2s = !(std::find(stateQueue2Order.begin(),
+				                                       stateQueue2Order.end(),
+						                               tokens[3]) == stateQueue2Order.end());
 				fillQueue2s(tokens[3], tokens[4], currentlyHandled->lc);
 			}
 
 			// Check if we have specified an additional
 			// condition for this queue
-			std::map<std::string, struct condition>::iterator foundLoopCond =
-					loopConditions.find(currentName);
+			auto foundLoopCond = loopConditions.find(currentName);
 			if (foundLoopCond != loopConditions.end()) {
 				currentlyHandled->lc->additionalCondition =
 						conditionFunctions->conditionMap[foundLoopCond->second.condName];
@@ -942,7 +932,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		}
 	}
 
-	if (!tokens[1].compare("STOP") || !tokens[1].compare("RESTART")) {
+	if (tokens[1] == "STOP" || tokens[1] == "RESTART") {
 		// Append END-event to current program
 		auto end = new ExecutionEvent();
 		end->type = END;
@@ -958,10 +948,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// Get the program pointer of the current SEM
 		Program **existingProgram;
 		if (currentlyHandled->lc != nullptr) {
-			uint32_t numQueue2s =
-					currentlyHandled->lc->serviceQueue2s ?
-							currentlyHandled->lc->serviceQueue2sServed.size() :
-							(currentlyHandled->lc->stateQueue2s ?
+			uint64_t numQueue2s = currentlyHandled->lc->serviceQueue2s ?
+							      currentlyHandled->lc->serviceQueue2sServed.size() :
+							      (currentlyHandled->lc->stateQueue2s ?
 									currentlyHandled->lc->stateQueue2sServed.size() :
 									currentlyHandled->lc->queuesServed.size());
 
@@ -986,7 +975,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			execEvent->checkpoint = locationTriggers[foundTrigger->first];
 		execEvent->line = line;
 		execEvent->lineNr = lineNr;
-		if (tokens.size() > 1 && !tokens[tokens.size() - 2].compare("debug")) {
+		if (tokens.size() > 1 && tokens[tokens.size() - 2] == "debug") {
 			execEvent->hasDebug = true;
 			execEvent->debug = tokens[tokens.size() - 1];
 		} else
@@ -1029,11 +1018,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// Then, iterate according to all HWE aggregates
 		// specified in the header parsed above.
-		int numHWEs = currentResources.size();
+		unsigned long numHWEs = currentResources.size();
 		int tokenIndex = 0;
 		for (int i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
-			if (!currentDistributions[i].compare("normal")) {
+			if (currentDistributions[i] == "normal") {
 				// The normal distribution takes two parameters:
 				// average and standard deviation
 				double average = stringToDouble(
@@ -1047,13 +1036,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				ps->resourcesUsed[currentResources[i]].param1 = average;
 				ps->resourcesUsed[currentResources[i]].param2 = sd * sd;
 				ps->samples = nrSamples;
-			} else if (!currentDistributions[i].compare("lognormal")) {
+			} else if (currentDistributions[i] == "lognormal") {
 				// The normal distribution takes two parameters:
 				// average and standard deviation
-				double logaverage = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
-				double logsd = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
+				double logaverage = stringToDouble(tokens[intField + 2 + tokenIndex++]);
+				double logsd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				ps->resourcesUsed[currentResources[i]].defined = true;
 				ps->resourcesUsed[currentResources[i]].consumption =
 						LogNormalVariable(logaverage, logsd);
@@ -1079,7 +1066,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			}
 		}
 
-		Queue2ExecutionEvent *q;
 		if (tokens[1] == "PROCESS" && tokens.size() >= 5 && tokens[4] == "PERBYTE") {  // Espen
 		    ps->pktqueue = queues[tokens[5]];  // The specified packet queue will be dequeued from.
 		} else if (tokens[1] == "PEUSTART" && tokens.size() >= 6 && tokens[5] == "PERBYTE") {
@@ -1091,7 +1077,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	// Handle incoming CEP event
-	if (!tokens[1].compare("HANDLEINCOMINGCEPEVENT")) {
+	if (tokens[1] == "HANDLEINCOMINGCEPEVENT") {
 		Ptr<Node> node = GetObject<Node>();
 		std::string cycles_per_fsm = tokens[2];
 		std::string deviation_per_fsm = tokens[3];
@@ -1101,43 +1087,36 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// Iterate all HWE aggregates obtained during
 		// the parsing of the header.
 		// First, create the processing stage
-		ProcessingStage *ps1 = new ProcessingStage();
+		auto ps1 = new ProcessingStage();
 		ps1->samples = nrSamples;
 
 		int intField = 0;
 
 		// Then, iterate according to all HWE aggregates
 		// specified in the header parsed above.
-		int numHWEs = currentResources.size();
+		unsigned long numHWEs = currentResources.size();
 		int tokenIndex = 0;
 		for (int i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
-			if (!currentDistributions[i].compare("normal")) {
+			if (currentDistributions[i] == "normal") {
 				// The normal distribution takes two parameters:
 				// average and standard deviation
-				double average = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
+				double average = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				ps1->resourcesUsed[currentResources[i]].defined = true;
-				ps1->resourcesUsed[currentResources[i]].consumption =
-						NormalVariable(average, sd * sd);
-				ps1->resourcesUsed[currentResources[i]].distributionType =
-						"normal";
+				ps1->resourcesUsed[currentResources[i]].consumption = NormalVariable(average, sd * sd);
+				ps1->resourcesUsed[currentResources[i]].distributionType = "normal";
 				ps1->resourcesUsed[currentResources[i]].param1 = average;
 				ps1->resourcesUsed[currentResources[i]].param2 = sd * sd;
 				ps1->samples = nrSamples;
-			} else if (!currentDistributions[i].compare("lognormal")) {
+			} else if (currentDistributions[i] == "lognormal") {
 				// The normal distribution takes two parameters:
 				// average and standard deviation
-				double logaverage = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
-				double logsd = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
+				double logaverage = stringToDouble(tokens[intField + 2 + tokenIndex++]);
+				double logsd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				ps1->resourcesUsed[currentResources[i]].defined = true;
-				ps1->resourcesUsed[currentResources[i]].consumption =
-						LogNormalVariable(logaverage, logsd);
-				ps1->resourcesUsed[currentResources[i]].distributionType =
-						"lognormal";
+				ps1->resourcesUsed[currentResources[i]].consumption = LogNormalVariable(logaverage, logsd);
+				ps1->resourcesUsed[currentResources[i]].distributionType = "lognormal";
 				ps1->resourcesUsed[currentResources[i]].param1 = logaverage;
 				ps1->resourcesUsed[currentResources[i]].param2 = logsd;
 				ps1->samples = nrSamples;
@@ -1152,37 +1131,30 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// Iterate all HWE aggregates obtained during
 		// the parsing of the header.
 		// First, create the processing stage
-		ProcessingStage *ps2 = new ProcessingStage();
+		auto ps2 = new ProcessingStage();
 		ps2->samples = nrSamples;
 
 		for (int i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
-			if (!currentDistributions[i].compare("normal")) {
+			if (currentDistributions[i] == "normal") {
 				// The normal distribution takes two parameters:
 				// average and standard deviation
-				double average = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
+				double average = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				ps2->resourcesUsed[currentResources[i]].defined = true;
-				ps2->resourcesUsed[currentResources[i]].consumption =
-						NormalVariable(average, sd * sd);
-				ps2->resourcesUsed[currentResources[i]].distributionType =
-						"normal";
+				ps2->resourcesUsed[currentResources[i]].consumption = NormalVariable(average, sd * sd);
+				ps2->resourcesUsed[currentResources[i]].distributionType = "normal";
 				ps2->resourcesUsed[currentResources[i]].param1 = average;
 				ps2->resourcesUsed[currentResources[i]].param2 = sd * sd;
 				ps2->samples = nrSamples;
-			} else if (!currentDistributions[i].compare("lognormal")) {
+			} else if (currentDistributions[i] == "lognormal") {
 				// The normal distribution takes two parameters:
 				// average and standard deviation
-				double logaverage = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
-				double logsd = stringToDouble(
-						tokens[intField + 2 + tokenIndex++]);
+				double logaverage = stringToDouble(tokens[intField + 2 + tokenIndex++]);
+				double logsd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				ps2->resourcesUsed[currentResources[i]].defined = true;
-				ps2->resourcesUsed[currentResources[i]].consumption =
-						LogNormalVariable(logaverage, logsd);
-				ps2->resourcesUsed[currentResources[i]].distributionType =
-						"lognormal";
+				ps2->resourcesUsed[currentResources[i]].consumption = LogNormalVariable(logaverage, logsd);
+				ps2->resourcesUsed[currentResources[i]].distributionType = "lognormal";
 				ps2->resourcesUsed[currentResources[i]].param1 = logaverage;
 				ps2->resourcesUsed[currentResources[i]].param2 = logsd;
 				ps2->samples = nrSamples;
@@ -1222,24 +1194,24 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	// because if there is a condition on a dequeued packet,
 	// it must be set to curPkt in thread.cc before being
 	// able to resolve the condition.
-	if (!tokens[1].compare("ENQUEUE") || !tokens[1].compare("DEQUEUE")) {
+	if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
 		// Create an event, and insert the queue
 		auto q = new Queue2ExecutionEvent();
 		execEvent = q;
-		q->enqueue = !tokens[1].compare("ENQUEUE");
+		q->enqueue = tokens[1] == "ENQUEUE";
 		// If we have a service queue, set the SEM
-		if (!tokens[2].compare("SRVQUEUE")) {
+		if (tokens[2] == "SRVQUEUE") {
 			q->serviceQueue2 = true;
-			if (!tokens[1].compare("ENQUEUE")) {
+			if (tokens[1] == "ENQUEUE") {
 				q->semToEnqueue = m_serviceMap[tokens[3]];
 				if (q->semToEnqueue == nullptr) {
 					std::cout << "SEM " << tokens[2] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
 					exit(1);
 				}
 			}
-		} else if (!tokens[2].compare("STATEQUEUE")) {
+		} else if (tokens[2] == "STATEQUEUE") {
 			q->stateQueue2 = true;
-			if (!tokens[1].compare("ENQUEUE")) {
+			if (tokens[1] == "ENQUEUE") {
 				q->valueToEnqueue = stringToUint32(tokens[3]);
 			}
 
@@ -1250,11 +1222,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			// We also do not support global state queues for now, as
 			// this is not in demand (i.e., we're only using state
 			// queues for the spisizes queue on the N900).
-			q->local = !tokens[5].compare("local");
+			q->local = tokens[5] == "local";
 		}
 
 		// We specify the queue
-		if (tokens[4].compare("0")) {
+		if (tokens[4] != "0") {
 			if (q->stateQueue2)
 				q->queueName = tokens[4]; // Only local scope supported for now
 			else if (!q->serviceQueue2) {
@@ -1267,7 +1239,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// set it. NOTICE that we may fire TWO triggers upon
 		// this event: (1) the one in the DEQUEUE event itself,
 		// and (2) the one in the SEM prospectively dequeued.
-		if (!tokens[1].compare("DEQUEUE")) {
+		if (tokens[1] == "DEQUEUE") {
 			auto dqTrigIt = dequeueTriggers.find(tokens[3]);
 			if (dqTrigIt != dequeueTriggers.end())
 				q->checkpoint = dqTrigIt->second;
@@ -1284,7 +1256,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(q);
 
 
-        if (q->serviceQueue2 == true && tokens[1] == "ENQUEUE" && tokens.size() > 5) {
+        if (q->serviceQueue2 && tokens[1] == "ENQUEUE" && tokens.size() > 5) {
 		    std::vector<uint32_t> arguments;
 		    std::string threadName = tokens[5];
 
@@ -1316,7 +1288,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				c->insertEntry(tokens[4] == "empty" ? QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
 				c->getConditionQueue2s = ns3::MakeCallback(&ConditionFunctions::Queue2Condition, conditionFunctions);
 			} else {
-				ServiceQueue2Condition *q = new ServiceQueue2Condition();
+				auto q = new ServiceQueue2Condition();
 				q->firstQueue2 = serviceQueue2s[tokens[2]];
 				q->lastQueue2 = serviceQueue2s[tokens[3]];
 				((ExecutionEvent *)q)-> lineNr = lineNr;
@@ -1362,8 +1334,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				// integers.
 
 				// See if state condition has read and/or write functions (TODO: Not tested yet!)
-				auto foundCond = conditionFunctions->conditionMap.find("readState" + sc->name);
-				if (foundCond != conditionFunctions->conditionMap.end()) {
+				auto foundCond2 = conditionFunctions->conditionMap.find("readState" + sc->name);
+				if (foundCond2 != conditionFunctions->conditionMap.end()) {
 					sc->getConditionState = conditionFunctions->conditionMap["readState" + sc->name];
 					sc->hasGetterFunction = true;
 				}
@@ -1388,7 +1360,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 			}
 		} else if (tokens[1] == "PKTEXTR") {
-//			std::cout << "Adding CONDITION" << std::endl;
 			// Can be global or local
 			// First find out if we have a condition specified for this location
 			auto foundCond = locationConditions.find(tokens[0]);
@@ -1460,13 +1431,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			if (!(condition == dequeueConditions.end() || condition == enqueueConditions.end())) {
 
 				// Iterate all conditions on this queue, and chain together
-				auto allConditions = condition->second;
-				struct condition cond;
-				for (auto it = allConditions.begin(); it != allConditions.end(); ++it) {
+				for (auto cond : condition->second) {
 					newProgram = new Program();
 					newProgram->sem = currentlyHandled;
 
-					cond = *it;
 					auto pc = new PacketCharacteristic();
 					c = (Condition *) pc;
 					((ExecutionEvent *)pc)-> lineNr = lineNr;
@@ -1488,9 +1456,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				newProgram->sem = currentlyHandled;
 
 				auto sc = new StateQueue2Condition();
-				((ExecutionEvent *)sc)-> lineNr = lineNr;
+				sc-> lineNr = lineNr;
 				sc->queueName = queueName;
-				c = (Condition *) sc;
+				c = sc;
 
 				// Set the packet extraction function id, and insert new program
 				c->insertEntry(stringToUint32(tokens[3]), newProgram);
@@ -1728,7 +1696,7 @@ void ExecEnv::Parse(std::string device) {
 
 			// If there was a blank line, we know we
 			// are done
-			if (tokens.size() == 0 || tokens[0].c_str()[0] == '#')
+			if (tokens.empty() || tokens[0].c_str()[0] == '#')
 				continue;
 
 			// Mode changes with these keywords
