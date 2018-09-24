@@ -65,9 +65,7 @@ std::string ExecutionEvent::typeStrings[] = {
 //////////
 // STATEMENTS
 //////////
-ExecutionEvent::~ExecutionEvent()
-{
-}
+ExecutionEvent::~ExecutionEvent() = default;
 
 ExecutionEvent::ExecutionEvent()
 {
@@ -96,14 +94,14 @@ TempCompletion::TempCompletion()
 	global = false;
 }
 
-TempCompletion::~TempCompletion() {}
+TempCompletion::~TempCompletion() = default;
 
 
 Queue2Condition::Queue2Condition()
 {
   Condition::condType = QUEUECONDITION;
 }
-Queue2Condition::~Queue2Condition() {}
+Queue2Condition::~Queue2Condition() = default;
 
 
 ServiceQueue2Condition::ServiceQueue2Condition()
@@ -111,20 +109,20 @@ ServiceQueue2Condition::ServiceQueue2Condition()
   Condition::condType = SERVICEQUEUECONDITION;
 }
 
-ServiceQueue2Condition::~ServiceQueue2Condition() {}
+ServiceQueue2Condition::~ServiceQueue2Condition() = default;
 
 ThreadCondition::ThreadCondition()
 {
   Condition::condType = THREADCONDITION;
 }
-ThreadCondition::~ThreadCondition() {}
+ThreadCondition::~ThreadCondition() = default;
 
 
 PacketCharacteristic::PacketCharacteristic()
 {
   Condition::condType = PACKETCHARACTERISTIC;
 }
-PacketCharacteristic::~PacketCharacteristic() {}
+PacketCharacteristic::~PacketCharacteristic() = default;
 
 
 StateCondition::StateCondition()
@@ -133,34 +131,34 @@ StateCondition::StateCondition()
   hasSetterFunction = false;
   hasGetterFunction = false;
 }
-StateCondition::~StateCondition() {}
+StateCondition::~StateCondition() = default;
 
 
 Queue2ExecutionEvent::Queue2ExecutionEvent()
 {
 	ExecutionEvent::type = QUEUE;
-	semToEnqueue = NULL;
+	semToEnqueue = nullptr;
 	valueToEnqueue = 0;
 	serviceQueue2 = false;
 	stateQueue2 = false;
 	local = false;
-	servQueue2 = NULL;
-	queue = NULL;
+	servQueue2 = nullptr;
+	queue = nullptr;
 	queueName = "";
 }
-Queue2ExecutionEvent::~Queue2ExecutionEvent() {}
+Queue2ExecutionEvent::~Queue2ExecutionEvent() = default;
 
 
 LoopCondition::LoopCondition()
 {
   Condition::condType = LOOPCONDITION;
-  emptyQueue2s = NULL;
+  emptyQueue2s = nullptr;
   hasAdditionalCondition = false;
   perQueue2 = false;
   serviceQueue2s = false;
   stateQueue2s = false;
 }
-LoopCondition::~LoopCondition() {}
+LoopCondition::~LoopCondition() = default;
 
 
 void
@@ -170,7 +168,7 @@ Condition::insertEntry(uint32_t entry, Program *p) {
   newPair.second = p;
 
   // Insert new program
-  std::list<std::pair<uint32_t, Program *> >::iterator it = programs.begin();
+  auto it = programs.begin();
   for(; it != programs.end() && entry >= (*it).first; it++);
   programs.insert(it, newPair);
 
@@ -181,12 +179,12 @@ std::pair<uint32_t, Program *>
 Condition::getClosestEntryValue(uint32_t value)
 {
   // Locate
-  std::list<std::pair<uint32_t, Program *> >::iterator it = programs.begin();
+  auto it = programs.begin();
 
 
   // If we dont have any entries yet
   if(it == programs.end()) {
-    std::pair<uint32_t, Program *> nullPair(0, NULL);
+    std::pair<uint32_t, Program *> nullPair(0, nullptr);
     return nullPair;
   }
 
@@ -212,7 +210,6 @@ Condition::getClosestEntryValue(uint32_t value)
   }
 }
 
-Program *prev_program;
 // Function used to obtain closest entry
 std::pair<uint32_t, Program *>
 Condition::getClosestEntry(Ptr<Thread> t)
@@ -223,7 +220,7 @@ Condition::getClosestEntry(Ptr<Thread> t)
 	Ptr<ProgramLocation> loc = t->m_currentLocation;
 	Ptr<ExecEnv> ee = loc->program->sem->peu->hwModel->node->GetObject<ExecEnv>();
 	if(condType == STATECONDITION) {
-		StateCondition* sc = (StateCondition *) this;
+		auto sc = (StateCondition *) this;
 		if(sc->hasGetterFunction)
 			value = sc->getConditionState(t);
 		else
@@ -274,9 +271,8 @@ ProcessingStage::ProcessingStage()
   ExecutionEvent::type = PROCESS;
   interrupt = NULL;
 }
-ProcessingStage::~ProcessingStage() {}
+ProcessingStage::~ProcessingStage() = default;
 
-int cnt = 0;
 // Draws samples from the random distributions available,
 // and returns one instance from this.
 ProcessingInstance
@@ -288,10 +284,10 @@ ProcessingStage::Instantiate() {
   toReturn.source = this;
 
   // For the PERBYTE statement
-  if (this->pktqueue != NULL && !this->pktqueue->IsEmpty()) {
+  if (this->pktqueue != nullptr && !this->pktqueue->IsEmpty()) {
         this->factor = this->pktqueue->Dequeue()->GetSize () - 36;  // Minus the UPD, IP and frame headers
   }
-  
+
   // Iterate all resources used, select a random
   // sample and store in toReturn.
   for(int i = 0; i < LASTRESOURCE; i++) {
@@ -313,34 +309,33 @@ InsertEventIntoCEPOp::InsertEventIntoCEPOp() {
     ExecutionEvent::type = INCOMINGCEPEVENT;
 }
 
-InsertEventIntoFSM::InsertEventIntoFSM() {
-}
+InsertEventIntoFSM::InsertEventIntoFSM() = default;
 
 InterruptExecutionEvent::InterruptExecutionEvent(int IRQNr)
   : number(IRQNr)
 {
 }
-InterruptExecutionEvent::~InterruptExecutionEvent() {}
+InterruptExecutionEvent::~InterruptExecutionEvent() = default;
 
 
 SchedulerExecutionEvent::SchedulerExecutionEvent(int t, std::vector<uint32_t> arguments, std::string threadName)
 {
   schedType = t;
   ExecutionEvent::type = SCHEDULER;
-  args = arguments;
-  this->threadName = threadName;
+  args = std::move(arguments);
+  this->threadName = std::move(threadName);
 }
-SchedulerExecutionEvent::~SchedulerExecutionEvent() {}
+SchedulerExecutionEvent::~SchedulerExecutionEvent() = default;
 
 
 ExecuteExecutionEvent::ExecuteExecutionEvent()
 {
   ExecutionEvent::type = EXECUTE;
-  lc = NULL;
+  lc = nullptr;
   service = "";
-  sem = NULL;
+  sem = nullptr;
 }
-ExecuteExecutionEvent::~ExecuteExecutionEvent() {}
+ExecuteExecutionEvent::~ExecuteExecutionEvent() = default;
 
 
 DebugExecutionEvent::DebugExecutionEvent()
@@ -348,13 +343,13 @@ DebugExecutionEvent::DebugExecutionEvent()
   ExecutionEvent::type = DEBUG;
   this->tag = "";
 }
-DebugExecutionEvent::~DebugExecutionEvent() {}
+DebugExecutionEvent::~DebugExecutionEvent() = default;
 
 MeasureExecutionEvent::MeasureExecutionEvent()
 {
   ExecutionEvent::type = MEASURE;
 }
-MeasureExecutionEvent::~MeasureExecutionEvent() {}
+MeasureExecutionEvent::~MeasureExecutionEvent() = default;
 
 SynchronizationExecutionEvent::SynchronizationExecutionEvent()
 {
@@ -363,13 +358,13 @@ SynchronizationExecutionEvent::SynchronizationExecutionEvent()
 	  ExecutionEvent::type = SYNCHRONIZATION;
 	  global = false;
 }
-SynchronizationExecutionEvent::~SynchronizationExecutionEvent() {}
+SynchronizationExecutionEvent::~SynchronizationExecutionEvent() = default;
 
 StateQueue2Condition::StateQueue2Condition() {
 	Condition::condType = STATEQUEUECONDITION;
 	queueName = "";
 }
-StateQueue2Condition::~StateQueue2Condition() {}
+StateQueue2Condition::~StateQueue2Condition() = default;
 
 
 /************************************************************** */
@@ -480,9 +475,8 @@ std::ostream& operator<<(std::ostream& out, Condition& event)
 
 	// Print contents
 	out << "(";
-	std::list<std::pair<uint32_t, Program *> >::iterator it = event.programs.begin();
-	for(; it != event.programs.end(); it++)
-		out << it->first << ":" << it->second->events[0]->lineNr << ",";
+	for(auto program : event.programs)
+		out << program.first << ":" << program.second->events[0]->lineNr << ",";
 	out << ")";
 
 	return out;
@@ -490,7 +484,7 @@ std::ostream& operator<<(std::ostream& out, Condition& event)
 
 std::ostream& operator<<(std::ostream& out, LoopCondition& event){
 	out << *((Condition *) &event) << ": ";
-	int queueSize = event.serviceQueue2s ? event.serviceQueue2sServed.size() : event.queuesServed.size();
+	unsigned long queueSize = event.serviceQueue2s ? event.serviceQueue2sServed.size() : event.queuesServed.size();
 	out << "MI: " << event.maxIterations << ", PQ: " << event.perQueue2 << ", SQ: " << event.serviceQueue2s << ", QS: " << queueSize <<
 			", EQ: " << event.emptyQueue2s << ", AC: " << event.hasAdditionalCondition;
 
@@ -535,6 +529,8 @@ std::ostream& operator<<(std::ostream& out, ProcessingStage& event) {
 				out << "MEMSTALLCYCLES(";
 				break;
 			}
+			default:
+				NS_ASSERT(0);
 			}
 
 			out << event.samples << ", " << event.resourcesUsed[i].distributionType << "[" <<
@@ -552,9 +548,8 @@ std::ostream& operator<<(std::ostream& out, SchedulerExecutionEvent& event) {
 	out << event.schedType << "(";
 
 	// Run through args
-	std::vector<uint32_t>::iterator it = event.args.begin();
-	for(; it != event.args.end(); it++)
-		out << *it << ", ";
+	for(auto arg : event.args)
+		out << arg << ", ";
 	out << ")";
 
 	return out;
@@ -565,9 +560,8 @@ std::ostream& operator<<(std::ostream& out, SynchronizationExecutionEvent& event
 	out << event.synchType << " " << event.id << " T: " << event.temp << "(";
 
 	// Run through args
-	std::vector<uint32_t>::iterator it = event.args.begin();
-	for(; it != event.args.end(); it++)
-		out << *it << ", ";
+	for(auto arg : event.args)
+		out << arg << ", ";
 	out << ")";
 
 	return out;
@@ -576,7 +570,7 @@ std::ostream& operator<<(std::ostream& out, SynchronizationExecutionEvent& event
  std::ostream& operator<<(std::ostream& out, Queue2ExecutionEvent& event) {
 	 out << *((ExecutionEvent *) &event) << ": ";
 	 out << (event.enqueue ? "ENQUEUE " : "DEQUEUE ") << (event.serviceQueue2 ? "SERVICE(" : "PACKET(") <<
-			 (event.serviceQueue2 ? (event.semToEnqueue == NULL ? "0" : event.semToEnqueue->name) : "") << ") from/to " <<
+			 (event.serviceQueue2 ? (event.semToEnqueue == nullptr ? "0" : event.semToEnqueue->name) : "") << ") from/to " <<
 					 (event.serviceQueue2 ? (void *) event.servQueue2 : (void *) PeekPointer(event.queue));
 
 	 return out;
@@ -584,7 +578,7 @@ std::ostream& operator<<(std::ostream& out, SynchronizationExecutionEvent& event
 
  std::ostream& operator<<(std::ostream& out, ExecuteExecutionEvent& event) {
 	 out << *((ExecutionEvent *) &event) << ": ";
-	 out << (event.lc == NULL ? "SERVICE(" : "LOOP(") << (event.sem == NULL ? "0" : event.sem->name) << ")";
+	 out << (event.lc == nullptr ? "SERVICE(" : "LOOP(") << (event.sem == nullptr ? "0" : event.sem->name) << ")";
 
 	 if(event.lc)
 	 {
