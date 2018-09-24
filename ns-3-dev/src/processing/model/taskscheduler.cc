@@ -19,7 +19,7 @@ NS_LOG_COMPONENT_DEFINE ("TaskScheduler");
 NS_OBJECT_ENSURE_REGISTERED (TaskScheduler);
 
 TypeId 
-TaskScheduler::GetTypeId (void)
+TaskScheduler::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::processing::TaskScheduler")
     .SetParent<Object> ()
@@ -27,8 +27,7 @@ TaskScheduler::GetTypeId (void)
   return tid;
 }
 
-TaskScheduler::~TaskScheduler () {
-}
+TaskScheduler::~TaskScheduler () = default;
 
 TaskScheduler::TaskScheduler() 
 {
@@ -95,7 +94,7 @@ TaskScheduler::Request(int cpu, int type, std::vector<uint32_t> arguments)
 {
 #if 1
     std::vector<int> previouslyRunning = std::vector<int>(m_currentRunning, m_currentRunning + NUM_CPU);
-    DoRequest(cpu, type, arguments);
+    DoRequest(cpu, type, std::move(arguments));
 
     return CheckAllCPUsForPreemptions(cpu, previouslyRunning);
 #else
@@ -138,7 +137,7 @@ TaskScheduler::Request(int cpu, int type, std::vector<uint32_t> arguments)
 
 // Must be implemented by a SimSched-specific sub-class
 std::vector<int>
-TaskScheduler::CurrentRunning(void)
+TaskScheduler::CurrentRunning()
 {
   return std::vector<int>();
 }
@@ -265,7 +264,7 @@ TaskScheduler::SetupIdleThreads()
   idleResources.defined = true;
 
   // Create processing stage
-  ProcessingStage *idleProcessing = new ProcessingStage();
+  auto idleProcessing = new ProcessingStage();
 
   idleProcessing->resourcesUsed[NANOSECONDS] = idleResources;
 
@@ -273,9 +272,9 @@ TaskScheduler::SetupIdleThreads()
   // - Infinite loop start
   // - process for one million seconds
   // - infinite loop end
-  Program *idleProgram = new Program();
+  auto idleProgram = new Program();
   idleProgram->events.push_back(idleProcessing);
-  ExecutionEvent *end = new ExecutionEvent();
+  auto end = new ExecutionEvent();
   end->type = END;
   idleProgram->events.push_back(end);
 
@@ -320,7 +319,7 @@ TaskScheduler::SetupIdleThreads()
 void
 TaskScheduler::AllocateSynch(int type, std::string id, std::vector<uint32_t> arguments)
 {
-  return DoAllocateSynch(type, id, arguments);
+  return DoAllocateSynch(type, std::move(id), std::move(arguments));
 }
 
 
@@ -330,7 +329,7 @@ TaskScheduler::SynchRequest(int cpu, int type, std::string id,  std::vector<uint
 #if 1
   std::vector<int> previouslyRunning = DoCurrentRunning();
 
-  /*int newCR = */DoSynchRequest(cpu, type, id, arguments);
+  /*int newCR = */DoSynchRequest(cpu, type, std::move(id), std::move(arguments));
 
   return CheckAllCPUsForPreemptions(cpu, previouslyRunning);
 #else
@@ -372,7 +371,7 @@ TaskScheduler::SynchRequest(int cpu, int type, std::string id,  std::vector<uint
 uint32_t
 TaskScheduler::GetSynchReqType(std::string name)
 {
-  return DoGetSynchReqType(name);
+  return DoGetSynchReqType(std::move(name));
 }
 
 uint32_t
@@ -399,7 +398,7 @@ TaskScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint
 bool TaskScheduler::TempSynchRequest(int cpu, int type, void* var, std::vector<uint32_t> arguments){
     std::vector<int> previouslyRunning = DoCurrentRunning();
 
-    /*int newCR = */DoTempSynchRequest(cpu, type, var, arguments);
+    DoTempSynchRequest(cpu, type, var, std::move(arguments));
 
     return CheckAllCPUsForPreemptions(cpu, previouslyRunning);
 
@@ -476,7 +475,8 @@ TaskScheduler::PreEmpt(int cpu, int new_pid)
 }
 
 Ptr<Thread>
-TaskScheduler::Fork(std::string threadName,
+TaskScheduler::Fork(
+        std::string threadName,
 		Program *program,
 		int priority,
 		Ptr<Packet> currentPacket,
@@ -493,8 +493,8 @@ TaskScheduler::Fork(std::string threadName,
   pl->program = program;
   pl->currentEvent = -1;
   pl->curPkt = currentPacket;
-  pl->localStateVariableQueue2s = localStateQueue2s;
-  pl->localStateVariables = localVars;
+  pl->localStateVariableQueue2s = std::move(localStateQueue2s);
+  pl->localStateVariables = std::move(localVars);
 
 
   // Generate infinite loop if requested
@@ -565,7 +565,7 @@ TaskScheduler::Fork(std::string threadName,
 
 
 void *TaskScheduler::AllocateTempSynch(int type, std::vector<uint32_t> arguments){
-	return DoAllocateTempSynch(type,arguments);
+	return DoAllocateTempSynch(type, std::move(arguments));
 }
 
 
@@ -584,7 +584,7 @@ void TaskScheduler::DoDeallocateTempSynch(void* var) {
 }
 
 void
-TaskScheduler::DoTerminate(void)
+TaskScheduler::DoTerminate()
 {
   // If we wind up here, no SchedSim is specified. This is the
   // case for PEUs other than the CPU.
@@ -622,7 +622,7 @@ TaskScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> arguments)
 }
 
 std::vector<int>
-TaskScheduler::DoCurrentRunning(void)
+TaskScheduler::DoCurrentRunning()
 {
   NS_LOG_ERROR("DoCurrentRunning not specialized by SchedSim wrapper");
   return std::vector<int>();
@@ -641,16 +641,13 @@ InterruptScheduler::DoTerminate() {
   peu->hwModel->m_interruptController->Proceed(peu->GetObject<CPU>()->GetId());
 }
 
-ParallelThreadsScheduler::ParallelThreadsScheduler()
-{
-  // Do nothing for now
-}
+ParallelThreadsScheduler::ParallelThreadsScheduler() = default;
 
 NS_OBJECT_ENSURE_REGISTERED (ParallelThreadsScheduler);
 
 /* FOR (current models of) PEUs */
 TypeId 
-ParallelThreadsScheduler::GetTypeId (void)
+ParallelThreadsScheduler::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::processing::ParallelThreadsScheduler")
     .SetParent<TaskScheduler> ()

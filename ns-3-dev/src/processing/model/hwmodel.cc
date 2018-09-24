@@ -20,9 +20,7 @@ HWModel::GetTypeId ()
   return tid;
 }
 
-HWModel::~HWModel()
-{
-}
+HWModel::~HWModel() = default;
 
 HWModel::HWModel()
 {

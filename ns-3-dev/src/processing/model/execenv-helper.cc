@@ -45,13 +45,12 @@ ExecEnvHelper::GetTypeId (void)
   return tid;
 }
 
-ExecEnvHelper::ExecEnvHelper() {
-}
+ExecEnvHelper::ExecEnvHelper() = default;
 
 void
 ExecEnvHelper::Install(std::string device, Ptr<Node> n)
 {
-  Install(device, NodeContainer(n));
+  Install(std::move(device), NodeContainer(n));
 }
 
 void

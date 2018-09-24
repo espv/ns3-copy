@@ -30,8 +30,7 @@ void
 MemBus::Contend(ProcessingInstance *pi)
 {
   m_contenders.push_back(pi);
-  pi->remaining[MEMSTALLCYCLES].amount = 
-    freq / m_contenders.size() * (pi->remaining[MEMORYACCESSES].amount);
+  pi->remaining[MEMSTALLCYCLES].amount = (float)freq / m_contenders.size() * (pi->remaining[MEMORYACCESSES].amount);
 }
 
 // NEXT: MemBus::UnContend

@@ -12,7 +12,7 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("InterruptController");
 
 TypeId
-InterruptController::GetTypeId (void)
+InterruptController::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::InterruptController")
     .SetParent<Object> ()
@@ -56,11 +56,11 @@ InterruptController::IssueInterruptWithService(Ptr<SEM> intSem, struct tempVar t
 {
     NS_ASSERT(0);
     static int cpu = 0;
-    ProgramLocation *p = new ProgramLocation;
-    p->tempvar = tempsynch;
+    auto p = new ProgramLocation;
+    p->tempvar = std::move(tempsynch);
     p->curPkt = current;
-    p->localStateVariables = localStateVariables;
-    p->localStateVariableQueue2s = localStateVariablesQueue2s;
+    p->localStateVariables = std::move(localStateVariables);
+    p->localStateVariableQueue2s = std::move(localStateVariablesQueue2s);
 
     IssueInterruptWithServiceOnCPU(cpu, intSem, p);
     // cpu = (cpu + 1) % 2;
@@ -115,7 +115,7 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
         }
     }
 #else
-    if (intSem == NULL)
+    if (intSem == nullptr)
       NS_FATAL_ERROR("Interrupt not located" << std::endl);
     std::vector<std::string> parts = split(intSem->name, '-');
 
@@ -156,7 +156,7 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
     ir.current = programLoc->curPkt;
     ir.service = intSem;
     ir.interruptNr = interruptNumber;
-    ir.toCall = NULL;
+    ir.toCall = nullptr;
     ir.tempsynch = programLoc->tempvar;
     ir.localStateVariables = programLoc->localStateVariables;
     ir.localStateVariablesQueue2s = programLoc->localStateVariableQueue2s;
@@ -243,9 +243,9 @@ InterruptController::IssueInterrupt(int interruptNumber, std::string service, Pt
   // Create an interrupt request
   InterruptRequest ir;
   ir.current = current;
-  ir.serviceString = service;
+  ir.serviceString = std::move(service);
   ir.interruptNr = interruptNumber;
-  ir.toCall = NULL;
+  ir.toCall = nullptr;
 
   // If no interrupt is currently handled,
   // we issue an interrupt to the CPU.
@@ -320,7 +320,7 @@ InterruptController::Proceed(int cpu)
     pendingRequests[cpu].pop();
     
     // Check if we have a processing interrupt or not
-    if(currentlyHandled[cpu].toCall != NULL) {
+    if(currentlyHandled[cpu].toCall != nullptr) {
       currentlyHandled[cpu].toCall->Invoke();
       currentlyHandled[cpu].toCall->Unref();
 
@@ -336,7 +336,7 @@ InterruptController::Proceed(int cpu)
   }
 }
 
-InterruptController::InterruptController (void)
+InterruptController::InterruptController ()
 {
   currentlyHandled[0] = InterruptRequest();
   currentlyHandled[1] = InterruptRequest();

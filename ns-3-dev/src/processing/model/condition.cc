@@ -64,7 +64,7 @@ uint32_t ConditionFunctions::ThreadCondition(std::string threadId)
 
 
 TypeId
-ConditionFunctions::GetTypeId(void)
+ConditionFunctions::GetTypeId()
 {
   static TypeId tid = TypeId ("ns3::processing::ConditionFunctions")
     .SetParent<Object> ()

@@ -20,7 +20,7 @@
 
 namespace ns3 {
 
-TypeId PEU::GetTypeId(void) {
+TypeId PEU::GetTypeId() {
 	static TypeId tid =
 			TypeId("ns3::processing::PEU")
             .SetParent<Object>().AddConstructor<PEU>()
@@ -42,8 +42,7 @@ PEU::PEU(std::string name, long freq) :
 		m_name(name), m_freq(freq) {
 }
 
-PEU::~PEU() {
-}
+PEU::~PEU() = default;
 
 void PEU::Consume(ProcessingInstance *pi) {
 	// Iterate all resources. We determine the
@@ -114,7 +113,7 @@ void PEU::Consume(ProcessingInstance *pi) {
 /*********************** CPU: **********************/
 /***************************************************/
 
-TypeId CPU::GetTypeId(void) {
+TypeId CPU::GetTypeId() {
 	static TypeId tid =
 			TypeId("ns3::processing::CPU").SetParent<PEU>().AddConstructor<CPU>();
 	return tid;

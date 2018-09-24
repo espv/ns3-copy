@@ -15,8 +15,6 @@ StateVariable::StateVariable() {
 	value = 0;
 }
 
-StateVariable::~StateVariable() {
-//	std::cout << "Destroying local state variable " << this << std::endl;
-}
+StateVariable::~StateVariable() = default;
 
 }

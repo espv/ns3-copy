@@ -10,13 +10,11 @@
 
 namespace ns3 {
 
-StateVariableQueue2::StateVariableQueue2() {
-//	std::cout << "Creating local state variable queue " << this << std::endl;
-}
+StateVariableQueue2::StateVariableQueue2() = default;
 
 StateVariableQueue2::~StateVariableQueue2() = default;
 
-bool StateVariableQueue2::empty(void) {
+bool StateVariableQueue2::empty() {
 	return stateVariableQueue2.empty();
 }
 
