@@ -3508,7 +3508,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/point-to-point-layout/wscript
         ns-3-dev/src/processing/examples/telosb-example.cc
         ns-3-dev/src/processing/examples/trex-example.cc
-        ns-3-dev/src/processing/examples/trex-example.cc~feature_cep_functionality
         ns-3-dev/src/processing/examples/wscript
         ns-3-dev/src/processing/model/cep.cc
         ns-3-dev/src/processing/model/cep.h
