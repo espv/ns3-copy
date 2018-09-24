@@ -173,10 +173,7 @@ void* RoundRobinScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> a
         case 1: // Completion
             {
                 NS_LOG_INFO("Allocating tempsync");
-                // No arguments for completions
-                // Ptr<Completion> c = new Completion();
-                // c->Ref();
-                Completion* c = new Completion();
+                auto c = new Completion();
                 return (void*)c;
             }
             break;
@@ -190,10 +187,6 @@ void* RoundRobinScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> a
 }
 
 void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
-    // This could be dangerous if var is not a pointer to a completion, beware...
-    // Ptr<Completion> c = Ptr<Completion>((Completion*)var);
-    // c->Unref();
-
     NS_LOG_INFO("Deallocating tempsync");
     delete (Completion*)var;
 }
@@ -234,7 +227,6 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
                 break;
             }
         }
-        end:
         return m_runqueue.front();
     }
 
@@ -253,7 +245,7 @@ int RoundRobinScheduler::DoSynchRequest(int cpu, int type, std::string id, std::
         case SEM_UP:
             {
                 NS_LOG_INFO("semaphore_up");
-                std::map<std::string, Ptr<Semaphore> >::iterator it = m_semaphores.find(id);
+                auto it = m_semaphores.find(id);
                 if (it == m_semaphores.end()) {
                     NS_LOG_ERROR("Unable to find semaphore named" << id);
                     NS_ASSERT(0);
@@ -281,7 +273,7 @@ int RoundRobinScheduler::DoSynchRequest(int cpu, int type, std::string id, std::
         case SEM_DOWN:
             {
                 NS_LOG_INFO("semaphore_down");
-                std::map<std::string, Ptr<Semaphore> >::iterator it = m_semaphores.find(id);
+                auto it = m_semaphores.find(id);
                 if (it == m_semaphores.end()) {
                     std::cout << "Unable to find semaphore named " << id << std::endl;
                     NS_LOG_ERROR("Unable to find semaphore named" << id);
@@ -314,7 +306,7 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
     switch (type) { // Completion
         case WAIT_COMPL:
             {
-                Completion* c = (Completion*)var;
+                auto c = (Completion*)var;
 
                 // When we arrive here, the completion may be either completed
                 // or not. If it is completed, just keep running.
@@ -329,7 +321,7 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
             break;
         case COMPL:
             {
-                Completion* c = (Completion*)var;
+                auto c = (Completion*)var;
                 int pid = c->Complete();
                 if (pid >= 0) {
                     // TODO: Maybe check if the pid isn't already in the runqueue?

@@ -81,7 +81,7 @@ process_event_SEM 0 0
 CONDITIONS
 
 TRIGGERS
-LOC send_event_loc do_send_event
+#BACKSERVICE service fsm ns3::TelosB  # We will call node->GetObject<ns3::TelosB>()->FSM when service is called. Object factory is used to setType to ns3::TelosB, perhaps?
 LOC received_event_loc received_event
 
 LOC process-or-cepop-loc loc-process-or-cepop
@@ -441,18 +441,18 @@ x LOOP populate-then-cepops 0 then-cepops then-cepops 0
 SIGEND
 
 
-SIGSTART
-NAME event_processing_thread
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x QUEUECOND h1-h2 h1-h2 empty
-x SLEEPTHREAD
-0 STOP
-
-SIGEND
+#SIGSTART
+#NAME event_processing_thread
+#PEU cpu
+#RESOURCES cycles normal
+#FRACTION 100% 1 1
+#
+#0 START
+#x QUEUECOND h1-h2 h1-h2 empty
+#x SLEEPTHREAD
+#0 STOP
+#
+#SIGEND
 
 
 SIGSTART
@@ -594,7 +594,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
 x STATECOND CepOpType read global 0
 x CALL handle-or-cepop
@@ -610,7 +610,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
 x STATECOND CepOpType read global 1
 x CALL handle-and-cepop
@@ -626,7 +626,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
 x STATECOND CepOpType read global 2
 x CALL handle-then-cepop
@@ -643,7 +643,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 0
 0 STOP
 
@@ -657,16 +657,17 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND h1-h2 h1-h2 notempty
+#x QUEUECOND h1-h2 h1-h2 notempty
+x SLEEPTHREAD
 #x PROCESS 8000000 0
 # Which CEPOp belongs to the thread is customizable and depends on the system being modeled.
 # In T-Rex, CepOps are delegated to each core to maximize CPU utilization.
 # Perhaps we need another event called ADDCEPOP that adds a CEPOp in whichever way the modeled system does.
 # Additionally, REMOVECEPOP can be useful.
 #x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
-x CALL handle-cepops
+#received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
+received_event_loc CALL handle-cepops
 #x CALL populate-cepops
-received_event_loc DEQUEUE PKTQUEUE 0 h1-h2
 x LOOP insert_event_into_cepops 0 cepops cepops 0
 #x TTWAKEUP packet_thread
 0 STOP

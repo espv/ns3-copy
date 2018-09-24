@@ -518,6 +518,13 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	// packet.
 	std::string eeTarget = ee->service;
 
+	auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+    auto it = execEnv->targets.find(eeTarget);
+    if (it != execEnv->targets.end()) {
+        ee->m_executionInfo.target = eeTarget;
+        ee->m_executionInfo.targetFPM = it->second;
+    }
+
 	Ptr<SEM> newSem;
 	if (ee->sem != nullptr) {
 		newSem = ee->sem;
@@ -534,7 +541,6 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		}
 	} else {
 		// Here, we assume there is an active packet specifying the target
-		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 		auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo.target);
 		newSem = it->second;
 
@@ -1069,12 +1075,19 @@ void Thread::Dispatch() {
 			if (m_currentLocation->curPkt != nullptr) {
 				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {
-					pktEI->executedByExecEnv = true;
+					//pktEI->executedByExecEnv = true;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
-                    //toInvoke->Unref();  // This statement causes error with PERBYTE statement
+                    toInvoke->Unref();  // This statement causes error with PERBYTE statement
 				}
 			}
+
+            if (e->m_executionInfo.targetFPM != nullptr) {
+                //pktEI->executedByExecEnv = true;
+                EventImpl *toInvoke = e->m_executionInfo.targetFPM;
+                toInvoke->Invoke();
+                toInvoke->Unref();  // This statement causes error with PERBYTE statement
+            }
 
 			// Must check if there are any more statements to execute. If not,
 			// terminate the thread. Note that this should never occur for

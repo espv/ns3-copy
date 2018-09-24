@@ -50,6 +50,9 @@ public:
   template<class T1,class T2, class T3, class T4, class T5, class MEM, class OBJ> bool Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5);
   template<class T1,class T2, class T3, class T4, class T5, class T6, class MEM, class OBJ> bool Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6);
 
+  template<class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object);
+  template<class T1, class MEM, class OBJ> bool Proceed(const std::string &service, MEM func, OBJ object, T1 arg1);
+
   void ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time);
 
   // The average number of CPU-cycles spent per trace-call
@@ -161,6 +164,8 @@ public:
   std::map<std::string, std::string> dequeueTriggers;
   std::map<std::string, std::string> locationTriggers;
 
+  std::map<std::string, EventImpl*> targets;
+
   std::vector<struct tempVar> tempVars;
 };
 
@@ -179,6 +184,16 @@ public:
      set the executedByExecEnv to true indicating upon the next
      call to Proceed that execution delay has already been
      introduced. */
+
+template<class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object) {
+    targets[service] = MakeEvent(func, object);
+    return true;
+}
+
+template<class T1, class MEM, class OBJ> bool ExecEnv::Proceed(const std::string &service, MEM func, OBJ object, T1 arg1) {
+    targets[service] = MakeEvent(func, object, arg1);
+    return true;
+}
 
 template<class MEM, class OBJ> bool ExecEnv::Proceed(Ptr<Packet> packet, std::string target, MEM func, OBJ object) {
   packet->m_executionInfo.target = std::move(target); packet->m_executionInfo.targetFPM = MakeEvent(func, object); return true;

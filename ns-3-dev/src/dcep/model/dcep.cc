@@ -266,7 +266,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 ee->queues["h1-h2"]->Enqueue(pkt);
                 ee->eventqueues["event-queue"].push_back(event->type);
                 ee->ScheduleInterrupt (pkt, "HIRQ-1", Seconds(0));
-                ee->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
+                //ee->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
+                // Only have to call this Proceed once per execution environment; the callback is attached to the "handle-cepops" service itself, not the packet
+                ee->Proceed("handle-cepops", &Placement::RcvCepEvent, p, event);
 
                 //p->RcvCepEvent(event); // This function is called within a SEM
                 break; 

@@ -12,7 +12,6 @@
 #include "interrupt-controller.h"
 #include "condition.h"
 #include "cep.h"
-// #include "ns3/schedsim-linsched.h"
 #include "ns3/rrscheduler.h"
 #include <ns3/drop-tail-queue2.h>
 #include "ns3/local-state-variable-queue.h"
@@ -335,7 +334,6 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 
             newPEU->hwModel = hwModel;
 
-            // static Ptr<TaskScheduler> ts = nullptr;
             if (cpuScheduler == nullptr) {
                 cpuScheduler = factory.Create()->GetObject<RoundRobinScheduler>();
                 cpuScheduler->Initialize(newPEU);
