@@ -1078,7 +1078,7 @@ void Thread::Dispatch() {
 					//pktEI->executedByExecEnv = true;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
-                    toInvoke->Unref();  // This statement causes error with PERBYTE statement
+                    //toInvoke->Unref();  // This statement causes error with PERBYTE statement
 				}
 			}
 
