@@ -346,8 +346,7 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 			cpu->interruptThread = CreateObject<Thread>();
 			cpu->interruptThread->peu = newPEU;
 			cpu->interruptThread->m_scheduler = newPEU->taskScheduler;
-		}  // All other types of PEUs are treated the same
-		else {
+		} else {  // All other types of PEUs are treated the same
 			newPEU = CreateObjectWithAttributes<PEU>("frequency", UintegerValue(freq), "name", StringValue(tokens[2]));
 			hwModel->m_PEUs[tokens[3]] = newPEU;
 			newPEU->taskScheduler = factory.Create()->GetObject<RoundRobinScheduler>();
@@ -925,8 +924,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			// condition for this queue
 			auto foundLoopCond = loopConditions.find(currentName);
 			if (foundLoopCond != loopConditions.end()) {
-				currentlyHandled->lc->additionalCondition =
-						conditionFunctions->conditionMap[foundLoopCond->second.condName];
+				currentlyHandled->lc->additionalCondition = conditionFunctions->conditionMap[foundLoopCond->second.condName];
 				currentlyHandled->lc->hasAdditionalCondition = true;
 			}
 		}
