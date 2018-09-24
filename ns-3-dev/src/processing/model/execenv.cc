@@ -548,8 +548,7 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 			// Check that both a and b are the same wrt. this resource
 			if (a.resourcesUsed[i].defined != b.resourcesUsed[i].defined ||
 			    a.resourcesUsed[i].distributionType != b.resourcesUsed[i].distributionType) {
-				NS_FATAL_ERROR(
-						"Attempted to add different types of distributions");
+				NS_FATAL_ERROR("Attempted to add different types of distributions");
 				exit(1);
 			}
 
@@ -696,16 +695,14 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 }
 
 void ExecEnv::PrintProgram(Program *curPgm) {
-	//std::cout << "Listing of program " << curPgm->sem->name << ":" << std::endl;
 	int i = 0;
 	unsigned int numIndent = 0;
 
-	//std::cout << curEvt->type;
-	for (unsigned int j = 0; j < numIndent; j++)
+	for (uint32_t j = 0; j < numIndent; j++)
 		std::cout << "\t";
 
-	while (i < curPgm->events.size()) {
-		ExecutionEvent *curEvt = curPgm->events[i];
+	for (auto evt : curPgm->events) {
+		ExecutionEvent *curEvt = evt;
 		switch (curEvt->type) {
 		case LOOP: {
 			std::cout << *((ExecuteExecutionEvent *) curEvt) << std::endl;
@@ -1018,7 +1015,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// specified in the header parsed above.
 		unsigned long numHWEs = currentResources.size();
 		int tokenIndex = 0;
-		for (int i = 0; i < numHWEs; i++) {
+		for (size_t i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
 			if (currentDistributions[i] == "normal") {
 				// The normal distribution takes two parameters:
@@ -1094,7 +1091,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// specified in the header parsed above.
 		unsigned long numHWEs = currentResources.size();
 		int tokenIndex = 0;
-		for (int i = 0; i < numHWEs; i++) {
+		for (size_t i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
 			if (currentDistributions[i] == "normal") {
 				// The normal distribution takes two parameters:
@@ -1132,7 +1129,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		auto ps2 = new ProcessingStage();
 		ps2->samples = nrSamples;
 
-		for (int i = 0; i < numHWEs; i++) {
+		for (size_t i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
 			if (currentDistributions[i] == "normal") {
 				// The normal distribution takes two parameters:
