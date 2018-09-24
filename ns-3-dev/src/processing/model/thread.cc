@@ -1086,7 +1086,7 @@ void Thread::Dispatch() {
                 //pktEI->executedByExecEnv = true;
                 EventImpl *toInvoke = e->m_executionInfo.targetFPM;
                 toInvoke->Invoke();
-                toInvoke->Unref();  // This statement causes error with PERBYTE statement
+                //toInvoke->Unref();  // These events might be reused, and we should therefore not Unref them
             }
 
 			// Must check if there are any more statements to execute. If not,
