@@ -36,7 +36,7 @@ NS_LOG_COMPONENT_DEFINE ("RoundRobinScheduler");
 NS_OBJECT_ENSURE_REGISTERED (RoundRobinScheduler);
 
 TypeId
-RoundRobinScheduler::GetTypeId (void)
+RoundRobinScheduler::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::processing::RoundRobinScheduler")
     .SetParent<TaskScheduler> ()
@@ -55,8 +55,7 @@ RoundRobinScheduler::RoundRobinScheduler() : TaskScheduler()
     }
 }
 
-RoundRobinScheduler::~RoundRobinScheduler () {
-}
+RoundRobinScheduler::~RoundRobinScheduler () = default;
 
 void RoundRobinScheduler::Schedule() {
     //NS_LOG_INFO("Schedule()");
@@ -92,7 +91,7 @@ void RoundRobinScheduler::Schedule() {
     }
 
     // If there is more than one thread, they need to get preempted once in a while
-    if (m_runqueue.size() > 1)
+    if (!m_runqueue.empty())
         Simulator::Schedule(MicroSeconds(150), // TODO: make property?
                 &RoundRobinScheduler::Schedule,
                 this
@@ -141,12 +140,12 @@ int RoundRobinScheduler::DoFork(int priority) {
     return pid;
 }
 
-void RoundRobinScheduler::DoTerminate(void) {
+void RoundRobinScheduler::DoTerminate() {
     NS_ASSERT_MSG(0, "Process terminated in RRSched, not supported");
     // m_runqueue.pop_front();
 }
 
-std::vector<int> RoundRobinScheduler::DoCurrentRunning(void) {
+std::vector<int> RoundRobinScheduler::DoCurrentRunning() {
     /*
     if (m_runqueue.empty()) return 1;
     return m_runqueue.front();
@@ -205,6 +204,7 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
                 NS_LOG_INFO (TaskScheduler::peu->m_name << " Waking up " << pid);
                 m_runqueue.push_back(pid);
                 this->need_scheduling = true;
+                //this->Schedule();
                 break;
             }
             case SLEEPTHREAD: {
@@ -212,14 +212,15 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
                 pid = arguments[0];
                 m_blocked.insert(pid);
 
-                auto it = std::find(m_currentRunning.begin(), m_currentRunning.end(), pid);
-
-                if (m_runqueue.empty())
-                    m_runqueue.push_front(cpu + 1);
-                *it = m_runqueue.front();
-                m_runqueue.pop_front();
-                this->Schedule();
-                WakeupIdle();
+                //auto it = std::find(m_currentRunning.begin(), m_currentRunning.end(), pid);
+                //*it = m_runqueue.front();
+                m_currentRunning[cpu] = cpu+1;
+                //WakeupIdle();
+                //m_runqueue.erase(it);
+                //this->Schedule();
+                //if (m_runqueue.empty())
+                //    m_runqueue.push_front(cpu + 1);
+                this->need_scheduling = true;
                 return 1;
             }
             default: {

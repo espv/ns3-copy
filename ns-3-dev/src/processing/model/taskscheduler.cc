@@ -512,7 +512,7 @@ TaskScheduler::Fork(
   // - Get the previously running pids
   // - Perform fork
   // - Perform any preemptions that is provoked by the fork
-#if 1 
+#if 1
   std::vector<int> previouslyRunning = DoCurrentRunning();
 
   int pid = DoFork(priority);

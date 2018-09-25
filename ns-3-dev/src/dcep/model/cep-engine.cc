@@ -184,12 +184,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return tid;
     }
 
-    void
-    Detector::ProceedFromEvaluate(Ptr<CEPEngine> cep, std::vector<Ptr<CepEvent> > &returned, Ptr<CepOperator> op, Ptr<Producer> producer)
-    {
-        Ptr<Query> q = cep->GetQuery(op->queryId);
-        producer->HandleNewCepEvent(q, returned);
-    }
 
     void
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
@@ -220,6 +214,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->globalStateVariables["CepOpsLeft"] = 1;
         } else {
             ee->globalStateVariables["CepOpsLeft"] = 0;
+            --ee->globalStateVariables["PacketsLeft"];
+            --ee->globalStateVariables["EventsLeft"];
         }
 
         //op->Evaluate(e, returned, MakeEvent(&Detector::ProceedFromEvaluate, this, cep, returned, op, producer));
@@ -492,7 +488,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p)
     {
         /* everything is a match*/
-       returned.push_back(e);
+        returned.push_back(e);
         // Here we insert the incoming event into the sequence
         Ptr<Packet> dp = Create<Packet>();
         Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();

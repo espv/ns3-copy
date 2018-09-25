@@ -263,7 +263,17 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
                 // Invoke SEM that delays the execution of p->RcvCepEvent
-                ee->queues["h1-h2"]->Enqueue(pkt);
+                //ee->queues["h1-h2"]->Enqueue(pkt);
+                if (!ee->globalStateVariables["PacketsLeft"])
+                    ee->globalStateVariables["PacketsLeft"] = 1;
+                else
+                    ee->globalStateVariables["PacketsLeft"]++;
+
+                if (!ee->globalStateVariables["EventsLeft"])
+                    ee->globalStateVariables["EventsLeft"] = 1;
+                else
+                    ee->globalStateVariables["EventsLeft"]++;
+
                 ee->eventqueues["event-queue"].push_back(event->type);
                 ee->ScheduleInterrupt (pkt, "HIRQ-1", Seconds(0));
                 //ee->Proceed(pkt, "received_event", &Placement::RcvCepEvent, p, event);
