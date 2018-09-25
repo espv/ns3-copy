@@ -27,47 +27,8 @@ QUEUES
 # NIC Tx memory: 32kb
 
 HIRQ	            FIFO 	-1    services
-cepops	            FIFO 	-1    services
-then-cepops         FIFO 	-1    services
-or-cepops           FIFO 	-1    services
-and-cepops          FIFO 	-1    services
-sequence-fsms	    FIFO 	-1    fsms
-and-sequence-queue      FIFO    -1    and-fsm-queues
-or-sequence-queue      FIFO    -1    or-fsm-queues
-then-sequence-queue      FIFO    -1    then-fsm-queues
-
-nic_rx FIFO -1 bytes
-
-h1-h2 FIFO -1 packets
-h2-h3 FIFO -1 packets
-h3-h4 FIFO -1 packets
-h4-h5 FIFO -1 packets
-h3-bytes FIFO -1 packets
-h12-h14 FIFO -1 packets
-h11-h12 FIFO -1 packets
-h4-rcvd FIFO -1 packets
-rcvd-send FIFO -1 packets
-send-bytes FIFO -1 packets
-ip-bytes FIFO -1 packets
-send-senddone FIFO -1 packets
-h8-h9 FIFO -1 packets
-h9-h10 FIFO -1 packets
-etq-etq FIFO -1 packets
-
-send-queue FIFO -1 packets
-
-event-queue FIFO -1 cepevents
-
-
-
-
 # Queue for posted tasks
-softirq::hi             FIFO   -1   services
-softirq::receive        FIFO    -1   services
-softirq::send           FIFO    -1   services
-softirq::sendDone       FIFO    -1   services
-softirq::gotosleep      FIFO    -1 services
-softirq::hrtimer        FIFO   -1   services
+sq FIFO -1 services
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
@@ -117,60 +78,7 @@ SIGEND
 
 
 SIGSTART
-NAME HIRQ-1 # Receiving part
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x TTWAKEUP packet_thread
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME send-events
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME HIRQ-6
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-x CALL send-events
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME packet_processing_thread  # Wake up when packet is received
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND PacketsLeft read global 0
-x SLEEPTHREAD
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME packet_processing_thread  # Wake up when packet is received
+NAME receive-packet  # Wake up when packet is received
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -186,7 +94,21 @@ SIGEND
 
 
 SIGSTART
-NAME add-cepop
+NAME HIRQ-1 # Receiving part
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x                  ENQUEUE		SRVQUEUE receive-packet sq
+x TTWAKEUP packet_thread
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME send-packet
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -199,253 +121,57 @@ SIGEND
 
 
 SIGSTART
-NAME HIRQ-2
+NAME HIRQ-2 # Sending part
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND andCepOpDoneYet write global 1
-x STATECOND orCepOpDoneYet write global 1
-x STATECOND thenCepOpDoneYet write global 1
+x                  ENQUEUE		SRVQUEUE send-packet sq
+x TTWAKEUP packet_thread
 0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME HIRQ-3
+NAME process-packets
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 START
-x STATECOND andCepOpDoneYet write global 0
-x STATECOND orCepOpDoneYet write global 0
-x STATECOND thenCepOpDoneYet write global 0
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND cepOpDoneYet read global 0
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND cepOpDoneYet read global 1
-process-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
-x PROCESS 1000 0
-x CALL process-cepop
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND cepOpDoneYet read global 2
-x PROCESS 1000 0
-process-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
-x PROCESS 2000 0
-x CALL process-cepop
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND cepOpDoneYet read global 3
-x PROCESS 1000 0
-process-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
-x PROCESS 3000 0
-x CALL process-cepop
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-then-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-process-then-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
-x STATECOND thenCepOpDoneYet read global 1
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-then-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-process-then-cepop-loc DEQUEUE PKTQUEUE 0 h2-h3
-x STATECOND thenCepOpDoneYet read global 0
-x CALL process-then-cepop
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-or-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-process-or-cepop-loc DEQUEUE PKTQUEUE 0 h3-h4
-x STATECOND orCepOpDoneYet read global 1
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-or-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 1000 0
-process-or-cepop-loc DEQUEUE PKTQUEUE 0 h3-h4
-x STATECOND orCepOpDoneYet read global 0
-x CALL process-or-cepop
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-and-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-insert-event PROCESS 1200 0
-process-and-cepop-loc DEQUEUE PKTQUEUE 0 h4-h5
-x STATECOND andCepOpDoneYet read global 1
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME process-and-cepop
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-insert-event PROCESS 1200 0
-process-and-cepop-loc DEQUEUE PKTQUEUE 0 h4-h5
-x STATECOND andCepOpDoneYet read global 0
-x CALL process-and-cepop
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME insert_event_into_cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 LOOPSTART		0 cepops cepops 0
-x DEQUEUE SRVQUEUE 0 0  # Execute process-and-cepop, process-then-cepop or process-or-cepop
+0 LOOPSTART		0 sq sq 0
+#x QUEUECOND sq sq notempty
+x CALL send-packet
+x                      DEQUEUE		SRVQUEUE 0 0
 0 RESTART
 
 SIGEND
 
 
-SIGSTART
-NAME populate-then-cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 LOOPSTART		0 then-cepops then-cepops 0
-x                  ENQUEUE		SRVQUEUE process-then-cepop cepops
-0 RESTART
-
-SIGEND
-
-
-SIGSTART
-NAME populate-or-cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 LOOPSTART		0 or-cepops or-cepops 0
-x                  ENQUEUE		SRVQUEUE process-or-cepop cepops
-0 RESTART
-
-SIGEND
+#SIGSTART
+#NAME process-packets
+#PEU cpu
+#RESOURCES cycles normal
+#FRACTION 100% 1 1
+#
+#0 LOOPSTART		0 sq sq 0
+###x QUEUECOND sq sq empty
+#x SLEEPTHREAD
+#0 RESTART
+#
+#SIGEND
 
 
 SIGSTART
-NAME populate-and-cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 LOOPSTART		0 and-cepops and-cepops 0
-x                  ENQUEUE		SRVQUEUE process-and-cepop cepops
-0 RESTART
-
-SIGEND
-
-
-SIGSTART
-NAME populate-cepops
+NAME packet_processing_thread  # Wake up when packet is received and to be sent
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x LOOP populate-and-cepops 0 and-cepops and-cepops 0
-x LOOP populate-or-cepops 0 or-cepops or-cepops 0
-x LOOP populate-then-cepops 0 then-cepops then-cepops 0
+x LOOP process-packets 0 sq sq 0
+x SLEEPTHREAD
 0 STOP
 
 SIGEND
@@ -671,7 +397,7 @@ x STATECOND EventsLeft read global 1
 x PROCESS 1000 0
 #x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
 x CALL handle-cepops
-x DEQUEUE PKTQUEUE 0 h2-h3
+#x DEQUEUE PKTQUEUE 0 h2-h3
 0 STOP
 
 SIGEND

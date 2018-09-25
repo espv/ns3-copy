@@ -723,7 +723,11 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
-			qe->servQueue2->push(std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(semToEnqueue, m_programStack.top()));
+			std::cout << "Size: " << qe->servQueue2->size() << std::endl;
+			auto toBeEnqueued = std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(semToEnqueue, m_programStack.top());
+			qe->servQueue2->push(toBeEnqueued);
+
+			std::cout << "Enqueued: " << qe->servQueue2->size() << std::endl;
 		} else if (qe->stateQueue2) {
 			ee->stateQueue2s[qe->queueName]->stateVariableQueue2.push(qe->valueToEnqueue);
 		} else
@@ -787,6 +791,13 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,
 						0, newPl->curPkt, newPl->localStateVariables,
 						newPl->localStateVariableQueue2s, false);
+
+            auto ee = peu->hwModel->node->GetObject<ExecEnv>();
+            auto it = ee->targets.find(toExecute->name);
+            if (it != ee->targets.end()) {
+                qe->m_executionInfo.target = toExecute->name;
+                qe->m_executionInfo.targetFPM = it->second;
+            }
 
 			// We should immediately continue with the next event in the called program
 			return true;

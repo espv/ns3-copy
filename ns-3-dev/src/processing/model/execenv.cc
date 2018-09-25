@@ -1198,7 +1198,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			if (tokens[1] == "ENQUEUE") {
 				q->semToEnqueue = m_serviceMap[tokens[3]];
 				if (q->semToEnqueue == nullptr) {
-					std::cout << "SEM " << tokens[2] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
+					std::cout << "SEM " << tokens[3] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
 					exit(1);
 				}
 			}

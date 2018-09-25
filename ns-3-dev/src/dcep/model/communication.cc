@@ -196,12 +196,11 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         ipv4.SetProtocol(123);
         p->AddHeader(ipv4);
 
-        //Ptr<Packet> p_item = (Ptr<Packet>)Create<Packet>(p);
-        m_sendQueue2->Enqueue(p/*p_item*/);
+        m_sendQueue2->Enqueue(p);
 
         Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
-        ee->Proceed("send-events", &Communication::send, this);
-        ee->ScheduleInterrupt (p, "HIRQ-6", Seconds(0));
+        ee->Proceed("send-packet", &Communication::send, this);
+        ee->ScheduleInterrupt (p, "HIRQ-2", Seconds(0));
 
         //Simulator::Schedule (Seconds (0.0), &Communication::send, this);
         
