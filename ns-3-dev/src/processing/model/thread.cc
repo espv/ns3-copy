@@ -795,8 +795,8 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
             auto ee = peu->hwModel->node->GetObject<ExecEnv>();
             auto it = ee->targets.find(toExecute->name);
             if (it != ee->targets.end()) {
-                qe->m_executionInfo.target = toExecute->name;
-                qe->m_executionInfo.targetFPM = it->second;
+                qe->m_executionInfo.targets[toExecute->name] = toExecute->name;
+                qe->m_executionInfo.targetFPMs[toExecute->name] = it->second;
             }
 
 			// We should immediately continue with the next event in the called program
@@ -1093,10 +1093,17 @@ void Thread::Dispatch() {
 				}
 			}
 
-            if (e->m_executionInfo.targetFPM != nullptr) {
+            if (e->m_executionInfo.targetFPM != nullptr || !e->m_executionInfo.targetFPMs.empty()) {
                 //pktEI->executedByExecEnv = true;
-                EventImpl *toInvoke = e->m_executionInfo.targetFPM;
-                toInvoke->Invoke();
+                if (e->m_executionInfo.targetFPM != nullptr) {
+                    EventImpl *toInvoke = e->m_executionInfo.targetFPM;
+                    toInvoke->Invoke();
+                }
+
+                for (auto const& target : e->m_executionInfo.targets) {
+                    EventImpl *toInvoke = e->m_executionInfo.targetFPMs[target.first];
+                    toInvoke->Invoke();
+                }
                 //toInvoke->Unref();  // These events might be reused, and we should therefore not Unref them
             }
 

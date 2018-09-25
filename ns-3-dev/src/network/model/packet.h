@@ -43,6 +43,7 @@
 
 /* ESPEN */
 #include "address.h"
+#include <map>
 /* ESPEN */
 
 namespace ns3 {
@@ -60,7 +61,9 @@ public:
 
     // Name and arguments for target service
     std::string target;
+    std::map<std::string, std::string> targets;
     EventImpl *targetFPM;
+    std::map<std::string, EventImpl *> targetFPMs;
 
     // Used for temporary synchronization primitives
     void *tempSynch;
