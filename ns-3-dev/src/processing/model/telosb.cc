@@ -6,11 +6,12 @@
 
 #include <fstream>
 #include <iostream>
-#include "ns3/gnuplot.h"
 #include <string.h>
 #include <time.h>
 #include <ctime>
+#include <random>
 
+#include "ns3/gnuplot.h"
 #include "ns3/internet-module.h"
 #include "ns3/cc2420-module.h"
 #include "ns3/applications-module.h"
@@ -108,7 +109,6 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   execenv->Proceed(packet, "readdonelength", &TelosB::read_done_length, this, packet);
 
   execenv->ScheduleInterrupt (packet, "HIRQ-1", NanoSeconds(10));
-  execenv->queues["h1-h2"]->Enqueue(packet);
   receivingPacket = true;
 }
 
@@ -117,7 +117,6 @@ void TelosB::read_done_length(Ptr<Packet> packet) {
   packet->m_executionInfo.executedByExecEnv = false;
   NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_length, next step readDoneFcf " << packet->m_executionInfo.seqNr);
   execenv->Proceed(packet, "readdonefcf", &TelosB::readDone_fcf, this, packet);
-  execenv->queues["h2-h3"]->Enqueue(packet);
 }
 
 void TelosB::readDone_fcf(Ptr<Packet> packet) {
@@ -126,7 +125,6 @@ void TelosB::readDone_fcf(Ptr<Packet> packet) {
 
   NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_fcf, next step readDonePayload " << packet->m_executionInfo.seqNr);
   execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
-  execenv->queues["h3-h4"]->Enqueue(packet);
   execenv->queues["h3-bytes"]->Enqueue(packet);
 }
 
@@ -154,7 +152,6 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
       Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
       execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
       execenv->ScheduleInterrupt (nextPacket, "HIRQ-1", Seconds(0));
-      execenv->queues["h1-h2"]->Enqueue(nextPacket);
     } else {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -178,14 +175,13 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
   packet->m_executionInfo.executedByExecEnv = false;
   NS_LOG_INFO ("packets_in_send_queue: " << packets_in_send_queue);
 
-  if (jitterExperiment && packets_in_send_queue < 3) {
+  if (jitterExperiment && execenv->queues["send-queue"]->GetNPackets() < 3) {
     /* In the jitter experiment, we fill the IP layer queue up by enqueueing the same packet three times instead of once.
      * That means we must increase the number of packets getting processed, which depends on how many packets are currently in the send queue.
      */
-    cur_nr_packets_processing += 2 - packets_in_send_queue;
+    cur_nr_packets_processing += 2 - execenv->queues["send-queue"]->GetNPackets();
     bool first = true;
-    while (packets_in_send_queue < 3) {
-      ++packets_in_send_queue;
+    while (execenv->queues["send-queue"]->GetNPackets() < 3) {
       execenv->queues["send-queue"]->Enqueue(packet);
       execenv->queues["rcvd-send"]->Enqueue(packet);
       if (first) {
@@ -196,8 +192,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
         first = false;
       }
     }
-  } else if (packets_in_send_queue < 3) {
-    ++packets_in_send_queue;
+  } else if (execenv->queues["send-queue"]->GetNPackets() < 3) {
     execenv->queues["send-queue"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);
     execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
@@ -218,7 +213,6 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
     execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
     execenv->ScheduleInterrupt (nextPacket, "HIRQ-1", Seconds(0));
-    execenv->queues["h1-h2"]->Enqueue(nextPacket);
   } else {
     receivingPacket = false;
     if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -245,25 +239,28 @@ void TelosB::sendTask() {
     return;
   }
 
-  Ptr<Packet> packet = execenv->queues["send-queue"]->Dequeue();
+  // Peek has been modified to return non-const Packet, should probably be changed back.
+  // This packet must be retrieved in this ad-hoc way because sendTask can be called from either finishedTransmitting or receiveDone_task.
+  Ptr<Packet> packet = execenv->queues["send-queue"]->Peek();
   execenv->ScheduleInterrupt (packet, "HIRQ-81", Seconds(0));
 
   packet->m_executionInfo.executedByExecEnv = false;
 
-  execenv->Proceed(packet, "senddone", &TelosB::sendDoneTask, this, packet);
-  execenv->queues["send-senddone"]->Enqueue(packet);
+  execenv->Proceed(packet, "senddone", &TelosB::writtenToTxFifo, this, packet);
 
   // The MCU will be busy copying packet from RAM to buffer for a while. Temporary workaround since we cannot schedule MCU to be busy for a dynamic amount of time.
   // 0.7 is a temporary way of easily adjusting the time processing the packet takes.
   execenv->queues["send-bytes"]->Enqueue(packet);
+  execenv->queues["send-senddone"]->Enqueue(packet);
   NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
 
   ip_radioBusy = true;
+  execenv->globalStateVariables["ip-radio-busy"] = 1;
 }
 
 void TelosB::sendViaCC2420(Ptr<Packet> packet) {
   uint8_t nullBuffer[packet->GetSize()];
-  for(uint32_t i=0; i<packet->GetSize(); i++) nullBuffer[i] = 0;
+  wmemset((wchar_t*)nullBuffer, 0, sizeof(uint8_t)*packet->GetSize());
 
   // send with CCA
   Ptr<CC2420Send> msg = CreateObject<CC2420Send>(nullBuffer, packet->GetSize(), true);
@@ -272,7 +269,7 @@ void TelosB::sendViaCC2420(Ptr<Packet> packet) {
 }
 
 // Called when done writing packet into TXFIFO, and radio is ready to send
-void TelosB::sendDoneTask(Ptr<Packet> packet) {
+void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   packet->m_executionInfo.executedByExecEnv = false;
 
@@ -280,14 +277,14 @@ void TelosB::sendDoneTask(Ptr<Packet> packet) {
     //packet->AddPaddingAtEnd (36);
     packet->attemptedSent = true;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    int intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() - packet->m_executionInfo.timestamps[1].GetMicroSeconds();
+    int64_t intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() - packet->m_executionInfo.timestamps[1].GetMicroSeconds();
     ps->time_received_packets.push_back (packet->m_executionInfo.timestamps[1].GetMicroSeconds());
     ps->forwarded_packets_seqnos.push_back (packet->m_executionInfo.seqNr);
     ps->all_intra_os_delays.push_back(intra_os_delay);
     ps->total_intra_os_delay += intra_os_delay;
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": sendDoneTask " << packet->m_executionInfo.seqNr);
-    NS_LOG_INFO (id << " sendDoneTask: DELTA: " << intra_os_delay << ", UDP payload size (36+payload bytes): " << packet->GetSize () << ", seq no " << packet->m_executionInfo.seqNr);
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": sendDoneTask, number forwarded: " << ++number_forwarded_and_acked << ", seq no " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (id << " writtenToTxFifo: DELTA: " << intra_os_delay << ", UDP payload size (36+payload bytes): " << packet->GetSize () << ", seq no " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo, number forwarded: " << ++number_forwarded_and_acked << ", seq no " << packet->m_executionInfo.seqNr);
   }
 
   // DO NOT SEND
@@ -299,7 +296,7 @@ void TelosB::sendDoneTask(Ptr<Packet> packet) {
 
   if (radio.nr_send_recv > 0) {
     if (ccaOn) {  // 2500 comes from traces
-      Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::sendDoneTask, this, packet);
+      Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::writtenToTxFifo, this, packet);
       return;
     }
     radio.collision = true;
@@ -316,11 +313,12 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   ++ps->nr_packets_forwarded;
 
-  // I believe it's here that the packet gets removed from the send queue, but it might be in sendDoneTask
+  // I believe it's here that the packet gets removed from the send queue, but it might be in writtenToTxFifo
   ip_radioBusy = false;
+  execenv->globalStateVariables["ip-radio-busy"] = 0;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: " << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0] << ", UDP payload size: " << packet->GetSize () << ", seq no: " << packet->m_executionInfo.seqNr);
-  --packets_in_send_queue;
+  execenv->queues["send-queue"]->Dequeue();
   --radio.nr_send_recv;
   if (--cur_nr_packets_processing == 0) {
     execenv->ScheduleInterrupt (packet, "HIRQ-12", Seconds(0));
@@ -436,7 +434,7 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
           //NS_LOG_INFO ("recvMsg->getSize (): " << recvMsg->getSize ());
           Ptr<Packet> packet = Create<Packet>(ps->packet_size);
           packet->attemptedSent = true;
-          Simulator::Schedule(Seconds(0.0025), &TelosB::sendDoneTask, this, packet);
+          Simulator::Schedule(Seconds(0.0025), &TelosB::writtenToTxFifo, this, packet);
         }
         return true;
 
@@ -491,11 +489,17 @@ void ProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *
 // GenerateTraffic schedules the generation of packets according to the duration
 // of the experinment and the specified (static) rate.
 void ProtocolStack::GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, TelosB *m2, TelosB *m3) {
-  static int curSeqNr = 0;
+  static uint32_t curSeqNr = 0;
+
+  static std::random_device r;
+
+  // Choose a random mean between 1 and 6
+  std::default_random_engine e1(r());
+  std::uniform_int_distribution<uint64_t> uniform_dist(0, 99);
 
   GeneratePacket(pktSize, curSeqNr++, m1, m2, m3);
   if (Simulator::Now().GetSeconds() + (1.0 / (double) pps) < duration - 0.02)
-    Simulator::Schedule(Seconds(1.0 / (double) pps) + MicroSeconds(rand() % 100),
+    Simulator::Schedule(Seconds(1.0 / (double) pps) + MicroSeconds(uniform_dist(e1)),
                         &ProtocolStack::GenerateTraffic, this, n, pktSize, m1, m2, m3);
 }
 
