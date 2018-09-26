@@ -116,10 +116,12 @@ int main(int argc, char *argv[])
 {
   // Debugging and tracing
   debugOn = true;
-  LogComponentEnable ("TelosBExample", LOG_LEVEL_ALL);
-  LogComponentEnable ("TelosB", LOG_LEVEL_INFO);
-  LogComponentEnable ("OnOffCC2420Application", LOG_LEVEL_INFO);
-  LogComponentEnable ("RoundRobinScheduler", LOG_LEVEL_INFO);
+  if (debugOn) {
+      LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
+      LogComponentEnable("TelosB", LOG_LEVEL_INFO);
+      LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
+      LogComponentEnable("RoundRobinScheduler", LOG_LEVEL_INFO);
+  }
 
   // Fetch from command line
   CommandLine cmd;

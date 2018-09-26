@@ -114,8 +114,8 @@ Queue2::DequeueAll (void)
     }
 }
 
-Ptr<const Packet>
-Queue2::Peek (void) const
+Ptr<Packet>
+Queue2::Peek (void)
 {
   NS_LOG_FUNCTION (this);
   return DoPeek ();

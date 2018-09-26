@@ -1639,6 +1639,13 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			c->debug = tokens[tokens.size() - 1];
 		}
 	}
+
+    // If we have a checkpoint specified on this location, we
+    // insert the string into the checkpoint value
+    auto foundTrigger = locationTriggers.find(tokens[0]);
+
+    if (foundTrigger != locationTriggers.end())
+        execEvent->checkpoint = locationTriggers[foundTrigger->first];
 }
 
 std::vector<std::string> split(const char *str, char c = ' ')

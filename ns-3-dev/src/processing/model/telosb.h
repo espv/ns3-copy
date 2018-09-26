@@ -49,15 +49,15 @@ public:
     int total_intra_os_delay = 0;
     int nr_packets_total = 0;
     bool firstNodeSendingtal = false;
-    std::vector<int> forwarded_packets_seqnos;
-    std::vector<int> time_received_packets;
-    std::vector<int> all_intra_os_delays;
+    std::vector<int64_t> forwarded_packets_seqnos;
+    std::vector<int64_t> time_received_packets;
+    std::vector<int64_t> all_intra_os_delays;
 };
 
 class CC2420 {
 public:
     bool rxfifo_overflow = false;
-    int bytes_in_rxfifo = 0;
+    uint32_t bytes_in_rxfifo = 0;
     DataRate datarate;
     int nr_send_recv = 0;
     bool collision = false;
@@ -131,7 +131,7 @@ public:
     void sendTask();
 
     // Called when done writing packet into TXFIFO, and radio is ready to send
-    void sendDoneTask(Ptr<Packet> packet);
+    void writtenToTxFifo(Ptr<Packet> packet);
 
     // Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
     // If acks are enabled, the ack has to be received before that can be done.
