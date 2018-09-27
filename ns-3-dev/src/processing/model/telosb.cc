@@ -221,8 +221,6 @@ void TelosB::sendTask(Ptr<Packet> packet) {
   // Peek has been modified to return non-const Packet, should probably be changed back.
   // This packet must be retrieved in this ad-hoc way because sendTask can be called from either finishedTransmitting or receiveDone_task.
   //Ptr<Packet> packet = execenv->queues["send-queue"]->Peek();
-  execenv->ScheduleInterrupt (packet, "HIRQ-81", Seconds(0));
-
   packet->m_executionInfo.executedByExecEnv = false;
 
   execenv->Proceed(packet, "senddone", &TelosB::writtenToTxFifo, this, packet);
@@ -312,8 +310,6 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   }
 
   // Re-scheduling sendTask in case there is a packet waiting to be sent
-  //execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
-  //execenv->queues["rcvd-send"]->Enqueue(packet);
   execenv->ScheduleInterrupt (packet, "HIRQ-6", NanoSeconds(0));
 }
 

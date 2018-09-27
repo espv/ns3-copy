@@ -28,8 +28,6 @@ QUEUES
 
 HIRQ	 FIFO 	 -1    services
 
-nic_rx FIFO -1 bytes
-
 h3-bytes FIFO -1 packets
 h4-rcvd FIFO -1 packets
 rcvd-send FIFO -1 packets
@@ -37,6 +35,8 @@ send-bytes FIFO -1 packets
 ip-bytes FIFO -1 packets
 receive_queue FIFO -1 packets
 send-senddone FIFO -1 packets
+finished-queue FIFO -1 packets
+send-senddone-bytes FIFO -1 packets
 
 send-queue FIFO -1 packets
 
@@ -66,6 +66,7 @@ LOC startoftask3 senddone
 LOC startofhirq9 readdoneacklength
 LOC startofhirq10 readdoneackpayload
 LOC endoftaskloop emptytaskloop
+LOC endoflast finishedtransmitting
 #SERVICE sendTask sendtask
 
 # Entrypoint function for the PEU defined above
@@ -94,6 +95,48 @@ x PROCESS 320 0
 0 RESTART
 
 SIGEND
+
+
+SIGSTART
+NAME sendTask
+PEU cpu
+RESOURCES cycles normal
+FRACTION 49%  1937 3880
+
+0 START
+x STATECOND ip-radio-busy read global 0
+x QUEUECOND send-queue send-queue empty
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME sendTask
+PEU cpu
+RESOURCES cycles normal
+FRACTION 49%  1937 3880
+
+0 START
+x STATECOND ip-radio-busy read global 1
+# QUEUECOND send-queue
+0 STOP
+
+SIGEND
+
+
+# SendDone
+SIGSTART
+NAME HIRQ-6
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
+x TTWAKEUP scheduler
+x PROCESS 1409 0
+0 STOP
 
 
 SIGSTART
@@ -152,28 +195,6 @@ SIGEND
 
 
 SIGSTART
-NAME HIRQ-81
-PEU cpu
-RESOURCES cycles normal
-FRACTION 49%  1937 3880
-
-0 START
-#x                                PROCESS		2776 0
-#x PROCESS 1070 0  # The missing cycles
-x PROCESS 4440 0 # Combine the two processing stages above
-x PROCESS 191 0 PERBYTE send-bytes
-
-middleLayer        TEMPSYNCH	-1 HIRQ-81 1 HIRQ-7	global
-x PEUSTART HIRQ-7 5792 0
-middleLayer        WAITCOMPL		(TEMP)	global
-x PROCESS 5792 0
-
-0 STOP
-
-SIGEND
-
-
-SIGSTART
 NAME sendTask
 PEU cpu
 RESOURCES cycles normal
@@ -182,52 +203,19 @@ FRACTION 49%  1937 3880
 0 START
 x STATECOND ip-radio-busy read global 0
 x QUEUECOND send-queue send-queue notempty
+# While sendTask might be delayed until after another packet is sent, the ProgramLocation's packet will be the correct
+# one in this case because dequeuing the packet from rcvd-send will set the new curPkt to be the next in line to be sent.
 startoftask2 DEQUEUE PKTQUEUE 0 rcvd-send
+x PROCESS 4440 0
+x PROCESS 191 0 PERBYTE send-bytes
+
+middleLayer        TEMPSYNCH	-1 sendTask 1 HIRQ-7	global
+x PEUSTART HIRQ-7 5792 0
+middleLayer        WAITCOMPL		(TEMP)	global
+x PROCESS 5792 0
 0 STOP
 
 SIGEND
-
-
-SIGSTART
-NAME sendTask
-PEU cpu
-RESOURCES cycles normal
-FRACTION 49%  1937 3880
-
-0 START
-x STATECOND ip-radio-busy read global 0
-x QUEUECOND send-queue send-queue empty
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME sendTask
-PEU cpu
-RESOURCES cycles normal
-FRACTION 49%  1937 3880
-
-0 START
-x STATECOND ip-radio-busy read global 1
-# QUEUECOND send-queue
-0 STOP
-
-SIGEND
-
-
-# SendDone
-SIGSTART
-NAME HIRQ-6
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
-x TTWAKEUP scheduler
-x PROCESS 1409 0
-0 STOP
 
 
 # Used by receiveDone_task, is basically an extension to it.
