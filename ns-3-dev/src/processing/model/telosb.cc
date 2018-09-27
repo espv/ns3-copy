@@ -276,38 +276,30 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
   NS_LOG_INFO (Simulator::Now() << " " << id << ": SendPacket " << packet->m_executionInfo.seqNr);
 
   // Finish this, also change ReceivePacket to also accept acks
-  if (!to_mote->radio.rxfifo_overflow && to_mote->radio.nr_send_recv == 0) {
+  if (!to_mote->radio.rxfifo_overflow) {
     if (ps->firstNodeSending) {
       Simulator::Schedule(MicroSeconds(100), &TelosB::SendPacket, this, packet, to_mote, third_mote);
       return;
+    }
+    if (to_mote->radio.nr_send_recv > 0) {
+        if (ccaOn && to_mote->radio.nr_send_recv > 0) {
+            NS_LOG_INFO ("CCA, delaying sending packet");
+            Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::SendPacket, this, packet, to_mote,
+                                third_mote);
+            return;
+        }
+        ++ps->nr_packets_collision_missed;
+        to_mote->radio.collision = packet->collided = true;
     }
 
     ps->firstNodeSending = true;
     ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5/* 5 is preamble + SFD */) + MicroSeconds (192) /* 12 symbol lengths before sending packet, even without CCA. 8 symbol lengths is 128 µs */, &TelosB::ReceivePacket, to_mote, packet);
+    Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5/* 5 is preamble + SFD */) + MicroSeconds (192) /* 12 symbol lengths before sending packet */, &TelosB::ReceivePacket, to_mote, packet);
     NS_LOG_INFO ("SendPacket, sending packet " << packet->m_executionInfo.seqNr);
-  } else if (to_mote->radio.nr_send_recv > 0) {
-    if (ccaOn) {
-      NS_LOG_INFO ("CCA, delaying sending packet");
-      Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::SendPacket, this, packet, to_mote, third_mote);
-      return;
-    }
-    ++ps->nr_packets_total;
-    to_mote->radio.collision = true;
-    ++ps->nr_packets_collision_missed;
-    // We should send a packet here, but drop it immediately afterwards. The reason why
-    // is that this packet's header will not be read by the receiving radio, and thus
-    // it will only serve as disturbance or preamble.
-    //++to_mote->radio.nr_send_recv;
-    //packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    //Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize ()), &TelosB::ReceivePacket, to_mote, packet);
-  } else { // When our mote is already transmitting a packet, this happens. However, this mote won't know that
-    // our mote is busy transmitting, so this mote will send the packet, and our mote might receive half of the packet for instance.
-    // That would most likely cause garbage to get collected in RXFIFO, which causes overhead for our mote, because it has
-    // to read all the bytes one by one.
-    NS_LOG_INFO ("SendPacket, failed to send because mote is transmitting");
+  } else {
+    NS_LOG_INFO ("SendPacket, failed to send because of RXFIFO overflow");
   }
 }
 
