@@ -28,6 +28,7 @@ QUEUES
 
 HIRQ	 FIFO 	 -1    services
 
+h1-h2 FIFO -1 packets
 h3-bytes FIFO -1 packets
 h4-rcvd FIFO -1 packets
 rcvd-send FIFO -1 packets
@@ -151,47 +152,6 @@ SIGEND
 
 
 SIGSTART
-NAME gotosleep_task
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x SLEEPTHREAD
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME HIRQ-11
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x TTWAKEUP scheduler
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME HIRQ-7
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x        COMPL		(TEMP)	global
-x                  ENQUEUE		SRVQUEUE writtenToTxFifo softirq::tasks
-x TTWAKEUP scheduler
-0 STOP
-
-SIGEND
-
-
-SIGSTART
 NAME sendTask
 PEU cpu
 RESOURCES cycles normal
@@ -206,32 +166,12 @@ startoftask2 DEQUEUE PKTQUEUE 0 rcvd-send
 x PROCESS 4440 0
 x PROCESS 191 0 PERBYTE send-bytes
 
-middleLayer        TEMPSYNCH	-1 sendTask 1 HIRQ-7	global
-x PEUSTART HIRQ-7 5792 0
-middleLayer        WAITCOMPL		(TEMP)	global
 x PROCESS 5792 0
+x                  ENQUEUE		SRVQUEUE writtenToTxFifo softirq::tasks
+x TTWAKEUP scheduler
 0 STOP
 
 SIGEND
-
-
-# Used by receiveDone_task, is basically an extension to it.
-SIGSTART
-NAME HIRQ-14
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-# These two processing stages are technically part of receiveDone_task, but we don't want the dropped packets to run them.
-# Split 8836 into 6636 so that 2000 cycles get run before dropping the packet in receiveDone_task SEM
-x                                PROCESS        6836 0
-x PROCESS 17 0 PERBYTE ip-bytes
-x PROCESS 2168 0  # 40-41
-x PROCESS 904 0  # 41-38 - Should this be here at all?
-0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
-x TTWAKEUP scheduler
-0 STOP
 
 
 SIGSTART
@@ -254,7 +194,7 @@ RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
-x                                PROCESS        2000 0  # Moved From HIRQ-14
+x                                PROCESS        2000 0
 startoftask1 DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 0
 # These two processing stages are technically part of receiveDone_task, but we don't want the dropped packets to run them.
@@ -265,7 +205,7 @@ x PROCESS 2168 0  # 40-41
 x PROCESS 904 0  # 41-38 - Should this be here at all?
 0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
 x TTWAKEUP scheduler
-#x CALL read-packets-in-rxfifo
+x CALL read-packets-in-rxfifo
 0 STOP
 
 SIGEND
@@ -278,26 +218,14 @@ RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
-x                                PROCESS        2000 0  # Moved From HIRQ-14
+x                                PROCESS        2000 0
 startoftask1 DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 1
 x PROCESS 928 0
-#x CALL read-packets-in-rxfifo
+x CALL read-packets-in-rxfifo
 0 STOP
 
 SIGEND
-
-
-# The time in between dropping a packet and ending receiveDone_task
-SIGSTART
-NAME HIRQ-17
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x PROCESS 928 0
-0 STOP
 
 
 SIGSTART
@@ -307,10 +235,23 @@ RESOURCES cycles normal
 FRACTION 100%  1940 1940
 
 0 START
-x                                PROCESS		700 0
-#startofhirq3 DEQUEUE PKTQUEUE 0 h3-h4
-startofhirq3                  ENQUEUE		SRVQUEUE receiveDone_task softirq::tasks
+x STATECOND packet-collided read global 0
+x                  ENQUEUE		SRVQUEUE receiveDone_task softirq::tasks
 x TTWAKEUP scheduler
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME hardware_interrupt_4
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100%  1940 1940
+
+0 START
+x STATECOND packet-collided read global 1
+x CALL read-packets-in-rxfifo
 0 STOP
 
 SIGEND
@@ -324,28 +265,8 @@ FRACTION 100% 1 1
 
 0 START
 readDonePayload        COMPL		(TEMP)	global
-x CALL hardware_interrupt_4
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME hardware_interrupt_3
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100%  1940 1940
-
-0 START
-startofhirq2                                PROCESS		656 0
-#startofhirq2 DEQUEUE PKTQUEUE 0 h2-h3
-x PROCESS 151 0 PERBYTE h3-bytes
-
-x        TEMPSYNCH	-1 hardware_interrupt_3 1 HIRQ-4	global
-s PEUSTART HIRQ-4 5348 0
-x        WAITCOMPL		(TEMP)	global
-x PROCESS 5348 0
-
+x PROCESS		700 0
+startofhirq3 CALL hardware_interrupt_4
 0 STOP
 
 SIGEND
@@ -359,28 +280,15 @@ FRACTION 100% 1 1
 
 0 START
 readDoneFcf        COMPL		(TEMP)	global
-x CALL hardware_interrupt_3
-0 STOP
 
-SIGEND
+startofhirq2                                PROCESS		656 0
+#startofhirq2 DEQUEUE PKTQUEUE 0 h2-h3
+x PROCESS 151 0 PERBYTE h3-bytes
 
-
-SIGSTART
-NAME hardware_interrupt_2
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100%  1940 1940
-
-0 START
-#startofhirq1 DEQUEUE PKTQUEUE 0 h1-h2
-startofhirq1                                PROCESS		680 0
-
-readDoneFcf        TEMPSYNCH	-1 hardware_interrupt_2 1 HIRQ-3	global
-s PEUSTART HIRQ-3 1352 0
-readDoneFcf        WAITCOMPL		(TEMP)	global
-
-x PROCESS 1352 0  # Assuming here that mcu is busy while reading fcf byte into RAM
-#x CALL hardware_interrupt_3
+x        TEMPSYNCH	-1 HIRQ-3 1 HIRQ-4	global
+s PEUSTART HIRQ-4 5348 0
+x        WAITCOMPL		(TEMP)	global
+x PROCESS 5348 0
 0 STOP
 
 SIGEND
@@ -394,7 +302,16 @@ FRACTION 100% 1 1
 
 0 START
 readDoneLength     COMPL		(TEMP)	global
-x CALL hardware_interrupt_2
+
+x                                PROCESS		680 0
+startofhirq1 DEQUEUE PKTQUEUE 0 h1-h2
+
+readDoneFcf        TEMPSYNCH	-1 HIRQ-2 1 HIRQ-3	global
+s PEUSTART HIRQ-3 1352 0
+readDoneFcf        WAITCOMPL		(TEMP)	global
+
+x PROCESS 1352 0  # Assuming here that mcu is busy while reading fcf byte into RAM
+#x CALL hardware_interrupt_3
 0 STOP
 
 SIGEND

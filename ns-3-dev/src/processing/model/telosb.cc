@@ -103,6 +103,7 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   execenv->Proceed(packet, "readdonelength", &TelosB::read_done_length, this, packet);
 
   execenv->ScheduleInterrupt (packet, "HIRQ-1", NanoSeconds(10));
+  execenv->queues["h1-h2"]->Enqueue(packet);
   receivingPacket = true;
 }
 
@@ -136,13 +137,14 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
 
   // Packets received and causing RXFIFO overflow get dropped.
   if (packet->collided) {
+    execenv->globalStateVariables["packet-collided"] = 1;
     ps->nr_packets_dropped_bad_crc++;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload, collision caused packet CRC check to fail, dropping it " << packet->m_executionInfo.seqNr);
     if (!execenv->queues["receive_queue"]->IsEmpty()) {
       Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
       execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
       // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
-      execenv->ScheduleInterrupt (nextPacket, "HIRQ-1", Seconds(0));
+      execenv->queues["h1-h2"]->Enqueue(packet);
     } else {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -153,6 +155,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
       }
     }
   } else {
+    execenv->globalStateVariables["packet-collided"] = 0;
     NS_LOG_INFO ("readDone_payload seqno: " << packet->m_executionInfo.seqNr);
     execenv->Proceed(packet, "receivedone", &TelosB::receiveDone_task, this, packet);
     execenv->queues["h4-rcvd"]->Enqueue(packet);
@@ -194,7 +197,6 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     execenv->queues["ip-bytes"]->Enqueue(packet);
   } else {
     ++ps->nr_packets_dropped_ip_layer;
-    //execenv->ScheduleInterrupt (packet, "HIRQ-17", MicroSeconds(1));
     execenv->globalStateVariables["ipaq-full"] = 1;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet " << packet->m_executionInfo.seqNr);
   }
@@ -203,7 +205,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
     Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
     execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
-    execenv->ScheduleInterrupt (nextPacket, "HIRQ-1", Seconds(0));
+    execenv->queues["h1-h2"]->Enqueue(packet);
   } else {
     receivingPacket = false;
     if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -262,6 +264,7 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
     NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo, number forwarded: " << ++number_forwarded_and_acked << ", seq no " << packet->m_executionInfo.seqNr);
   }
 
+  // TODO: Use only the CC2420 model to transmit packets
   // DO NOT SEND
   if (fakeSending) {
     ++radio.nr_send_recv;
@@ -288,7 +291,6 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   ++ps->nr_packets_forwarded;
 
-  // I believe it's here that the packet gets removed from the send queue, but it might be in writtenToTxFifo
   execenv->globalStateVariables["ip-radio-busy"] = 0;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: " << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0] << ", UDP payload size: " << packet->GetSize () << ", seq no: " << packet->m_executionInfo.seqNr);
