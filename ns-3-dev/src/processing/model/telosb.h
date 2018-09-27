@@ -35,7 +35,7 @@ public:
 
     uint32_t seed = 3;
     double duration = 10;
-    int pps = 22;
+    int pps = 62;
     int packet_size = 125;
     std::string deviceFile = "device-files/telosb-min.device";  // Required if we use gdb
     std::string trace_fn = "trace-inputs/packets-received.txt";

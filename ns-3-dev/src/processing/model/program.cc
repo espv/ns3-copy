@@ -276,7 +276,7 @@ ProcessingStage::~ProcessingStage() = default;
 // Draws samples from the random distributions available,
 // and returns one instance from this.
 ProcessingInstance
-ProcessingStage::Instantiate() {
+ProcessingStage::Instantiate(Ptr<Packet> packet) {
   // The object to return
   ProcessingInstance toReturn;
 
@@ -284,8 +284,8 @@ ProcessingStage::Instantiate() {
   toReturn.source = this;
 
   // For the PERBYTE statement
-  if (this->pktqueue != nullptr && !this->pktqueue->IsEmpty()) {
-        this->factor = this->pktqueue->Dequeue()->GetSize () - 36;  // Minus the UPD, IP and frame headers
+  if (this->perByte) {
+        this->factor = packet->GetSize () - 36;  // Minus the UPD, IP and frame headers
   }
 
   // Iterate all resources used, select a random

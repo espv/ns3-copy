@@ -29,12 +29,9 @@ QUEUES
 HIRQ	 FIFO 	 -1    services
 
 h1-h2 FIFO -1 packets
-h3-bytes FIFO -1 packets
 h4-rcvd FIFO -1 packets
 rcvd-send FIFO -1 packets
-send-bytes FIFO -1 packets
-ip-bytes FIFO -1 packets
-receive_queue FIFO -1 packets
+receive-queue FIFO -1 packets
 send-senddone FIFO -1 packets
 
 send-queue FIFO -1 packets
@@ -156,7 +153,7 @@ x QUEUECOND send-queue send-queue notempty
 # one in this case because dequeuing the packet from rcvd-send will set the new curPkt to be the next in line to be sent.
 startoftask2 DEQUEUE PKTQUEUE 0 rcvd-send
 x PROCESS 4440 0
-x PROCESS 191 0 PERBYTE send-bytes
+x PROCESS 191 0 PERBYTE
 
 x PROCESS 5792 0
 x                  ENQUEUE		SRVQUEUE writtenToTxFifo softirq::tasks
@@ -173,7 +170,7 @@ RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
-x QUEUECOND receive_queue receive_queue empty
+x QUEUECOND receive-queue receive-queue empty
 0 STOP
 
 SIGEND
@@ -190,7 +187,7 @@ x                                PROCESS        2000 0
 startoftask1 DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 0
 x                                PROCESS        6836 0
-x PROCESS 17 0 PERBYTE ip-bytes
+x PROCESS 17 0 PERBYTE
 x PROCESS 3072 0  # 40-41 + 41-38
 0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
 x TTWAKEUP scheduler
@@ -254,8 +251,9 @@ FRACTION 50%  1940 3880
 
 0 START
 x PROCESS 3028 0
-x PROCESS 151 0 PERBYTE h3-bytes
+x PROCESS 151 0 PERBYTE
 x PROCESS 6048 0
+x DEQUEUE PKTQUEUE 0 receive-queue
 startofhirq3 CALL check-if-packet-collided
 0 STOP
 
@@ -282,7 +280,7 @@ RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
-x QUEUECOND receive_queue receive_queue notempty
+x QUEUECOND receive-queue receive-queue notempty
 x CALL read-packet-into-RAM
 0 STOP
 

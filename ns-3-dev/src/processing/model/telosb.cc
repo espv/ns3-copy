@@ -92,9 +92,10 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
     radio.rxfifo_overflow = true;
   }
 
+  execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
+  execenv->queues["receive-queue"]->Enqueue(packet);
   if (receivingPacket) {
-    execenv->queues["receive_queue"]->Enqueue(packet);
-    NS_LOG_INFO ("Adding packet " << packet->m_executionInfo.seqNr << " to receive_queue, length: " << execenv->queues["receive_queue"]->GetNPackets());
+    NS_LOG_INFO ("Adding packet " << packet->m_executionInfo.seqNr << " to receive-queue, length: " << execenv->queues["receive-queue"]->GetNPackets());
     return;
   }
 
@@ -103,8 +104,6 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   execenv->ScheduleInterrupt (packet, "HIRQ-1", NanoSeconds(10));
   // We need this queue because hardware_interrupt_1 can be called from multiple places: here, when a packet is read
   // into memory, and when receiveDone_task is finished.
-  execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
-  execenv->queues["h3-bytes"]->Enqueue(packet);
   receivingPacket = true;
 }
 
@@ -125,10 +124,8 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     execenv->globalStateVariables["packet-collided"] = 1;
     ps->nr_packets_dropped_bad_crc++;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload, collision caused packet CRC check to fail, dropping it " << packet->m_executionInfo.seqNr);
-    if (!execenv->queues["receive_queue"]->IsEmpty()) {
-      Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
-      execenv->Proceed(nextPacket, "readdonepayload", &TelosB::readDone_payload, this, nextPacket);
-      execenv->queues["h3-bytes"]->Enqueue(packet);
+    if (!execenv->queues["receive-queue"]->IsEmpty()) {
+      Ptr<Packet> nextPacket = execenv->queues["receive-queue"]->Dequeue();
     } else {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -166,7 +163,6 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
         execenv->globalStateVariables["ipaq-full"] = 0;
         execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
         NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
-        execenv->queues["ip-bytes"]->Enqueue(packet);
         first = false;
       }
     }  // STATECOND for the two statements below; STATECOND ipaq-overflow
@@ -178,19 +174,13 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     execenv->globalStateVariables["ipaq-full"] = 0;
     execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
-    execenv->queues["ip-bytes"]->Enqueue(packet);
   } else {
     ++ps->nr_packets_dropped_ip_layer;
     execenv->globalStateVariables["ipaq-full"] = 1;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet " << packet->m_executionInfo.seqNr);
   }
 
-  if (!execenv->queues["receive_queue"]->IsEmpty()) {
-    // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
-    Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
-    execenv->Proceed(nextPacket, "readdonepayload", &TelosB::readDone_payload, this, nextPacket);
-    execenv->queues["h3-bytes"]->Enqueue(packet);
-  } else {
+  if (execenv->queues["receive-queue"]->IsEmpty()) {
     receivingPacket = false;
     if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
       NS_LOG_INFO ("RXFIFO gets flushed");
@@ -213,7 +203,6 @@ void TelosB::sendTask(Ptr<Packet> packet) {
 
   // The MCU will be busy copying packet from RAM to buffer for a while. Temporary workaround since we cannot schedule MCU to be busy for a dynamic amount of time.
   // 0.7 is a temporary way of easily adjusting the time processing the packet takes.
-  execenv->queues["send-bytes"]->Enqueue(packet);
   execenv->queues["send-senddone"]->Enqueue(packet);
   NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
 

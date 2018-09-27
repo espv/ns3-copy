@@ -343,11 +343,11 @@ class ProcessingStage : public ExecutionEvent {
   virtual ~ProcessingStage();
 
   ResourceConsumption resourcesUsed[LASTRESOURCE];
-  ProcessingInstance Instantiate();
+  ProcessingInstance Instantiate(Ptr<Packet> packet);
   uint32_t samples; // The number of samples observed
   Ptr<SEM> interrupt;
   int factor = 1;  // Factor to multiply processing time with
-  Ptr<Queue2> pktqueue;  // Queue2 to dequeue from and set factor to multiply with that packet.
+  bool perByte = false;
 
   friend std::ostream& operator<<(std::ostream& out, ProcessingStage& event);
 };

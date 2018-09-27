@@ -416,7 +416,7 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 	if (ps->interrupt != nullptr) { // OYSTEDAL: We are in an interrupt
 		// TODO: consume from a PEU. For now, use CPU.
 		// Dirty hack for now: sample cycles, and calculate based on CPU frequency
-		auto pi = ps->Instantiate();
+		auto pi = ps->Instantiate(m_currentLocation->curPkt);
 		int cpu = peu->GetObject<CPU>()->GetId();
 
 		long m_freq = peu->hwModel->cpus[cpu]->m_freq;
@@ -459,7 +459,7 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 	} else {
 		// First, obtain a processing instance with all sample
 		// values for all resources consumed filled in.
-		m_currentProcessing = ps->Instantiate();
+		m_currentProcessing = ps->Instantiate(m_currentLocation->curPkt);
 		m_currentProcessing.thread = this;
 
 		// Pass this instance to the PEU responsible of

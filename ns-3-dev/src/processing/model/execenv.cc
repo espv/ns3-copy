@@ -1059,10 +1059,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			}
 		}
 
-		if (tokens[1] == "PROCESS" && tokens.size() >= 5 && tokens[4] == "PERBYTE") {  // Espen
-		    ps->pktqueue = queues[tokens[5]];  // The specified packet queue will be dequeued from.
-		} else if (tokens[1] == "PEUSTART" && tokens.size() >= 6 && tokens[5] == "PERBYTE") {
-		    ps->pktqueue = queues[tokens[6]];  // The specified packet queue will be dequeued from.
+		if ((tokens[1] == "PROCESS" && tokens.size() >= 5 && tokens[4] == "PERBYTE") ||
+				(tokens[1] == "PEUSTART" && tokens.size() >= 6 && tokens[5] == "PERBYTE")) {
+		    ps->perByte = true;  // The specified packet queue will be dequeued from.
 		}
 
 		// Add this PS to the current program
