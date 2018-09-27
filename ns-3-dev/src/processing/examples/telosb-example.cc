@@ -115,7 +115,7 @@ void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* data
 int main(int argc, char *argv[])
 {
   // Debugging and tracing
-  debugOn = true;
+  debugOn = false;
   if (debugOn) {
       LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
       LogComponentEnable("TelosB", LOG_LEVEL_INFO);
@@ -139,8 +139,8 @@ int main(int argc, char *argv[])
   createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
-#define ONE_CONTEXT 1
-#define SIMULATION_OVERHEAD_TEST 0
+#define ONE_CONTEXT 0
+#define SIMULATION_OVERHEAD_TEST 1
 #define ALL_CONTEXTS 0
 #define CC2420_MODEL 0
 #if CC2420_MODEL
@@ -350,8 +350,8 @@ int main(int argc, char *argv[])
 #elif SIMULATION_OVERHEAD_TEST
     NodeContainer c;
     int numberMotes = 1;
-    ps.pps = 1;
-    ps.duration = 100;
+    ps.pps = 10;
+    ps.duration = 6000;
     memset(&c, 0, sizeof(NodeContainer));
     c.Create(numberMotes);
 

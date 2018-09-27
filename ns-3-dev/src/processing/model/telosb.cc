@@ -83,7 +83,7 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   NS_LOG_INFO ("radio.bytes_in_rxfifo: " << radio.bytes_in_rxfifo);
   NS_LOG_INFO ("packet->GetSize(): " << packet->GetSize ());
   if (radio.bytes_in_rxfifo > 128) {
-    radio.bytes_in_rxfifo -= packet->GetSize (); //+ 36;
+    radio.bytes_in_rxfifo -= packet->GetSize ();
     NS_LOG_INFO (id << " RXFIFO overflow");
     packet->collided = true;
     // RemoveAtEnd removes the number of bytes from the received packet that were not received due to overflow.
@@ -246,7 +246,7 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
     NS_LOG_INFO ("Forwarding packet " << packet->m_executionInfo.seqNr << " causes collision");
   }
 
-  Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize ()+36 + 5) + MicroSeconds (192), &TelosB::finishedTransmitting, this, packet);
+  Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5) + MicroSeconds (192), &TelosB::finishedTransmitting, this, packet);
   ++radio.nr_send_recv;
 }
 
@@ -294,7 +294,6 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
     ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    std::cout << "Packet size: " << packet->GetSize () << std::endl;
     Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5/* 5 is preamble + SFD */) + MicroSeconds (192) /* 12 symbol lengths before sending packet, even without CCA. 8 symbol lengths is 128 µs */, &TelosB::ReceivePacket, to_mote, packet);
     NS_LOG_INFO ("SendPacket, sending packet " << packet->m_executionInfo.seqNr);
   } else if (to_mote->radio.nr_send_recv > 0) {
@@ -311,7 +310,7 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
     // it will only serve as disturbance or preamble.
     //++to_mote->radio.nr_send_recv;
     //packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    //Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 36/* 36 is UDP packet, 13 is just a constant time before OS gets packet*/), &TelosB::ReceivePacket, to_mote, packet);
+    //Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize ()), &TelosB::ReceivePacket, to_mote, packet);
   } else { // When our mote is already transmitting a packet, this happens. However, this mote won't know that
     // our mote is busy transmitting, so this mote will send the packet, and our mote might receive half of the packet for instance.
     // That would most likely cause garbage to get collected in RXFIFO, which causes overhead for our mote, because it has

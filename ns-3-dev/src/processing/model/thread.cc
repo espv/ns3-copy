@@ -723,11 +723,9 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
-			std::cout << "Size: " << qe->servQueue2->size() << std::endl;
 			auto toBeEnqueued = std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(semToEnqueue, m_programStack.top());
 			qe->servQueue2->push(toBeEnqueued);
 
-			std::cout << "Enqueued: " << qe->servQueue2->size() << std::endl;
 		} else if (qe->stateQueue2) {
 			ee->stateQueue2s[qe->queueName]->stateVariableQueue2.push(qe->valueToEnqueue);
 		} else
