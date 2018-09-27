@@ -285,7 +285,8 @@ ProcessingStage::Instantiate(Ptr<Packet> packet) {
 
   // For the PERBYTE statement
   if (this->perByte) {
-        this->factor = packet->GetSize ();
+  	NS_ASSERT(packet != nullptr);
+  	this->factor = packet->GetSize ();
   }
 
   // Iterate all resources used, select a random
