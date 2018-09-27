@@ -199,7 +199,7 @@ void TelosB::sendTask(Ptr<Packet> packet) {
   //Ptr<Packet> packet = execenv->queues["send-queue"]->Peek();
   packet->m_executionInfo.executedByExecEnv = false;
 
-  execenv->Proceed(packet, "senddone", &TelosB::writtenToTxFifo, this, packet);
+  execenv->Proceed(packet, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
 
   // The MCU will be busy copying packet from RAM to buffer for a while. Temporary workaround since we cannot schedule MCU to be busy for a dynamic amount of time.
   // 0.7 is a temporary way of easily adjusting the time processing the packet takes.

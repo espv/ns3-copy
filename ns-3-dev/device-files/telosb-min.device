@@ -33,10 +33,7 @@ h4-rcvd FIFO -1 packets
 rcvd-send FIFO -1 packets
 receive-queue FIFO -1 packets
 send-senddone FIFO -1 packets
-
 send-queue FIFO -1 packets
-
-
 
 # Queue for posted tasks
 softirq::tasks             FIFO   -1   services
@@ -52,10 +49,10 @@ SYNCH
 CONDITIONS
 
 TRIGGERS
-LOC startofhirq3 readdonepayload
-LOC startoftask1 receivedone
-LOC startoftask2 sendtask
-LOC startoftask3 senddone
+LOC within-read-packet-into-RAM readdonepayload
+LOC within-receiveDone-task receivedone
+LOC within-sendTask sendtask
+LOC within-writtenToTxFifo writtentotxfifo
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -134,7 +131,7 @@ FRACTION 20%  1 5
 
 0 START
 x                                PROCESS		1100 0
-startoftask3 DEQUEUE PKTQUEUE 0 send-senddone
+within-writtenToTxFifo DEQUEUE PKTQUEUE 0 send-senddone
 0 STOP
 
 SIGEND
@@ -151,12 +148,15 @@ x STATECOND ip-radio-busy read global 0
 x QUEUECOND send-queue send-queue notempty
 # While sendTask might be delayed until after another packet is sent, the ProgramLocation's packet will be the correct
 # one in this case because dequeuing the packet from rcvd-send will set the new curPkt to be the next in line to be sent.
-startoftask2 DEQUEUE PKTQUEUE 0 rcvd-send
+within-sendTask DEQUEUE PKTQUEUE 0 rcvd-send
 x PROCESS 4440 0
 x PROCESS 191 0 PERBYTE
 
 x PROCESS 5792 0
-x                  ENQUEUE		SRVQUEUE writtenToTxFifo softirq::tasks
+# Technically, writtenToTxFifo is a hardware interrupt and the above processing stages should be done through a PEUSTART.
+# Since the CPU is busy processing most of the time, however, we can model it as a call to a service. Meaning,
+# the CPU will not have time to process another packet in the meantime.
+x CALL writtenToTxFifo
 x TTWAKEUP scheduler
 0 STOP
 
@@ -177,14 +177,14 @@ SIGEND
 
 
 SIGSTART
-NAME receiveDone_task
+NAME receiveDone-task
 PEU cpu
 RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
 x                                PROCESS        2000 0
-startoftask1 DEQUEUE PKTQUEUE 0 h4-rcvd
+within-receiveDone-task DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 0
 x                                PROCESS        6836 0
 x PROCESS 17 0 PERBYTE
@@ -198,14 +198,14 @@ SIGEND
 
 
 SIGSTART
-NAME receiveDone_task
+NAME receiveDone-task
 PEU cpu
 RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
 x                                PROCESS        2000 0
-startoftask1 DEQUEUE PKTQUEUE 0 h4-rcvd
+within-receiveDone-task DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 1
 x PROCESS 928 0
 x CALL read-packets-in-rxfifo
@@ -222,7 +222,7 @@ FRACTION 100%  1940 1940
 
 0 START
 x STATECOND packet-collided read global 0
-x                  ENQUEUE		SRVQUEUE receiveDone_task softirq::tasks
+x                  ENQUEUE		SRVQUEUE receiveDone-task softirq::tasks
 x TTWAKEUP scheduler
 0 STOP
 
@@ -254,7 +254,7 @@ x PROCESS 3028 0
 x PROCESS 151 0 PERBYTE
 x PROCESS 6048 0
 x DEQUEUE PKTQUEUE 0 receive-queue
-startofhirq3 CALL check-if-packet-collided
+within-read-packet-into-RAM CALL check-if-packet-collided
 0 STOP
 
 SIGEND
