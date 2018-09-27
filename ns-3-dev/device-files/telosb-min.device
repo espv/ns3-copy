@@ -28,12 +28,19 @@ QUEUES
 
 HIRQ	 FIFO 	 -1    services
 
-h1-h2 FIFO -1 packets
-h4-rcvd FIFO -1 packets
+# Only one packet can be in the CC2420 driver
+rcvd FIFO 1 packets
+# The IPAQ has a capacity of 3 packets
+ipaq FIFO 3 packets
+
+# The 3 packet queues below are "bridges" between functions. Conceptually, a thread is always working with at max
+# one packet at a time. When we dequeue a packet from any queue with the DEQUEUE event, we assign the dequeued packet
+# to the current running thread. This way, multiple threads can run simultaneously and still work with the correct
+# packet. An alternative solution could result in multiple threads working with the same packet.
 rcvd-send FIFO -1 packets
 receive-queue FIFO -1 packets
-send-senddone FIFO -1 packets
-send-queue FIFO -1 packets
+send-written FIFO -1 packets
+
 
 # Queue for posted tasks
 softirq::tasks             FIFO   -1   services
@@ -90,7 +97,7 @@ FRACTION 49%  1937 3880
 
 0 START
 x STATECOND ip-radio-busy read global 0
-x QUEUECOND send-queue send-queue empty
+x QUEUECOND ipaq ipaq empty
 0 STOP
 
 SIGEND
@@ -131,7 +138,7 @@ FRACTION 20%  1 5
 
 0 START
 x                                PROCESS		1100 0
-within-writtenToTxFifo DEQUEUE PKTQUEUE 0 send-senddone
+within-writtenToTxFifo DEQUEUE PKTQUEUE 0 send-written
 0 STOP
 
 SIGEND
@@ -145,15 +152,10 @@ FRACTION 49%  1937 3880
 
 0 START
 x STATECOND ip-radio-busy read global 0
-x QUEUECOND send-queue send-queue notempty
-# While sendTask might be delayed until after another packet is sent, the ProgramLocation's packet will be the correct
-# one in this case because dequeuing the packet from rcvd-send will set the new curPkt to be the next in line to be sent.
+x QUEUECOND ipaq ipaq notempty
 within-sendTask DEQUEUE PKTQUEUE 0 rcvd-send
 x PROCESS 3165 0
 x PROCESS 191 0 PERBYTE
-# Technically, writtenToTxFifo is a hardware interrupt and the above processing stages should be done through a PEUSTART.
-# Since the CPU is busy processing most of the time, however, we can model it as a call to a service. Meaning,
-# the CPU will not have time to process another packet in the meantime.
 x CALL writtenToTxFifo
 x TTWAKEUP scheduler
 0 STOP
@@ -182,7 +184,7 @@ FRACTION 99%  1939 1940
 
 0 START
 x                                PROCESS        2000 0
-within-receiveDone-task DEQUEUE PKTQUEUE 0 h4-rcvd
+within-receiveDone-task DEQUEUE PKTQUEUE 0 rcvd
 x STATECOND ipaq-full read global 0
 x                                PROCESS        9279 0
 x PROCESS 17 0 PERBYTE
@@ -202,7 +204,7 @@ FRACTION 99%  1939 1940
 
 0 START
 x                                PROCESS        2000 0
-within-receiveDone-task DEQUEUE PKTQUEUE 0 h4-rcvd
+within-receiveDone-task DEQUEUE PKTQUEUE 0 rcvd
 x STATECOND ipaq-full read global 1
 x PROCESS 928 0
 x CALL read-next-packet-in-rxfifo
