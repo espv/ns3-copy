@@ -251,9 +251,9 @@ FRACTION 50%  1940 3880
 
 0 START
 x PROCESS 3028 0
+x DEQUEUE PKTQUEUE 0 receive-queue
 x PROCESS 151 0 PERBYTE
 x PROCESS 6048 0
-x DEQUEUE PKTQUEUE 0 receive-queue
 within-read-packet-into-RAM CALL check-if-packet-collided
 0 STOP
 
