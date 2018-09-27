@@ -35,8 +35,6 @@ send-bytes FIFO -1 packets
 ip-bytes FIFO -1 packets
 receive_queue FIFO -1 packets
 send-senddone FIFO -1 packets
-finished-queue FIFO -1 packets
-send-senddone-bytes FIFO -1 packets
 
 send-queue FIFO -1 packets
 
@@ -66,7 +64,6 @@ LOC startoftask3 senddone
 LOC startofhirq9 readdoneacklength
 LOC startofhirq10 readdoneackpayload
 LOC endoftaskloop emptytaskloop
-LOC endoflast finishedtransmitting
 #SERVICE sendTask sendtask
 
 # Entrypoint function for the PEU defined above
