@@ -162,7 +162,7 @@ SIGEND
 
 
 SIGSTART
-NAME read-packets-in-rxfifo   # The other signature is further down in this file
+NAME read-next-packet-in-rxfifo   # The other signature is further down in this file
 PEU cpu
 RESOURCES cycles normal
 FRACTION 99%  1939 1940
@@ -188,7 +188,7 @@ x                                PROCESS        9279 0
 x PROCESS 17 0 PERBYTE
 0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
 x TTWAKEUP scheduler
-x CALL read-packets-in-rxfifo
+x CALL read-next-packet-in-rxfifo
 0 STOP
 
 SIGEND
@@ -205,7 +205,7 @@ x                                PROCESS        2000 0
 within-receiveDone-task DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 1
 x PROCESS 928 0
-x CALL read-packets-in-rxfifo
+x CALL read-next-packet-in-rxfifo
 0 STOP
 
 SIGEND
@@ -234,7 +234,7 @@ FRACTION 100%  1940 1940
 
 0 START
 x STATECOND packet-collided read global 1
-x CALL read-packets-in-rxfifo
+x CALL read-next-packet-in-rxfifo
 0 STOP
 
 SIGEND
@@ -270,7 +270,7 @@ SIGEND
 
 
 SIGSTART
-NAME read-packets-in-rxfifo  # The other signature is further up in this file
+NAME read-next-packet-in-rxfifo  # The other signature is further up in this file
 PEU cpu
 RESOURCES cycles normal
 FRACTION 99%  1939 1940
