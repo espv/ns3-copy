@@ -31,6 +31,9 @@ namespace ns3 {
     NS_LOG_COMPONENT_DEFINE("TelosB");
 }
 
+// TODO: Replace these constructors with the Configure function below
+// TODO: Replace some of the ad-hoc variables with proper queues and STATECOND variables that can be used by the execenv
+// TODO: Get the mote to drop packets at 65kbps with packet size 125 bytes, which worked before the recent changes
 TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
@@ -92,9 +95,9 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   }
 
   execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
-  execenv->queues["receive-queue"]->Enqueue(packet);
+  execenv->queues["rxfifo"]->Enqueue(packet);
   if (receivingPacket) {
-    NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: " << execenv->queues["receive-queue"]->GetNPackets());
+    NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: " << execenv->queues["rxfifo"]->GetNPackets());
     return;
   }
 
@@ -121,8 +124,8 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     execenv->globalStateVariables["packet-collided"] = 1;
     ps->nr_packets_dropped_bad_crc++;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": collision caused packet nr " << packet->m_executionInfo.seqNr << "'s CRC check to fail, dropping it");
-    if (!execenv->queues["receive-queue"]->IsEmpty()) {
-      execenv->queues["receive-queue"]->Dequeue();
+    if (!execenv->queues["rxfifo"]->IsEmpty()) {
+      execenv->queues["rxfifo"]->Dequeue();
     } else {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -168,7 +171,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet " << packet->m_executionInfo.seqNr);
   }
 
-  if (execenv->queues["receive-queue"]->IsEmpty()) {
+  if (execenv->queues["rxfifo"]->IsEmpty()) {
     receivingPacket = false;
     if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
       NS_LOG_INFO ("RXFIFO gets flushed");
