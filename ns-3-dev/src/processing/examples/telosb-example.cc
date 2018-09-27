@@ -31,32 +31,7 @@ namespace ns3 {
 
 using namespace ns3;
 
-
-static ProgramLocation *dummyProgramLoc;
-
 static ProtocolStack ps;
-// ScheduleInterrupt schedules an interrupt on the node.
-// interruptId is the service name of the interrupt, such as HIRQ-123
-void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interruptId, Time time) {
-  Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-
-  // TODO: Model the interrupt distribution somehow
-  static int cpu = 0;
-
-  dummyProgramLoc = new ProgramLocation();
-  dummyProgramLoc->tempvar = tempVar();
-  dummyProgramLoc->curPkt = packet;
-  dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-  dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
-
-  Simulator::Schedule(time,
-                      &InterruptController::IssueInterruptWithServiceOnCPU,
-                      ee->hwModel->m_interruptController,
-                      cpu,
-                      ee->m_serviceMap[interruptId],
-                      dummyProgramLoc);
-
-}
 
 Gnuplot *ppsPlot = nullptr;
 Gnuplot *delayPlot = nullptr;
@@ -114,10 +89,10 @@ void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* data
 
 int main(int argc, char *argv[])
 {
+  LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
   // Debugging and tracing
   debugOn = false;
   if (debugOn) {
-      LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
       LogComponentEnable("TelosB", LOG_LEVEL_INFO);
       LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
       LogComponentEnable("RoundRobinScheduler", LOG_LEVEL_INFO);
@@ -139,8 +114,8 @@ int main(int argc, char *argv[])
   createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
-#define ONE_CONTEXT 0
-#define SIMULATION_OVERHEAD_TEST 1
+#define ONE_CONTEXT 1
+#define SIMULATION_OVERHEAD_TEST 0
 #define ALL_CONTEXTS 0
 #define CC2420_MODEL 0
 #if CC2420_MODEL

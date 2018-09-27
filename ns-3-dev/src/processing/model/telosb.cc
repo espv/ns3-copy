@@ -150,24 +150,16 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
   packet->m_executionInfo.executedByExecEnv = false;
   NS_LOG_INFO ("Packets in send queue: " << execenv->queues["send-queue"]->GetNPackets());
 
-  //if (jitterExperiment && execenv->queues["send-queue"]->GetNPackets() < 3) {
+  if (jitterExperiment) {
     /* In the jitter experiment, we fill the IP layer queue up by enqueueing the same packet three times instead of once.
      * That means we must increase the number of packets getting processed, which depends on how many packets are currently in the send queue.
      */
-   /* bool first = true;
-    while (execenv->queues["send-queue"]->GetNPackets() < 3) {
-      execenv->queues["send-queue"]->Enqueue(packet);
-      execenv->queues["rcvd-send"]->Enqueue(packet);
-      if (first) {
-        //execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
-        execenv->globalStateVariables["ipaq-full"] = 0;
-        execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
-        NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
-        first = false;
-      }
-    }  // STATECOND for the two statements below; STATECOND ipaq-overflow
-  } else*/
-  if (execenv->queues["send-queue"]->GetNPackets() < 3) {
+    execenv->queues["send-queue"]->Enqueue(packet);execenv->queues["send-queue"]->Enqueue(packet);execenv->queues["send-queue"]->Enqueue(packet);
+    execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);
+    execenv->globalStateVariables["ipaq-full"] = 0;
+    execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
+  } else if (execenv->queues["send-queue"]->GetNPackets() < 3) {
     execenv->queues["send-queue"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);
     //execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
