@@ -58,24 +58,24 @@ void ScheduleInterrupt(Ptr<Node> node, Ptr<Packet> packet, const char* interrupt
 
 }
 
-Gnuplot *ppsPlot = NULL;
-Gnuplot *delayPlot = NULL;
-Gnuplot *numberForwardedPlot = NULL;
-Gnuplot *packetOutcomePlot = NULL;
-Gnuplot *numberBadCrcPlot = NULL;
-Gnuplot *numberRxfifoFlushesPlot = NULL;
-Gnuplot *numberCollidedPlot = NULL;
-Gnuplot *numberIPDroppedPlot = NULL;
-Gnuplot *intraOsDelayPlot = NULL;
-Gnuplot2dDataset *ppsDataSet = NULL;
-Gnuplot2dDataset *delayDataSet = NULL;
-Gnuplot2dDataset *numberForwardedDataSet = NULL;
-Gnuplot2dDataset *numberForwardedDataSet2 = NULL;
-Gnuplot2dDataset *numberBadCrcDataSet = NULL;
-Gnuplot2dDataset *numberRxfifoFlushesDataSet = NULL;
-Gnuplot2dDataset *numberCollidedDataSet = NULL;
-Gnuplot2dDataset *numberIPDroppedDataSet = NULL;
-Gnuplot2dDataset *intraOsDelayDataSet = NULL;
+Gnuplot *ppsPlot = nullptr;
+Gnuplot *delayPlot = nullptr;
+Gnuplot *numberForwardedPlot = nullptr;
+Gnuplot *packetOutcomePlot = nullptr;
+Gnuplot *numberBadCrcPlot = nullptr;
+Gnuplot *numberRxfifoFlushesPlot = nullptr;
+Gnuplot *numberCollidedPlot = nullptr;
+Gnuplot *numberIPDroppedPlot = nullptr;
+Gnuplot *intraOsDelayPlot = nullptr;
+Gnuplot2dDataset *ppsDataSet = nullptr;
+Gnuplot2dDataset *delayDataSet = nullptr;
+Gnuplot2dDataset *numberForwardedDataSet = nullptr;
+Gnuplot2dDataset *numberForwardedDataSet2 = nullptr;
+Gnuplot2dDataset *numberBadCrcDataSet = nullptr;
+Gnuplot2dDataset *numberRxfifoFlushesDataSet = nullptr;
+Gnuplot2dDataset *numberCollidedDataSet = nullptr;
+Gnuplot2dDataset *numberIPDroppedDataSet = nullptr;
+Gnuplot2dDataset *intraOsDelayDataSet = nullptr;
 
 void createPlot(Gnuplot** plot, std::string filename, std::string title, Gnuplot2dDataset** dataSet) {
   *plot = new Gnuplot(filename);
@@ -192,8 +192,6 @@ int main(int argc, char *argv[])
             UintegerValue(0));
     eeh->Install(ps.deviceFile, mote2->GetNode());
 
-    ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
-
     // send packets to PacketSink (installed on node 1)
     OnOffCC2420Helper onoff;
     // 80kbps ist die "Grenze", bei der bei einer Paketgröße von 20 Bytes gerade noch alle Pakete ankommen
@@ -258,13 +256,10 @@ int main(int argc, char *argv[])
 
     TelosB *mote1 = new TelosB(c.Get(0), &ps);
     mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
-    ScheduleInterrupt (mote1->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
     TelosB *mote2 = new TelosB(c.Get(1), &ps);
     mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
-    ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
     TelosB *mote3 = new TelosB(c.Get(2), &ps);
     mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
-    ScheduleInterrupt (mote3->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
 
     debugOn = true;
     ps.pps = 0;  // Need to disable pps here
@@ -329,13 +324,10 @@ int main(int argc, char *argv[])
 
   TelosB *mote1 = new TelosB(c.Get(0), &ps);
   mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
-  ScheduleInterrupt (mote1->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
   TelosB *mote2 = new TelosB(c.Get(1), &ps);
   mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
-  ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
   TelosB *mote3 = new TelosB(c.Get(2), &ps);
   mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
-  ScheduleInterrupt (mote3->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
 
   debugOn = true;
   protocolStack->GenerateTraffic(c.Get(0), ps.packet_size, mote1, mote2, mote3);
@@ -415,7 +407,6 @@ int main(int argc, char *argv[])
     install_time = clock();
     eeh->Install(ps.deviceFile, c);
     for (int i = 0; i < numberMotes; i++) {
-        ScheduleInterrupt (c.Get(i), Create<Packet>(0), "HIRQ-12", Seconds(0));
         TelosB *mote1 = new TelosB(c.Get(i), &ps);
         mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
         TelosB *mote2 = new TelosB(c.Get(i), &ps);
@@ -516,10 +507,6 @@ int main(int argc, char *argv[])
             mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
             TelosB *mote3 = new TelosB(node_container.Get(2));
             mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
-
-            ScheduleInterrupt (mote1->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
-            ScheduleInterrupt (mote2->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
-            ScheduleInterrupt (mote3->GetNode(), Create<Packet>(0), "HIRQ-12", Seconds(0));
 
             protocolStack->GenerateTraffic(node_container.Get(0), ps.packet_size, mote1, mote2, mote3);
             Simulator::Stop(Seconds(ps.duration));

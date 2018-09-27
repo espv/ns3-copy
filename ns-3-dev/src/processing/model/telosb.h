@@ -35,7 +35,7 @@ public:
 
     uint32_t seed = 3;
     double duration = 10;
-    int pps = 138;
+    int pps = 55;
     int packet_size = 125;
     std::string deviceFile = "device-files/telosb-min.device";  // Required if we use gdb
     std::string trace_fn = "trace-inputs/packets-received.txt";
@@ -48,7 +48,7 @@ public:
     int nr_packets_dropped_ip_layer;
     int total_intra_os_delay = 0;
     int nr_packets_total = 0;
-    bool firstNodeSendingtal = false;
+    bool firstNodeSending = false;
     std::vector<int64_t> forwarded_packets_seqnos;
     std::vector<int64_t> time_received_packets;
     std::vector<int64_t> all_intra_os_delays;
@@ -128,7 +128,7 @@ public:
 
     void receiveDone_task(Ptr<Packet> packet);
 
-    void sendTask();
+    void sendTask(Ptr<Packet> packet);
 
     // Called when done writing packet into TXFIFO, and radio is ready to send
     void writtenToTxFifo(Ptr<Packet> packet);

@@ -34,7 +34,6 @@ namespace ns3 {
 TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
-  TelosB::packets_in_send_queue = 0;
   TelosB::receivingPacket = false;
   TelosB::src = src;
   TelosB::netDevice = netDevice;
@@ -44,7 +43,6 @@ TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDev
 TelosB::TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
-  TelosB::packets_in_send_queue = 0;
   TelosB::receivingPacket = false;
   TelosB::src = src;
   TelosB::dst = dst;
@@ -55,7 +53,6 @@ TelosB::TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetD
 TelosB::TelosB(Ptr<Node> node, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
-  TelosB::packets_in_send_queue = 0;
   TelosB::receivingPacket = false;
   TelosB::ps = ps;
 }
@@ -67,7 +64,7 @@ TelosB::Configure(Ptr<ExecEnv> ee) {
 
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
-  ps->firstNodeSendingtal = false;
+  ps->firstNodeSending = false;
   --radio.nr_send_recv;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   packet->collided = radio.collision;
@@ -81,9 +78,6 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
     NS_LOG_INFO ("Dropping packet " << packet->m_executionInfo.seqNr << " due to RXFIFO overflow");
     return;
   }
-
-  if (++cur_nr_packets_processing == 1)
-    execenv->ScheduleInterrupt (packet, "HIRQ-11", Seconds(0));
 
   radio.bytes_in_rxfifo += packet->GetSize ();
   NS_LOG_INFO ("radio.bytes_in_rxfifo: " << radio.bytes_in_rxfifo);
@@ -142,15 +136,12 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
 
   // Packets received and causing RXFIFO overflow get dropped.
   if (packet->collided) {
-    cur_nr_packets_processing--;
-    if (cur_nr_packets_processing == 0) {
-      execenv->ScheduleInterrupt (packet, "HIRQ-12", Seconds(0));
-    }
     ps->nr_packets_dropped_bad_crc++;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload, collision caused packet CRC check to fail, dropping it " << packet->m_executionInfo.seqNr);
     if (!execenv->queues["receive_queue"]->IsEmpty()) {
       Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
       execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
+      // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
       execenv->ScheduleInterrupt (nextPacket, "HIRQ-1", Seconds(0));
     } else {
       receivingPacket = false;
@@ -173,43 +164,43 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
 void TelosB::receiveDone_task(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   packet->m_executionInfo.executedByExecEnv = false;
-  NS_LOG_INFO ("packets_in_send_queue: " << packets_in_send_queue);
+  NS_LOG_INFO ("Packets in send queue: " << execenv->queues["send-queue"]->GetNPackets());
 
-  if (jitterExperiment && execenv->queues["send-queue"]->GetNPackets() < 3) {
+  //if (jitterExperiment && execenv->queues["send-queue"]->GetNPackets() < 3) {
     /* In the jitter experiment, we fill the IP layer queue up by enqueueing the same packet three times instead of once.
      * That means we must increase the number of packets getting processed, which depends on how many packets are currently in the send queue.
      */
-    cur_nr_packets_processing += 2 - execenv->queues["send-queue"]->GetNPackets();
-    bool first = true;
+   /* bool first = true;
     while (execenv->queues["send-queue"]->GetNPackets() < 3) {
       execenv->queues["send-queue"]->Enqueue(packet);
       execenv->queues["rcvd-send"]->Enqueue(packet);
       if (first) {
-        execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
+        //execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
+        execenv->globalStateVariables["ipaq-full"] = 0;
         execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
         NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
         execenv->queues["ip-bytes"]->Enqueue(packet);
         first = false;
       }
-    }
-  } else if (execenv->queues["send-queue"]->GetNPackets() < 3) {
+    }  // STATECOND for the two statements below; STATECOND ipaq-overflow
+  } else*/
+  if (execenv->queues["send-queue"]->GetNPackets() < 3) {
     execenv->queues["send-queue"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);
-    execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
-    execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
+    //execenv->ScheduleInterrupt (packet, "HIRQ-14", MicroSeconds(1));
+    execenv->globalStateVariables["ipaq-full"] = 0;
+    execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
     execenv->queues["ip-bytes"]->Enqueue(packet);
   } else {
-    cur_nr_packets_processing--;
-    if (cur_nr_packets_processing == 0) {
-      execenv->ScheduleInterrupt (packet, "HIRQ-12", Seconds(0));
-    }
     ++ps->nr_packets_dropped_ip_layer;
-    execenv->ScheduleInterrupt (packet, "HIRQ-17", MicroSeconds(1));
+    //execenv->ScheduleInterrupt (packet, "HIRQ-17", MicroSeconds(1));
+    execenv->globalStateVariables["ipaq-full"] = 1;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet " << packet->m_executionInfo.seqNr);
   }
 
   if (!execenv->queues["receive_queue"]->IsEmpty()) {
+    // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
     Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
     execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
     execenv->ScheduleInterrupt (nextPacket, "HIRQ-1", Seconds(0));
@@ -224,24 +215,12 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
   }
 }
 
-void TelosB::sendTask() {
-  // TODO: Reschedule this event if a packet can get read into memory. It seems that events run in parallell when we don't want them to.
+void TelosB::sendTask(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  if (execenv->queues["send-queue"]->IsEmpty()) {
-    NS_LOG_INFO ("There are no packets in the send queue, returning from sendTask");
-    return;
-  }
-
-
-  if (ip_radioBusy) {
-    // finishedTransmitting() calls this function again when ip_radioBusy is set to false.
-    NS_LOG_INFO ("ip_radioBusy is true, returning from sendTask");
-    return;
-  }
 
   // Peek has been modified to return non-const Packet, should probably be changed back.
   // This packet must be retrieved in this ad-hoc way because sendTask can be called from either finishedTransmitting or receiveDone_task.
-  Ptr<Packet> packet = execenv->queues["send-queue"]->Peek();
+  //Ptr<Packet> packet = execenv->queues["send-queue"]->Peek();
   execenv->ScheduleInterrupt (packet, "HIRQ-81", Seconds(0));
 
   packet->m_executionInfo.executedByExecEnv = false;
@@ -254,7 +233,6 @@ void TelosB::sendTask() {
   execenv->queues["send-senddone"]->Enqueue(packet);
   NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
 
-  ip_radioBusy = true;
   execenv->globalStateVariables["ip-radio-busy"] = 1;
 }
 
@@ -274,7 +252,6 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   packet->m_executionInfo.executedByExecEnv = false;
 
   if (!packet->attemptedSent) {
-    //packet->AddPaddingAtEnd (36);
     packet->attemptedSent = true;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
     int64_t intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() - packet->m_executionInfo.timestamps[1].GetMicroSeconds();
@@ -314,15 +291,11 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   ++ps->nr_packets_forwarded;
 
   // I believe it's here that the packet gets removed from the send queue, but it might be in writtenToTxFifo
-  ip_radioBusy = false;
   execenv->globalStateVariables["ip-radio-busy"] = 0;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: " << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0] << ", UDP payload size: " << packet->GetSize () << ", seq no: " << packet->m_executionInfo.seqNr);
   execenv->queues["send-queue"]->Dequeue();
   --radio.nr_send_recv;
-  if (--cur_nr_packets_processing == 0) {
-    execenv->ScheduleInterrupt (packet, "HIRQ-12", Seconds(0));
-  }
 
   if (radio.collision) {
     NS_LOG_INFO (Simulator::Now() << " finishedTransmitting: Collision occured, destroying packet to be forwarded, radio.nr_send_recv: " << radio.nr_send_recv << ", receivingPacket: " << receivingPacket);
@@ -339,8 +312,8 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   }
 
   // Re-scheduling sendTask in case there is a packet waiting to be sent
-  execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
-  execenv->queues["rcvd-send"]->Enqueue(packet);
+  //execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this);
+  //execenv->queues["rcvd-send"]->Enqueue(packet);
   execenv->ScheduleInterrupt (packet, "HIRQ-6", NanoSeconds(0));
 }
 
@@ -350,12 +323,12 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
 
   // Finish this, also change ReceivePacket to also accept acks
   if (!to_mote->radio.rxfifo_overflow && to_mote->radio.nr_send_recv == 0) {
-    if (ps->firstNodeSendingtal) {
+    if (ps->firstNodeSending) {
       Simulator::Schedule(MicroSeconds(100), &TelosB::SendPacket, this, packet, to_mote, third_mote);
       return;
     }
 
-    ps->firstNodeSendingtal = true;
+    ps->firstNodeSending = true;
     ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
