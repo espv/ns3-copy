@@ -1,45 +1,21 @@
-#
-# Lines starting with "#" are regarded as comments, and disregarded during parsing.
-#
-# The order of sections matter - they must be in the following order:
-# QUEUES, HARDWARE, SYNCH, CONDITIONS, TRIGGERS,
-# {SIGSTART ... SIGEND},
-# THREADS
-#
-
-#############################################################################
-############################### HEADER ######################################
-#############################################################################
-
-QUEUES
-# Format: name
-#	  queuing policy (only currently supported: "FIFO")
-#	  size
-#	  type of queued entries ("packet" or "service")
-# order matters, since queue conditions work on sets of queues specified
-# by the name of the first and the last queue
-
-# BCM4430 TRS: http://linux-sunxi.org/images/0/05/4330-DS206-R.pdf
-# Page 84, figure 34
-# NIC Rx memory: 10kb
-# NIC Tx memory: 32kb
 
 QUEUES
 
 HIRQ	 FIFO 	 -1    services
 
-# Only one packet can be in the CC2420 driver
+# CC2420 driver packet "slot", which one packet is placed in when the packet is written into RAM.
 rcvd FIFO 1 packets
-# The IPAQ has a capacity of 3 packets
+# The IPAQ, which has a capacity of 3 packets
 ipaq FIFO 3 packets
 
 # The 3 packet queues below are "bridges" between functions. Conceptually, a thread is always working with at max
 # one packet at a time. When we dequeue a packet from any queue with the DEQUEUE event, we assign the dequeued packet
 # to the current running thread. This way, multiple threads can run simultaneously and still work with the correct
 # packet. An alternative solution could result in multiple threads working with the same packet.
-rcvd-send FIFO -1 packets
-receive-queue FIFO -1 packets
-send-written FIFO -1 packets
+
+receive-queue FIFO -1 packets  # Bridge between write-packet-into-RAM and receiveDone-task
+rcvd-send FIFO -1 packets  # Bridge between receiveDone-task and sendTask
+send-written FIFO -1 packets  # Bridge between sendTask and writtenToTxFifo
 
 
 # Queue for posted tasks
@@ -56,7 +32,7 @@ SYNCH
 CONDITIONS
 
 TRIGGERS
-LOC within-read-packet-into-RAM readdonepayload
+LOC within-write-packet-into-RAM readdonepayload
 LOC within-receiveDone-task receivedone
 LOC within-sendTask sendtask
 LOC within-writtenToTxFifo writtentotxfifo
@@ -243,7 +219,7 @@ SIGEND
 
 
 SIGSTART
-NAME read-packet-into-RAM
+NAME write-packet-into-RAM
 PEU cpu
 RESOURCES cycles normal
 FRACTION 50%  1940 3880
@@ -252,7 +228,7 @@ FRACTION 50%  1940 3880
 x PROCESS 3489 0
 x DEQUEUE PKTQUEUE 0 receive-queue
 x PROCESS 151 0 PERBYTE
-within-read-packet-into-RAM CALL check-if-packet-collided
+within-write-packet-into-RAM CALL check-if-packet-collided
 0 STOP
 
 SIGEND
@@ -265,7 +241,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x CALL read-packet-into-RAM
+x CALL write-packet-into-RAM
 0 STOP
 
 SIGEND
@@ -279,7 +255,7 @@ FRACTION 99%  1939 1940
 
 0 START
 x QUEUECOND receive-queue receive-queue notempty
-x CALL read-packet-into-RAM
+x CALL write-packet-into-RAM
 0 STOP
 
 SIGEND
