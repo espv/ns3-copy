@@ -34,6 +34,7 @@ namespace ns3 {
 // TODO: Replace these constructors with the Configure function below
 // TODO: Replace some of the ad-hoc variables with proper queues and STATECOND variables that can be used by the execenv
 // TODO: Get the mote to drop packets at 65kbps with packet size 125 bytes, which worked before the recent changes
+// TODO: Tidy up telosb-example.cc
 TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
   TelosB::node = node;
   TelosB::number_forwarded_and_acked = 0;
