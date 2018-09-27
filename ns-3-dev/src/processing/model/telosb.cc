@@ -193,20 +193,12 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
 
 void TelosB::sendTask(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-
-  // Peek has been modified to return non-const Packet, should probably be changed back.
-  // This packet must be retrieved in this ad-hoc way because sendTask can be called from either finishedTransmitting or receiveDone_task.
-  //Ptr<Packet> packet = execenv->queues["send-queue"]->Peek();
   packet->m_executionInfo.executedByExecEnv = false;
-
   execenv->Proceed(packet, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
-
-  // The MCU will be busy copying packet from RAM to buffer for a while. Temporary workaround since we cannot schedule MCU to be busy for a dynamic amount of time.
-  // 0.7 is a temporary way of easily adjusting the time processing the packet takes.
   execenv->queues["send-senddone"]->Enqueue(packet);
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
-
   execenv->globalStateVariables["ip-radio-busy"] = 1;
+
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
 }
 
 void TelosB::sendViaCC2420(Ptr<Packet> packet) {
@@ -271,10 +263,9 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   --radio.nr_send_recv;
 
   if (radio.collision) {
-    NS_LOG_INFO (Simulator::Now() << " finishedTransmitting: Collision occured, destroying packet to be forwarded, radio.nr_send_recv: " << radio.nr_send_recv << ", receivingPacket: " << receivingPacket);
-    if (radio.nr_send_recv == 0) {
+    NS_LOG_INFO (Simulator::Now() << " Collision occured, destroying packet to be forwarded, radio.nr_send_recv: " << radio.nr_send_recv << ", receivingPacket: " << receivingPacket);
+    if (radio.nr_send_recv == 0)
       radio.collision = false;
-    }
   }
 
   // In the jitter experiment, we send the same packet three times.
@@ -303,7 +294,8 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
     ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize ()+36 + 5/* 36 is UDP packet, 5 is preamble + SFD*/) + MicroSeconds (192) /* 12 symbol lengths before sending packet, even without CCA. 8 symbol lengths is 128 µs */, &TelosB::ReceivePacket, to_mote, packet);
+    std::cout << "Packet size: " << packet->GetSize () << std::endl;
+    Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5/* 5 is preamble + SFD */) + MicroSeconds (192) /* 12 symbol lengths before sending packet, even without CCA. 8 symbol lengths is 128 µs */, &TelosB::ReceivePacket, to_mote, packet);
     NS_LOG_INFO ("SendPacket, sending packet " << packet->m_executionInfo.seqNr);
   } else if (to_mote->radio.nr_send_recv > 0) {
     if (ccaOn) {
@@ -324,7 +316,7 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
     // our mote is busy transmitting, so this mote will send the packet, and our mote might receive half of the packet for instance.
     // That would most likely cause garbage to get collected in RXFIFO, which causes overhead for our mote, because it has
     // to read all the bytes one by one.
-    NS_LOG_INFO ("SendPacket, failed to send because radio's RXFIFO is overflowed");
+    NS_LOG_INFO ("SendPacket, failed to send because mote is transmitting");
   }
 }
 

@@ -285,7 +285,7 @@ ProcessingStage::Instantiate(Ptr<Packet> packet) {
 
   // For the PERBYTE statement
   if (this->perByte) {
-        this->factor = packet->GetSize () - 36;  // Minus the UPD, IP and frame headers
+        this->factor = packet->GetSize ();
   }
 
   // Iterate all resources used, select a random

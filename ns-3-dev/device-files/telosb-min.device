@@ -149,10 +149,8 @@ x QUEUECOND send-queue send-queue notempty
 # While sendTask might be delayed until after another packet is sent, the ProgramLocation's packet will be the correct
 # one in this case because dequeuing the packet from rcvd-send will set the new curPkt to be the next in line to be sent.
 within-sendTask DEQUEUE PKTQUEUE 0 rcvd-send
-x PROCESS 4440 0
+x PROCESS 3165 0
 x PROCESS 191 0 PERBYTE
-
-x PROCESS 5792 0
 # Technically, writtenToTxFifo is a hardware interrupt and the above processing stages should be done through a PEUSTART.
 # Since the CPU is busy processing most of the time, however, we can model it as a call to a service. Meaning,
 # the CPU will not have time to process another packet in the meantime.
@@ -186,9 +184,8 @@ FRACTION 99%  1939 1940
 x                                PROCESS        2000 0
 within-receiveDone-task DEQUEUE PKTQUEUE 0 h4-rcvd
 x STATECOND ipaq-full read global 0
-x                                PROCESS        6836 0
+x                                PROCESS        9279 0
 x PROCESS 17 0 PERBYTE
-x PROCESS 3072 0  # 40-41 + 41-38
 0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
 x TTWAKEUP scheduler
 x CALL read-packets-in-rxfifo
@@ -250,10 +247,9 @@ RESOURCES cycles normal
 FRACTION 50%  1940 3880
 
 0 START
-x PROCESS 3028 0
+x PROCESS 3489 0
 x DEQUEUE PKTQUEUE 0 receive-queue
 x PROCESS 151 0 PERBYTE
-x PROCESS 6048 0
 within-read-packet-into-RAM CALL check-if-packet-collided
 0 STOP
 
