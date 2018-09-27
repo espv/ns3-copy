@@ -55,8 +55,6 @@ SYNCH
 CONDITIONS
 
 TRIGGERS
-LOC startofhirq1 readdonelength
-LOC startofhirq2 readdonefcf
 LOC startofhirq3 readdonepayload
 LOC sendDoneLoc senddonetrigger
 LOC startoftask1 receivedone
@@ -229,7 +227,7 @@ SIGEND
 
 
 SIGSTART
-NAME hardware_interrupt_4
+NAME check-if-packet-collided
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100%  1940 1940
@@ -244,7 +242,7 @@ SIGEND
 
 
 SIGSTART
-NAME hardware_interrupt_4
+NAME check-if-packet-collided
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100%  1940 1940
@@ -265,8 +263,8 @@ FRACTION 100% 1 1
 
 0 START
 readDonePayload        COMPL		(TEMP)	global
-x PROCESS		700 0
-startofhirq3 CALL hardware_interrupt_4
+startofhirq3 PROCESS		700 0
+x CALL check-if-packet-collided
 0 STOP
 
 SIGEND
@@ -281,8 +279,7 @@ FRACTION 100% 1 1
 0 START
 readDoneFcf        COMPL		(TEMP)	global
 
-startofhirq2                                PROCESS		656 0
-#startofhirq2 DEQUEUE PKTQUEUE 0 h2-h3
+x                                PROCESS		656 0
 x PROCESS 151 0 PERBYTE h3-bytes
 
 x        TEMPSYNCH	-1 HIRQ-3 1 HIRQ-4	global
@@ -304,7 +301,6 @@ FRACTION 100% 1 1
 readDoneLength     COMPL		(TEMP)	global
 
 x                                PROCESS		680 0
-startofhirq1 DEQUEUE PKTQUEUE 0 h1-h2
 
 readDoneFcf        TEMPSYNCH	-1 HIRQ-2 1 HIRQ-3	global
 s PEUSTART HIRQ-3 1352 0

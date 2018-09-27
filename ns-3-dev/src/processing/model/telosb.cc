@@ -100,27 +100,12 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
 
   NS_LOG_INFO (Simulator::Now() << " " << id << ": CC2420ReceivePacket, next step readDoneLength, radio busy " << packet->m_executionInfo.seqNr);
 
-  execenv->Proceed(packet, "readdonelength", &TelosB::read_done_length, this, packet);
-
   execenv->ScheduleInterrupt (packet, "HIRQ-1", NanoSeconds(10));
-  execenv->queues["h1-h2"]->Enqueue(packet);
-  receivingPacket = true;
-}
-
-void TelosB::read_done_length(Ptr<Packet> packet) {
-  Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_length, next step readDoneFcf " << packet->m_executionInfo.seqNr);
-  execenv->Proceed(packet, "readdonefcf", &TelosB::readDone_fcf, this, packet);
-}
-
-void TelosB::readDone_fcf(Ptr<Packet> packet) {
-  Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
-
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_fcf, next step readDonePayload " << packet->m_executionInfo.seqNr);
+  // We need this queue because hardware_interrupt_1 can be called from multiple places: here, when a packet is read
+  // into memory, and when receiveDone_task is finished.
   execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
   execenv->queues["h3-bytes"]->Enqueue(packet);
+  receivingPacket = true;
 }
 
 void TelosB::readDone_payload(Ptr<Packet> packet) {
@@ -142,9 +127,8 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload, collision caused packet CRC check to fail, dropping it " << packet->m_executionInfo.seqNr);
     if (!execenv->queues["receive_queue"]->IsEmpty()) {
       Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
-      execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
-      // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
-      execenv->queues["h1-h2"]->Enqueue(packet);
+      execenv->Proceed(nextPacket, "readdonepayload", &TelosB::readDone_payload, this, nextPacket);
+      execenv->queues["h3-bytes"]->Enqueue(packet);
     } else {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -204,8 +188,8 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
   if (!execenv->queues["receive_queue"]->IsEmpty()) {
     // TODO: we need to add nextPacket to the program location and not invoke HIRQ-1
     Ptr<Packet> nextPacket = execenv->queues["receive_queue"]->Dequeue();
-    execenv->Proceed(nextPacket, "readdonelength", &TelosB::read_done_length, this, nextPacket);
-    execenv->queues["h1-h2"]->Enqueue(packet);
+    execenv->Proceed(nextPacket, "readdonepayload", &TelosB::readDone_payload, this, nextPacket);
+    execenv->queues["h3-bytes"]->Enqueue(packet);
   } else {
     receivingPacket = false;
     if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
