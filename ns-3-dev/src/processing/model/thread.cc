@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
-#include <iomanip>      // std::setw (OYSTEDAL)
+#include <iomanip>
 
 #include "peu.h"
 #include "program.h"
@@ -17,7 +17,6 @@
 #include "interrupt-controller.h"
 #include "sem.h"
 #include "ns3/local-state-variable-queue.h"
-// #include "ns3/schedsim-linsched.h"
 #include "ns3/rrscheduler.h"
 
 #include <queue>
@@ -342,8 +341,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			if (curLc->emptyQueue2s != nullptr)
 				m_currentLocation->program = curLc->emptyQueue2s;
 			else { // See commends in program.h on LoopCondition members hasInternalLoop and hasDequeue
-				m_currentLocation->program =
-					m_currentLocation->program->sem->rootProgram;
+				m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
 				if (!m_currentLocation->program->hasInternalLoop) {
 					// iterate queues until we find one which is not
 					// empty. If all are empty, return from LOOP.
@@ -425,8 +423,6 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 		double nanoseconds = (((pi.remaining[CYCLES].amount * 1000) / m_freq)) - ((m_tracingOverhead * 1000.0) / m_freq);
 		nanoseconds = (nanoseconds > 0 ? nanoseconds : 0);
 		if(withBlockingIO) {
-			//std::cout << "WITHBLOCKINGIO, nanoseconds: " << nanoseconds << std::endl;
-			// This calls EventMemberImpl3 with all the args below except nanoseconds
 			Simulator::Schedule(NanoSeconds((uint64_t) nanoseconds),
 					&InterruptController::IssueInterruptWithServiceOnCPU,
 					peu->hwModel->m_interruptController, 
@@ -518,13 +514,6 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	// packet.
 	std::string eeTarget = ee->service;
 
-	auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-    auto it = execEnv->targets.find(eeTarget);
-    if (it != execEnv->targets.end()) {
-        ee->m_executionInfo.target = eeTarget;
-        ee->m_executionInfo.targetFPM = it->second;
-    }
-
 	Ptr<SEM> newSem;
 	if (ee->sem != nullptr) {
 		newSem = ee->sem;
@@ -540,6 +529,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 			}
 		}
 	} else {
+		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 		// Here, we assume there is an active packet specifying the target
 		auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo.target);
 		newSem = it->second;
@@ -743,28 +733,9 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 			// in the insertion above, so we don't need to resolve this again.
             Ptr<SEM> toExecute = queueToServe->front().first;
 			Ptr<ProgramLocation> newPl = queueToServe->front().second;
+            queueToServe->pop();
 
-            //std::cout << "Dequeueing service " << toExecute->name << std::endl;
-			queueToServe->pop();
-			// We need to execute the SEM, and thus before that
-			// check whether it is specified as a trigger in the current packet.
-            //Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
-            //if (toExecute->trigger.length() != 0) {
-            //    EventImpl *toInvoke = ee->serviceTriggers[]->m_executionInfo.targetFPM;
-            //    toInvoke->Invoke();
-            //    toInvoke->Unref();
-            //    //					curPkt->m_executionInfo.targetFPM->Unref();
-            //}
-			//f (toExecute->trigger.length() != 0
-			//		&& !toExecute->trigger.compare(
-			//			m_currentLocation->curPkt->m_executionInfo.target)) {
-			//	Ptr<Packet> curPkt = m_currentLocation->curPkt;
-			//	curPkt->m_executionInfo.executedByExecEnv = true;
-			//	EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
-			//	toInvoke->Invoke();
-			//	toInvoke->Unref();
-			//	//					curPkt->m_executionInfo.targetFPM->Unref();
-			//
+            NS_LOG_INFO("Dequeueing service " << toExecute->name);
 
 			// Now, its time to execute the de-queued service
 			// Note that it is not possible to en-queue loop services
@@ -772,30 +743,20 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 			// enqueued service is a regular service.
 			// COMMENTS ON THIS is in the EXECUTE events above - we do
 			// almost the same here.
-			// if (toExecute->peu == peu) {
             if (toExecute->peu->IsCPU()) {
 				Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
 				newProgramLocation->program = toExecute->rootProgram;
 				newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
-				newProgramLocation->curPkt = m_currentLocation->curPkt;
-				newProgramLocation->lc = nullptr;
-				newProgramLocation->localStateVariables =
-					newPl->localStateVariables;
-				newProgramLocation->localStateVariableQueue2s =
-					newPl->localStateVariableQueue2s;
+				newProgramLocation->curPkt = newPl->curPkt;  // Added by Espen
+				newProgramLocation->lc = newPl->lc;
+				newProgramLocation->localStateVariables = newPl->localStateVariables;
+				newProgramLocation->localStateVariableQueue2s = newPl->localStateVariableQueue2s;
 				newProgramLocation->tempvar = m_currentLocation->tempvar;
 				m_programStack.push(newProgramLocation);
 			} else
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,
 						0, newPl->curPkt, newPl->localStateVariables,
 						newPl->localStateVariableQueue2s, false);
-
-            auto ee = peu->hwModel->node->GetObject<ExecEnv>();
-            auto it = ee->targets.find(toExecute->name);
-            if (it != ee->targets.end()) {
-                qe->m_executionInfo.targets[toExecute->name] = toExecute->name;
-                qe->m_executionInfo.targetFPMs[toExecute->name] = it->second;
-            }
 
 			// We should immediately continue with the next event in the called program
 			return true;
@@ -1026,7 +987,6 @@ void Thread::PreEmpt() {
 
 // Dispatch is allways called when executing a service on a PEU
 void Thread::Dispatch() {
-//	static unsigned int plSize = 0;
 	// Make sure the stack is not empty, i.e., that we have
 	// at least a root program
 	if (m_programStack.empty()) {
@@ -1080,30 +1040,15 @@ void Thread::Dispatch() {
             ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
 			proceed = HandleExecutionEvent(e);
 
-			// OYSTEDAL: Is this where ee->Proceed() is "resumed" from?
 			if (m_currentLocation->curPkt != nullptr) {
 				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {
-					//pktEI->executedByExecEnv = true;
+					pktEI->executedByExecEnv = true;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
-                    //toInvoke->Unref();  // This statement causes error with PERBYTE statement
+                    //toInvoke->Unref();
 				}
 			}
-
-            if (e->m_executionInfo.targetFPM != nullptr || !e->m_executionInfo.targetFPMs.empty()) {
-                //pktEI->executedByExecEnv = true;
-                if (e->m_executionInfo.targetFPM != nullptr) {
-                    EventImpl *toInvoke = e->m_executionInfo.targetFPM;
-                    toInvoke->Invoke();
-                }
-
-                for (auto const& target : e->m_executionInfo.targets) {
-                    EventImpl *toInvoke = e->m_executionInfo.targetFPMs[target.first];
-                    toInvoke->Invoke();
-                }
-                //toInvoke->Unref();  // These events might be reused, and we should therefore not Unref them
-            }
 
 			// Must check if there are any more statements to execute. If not,
 			// terminate the thread. Note that this should never occur for
@@ -1120,17 +1065,6 @@ void Thread::Dispatch() {
 		}
 	}
 }
-
-/*ProgramLocation::ProgramLocation() {
-	lc = nullptr;
-	program = nullptr;
-	rootProgram = nullptr;
-	currentEvent = 0;
-	curPkt = nullptr;
-	curIteration = 0;
-	curServedQueue2 = 0;
-	wasBlocked = 0;
-}*/
 
 } // namespace ns3
 

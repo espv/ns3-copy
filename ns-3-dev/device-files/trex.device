@@ -30,6 +30,11 @@ HIRQ	            FIFO 	-1    services
 # Queue for posted tasks
 sq FIFO -1 services
 
+# Bridge queues
+from-CepOperatorProcessCepEvent FIFO -1 packets
+from-ProcessCepEvent FIFO -1 packets
+from-ScheduleSend FIFO -1 packets
+
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 4 cpu0 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
@@ -334,6 +339,7 @@ FRACTION 100% 1 1
 0 START
 #x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
+x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpType read global 1
 x CALL handle-and-cepop
 x CALL handle-cepops
@@ -350,6 +356,7 @@ FRACTION 100% 1 1
 0 START
 #x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
+x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpType read global 2
 x CALL handle-then-cepop
 x CALL handle-cepops
@@ -365,7 +372,6 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 0
 0 STOP
 
@@ -395,9 +401,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND EventsLeft read global 1
 x PROCESS 1000 0
-#x HANDLEINCOMINGCEPEVENT 1000 0 2000 0  # 1000 cycles per state machine, 2000 cycles per CEPOp
 x CALL handle-cepops
-#x DEQUEUE PKTQUEUE 0 h2-h3
 0 STOP
 
 SIGEND

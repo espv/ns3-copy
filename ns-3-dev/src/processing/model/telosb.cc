@@ -31,7 +31,6 @@ namespace ns3 {
     NS_LOG_COMPONENT_DEFINE("TelosB");
 }
 
-// TODO: Replace these constructors with the Configure function below
 // TODO: Replace some of the ad-hoc variables with proper queues and STATECOND variables that can be used by the execenv
 // TODO: Get the mote to drop packets at 65kbps with packet size 125 bytes, which worked before the recent changes
 // TODO: Tidy up telosb-example.cc
@@ -120,7 +119,6 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     execenv->globalStateVariables["packet-collided"] = 0;
     NS_LOG_INFO ("readDone_payload seqno: " << packet->m_executionInfo.seqNr);
     execenv->Proceed(packet, "receivedone", &TelosB::receiveDone_task, this, packet);
-    execenv->queues["rcvd"]->Enqueue(packet);
   }
 
   NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload " << packet->m_executionInfo.seqNr << ", receivingPacket: " << receivingPacket << ", packet collided: " << packet->collided);
@@ -142,7 +140,6 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
   } else if (execenv->queues["ipaq"]->GetNPackets() < 3) {
     execenv->queues["ipaq"]->Enqueue(packet);
-    execenv->queues["rcvd-send"]->Enqueue(packet);
     execenv->globalStateVariables["ipaq-full"] = 0;
     execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
@@ -167,7 +164,6 @@ void TelosB::sendTask(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   packet->m_executionInfo.executedByExecEnv = false;
   execenv->Proceed(packet, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
-  execenv->queues["send-written"]->Enqueue(packet);
   execenv->globalStateVariables["ip-radio-busy"] = 1;
 
   NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);

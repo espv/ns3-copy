@@ -210,7 +210,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         ops.erase(ops.begin());
         if (ops.begin() != ops.end()) {
-            ee->Proceed("handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            Ptr<Packet> newPacket = Create<Packet>();
+            ee->queues["from-CepOperatorProcessCepEvent"]->Enqueue(newPacket);
+            ee->Proceed(newPacket, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->globalStateVariables["CepOpsLeft"] = 1;
         } else {
             ee->globalStateVariables["CepOpsLeft"] = 0;
@@ -236,7 +238,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Node> node = GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         if (ops.begin() != ops.end()) {
-            ee->Proceed("handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            Ptr<Packet> newPacket = Create<Packet>();
+            ee->queues["from-ProcessCepEvent"]->Enqueue(newPacket);
+            ee->Proceed(newPacket, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->globalStateVariables["CepOpsLeft"] = 1;
         } else {
             ee->globalStateVariables["CepOpsLeft"] = 0;

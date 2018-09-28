@@ -199,7 +199,8 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         m_sendQueue2->Enqueue(p);
 
         Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
-        ee->Proceed("send-packet", &Communication::send, this);
+        ee->queues["from-ScheduleSend"]->Enqueue(p);
+        ee->Proceed(p, "send-packet", &Communication::send, this);
         ee->ScheduleInterrupt (p, "HIRQ-2", Seconds(0));
 
         //Simulator::Schedule (Seconds (0.0), &Communication::send, this);

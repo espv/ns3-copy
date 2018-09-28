@@ -3,20 +3,15 @@ QUEUES
 
 HIRQ	 FIFO 	 -1    services
 
-# CC2420 driver packet "slot", which one packet is placed in when the packet is written into RAM.
-rcvd FIFO 1 packets
 # The IPAQ, which has a capacity of 3 packets
 ipaq FIFO 3 packets
+# CC2420 RxFifo
+rxfifo FIFO -1 packets
 
 # The 3 packet queues below are "bridges" between functions. Conceptually, a thread is always working with at max
 # one packet at a time. When we dequeue a packet from any queue with the DEQUEUE event, we assign the dequeued packet
 # to the current running thread. This way, multiple threads can run simultaneously and still work with the correct
 # packet. An alternative solution could result in multiple threads working with the same packet.
-
-rxfifo FIFO -1 packets  # Bridge between HIRQ-1/receiveDone-task/write-packet-into-RAM and write-packet-into-RAM
-rcvd-send FIFO -1 packets  # Bridge between receiveDone-task and sendTask
-send-written FIFO -1 packets  # Bridge between sendTask and writtenToTxFifo
-
 
 # Queue for posted tasks
 softirq::tasks             FIFO   -1   services
@@ -113,8 +108,7 @@ RESOURCES cycles normal
 FRACTION 20%  1 5
 
 0 START
-x                                PROCESS		1100 0
-within-writtenToTxFifo DEQUEUE PKTQUEUE 0 send-written
+within-writtenToTxFifo                                PROCESS		1100 0
 0 STOP
 
 SIGEND
@@ -129,8 +123,7 @@ FRACTION 49%  1937 3880
 0 START
 x STATECOND ip-radio-busy read global 0
 x QUEUECOND ipaq ipaq notempty
-within-sendTask DEQUEUE PKTQUEUE 0 rcvd-send
-x PROCESS 3165 0
+within-sendTask PROCESS 3165 0
 x PROCESS 191 0 PERBYTE
 x CALL writtenToTxFifo
 x TTWAKEUP scheduler
@@ -159,8 +152,7 @@ RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
-x                                PROCESS        2000 0
-within-receiveDone-task DEQUEUE PKTQUEUE 0 rcvd
+within-receiveDone-task PROCESS 2000 0
 x STATECOND ipaq-full read global 0
 x                                PROCESS        9279 0
 x PROCESS 17 0 PERBYTE
@@ -179,8 +171,7 @@ RESOURCES cycles normal
 FRACTION 99%  1939 1940
 
 0 START
-x                                PROCESS        2000 0
-within-receiveDone-task DEQUEUE PKTQUEUE 0 rcvd
+within-receiveDone-task PROCESS 2000 0
 x STATECOND ipaq-full read global 1
 x PROCESS 928 0
 x CALL read-next-packet-in-rxfifo

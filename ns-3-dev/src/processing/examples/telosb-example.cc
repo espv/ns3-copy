@@ -52,7 +52,7 @@ Gnuplot2dDataset *numberCollidedDataSet = nullptr;
 Gnuplot2dDataset *numberIPDroppedDataSet = nullptr;
 Gnuplot2dDataset *intraOsDelayDataSet = nullptr;
 
-void createPlot(Gnuplot** plot, std::string filename, std::string title, Gnuplot2dDataset** dataSet) {
+void createPlot(Gnuplot** plot, const std::string &filename, const std::string &title, Gnuplot2dDataset** dataSet) {
   *plot = new Gnuplot(filename);
   (*plot)->SetTitle(title);
   (*plot)->SetTerminal("png");
@@ -62,7 +62,7 @@ void createPlot(Gnuplot** plot, std::string filename, std::string title, Gnuplot
   (*dataSet)->SetStyle(Gnuplot2dDataset::LINES_POINTS);
 }
 
-void createPlot2(Gnuplot** plot, std::string filename, std::string title, Gnuplot2dDataset** dataSet, std::string dataSetTitle) {
+void createPlot2(Gnuplot** plot, const std::string &filename, const std::string &title, Gnuplot2dDataset** dataSet, const std::string &dataSetTitle) {
   *plot = new Gnuplot(filename);
   (*plot)->SetTitle(title);
   (*plot)->SetTerminal("png");
@@ -72,14 +72,14 @@ void createPlot2(Gnuplot** plot, std::string filename, std::string title, Gnuplo
   (*dataSet)->SetStyle(Gnuplot2dDataset::LINES_POINTS);
 }
 
-void writePlot(Gnuplot* plot, std::string filename, Gnuplot2dDataset* dataSet) {
+void writePlot(Gnuplot* plot, const std::string &filename, Gnuplot2dDataset* dataSet) {
   plot->AddDataset(*dataSet);
   std::ofstream plotFile(filename.c_str());
   plot->GenerateOutput(plotFile);
   plotFile.close();
 }
 
-void writePlot2Lines(Gnuplot* plot, std::string filename, Gnuplot2dDataset* dataSet1, Gnuplot2dDataset* dataSet2) {
+void writePlot2Lines(Gnuplot* plot, const std::string &filename, Gnuplot2dDataset* dataSet1, Gnuplot2dDataset* dataSet2) {
   plot->AddDataset(*dataSet1);
   plot->AddDataset(*dataSet2);
   std::ofstream plotFile(filename.c_str());
@@ -91,11 +91,10 @@ int main(int argc, char *argv[])
 {
   LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
   // Debugging and tracing
-  debugOn = false;
+  debugOn = true;
   if (debugOn) {
       LogComponentEnable("TelosB", LOG_LEVEL_INFO);
       LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
-      LogComponentEnable("RoundRobinScheduler", LOG_LEVEL_INFO);
   }
 
   // Fetch from command line
@@ -119,13 +118,12 @@ int main(int argc, char *argv[])
 #define ALL_CONTEXTS 0
 #define CC2420_MODEL 0
 #if CC2420_MODEL
-  CC2420Helper cc2420;
+    CC2420Helper cc2420;
 
     NodeContainer nodes;
     nodes.Create(3);
 
-    NetDeviceContainer devices;
-    devices = cc2420.Install(nodes, true); // regular CC2420NetDevice
+    NetDeviceContainer devices = cc2420.Install(nodes, true); // regular CC2420NetDevice
 
     InternetStackHelper stack;
     stack.Install(nodes);
@@ -150,13 +148,12 @@ int main(int argc, char *argv[])
 
     Ipv4InterfaceContainer interfaces = address.Assign(devices);
 
-    Ptr<CC2420InterfaceNetDevice> netDevice1 = nodes.Get(0)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
-    Ptr<CC2420InterfaceNetDevice> netDevice2 = nodes.Get(1)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
-    Ptr<CC2420InterfaceNetDevice> netDevice3 = nodes.Get(2)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
-    TelosB *mote1 = new TelosB(); mote1->Configure(nodes.Get(0), &ps, netDevice1);
-    TelosB *mote2 = new TelosB(); mote2->Configure(nodes.Get(1), &ps, netDevice2);
-    TelosB *mote3 = new TelosB(); mote3->Configure(nodes.Get(2), &ps, netDevice3);
-    debugOn = false;
+    auto netDevice1 = nodes.Get(0)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
+    auto netDevice2 = nodes.Get(1)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
+    auto netDevice3 = nodes.Get(2)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
+    auto mote1 = new TelosB(); mote1->Configure(nodes.Get(0), &ps, netDevice1);
+    auto mote2 = new TelosB(); mote2->Configure(nodes.Get(1), &ps, netDevice2);
+    auto mote3 = new TelosB(); mote3->Configure(nodes.Get(2), &ps, netDevice3);
 
     Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
             "cacheLineSize", UintegerValue(64), "tracingOverhead",
@@ -220,16 +217,15 @@ int main(int argc, char *argv[])
     eeh->Install(ps.deviceFile, c.Get(1));
     eeh->Install(ps.deviceFile, c.Get(2));
 
-    Ptr<ExecEnv> ee1 = c.Get(0)->GetObject<ExecEnv>();
-    Ptr<ExecEnv> ee2 = c.Get(1)->GetObject<ExecEnv>();
-    Ptr<ExecEnv> ee3 = c.Get(2)->GetObject<ExecEnv>();
+    auto ee1 = c.Get(0)->GetObject<ExecEnv>();
+    auto ee2 = c.Get(1)->GetObject<ExecEnv>();
+    auto ee3 = c.Get(2)->GetObject<ExecEnv>();
     ProtocolStack *protocolStack = &ps;
 
-    TelosB *mote1 = new TelosB(); mote1->Configure(c.Get(0), &ps, nullptr);
-    TelosB *mote2 = new TelosB(); mote2->Configure(c.Get(1), &ps, nullptr);
-    TelosB *mote3 = new TelosB(); mote3->Configure(c.Get(2), &ps, nullptr);
+    auto mote1 = new TelosB(); mote1->Configure(c.Get(0), &ps, nullptr);
+    auto mote2 = new TelosB(); mote2->Configure(c.Get(1), &ps, nullptr);
+    auto mote3 = new TelosB(); mote3->Configure(c.Get(2), &ps, nullptr);
 
-    debugOn = true;
     ps.pps = 0;  // Need to disable pps here
     bool next_is_packet_size = false;
     Time first_time = MicroSeconds(0);
@@ -287,11 +283,10 @@ int main(int argc, char *argv[])
 
   ProtocolStack *protocolStack = &ps;
 
-  TelosB *mote1 = new TelosB(); mote1->Configure(c.Get(0), &ps, nullptr);
-  TelosB *mote2 = new TelosB(); mote2->Configure(c.Get(1), &ps, nullptr);
-  TelosB *mote3 = new TelosB(); mote3->Configure(c.Get(2), &ps, nullptr);
+  auto mote1 = new TelosB(); mote1->Configure(c.Get(0), &ps, nullptr);
+  auto mote2 = new TelosB(); mote2->Configure(c.Get(1), &ps, nullptr);
+  auto mote3 = new TelosB(); mote3->Configure(c.Get(2), &ps, nullptr);
 
-  debugOn = true;
   protocolStack->GenerateTraffic(c.Get(0), ps.packet_size, mote1, mote2, mote3);
   Simulator::Stop(Seconds(ps.duration));
   clock_t t;
@@ -369,14 +364,13 @@ int main(int argc, char *argv[])
     install_time = clock();
     eeh->Install(ps.deviceFile, c);
     for (int i = 0; i < numberMotes; i++) {
-        TelosB *mote1 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
-        TelosB *mote2 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
-        TelosB *mote3 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
-
+        auto mote1 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
+        auto mote2 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
+        auto mote3 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
+auto
         protocolStack->GenerateTraffic(c.Get(i), ps.packet_size, mote1, mote2, mote3);
     }
     install_time = clock() - install_time;
-    debugOn = false;
 
     Simulator::Stop(Seconds(ps.duration));
     clock_t t;
@@ -397,19 +391,13 @@ int main(int argc, char *argv[])
     NS_LOG_INFO ("Microseconds to simulate " << numberMotes << " motes for " << ps.duration << " seconds: " <<
                  t << ", install time in microseconds: " << install_time);
 #elif ALL_CONTEXTS
-    //Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
-    //        "cacheLineSize", UintegerValue(64), "tracingOverhead",
-    //        UintegerValue(0));
 
-    // Create node with ExecEnv
-    debugOn = false;
-
-    std::ofstream numberForwardedFile ("plots/numberForwardedPoints.txt");
+    std::ofstream numberForwardedFile ("NumberPoints.txt");
     if (!numberForwardedFile.is_open()) {
-        NS_LOG_INFO ("Failed to open numberForwardedPoints.txt, exiting");
+        NS_LOG_INFO ("Failed to open NumberPoints.txt, exiting");
         exit(-1);
     }
-    for (int i = 125; i >= 36; i-=8) {
+    for (uint32_t i = 125; i >= 36; i-=8) {
         ps.packet_size = i;
         std::ostringstream os;
         os << ps.packet_size;
@@ -443,11 +431,10 @@ int main(int argc, char *argv[])
             ps.nr_packets_dropped_ip_layer = 0;
             ps.nr_rxfifo_flushes = 0;
             ps.total_intra_os_delay = 0;
-            ps.all_intra_os_delays.empty();
+            ps.all_intra_os_delays.clear();
 
             // Create node with ExecEnv
             NodeContainer node_container;
-            memset(&node_container, 0, sizeof(NodeContainer));
             node_container.Create(3);
 
             Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
@@ -460,9 +447,9 @@ int main(int argc, char *argv[])
 
             ProtocolStack *protocolStack = &ps;
 
-            TelosB *mote1 = new TelosB(); mote1->Configure(node_container.Get(0), &ps, nullptr);
-            TelosB *mote2 = new TelosB(); mote2->Configure(node_container.Get(1), &ps, nullptr);
-            TelosB *mote3 = new TelosB(); mote3->Configure(node_container.Get(2), &ps, nullptr);
+            auto mote1 = new TelosB(); mote1->Configure(node_container.Get(0), &ps, nullptr);
+            auto mote2 = new TelosB(); mote2->Configure(node_container.Get(1), &ps, nullptr);
+            auto mote3 = new TelosB(); mote3->Configure(node_container.Get(2), &ps, nullptr);
 
             protocolStack->GenerateTraffic(node_container.Get(0), ps.packet_size, mote1, mote2, mote3);
             Simulator::Stop(Seconds(ps.duration));
@@ -495,13 +482,9 @@ int main(int argc, char *argv[])
                          (ps.nr_packets_forwarded/(float)ps.nr_packets_total)*100 <<
                          "% Intra OS median: " << ps.all_intra_os_delays.at(ps.all_intra_os_delays.size()/2));
 
-            memset(mote1, 0, sizeof(TelosB));
             delete mote1;
-            memset(mote2, 0, sizeof(TelosB));
             delete mote2;
-            memset(mote3, 0, sizeof(TelosB));
             delete mote3;
-            memset(eeh, 0, sizeof(ExecEnvHelper));
         }
 
         writePlot2Lines(packetOutcomePlot, "plots/numberForwardedNumberBadCrc" + os.str() + ".gnu",
