@@ -340,7 +340,7 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
             }
 
 			newPEU->taskScheduler = cpuScheduler;
-					
+
 			cpu->interruptThread = CreateObject<Thread>();
 			cpu->interruptThread->peu = newPEU;
 			cpu->interruptThread->m_scheduler = newPEU->taskScheduler;
@@ -539,7 +539,7 @@ std::string ExecEnv::deTokenize(std::vector<std::string> tokens) {
 }
 
 ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage b) {
-	ProcessingStage toReturn;
+	ProcessingStage toReturn(a);
 	// Run through resources in both processing stages, and sum them
 	for (int i = 0; i < LASTRESOURCE; i++) {
 		if (a.resourcesUsed[i].defined) {
@@ -830,7 +830,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			currentlyHandled = Create<SEM>();
 			m_serviceMap[tokens[1]] = currentlyHandled;
 			currentlyHandled->name = tokens[1];
-		} 
+		}
 		else // It did exist: set currentlyHandled to it
 			currentlyHandled = m_serviceMap[tokens[1]];
 
@@ -935,8 +935,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		execEvent->tokens = tokens;
 
 		// Print the constructed program for debug purposes
-//			Program *curPgm = rootProgram;
-//		PrintProgram(curPgm);
+		Program *curPgm = rootProgram;
+		PrintProgram(curPgm);
 
 		// Get the program pointer of the current SEM
 		Program **existingProgram;
@@ -993,8 +993,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		dequeueOrLoopEncountered = false;
 		currentName = "";
 		nrSamples = 0;
-
-		return;
 	}
 
 	if (tokens[1] == "PROCESS" || tokens[1] == "PEUSTART") {
@@ -1172,9 +1170,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(ieiceop);
 		currentProgram->events.push_back(ieiceop->ps);
 		currentProgram->events.push_back(ieiceop->ieifsm->ps);
-		// currentProgram->events.push_back(ieiceop);
-		// currentProgram->events.push_back(ieifsm);
-		// ieiceop.evaluate(tid, event); // Calls ieifsm.evaluate(event);
 	}
 
 	// Remember: unless the queue is explicitly specified,
@@ -1272,7 +1267,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			// Assume that the first and last queues are of the same type: packet or service queue
 			if (queues.find(tokens[2]) != queues.end()) {
 				auto q = new Queue2Condition();
-				((ExecutionEvent *)q)-> lineNr = lineNr;
+				q->lineNr = lineNr;
 				q->firstQueue2 = queues[tokens[2]];
 				q->lastQueue2 = queues[tokens[3]];
 				c = (Condition *) q;
@@ -1283,7 +1278,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				auto q = new ServiceQueue2Condition();
 				q->firstQueue2 = serviceQueue2s[tokens[2]];
 				q->lastQueue2 = serviceQueue2s[tokens[3]];
-				((ExecutionEvent *)q)-> lineNr = lineNr;
+				q->lineNr = lineNr;
 				c = (Condition *) q;
 				c->insertEntry(tokens[4] == "empty" ? QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
 				c->getServiceConditionQueue2s = ns3::MakeCallback(&ConditionFunctions::ServiceQueue2Condition, conditionFunctions);
@@ -1294,7 +1289,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			currentProgram = newProgram;
 		} else if (tokens[1] == "THREADCOND") {
 			auto t = new ThreadCondition();
-			t-> lineNr = lineNr;
+			t->lineNr = lineNr;
 			c = t;
 			c->scope = CONDITIONGLOBAL;
 			c->insertEntry(tokens[4] == "ready" ? THREADREADY : THREADNOTREADY, newProgram);
@@ -1357,7 +1352,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			auto foundCond = locationConditions.find(tokens[0]);
 			if (foundCond != locationConditions.end()) {
 				c = (Condition *) new PacketCharacteristic();
-				((ExecutionEvent *)c)-> lineNr = lineNr;
+				c->lineNr = lineNr;
 
 				// Set the packet extraction function id, and insert new program
 				c->getConditionState = conditionFunctions->conditionMap[foundCond->second.condName];
@@ -1429,7 +1424,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 					auto pc = new PacketCharacteristic();
 					c = (Condition *) pc;
-					((ExecutionEvent *)pc)-> lineNr = lineNr;
+					pc-> lineNr = lineNr;
 					c->scope = CONDITIONGLOBAL;
 
 					// Set the packet extraction function id, and insert new program
@@ -1448,7 +1443,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				newProgram->sem = currentlyHandled;
 
 				auto sc = new StateQueue2Condition();
-				sc-> lineNr = lineNr;
+				sc->lineNr = lineNr;
 				sc->queueName = queueName;
 				c = sc;
 
@@ -1638,13 +1633,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			c->debug = tokens[tokens.size() - 1];
 		}
 	}
-
-    // If we have a checkpoint specified on this location, we
-    // insert the string into the checkpoint value
-    auto foundTrigger = locationTriggers.find(tokens[0]);
-
-    if (foundTrigger != locationTriggers.end())
-        execEvent->checkpoint = locationTriggers[foundTrigger->first];
 }
 
 std::vector<std::string> split(const char *str, char c = ' ')
@@ -1680,12 +1668,7 @@ void ExecEnv::Parse(std::string device) {
 		while (myfile.good()) {
 			// Get line and tokenize
 			lineNr++;
-//			if(lineNr == 1227) {
-//				std::cout << "here" << std::endl;
-//			}
 			std::getline(myfile, line);
-
-//			std::cout << "INTERPRETING LINE: " << lineNr << ": " << line << std::endl;
 
 			std::istringstream iss(line);
 			std::vector<std::string> tokens; // = split(line.c_str());
