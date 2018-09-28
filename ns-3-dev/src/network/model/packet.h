@@ -272,10 +272,10 @@ private:
 class Packet : public SimpleRefCount<Packet>
 {
 public:
+  // Espen
   bool attemptedSent = false;
   bool collided = false;
-  Address src;
-  Address dst;
+  // Espen
 
   /**
    * \brief Create an empty packet with a new uid (as returned

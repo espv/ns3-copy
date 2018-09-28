@@ -93,8 +93,8 @@ private:
     std::vector<Ptr<Packet> > receive_queue;
     ProtocolStack *ps;
 
-    Address src;
-    Address dst;
+    Address *src;
+    Address *dst;
     Ptr<CC2420InterfaceNetDevice> netDevice;
 
 public:
@@ -107,13 +107,9 @@ public:
     bool use_device_model = true;
     int seqNr = 0;
 
-    TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps);
+    TelosB() = default;
 
-    TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps);
-
-    TelosB(Ptr<Node> node, ProtocolStack *ps);
-
-    void Configure(Ptr<ExecEnv>);
+    void Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevice> netDevice);
 
     // Models the radio's behavior before the packets are processed by the microcontroller.
     void ReceivePacket(Ptr<Packet> packet);

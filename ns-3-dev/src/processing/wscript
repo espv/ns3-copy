@@ -21,8 +21,9 @@ def build(bld):
         # OYSTEDAL
         'model/rrscheduler.cc',
         'model/sync.cc',
+
+        # Espen
         'model/telosb.cc',
-        'model/trex.cc',
         'model/cep.cc',
 
         ]
@@ -47,8 +48,9 @@ def build(bld):
         # OYSTEDAL
         'model/rrscheduler.h',
         'model/sync.h',
+
+        # Espen
         'model/telosb.h',
-        'model/trex.h',
         'model/cep.h',
 
     ]

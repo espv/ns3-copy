@@ -35,35 +35,15 @@ namespace ns3 {
 // TODO: Replace some of the ad-hoc variables with proper queues and STATECOND variables that can be used by the execenv
 // TODO: Get the mote to drop packets at 65kbps with packet size 125 bytes, which worked before the recent changes
 // TODO: Tidy up telosb-example.cc
-TelosB::TelosB(Ptr<Node> node, Address src, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
-  TelosB::node = node;
-  TelosB::number_forwarded_and_acked = 0;
-  TelosB::receivingPacket = false;
-  TelosB::src = src;
-  TelosB::netDevice = netDevice;
-  TelosB::ps = ps;
-}
-
-TelosB::TelosB(Ptr<Node> node, Address src, Address dst, Ptr<CC2420InterfaceNetDevice> netDevice, ProtocolStack *ps) : Mote() {
-  TelosB::node = node;
-  TelosB::number_forwarded_and_acked = 0;
-  TelosB::receivingPacket = false;
-  TelosB::src = src;
-  TelosB::dst = dst;
-  TelosB::netDevice = netDevice;
-  TelosB::ps = ps;
-}
-
-TelosB::TelosB(Ptr<Node> node, ProtocolStack *ps) : Mote() {
-  TelosB::node = node;
-  TelosB::number_forwarded_and_acked = 0;
-  TelosB::receivingPacket = false;
-  TelosB::ps = ps;
-}
 
 void
-TelosB::Configure(Ptr<ExecEnv> ee) {
-    ee->cpuScheduler->allowNestedInterrupts = true;
+TelosB::Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevice> netDevice) {
+    node->GetObject<ExecEnv>()->cpuScheduler->allowNestedInterrupts = true;
+    this->node = node;
+    this->number_forwarded_and_acked = 0;
+    this->TelosB::receivingPacket = false;
+    this->netDevice = netDevice;
+    this->ps = ps;
 }
 
 // Models the radio's behavior before the packets are processed by the microcontroller.
@@ -325,8 +305,6 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
     Ptr<Packet> packet = Create<Packet>(ps->packet_size);
     ps->nr_packets_total++;
     packet->m_executionInfo.timestamps.push_back (Simulator::Now());
-    packet->src = src;
-    packet->dst = dst;
     packet->m_executionInfo.seqNr = seqNr++;
     if (use_device_model)
       ReceivePacket (packet);

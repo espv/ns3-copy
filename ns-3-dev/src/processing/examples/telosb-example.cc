@@ -153,13 +153,9 @@ int main(int argc, char *argv[])
     Ptr<CC2420InterfaceNetDevice> netDevice1 = nodes.Get(0)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
     Ptr<CC2420InterfaceNetDevice> netDevice2 = nodes.Get(1)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
     Ptr<CC2420InterfaceNetDevice> netDevice3 = nodes.Get(2)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
-    TelosB *mote1 = new TelosB(nodes.Get(0), InetSocketAddress(interfaces.GetAddress(0), 9), netDevice1, &ps);
-    mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
-    TelosB *mote2 = new TelosB(nodes.Get(1), InetSocketAddress(interfaces.GetAddress(1), 9),
-                               InetSocketAddress(interfaces.GetAddress(2), 9), netDevice2, &ps);
-    mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
-    TelosB *mote3 = new TelosB(nodes.Get(2), InetSocketAddress(interfaces.GetAddress(2), 9), netDevice3, &ps);
-    mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
+    TelosB *mote1 = new TelosB(); mote1->Configure(nodes.Get(0), &ps, netDevice1);
+    TelosB *mote2 = new TelosB(); mote2->Configure(nodes.Get(1), &ps, netDevice2);
+    TelosB *mote3 = new TelosB(); mote3->Configure(nodes.Get(2), &ps, netDevice3);
     debugOn = false;
 
     Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
@@ -229,12 +225,9 @@ int main(int argc, char *argv[])
     Ptr<ExecEnv> ee3 = c.Get(2)->GetObject<ExecEnv>();
     ProtocolStack *protocolStack = &ps;
 
-    TelosB *mote1 = new TelosB(c.Get(0), &ps);
-    mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
-    TelosB *mote2 = new TelosB(c.Get(1), &ps);
-    mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
-    TelosB *mote3 = new TelosB(c.Get(2), &ps);
-    mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
+    TelosB *mote1 = new TelosB(); mote1->Configure(c.Get(0), &ps, nullptr);
+    TelosB *mote2 = new TelosB(); mote2->Configure(c.Get(1), &ps, nullptr);
+    TelosB *mote3 = new TelosB(); mote3->Configure(c.Get(2), &ps, nullptr);
 
     debugOn = true;
     ps.pps = 0;  // Need to disable pps here
@@ -292,17 +285,11 @@ int main(int argc, char *argv[])
   eeh->Install(ps.deviceFile, c.Get(1));
   eeh->Install(ps.deviceFile, c.Get(2));
 
-  //Ptr<ExecEnv> ee1 = c.Get(0)->GetObject<ExecEnv>();
-  //Ptr<ExecEnv> ee2 = c.Get(1)->GetObject<ExecEnv>();
-  //Ptr<ExecEnv> ee3 = c.Get(2)->GetObject<ExecEnv>();
   ProtocolStack *protocolStack = &ps;
 
-  TelosB *mote1 = new TelosB(c.Get(0), &ps);
-  mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
-  TelosB *mote2 = new TelosB(c.Get(1), &ps);
-  mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
-  TelosB *mote3 = new TelosB(c.Get(2), &ps);
-  mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
+  TelosB *mote1 = new TelosB(); mote1->Configure(c.Get(0), &ps, nullptr);
+  TelosB *mote2 = new TelosB(); mote2->Configure(c.Get(1), &ps, nullptr);
+  TelosB *mote3 = new TelosB(); mote3->Configure(c.Get(2), &ps, nullptr);
 
   debugOn = true;
   protocolStack->GenerateTraffic(c.Get(0), ps.packet_size, mote1, mote2, mote3);
@@ -382,12 +369,9 @@ int main(int argc, char *argv[])
     install_time = clock();
     eeh->Install(ps.deviceFile, c);
     for (int i = 0; i < numberMotes; i++) {
-        TelosB *mote1 = new TelosB(c.Get(i), &ps);
-        mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
-        TelosB *mote2 = new TelosB(c.Get(i), &ps);
-        mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
-        TelosB *mote3 = new TelosB(c.Get(i), &ps);
-        mote1->Configure(c.Get(i)->GetObject<ExecEnv>());
+        TelosB *mote1 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
+        TelosB *mote2 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
+        TelosB *mote3 = new TelosB(); mote1->Configure(c.Get(i), &ps, nullptr);
 
         protocolStack->GenerateTraffic(c.Get(i), ps.packet_size, mote1, mote2, mote3);
     }
@@ -476,12 +460,9 @@ int main(int argc, char *argv[])
 
             ProtocolStack *protocolStack = &ps;
 
-            TelosB *mote1 = new TelosB(node_container.Get(0));
-            mote1->Configure(c.Get(0)->GetObject<ExecEnv>());
-            TelosB *mote2 = new TelosB(node_container.Get(1));
-            mote2->Configure(c.Get(1)->GetObject<ExecEnv>());
-            TelosB *mote3 = new TelosB(node_container.Get(2));
-            mote3->Configure(c.Get(2)->GetObject<ExecEnv>());
+            TelosB *mote1 = new TelosB(); mote1->Configure(node_container.Get(0), &ps, nullptr);
+            TelosB *mote2 = new TelosB(); mote2->Configure(node_container.Get(1), &ps, nullptr);
+            TelosB *mote3 = new TelosB(); mote3->Configure(node_container.Get(2), &ps, nullptr);
 
             protocolStack->GenerateTraffic(node_container.Get(0), ps.packet_size, mote1, mote2, mote3);
             Simulator::Stop(Seconds(ps.duration));
