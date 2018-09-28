@@ -1046,7 +1046,7 @@ void Thread::Dispatch() {
 					pktEI->executedByExecEnv = true;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
-                    //toInvoke->Unref();
+                    //toInvoke->Unref();  // TODO: Espen, figure out why this causes crashes and almost all packets dropping due to receive-queue overflow
 				}
 			}
 
