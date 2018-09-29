@@ -50,7 +50,7 @@ int getInterruptNumber(std::string str) {
 
 
 void
-InterruptController::IssueInterruptWithService(Ptr<SEM> intSem, struct tempVar tempsynch, Ptr<Packet> current,
+InterruptController::IssueInterruptWithService(const Ptr<SEM> &intSem, struct tempVar tempsynch, const Ptr<Packet> &current,
 		std::map<std::string, Ptr<StateVariable> > localStateVariables,
 		std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s)
 {
@@ -70,51 +70,6 @@ void
 InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Ptr<ProgramLocation> programLoc)
 {
     // See: Understanding the Linux kernel, page 138
-    //std::cout << "IssueInterruptWithServiceOnCPU" << std::endl;
-#if 0
-
-    int irq = getInterruptNumber(intSem->name);
-
-    // spin lock?
-
-    pending[irq] = true;
-
-    // If this IRQ is serviced by another CPU, let that CPU do the next iteration as well
-    if (!in_progress[irq]) {
-        in_progress[irq] = true;
-
-        // Create an interrupt request
-#if 0
-        InterruptRequest ir;
-        ir.current = programLoc->curPkt;
-        ir.service = intSem;
-        ir.interruptNr = irq;
-        ir.toCall = NULL;
-        ir.tempsynch = programLoc->tempvar;
-        ir.localStateVariables = programLoc->localStateVariables;
-        ir.localStateVariablesQueue2s = programLoc->localStateVariableQueue2s;
-#else
-        InterruptRequest ir;
-        ir.current = Ptr<Packet>();
-        ir.service = intSem;
-        ir.interruptNr = irq;
-        ir.toCall = NULL;
-        ir.tempsynch = tempVar();
-        ir.localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-        ir.localStateVariablesQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
-#endif
-
-        if(currentlyHandled[cpu].interruptNr == -1)
-        {
-            currentlyHandled[cpu] = ir;
-            hwModel->cpus[cpu]->Interrupt(ir);
-        }
-        else {
-            if(pendingRequests[cpu].size() < queueSize)
-                pendingRequests[cpu].push(ir);
-        }
-    }
-#else
     if (intSem == nullptr)
       NS_FATAL_ERROR("Interrupt not located" << std::endl);
     std::vector<std::string> parts = split(intSem->name, '-');
@@ -125,32 +80,11 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
     if(!(i >> interruptNumber))
         NS_FATAL_ERROR("Unable to obtain interrupt number from " << intSem->name << std::endl);
 
-    /*
-    struct tempVar tempsynch = programLoc->tempvar;
-    Ptr<Packet> current = programLoc->curPkt;
-    std::map<std::string, Ptr<StateVariable> > localStateVariables = programLoc->localStateVariables;
-    std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s = programLoc->localStateVariableQueue2s;
-    */
-
-
-    // If already pending, simply return. The'
-    // interrupt is in that case lost.
+    // If already pending, simply return. The interrupt is in that case lost.
     if(pending[interruptNumber] || masked[interruptNumber])
         return;
 
     NS_LOG_INFO("Interrupt " << interruptNumber << " on CPU" << cpu);
-
-    // Create an interrupt request
-    /*
-    InterruptRequest ir;
-    ir.current = current;
-    ir.service = intSem;
-    ir.interruptNr = interruptNumber;
-    ir.toCall = NULL;
-    ir.tempsynch = tempsynch;
-    ir.localStateVariables = localStateVariables;
-    ir.localStateVariablesQueue2s = localStateVariablesQueue2s;
-    */
 
     InterruptRequest ir;
     ir.current = programLoc->curPkt;
@@ -161,75 +95,24 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
     ir.localStateVariables = programLoc->localStateVariables;
     ir.localStateVariablesQueue2s = programLoc->localStateVariableQueue2s;
 
-    // If no interrupt is currently handled,
-    // we issue an interrupt to the CPU.
-    // On the CPU, interrupts may or may not
-    // be enabled, but whey they are enabled
-    // the pending interrupt will be executed,
-    // and on completion the ExecuteNext function
-    // will be called.
+    /* If no interrupt is currently handled,
+     * we issue an interrupt to the CPU.
+     * On the CPU, interrupts may or may not
+     * be enabled, but whey they are enabled
+     * the pending interrupt will be executed,
+     * and on completion the ExecuteNext function
+     * will be called.
+     */
     if(currentlyHandled[cpu].interruptNr == -1)
     {
         currentlyHandled[cpu] = ir;
         hwModel->cpus[cpu]->Interrupt(ir);
-        // cpu = (cpu+1) % 2;
     }
     else {
         if(pendingRequests[cpu].size() < queueSize)
             pendingRequests[cpu].push(ir);
     }
-#endif
 }
-
-#if 0
-void
-InterruptController::IssueInterruptWithService(Ptr<SEM> intSem, struct tempVar tempsynch, Ptr<Packet> current,
-		std::map<std::string, Ptr<StateVariable> > localStateVariables,
-		std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s)
-{
-	std::vector<std::string> parts = split(intSem->name, '-');
-
-	// Fetch the interrupt number
-	std::istringstream i(parts[1]);
-	int interruptNumber;
-	if(!(i >> interruptNumber))
-		NS_FATAL_ERROR("Unable to obtain interrupt number from " << intSem->name << std::endl);
-
-  // If already pending, simply return. The'
-  // interrupt is in that case lost.
-  if(pending[interruptNumber] || masked[interruptNumber])
-    return;
-
-  // Create an interrupt request
-  InterruptRequest ir;
-  ir.current = current;
-  ir.service = intSem;
-  ir.interruptNr = interruptNumber;
-  ir.toCall = NULL;
-  ir.tempsynch = tempsynch;
-  ir.localStateVariables = localStateVariables;
-  ir.localStateVariablesQueue2s = localStateVariablesQueue2s;
-
-  // If no interrupt is currently handled,
-  // we issue an interrupt to the CPU.
-  // On the CPU, interrupts may or may not
-  // be enabled, but whey they are enabled
-  // the pending interrupt will be executed,
-  // and on completion the ExecuteNext function
-  // will be called.
-  if(currentlyHandled.interruptNr == -1)
-    {
-      currentlyHandled = ir;
-      static int cpu = 0;
-      hwModel->cpus[cpu]->Interrupt(ir);
-      // cpu = (cpu+1) % 2;
-    }
-  else {
-    if(pendingRequests.size() < queueSize)
-      pendingRequests.push(ir);
-  }
-}
-#endif
 
 void
 InterruptController::IssueInterrupt(int interruptNumber, std::string service, Ptr<Packet> current)
@@ -247,13 +130,14 @@ InterruptController::IssueInterrupt(int interruptNumber, std::string service, Pt
   ir.interruptNr = interruptNumber;
   ir.toCall = nullptr;
 
-  // If no interrupt is currently handled,
-  // we issue an interrupt to the CPU.
-  // On the CPU, interrupts may or may not
-  // be enabled, but whey they are enabled
-  // the pending interrupt will be executed,
-  // and on completion the ExecuteNext function
-  // will be called.
+  /* If no interrupt is currently handled,
+   * we issue an interrupt to the CPU.
+   * On the CPU, interrupts may or may not
+   * be enabled, but whey they are enabled
+   * the pending interrupt will be executed,
+   * and on completion the ExecuteNext function
+   * will be called.
+   */
   if(currentlyHandled[0].interruptNr == -1)
     {
       currentlyHandled[0] = ir;
@@ -268,8 +152,7 @@ InterruptController::IssueInterrupt(int interruptNumber, std::string service, Pt
 void
 InterruptController::IssueInterruptNoProcessing(int interruptNumber, EventImpl *callback)
 {
-  // If allready pending, simply return. The'
-  // interrupt is in that case lost.
+  //If allready pending, simply return. The interrupt is in that case lost.
   if(pending[interruptNumber])
     return;
 
@@ -278,13 +161,14 @@ InterruptController::IssueInterruptNoProcessing(int interruptNumber, EventImpl *
   ir.interruptNr = interruptNumber;
   ir.toCall = callback;
 
-  // If no interrupt is currently handled,
-  // we issue an interrupt to the CPU.
-  // On the CPU, interrupts may or may not
-  // be enabled, but whey they are enabled
-  // the pending interrupt will be executed,
-  // and on completion the ExecuteNext function
-  // will be called.
+  /* If no interrupt is currently handled,
+   * we issue an interrupt to the CPU.
+   * On the CPU, interrupts may or may not
+   * be enabled, but whey they are enabled
+   * the pending interrupt will be executed,
+   * and on completion the ExecuteNext function
+   * will be called.
+   */
   if(currentlyHandled[0].interruptNr == -1)
     {
       currentlyHandled[0] = ir;
@@ -298,10 +182,11 @@ InterruptController::IssueInterruptNoProcessing(int interruptNumber, EventImpl *
   }
 }
 
-// If we have more interrupt, call the
-// interrupt routine of the CPU at once.
-// The CPU will call the Dispatch of the
-// correct program 
+/* If we have more interrupt, call the
+ * interrupt routine of the CPU at once.
+ * The CPU will call the Dispatch of the
+ * correct program
+ */
 void
 InterruptController::Proceed(int cpu)
 {
@@ -309,10 +194,7 @@ InterruptController::Proceed(int cpu)
     in_progress[currentlyHandled[cpu].interruptNr] = false;
     currentlyHandled[cpu].interruptNr = -1;
 
-    // OYSTEDAL: Continue the execution of whatever was executing on the
-    // interrupted core.
-
-    // Simulator::ScheduleNow(&Thread::Dispatch, hwModel->cpus[cpu]->taskScheduler->m_currentRunning);
+    // OYSTEDAL: Continue the execution of whatever was executing on the interrupted core.
     Simulator::ScheduleNow(&Thread::Dispatch, hwModel->cpus[cpu]->taskScheduler->GetCurrentRunningThread(cpu));
   }
   else {
@@ -324,9 +206,10 @@ InterruptController::Proceed(int cpu)
       currentlyHandled[cpu].toCall->Invoke();
       currentlyHandled[cpu].toCall->Unref();
 
-      // We can afford recursiveness here, as it is
-      // unlikely that we have many waiting interruptss
-      // causing the stack to overflow.
+      /* We can afford recursiveness here, as it is
+       * unlikely that we have many waiting interruptss
+       * causing the stack to overflow.
+       */
       Proceed(cpu);
     }
     else {

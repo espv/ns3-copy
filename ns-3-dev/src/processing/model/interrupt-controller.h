@@ -44,14 +44,13 @@ public:
   static TypeId GetTypeId (void);
 
   InterruptController();
-  InterruptController (int queue_size);
-  virtual ~InterruptController () {};
+  ~InterruptController () override = default;
 
   void IssueInterrupt(int number, std::string service, Ptr<Packet> current);
   virtual void IssueInterruptNoProcessing(int interruptNumber, EventImpl *callback);
-  virtual void IssueInterruptWithService(Ptr<SEM> intSem, struct tempVar tempsynch, Ptr<Packet> current,
-		  	  std::map<std::string, Ptr<StateVariable> > localStateVariables,
-		  	  std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s);
+  virtual void IssueInterruptWithService(const Ptr<SEM> &intSem, struct tempVar tempsynch, const Ptr<Packet> &current,
+                                         std::map<std::string, Ptr<StateVariable> > localStateVariables,
+                                         std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s);
 
   virtual void IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Ptr<ProgramLocation> programLoc);
 
