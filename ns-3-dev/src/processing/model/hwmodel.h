@@ -21,7 +21,7 @@
  */
 
 #ifndef HWMODEL_H
-#define HWMODEL_H
+ *#define HWMODEL_H
 
 #include "ns3/object.h"
 #include "ns3/event-garbage-collector.h"
@@ -50,19 +50,19 @@ public:
   HWModel ();
   virtual ~HWModel ();
 
-  // We need a pointer to the Processing
-  // object.
+  /* We need a pointer to the Processing
+   * object.
+   */
   Ptr<Node> node;
 
-  // The CPU is a special PEU
-  // Ptr<CPU> cpu;
   // OYSTEDAL: The hardware contains a set of cpus
   std::vector<Ptr<CPU> > cpus;
   Ptr<CPU> AddCPU(Ptr<CPU>);
 
-  // Components of the hardware model:
-  // - Physical execution units
-  // - Memory bus
+  /* Components of the hardware model:
+   * - Physical execution units
+   * - Memory bus
+   */
 
   // - Interrupt controller
   std::map<std::string, Ptr<PEU> > m_PEUs;
@@ -73,9 +73,10 @@ public:
   Ptr<InterruptController> m_interruptController;
 #endif
 
-  // Needed to calculate the number of
-  // memory lookups required for every
-  // cache miss.
+  /* Needed to calculate the number of
+   * memory lookups required for every
+   * cache miss.
+   */
   int cacheLineSize;
 
 };

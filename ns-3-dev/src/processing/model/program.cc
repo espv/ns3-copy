@@ -191,9 +191,10 @@ Condition::getClosestEntryValue(uint32_t value)
   // Find the first one larger than entry
   for(; it != programs.end() && value > (*it).first; it++);
 
-  // If we hit the end, we are the largest one,
-  // so return the difference to the one below (at
-  // the end of the list)
+  /* If we hit the end, we are the largest one,
+   * so return the difference to the one below (at
+   * the end of the list)
+   */
   if(it == programs.end())  // This results in wrong SEM
     return *(--it);
 
@@ -201,8 +202,9 @@ Condition::getClosestEntryValue(uint32_t value)
   else if (it == programs.begin())  // This results in correct SEM
 	  return *it;
 
-  // Elsewise, we are between two programs. Returns the
-  // closest one
+  /* Elsewise, we are between two programs. Returns the
+   * closest one
+   */
   else {
     uint32_t belowdiff = value - (*(--it)).first;
     uint32_t abovediff = (*++it).first - value;
@@ -214,8 +216,9 @@ Condition::getClosestEntryValue(uint32_t value)
 std::pair<uint32_t, Program *>
 Condition::getClosestEntry(Ptr<Thread> t)
 {
-	// Obtain value. Pass packet, queues or thread-id,
-	// depending on the type of condition we have.
+	/* Obtain value. Pass packet, queues or thread-id,
+	 * depending on the type of condition we have.
+	 */
 	uint32_t value = 0;
 	Ptr<ProgramLocation> loc = t->m_currentLocation;
 	Ptr<ExecEnv> ee = loc->program->sem->peu->hwModel->node->GetObject<ExecEnv>();
@@ -239,24 +242,12 @@ Condition::getClosestEntry(Ptr<Thread> t)
 	else if(condType == SERVICEQUEUECONDITION) {
 		value = getServiceConditionQueue2s(((ServiceQueue2Condition *)this)->firstQueue2,
 				                           ((ServiceQueue2Condition *)this)->lastQueue2);
-        //std::cout << "SERVICEQUEUECONDITION: empty: " << (value == QUEUEEMPTY) << std::endl;
 	} else if(condType == THREADCONDITION)
 		value = getConditionThread(((ThreadCondition *)this)->threadId);
 
 
 	// Obtain the closest value and program, and return
 	std::pair<uint32_t, Program *> returnValue = getClosestEntryValue(value);
-    /*if (value == QUEUENOTEMPTY && !prev_program)
-	    prev_program = returnValue.second;
-	else if (value == QUEUENOTEMPTY)
-        returnValue.second = prev_program;*/
-
-    /*if ( value == QUEUENOTEMPTY) {
-		returnValue.second->hasDequeue = true;
-		returnValue.first = 1;
-        returnValue.second->events = prev_program->events;  // THIS IS WHERE IT'S AT.
-	    //returnValue.second->sem = ((SEM*)0x699ed0);
-    }*/
 
 	return returnValue;
 }
@@ -273,8 +264,9 @@ ProcessingStage::ProcessingStage()
 }
 ProcessingStage::~ProcessingStage() = default;
 
-// Draws samples from the random distributions available,
-// and returns one instance from this.
+/* Draws samples from the random distributions available,
+ * and returns one instance from this.
+ */
 ProcessingInstance
 ProcessingStage::Instantiate(Ptr<Packet> packet) {
   // The object to return
@@ -289,8 +281,9 @@ ProcessingStage::Instantiate(Ptr<Packet> packet) {
   	this->factor = packet->GetSize ();
   }
 
-  // Iterate all resources used, select a random
-  // sample and store in toReturn.
+  /* Iterate all resources used, select a random
+   * sample and store in toReturn.
+   */
   for(int i = 0; i < LASTRESOURCE; i++) {
     if(!resourcesUsed[i].defined) {
       toReturn.remaining[i].defined = false;
@@ -403,10 +396,6 @@ std::ostream& operator<<(std::ostream& out, ExecutionEvent& event)
 	}
 	case QUEUE: {
 		out << "QUEUE";
-		break;
-	}
-	case INTERRUPT: {
-		out << "INT";
 		break;
 	}
 	case CONDITION: {

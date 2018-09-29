@@ -10,9 +10,10 @@ Semaphore::Semaphore(int initialValue) {
     value = initialValue;
 }
 
-// Up() increments the semaphore and returns true if there's at least one process
-// waiting to be unblocked. The task scheduler is then
-// responsible for enqueueing the unblocked process.
+/* Up() increments the semaphore and returns true if there's at least one process
+ * waiting to be unblocked. The task scheduler is then
+ * responsible for enqueueing the unblocked process.
+ */
 bool Semaphore::Up() {
     NS_ASSERT(value >= 0);
 
@@ -20,8 +21,9 @@ bool Semaphore::Up() {
     return !m_blocked.empty();
 }
 
-// Down() decrements the semaphore if possible, or returns false if the calling
-// process should be blocked on the semaphore.
+/* Down() decrements the semaphore if possible, or returns false if the calling
+ * process should be blocked on the semaphore.
+ */
 bool Semaphore::Down() {
     NS_ASSERT(value >= 0);
 

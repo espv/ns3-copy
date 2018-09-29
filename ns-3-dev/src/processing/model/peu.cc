@@ -45,31 +45,34 @@ PEU::PEU(std::string name, long freq) :
 PEU::~PEU() = default;
 
 void PEU::Consume(ProcessingInstance *pi) {
-	// Iterate all resources. We determine the
-	// consumption according to the following
-	// dependencies:
-	//
-	// duration = cycles / frequency
-	// cycles = instructions +
-	// CACHE MISSES + CACHE LINE SIZE = MEMORY ACCESSES
-	// MEMORY CYCLES + MEMORY FREQUENCY = MEMORY DURATION
-	// MEMORY ACCESSES + CONTENTION = MEMORY CYCLES
-	// INSTRUCTIONS + MEMORY DURATION = PEU CYCLES
-	// PEU CYCLES + PEU FREQUENCY = PEU DURATION
-	// TOTAL DURATION = PEU DURATION + MEMORY DURATION
-	//
-	// The loop below will iterate the resources and
-	// add entities from level n to level n - 1 for
-	// each iteration. When an entity at level 1 is
-	// discovered (nanoseconds), we return.
+	/* Iterate all resources. We determine the
+	 * consumption according to the following
+	 * dependencies:
+	 *
+	 * duration = cycles / frequency
+	 * cycles = instructions +
+	 * CACHE MISSES + CACHE LINE SIZE = MEMORY ACCESSES
+	 * MEMORY CYCLES + MEMORY FREQUENCY = MEMORY DURATION
+	 * MEMORY ACCESSES + CONTENTION = MEMORY CYCLES
+	 * INSTRUCTIONS + MEMORY DURATION = PEU CYCLES
+	 * PEU CYCLES + PEU FREQUENCY = PEU DURATION
+	 * TOTAL DURATION = PEU DURATION + MEMORY DURATION
+	 *
+	 * The loop below will iterate the resources and
+	 * add entities from level n to level n - 1 for
+	 * each iteration. When an entity at level 1 is
+	 * discovered (nanoseconds), we return.
+	 */
 	while (!pi->remaining[NANOSECONDS].defined) {
-		// If we are provided a set of NANOSECONDS, simply return -
-		// we don't have anything to calculate.
+		/* If we are provided a set of NANOSECONDS, simply return -
+		 * we don't have anything to calculate.
+		 */
 		if (pi->remaining[NANOSECONDS].defined)
 			break;
 
-		// If we are provided with a set of cycles, calculate
-		// duration by means of dividing by frequency
+		/* If we are provided with a set of cycles, calculate
+		 * duration by means of dividing by frequency
+		 */
 		else if (pi->remaining[CYCLES].defined) {
 			pi->remaining[NANOSECONDS].amount = ((pi->remaining[CYCLES].amount
 					* 1000.0) / m_freq) - ((m_tracingOverhead * 1000.0) / m_freq);
@@ -79,9 +82,10 @@ void PEU::Consume(ProcessingInstance *pi) {
 			pi->remaining[NANOSECONDS].defined = true;
 		}
 
-		// If we have neither duration nor cycles defined, we
-		// must have been provided with instructions and
-		// cache misses or memory accesses
+		/* If we have neither duration nor cycles defined, we
+		 * must have been provided with instructions and
+		 * cache misses or memory accesses
+		 */
 		else {
 			// If we have been provided with cache misses,
 			// calculate and store memory accesses
@@ -90,8 +94,9 @@ void PEU::Consume(ProcessingInstance *pi) {
 						pi->remaining[CACHEMISSES].amount
 								* hwModel->cacheLineSize;
 
-			// Here, we must have both instructions and
-			// memory accesses defined. If not, complain!
+			/* Here, we must have both instructions and
+			 * memory accesses defined. If not, complain!
+			 */
 			NS_ASSERT(pi->remaining[INSTRUCTIONS].defined && pi->remaining[MEMORYACCESSES].defined);
 
 			// TODO: we do not contend for now - one of the next steps if necessary.
@@ -102,8 +107,9 @@ void PEU::Consume(ProcessingInstance *pi) {
 		}
 	}
 
-	// Finally, schedule the completion function to run
-	// after the computed duration.
+	/* Finally, schedule the completion function to run
+	 * after the computed duration.
+	 */
 
     auto amount = pi->remaining[NANOSECONDS].amount * pi->factor;
 	pi->processingCompleted = Simulator::Schedule(NanoSeconds((uint64_t)amount), &Thread::DoneProcessing, pi->thread);
@@ -154,26 +160,28 @@ void CPU::DisableInterrupt() {
 }
 
 bool CPU::Interrupt(InterruptRequest ir) {
-	// Interrupt models
-	// are simply present as SEMs (format "interrupt::nr").
-	// When they are executed, we (1) disable interrupts,
-	// (2) instantiate the program from the SEM, (3)
-	// execute the program, (4) Issue an End of Interrupt
-	// (5) If no more interrupts were ready, we enable interrupts and
-	// (6) check if a context switch is imminent. For
-	// now, we simply drop interrupts that occur during
-	// disabled interrupts.
+	/* Interrupt models
+	 * are simply present as SEMs (format "interrupt::nr").
+	 * When they are executed, we (1) disable interrupts,
+	 * (2) instantiate the program from the SEM, (3)
+	 * execute the program, (4) Issue an End of Interrupt
+	 * (5) If no more interrupts were ready, we enable interrupts and
+	 * (6) check if a context switch is imminent. For
+	 * now, we simply drop interrupts that occur during
+	 * disabled interrupts.
+	 */
 
 	if (!interruptsEnabled)
 		return false;
 	else {
 		Program *newProgram = ir.service->rootProgram;
 
-		// Indicate to users of synchronization primitives and
-		// the task scheduler that we are in an interrupt, and
-		// no dispatching should occur. This is because the
-		// interrupt controller dispatches the currently running
-		// thread when it is finished handling interrupts.
+		/* Indicate to users of synchronization primitives and
+		 * the task scheduler that we are in an interrupt, and
+		 * no dispatching should occur. This is because the
+		 * interrupt controller dispatches the currently running
+		 * thread when it is finished handling interrupts.
+		 */
 		inInterrupt = true;
 
 		// Create new thread of execution
@@ -208,11 +216,6 @@ bool CPU::Interrupt(InterruptRequest ir) {
 
 		interruptThread->m_programStack.push(irqProgramLocation);
 
-        // OYSTEDAL: If there's a thread running on the interrupted core, we 
-        // need to preempt it unless it's already done processing.
-        //
-		// if (!taskScheduler->m_currentRunning->m_currentProcessing.done)
-			// taskScheduler->m_currentRunning->PreEmpt();
         Ptr<Thread> cr = taskScheduler->GetCurrentRunningThread(GetId());
         if (!cr->m_currentProcessing.done)
             cr->PreEmpt();

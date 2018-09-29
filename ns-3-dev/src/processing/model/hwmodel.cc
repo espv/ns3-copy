@@ -24,10 +24,6 @@ HWModel::~HWModel() = default;
 
 HWModel::HWModel()
 {
-  // Create CPU
-//  cpu = CreateObject<CPU> ();
-//  cpu->hwModel = this;
-
   // Create memory bus
   m_memBus = CreateObject<MemBus> ();
 }

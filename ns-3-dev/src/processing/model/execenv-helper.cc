@@ -20,7 +20,7 @@
 namespace ns3 {
 
 TypeId
-ExecEnvHelper::GetTypeId (void)
+ExecEnvHelper::GetTypeId ()
 {
   static TypeId tid = TypeId ("ns3::ExecEnvHelper")
     .SetParent<Object> ()

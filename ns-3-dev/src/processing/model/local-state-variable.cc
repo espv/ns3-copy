@@ -11,7 +11,6 @@
 namespace ns3 {
 
 StateVariable::StateVariable() {
-//	std::cout << "Creating local state variable " << this << std::endl;
 	value = 0;
 }
 

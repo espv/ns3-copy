@@ -66,7 +66,6 @@ void
 TaskScheduler::Terminate(Ptr<PEU> peu, unsigned int pid)
 {
     NS_LOG_INFO("Terminating " << pid);
-#if 1
     Ptr<CPU> cpu = peu->GetObject<CPU>();
     if (cpu->inInterrupt) {
         cpu->inInterrupt = false;
@@ -74,65 +73,16 @@ TaskScheduler::Terminate(Ptr<PEU> peu, unsigned int pid)
     } else {
         NS_ASSERT(0);
     }
-#else
-    const int cpu = peu->GetObject<CPU>()->GetId();
-	if(peu->hwModel->cpus[cpu]->inInterrupt) {
-		peu->hwModel->cpus[cpu]->inInterrupt = false;
-		this->peu->hwModel->m_interruptController->Proceed(peu->GetObject<CPU>()->GetId());
-	} else {
-        // OYSTEDAL: cr used to determine which thread to terminate.
-        // Should come from the parameter instead.
-		m_threads[m_currentRunning->GetPid()] = nullptr;
-		DoTerminate();
-	}
-#endif
 }
 
 // Must be implemented by a SimSched-specific sub-class
 bool
 TaskScheduler::Request(int cpu, int type, std::vector<uint32_t> arguments)
 {
-#if 1
     std::vector<int> previouslyRunning = std::vector<int>(m_currentRunning, m_currentRunning + NUM_CPU);
     DoRequest(cpu, type, std::move(arguments));
 
     return CheckAllCPUsForPreemptions(cpu, previouslyRunning);
-#else
-	  int newCR = DoRequest(type, arguments);
-
-	  //
-	  // When we have a new current running, we return
-	  // true. The calling thread will then stop executing.
-	  // Note that we cannot simply dispatch the new thread
-	  // here, i.e., from within this event, as that would
-	  // result in the new thread executing within the
-	  // synchronization event of the former thread. This
-	  // could result in unpredictable behavior. In stead,
-	  // we use the NetSim scheduler to schedule the dispatch
-	  // of the new thread at this time instance, resulting
-	  // in the new thread executing in a new event, and
-	  // allowing the previous thread to return completely
-	  // from its execution, i.e., its Dispatch(). Note also
-	  // that no further operations are necessary here, as
-	  // the task switch consists of (1) the previous thread
-	  // stopping its execution since we return false, and
-	  // (2) the new thread starting its execution immediately
-	  // in virtual time due to our scheduling its Dispatch()
-	  // at this point in time. In addition, we (3) update the
-	  // current running pid.
-	  //
-
-      // OYSTEDAL: CR used to determine if a context switch occurred.
-      // For multicore, this is the case when the vector of current running 
-      // threads have changed. If it has, we need to preemt any cores that are
-      // now executing a new thread.
-	  if(m_currentRunning->GetPid() != newCR) {
-		PreEmpt(newCR);
-	    return false;
-	  }
-	  else
-	    return true;
-#endif
 }
 
 // Must be implemented by a SimSched-specific sub-class
@@ -152,107 +102,14 @@ TaskScheduler::HandleSchedulerEvent()
 // Creates and initializes data structures for this node as well as 
 // creating the idle thread.
 void
-TaskScheduler::Initialize(Ptr<PEU> cpuPEU)
+TaskScheduler::Initialize(const Ptr<PEU> &cpuPEU)
 {
   // Set the CPU
   peu = cpuPEU;
-
-  /*
-
-  // Create resource consumption for idle thread
-  ResourceConsumption idleResources;
-  idleResources.consumption = NormalVariable(10000000000000, 0);
-  idleResources.defined = true;
-
-  // Create processing stage
-  ProcessingStage *idleProcessing = new ProcessingStage();
-
-  idleProcessing->resourcesUsed[NANOSECONDS] = idleResources;
-
-  // Create idle program and store in program:
-  // - Infinite loop start
-  // - process for one million seconds
-  // - infinite loop end
-  Program *idleProgram = new Program();
-  idleProgram->events.push_back(idleProcessing);
-  ExecutionEvent *end = new ExecutionEvent();
-  end->type = END;
-  idleProgram->events.push_back(end);
-
-  // Create and register a SEM, in which we only store the CPU as
-  // the PEU. This is because the thread calls Consume()
-  // of the peu on which the program runs. We do not need
-  // to create any measurements, though, as the thread
-  // should (!) never call execute, i.e., it is never
-  // allowed to execute the idle program from another
-  // thread.
-  Ptr<SEM> idleSEM= Create<SEM> ();
-  idleSEM->name = "idlethread";
-  idleSEM->peu = peu;
-  peu->hwModel->node->GetObject<ExecEnv> ()->m_serviceMap["idle"] = idleSEM;
-//  std::cout << "idleProgram->sem before setting it: " << idleProgram->sem << std::endl;
-  idleProgram->sem = idleSEM;
-//  std::cout << "idleProgram->sem after setting it: " << idleProgram->sem << std::endl;
-    */
-
   Simulator::ScheduleNow(&TaskScheduler::SetupIdleThreads, this);
 
   // Call SchedSim-specific DoStart
   DoInitialize();
-
-  // Create a thread of execution - it must be
-  // set up to call the idleProgram in an endless
-  // loop
-  /*
-  ProgramLocation toe;
-  toe.program = idleProgram;
-  toe.currentEvent = -1; // Will be incremented by Dispatch()
-  toe.lc = new LoopCondition();
-  toe.lc->emptyQueue2s = idleProgram;
-  toe.lc->maxIterations = 0;
-  toe.lc->perQueue2 = false;
-  */
-
-  // The current running in the scheduler simulator must
-  // be the idle thread, since no other threads have been
-  // created yet.
-  
-  // OYSTEDAL: We assume one idle thread per cpu, hence there is a set of pids
-  // corresponding to the idle thread of each cpu.
-#if 0
-  int idleThreadPid = DoCurrentRunning();
-  Ptr<Thread> idleThread = CreateObject<Thread> ();
-  idleThread->SetPid(idleThreadPid);
-  idleThread->m_programStack.push(toe);
-
-//  std::cout << "Program stack during init: " << idleThread->m_programStack.top().program << std::endl;
-
-  // Add this to the threads, and dispatch
-  m_threads[idleThreadPid] = idleThread;
-  m_currentRunning = idleThread; // OYSTEDAL: Set the CR of each cpu to the idle thread
-  idleThread->Dispatch(); // OYSTEDAL: Dispatch each idle thread
-
-  NS_LOG_INFO("Task scheduler initialized. PID of idle thread is " << idleThreadPid);
-#else
-  /*
-  std::vector<int> idleThreadPids = DoCurrentRunning();
-  for (int i = 0; i < NUM_CPU; i++) {
-      Ptr<Thread> idleThread = CreateObject<Thread>();
-      idleThread->SetPid(idleThreadPids[i]);
-      idleThread->m_programStack.push(toe);
-
-      m_currentRunning[i] = idleThreadPids[i];
-
-      m_threads[idleThreadPids[i]] = idleThread;
-
-      idleThread->peu = this->peu->hwModel->cpus[i];
-      idleThread->Dispatch();
-  }
-
-  // NS_ASSERT(m_currentRunning.size() == NUM_CPU);
-  */
-#endif
-
 }
 
 void
@@ -326,46 +183,11 @@ TaskScheduler::AllocateSynch(int type, std::string id, std::vector<uint32_t> arg
 bool
 TaskScheduler::SynchRequest(int cpu, int type, std::string id,  std::vector<uint32_t> arguments)
 {
-#if 1
   std::vector<int> previouslyRunning = DoCurrentRunning();
 
-  /*int newCR = */DoSynchRequest(cpu, type, std::move(id), std::move(arguments));
+  DoSynchRequest(cpu, type, std::move(id), std::move(arguments));
 
   return CheckAllCPUsForPreemptions(cpu, previouslyRunning);
-#else
-
-  //
-  // When we have a new current running, we return
-  // true. The calling thread will then stop executing.
-  // Note that we cannot simply dispatch the new thread
-  // here, i.e., from within this event, as that would
-  // result in the new thread executing within the
-  // synchronization event of the former thread. This
-  // could result in unpredictable behavior. In stead,
-  // we use the NetSim scheduler to schedule the dispatch
-  // of the new thread at this time instance, resulting
-  // in the new thread executing in a new event, and
-  // allowing the previous thread to return completely
-  // from its execution, i.e., its Dispatch(). Note also
-  // that no further operations are necessary here, as
-  // the task switch consists of (1) the previous thread
-  // stopping its execution since we return false, and
-  // (2) the new thread starting its execution immediately
-  // in virtual time due to our scheduling its Dispatch()
-  // at this point in time. In addition, we (3) update the
-  // current running pid.
-  //
-  
-  // OYSTEDAL: As previously, determine if the vector of currently running
-  // threads have changed, and if so, one should preempt any of the threads that
-  // have been switched out. TODO: Make a function for this.
-  if(m_currentRunning->GetPid() != newCR) {
-	PreEmpt(newCR);
-    return false;
-  }
-  else
-    return true;
-#endif
 }
 
 uint32_t
@@ -389,7 +211,7 @@ TaskScheduler::DoSynchRequest(int cpu, int type, std::string id,  std::vector<ui
 }
 
 int
-TaskScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint32_t> arguments)
+TaskScheduler::DoTempSynchRequest(int cpu, int type, void *var, const std::vector<uint32_t> &arguments)
 {
   NS_LOG_ERROR("DoTempSynchRequest not implemented in SchedSim");
   return -1;
@@ -401,24 +223,6 @@ bool TaskScheduler::TempSynchRequest(int cpu, int type, void* var, std::vector<u
     DoTempSynchRequest(cpu, type, var, std::move(arguments));
 
     return CheckAllCPUsForPreemptions(cpu, previouslyRunning);
-
-#if 0
-//  std::cout << "Current running in TempSynchRequest: " << m_currentRunning->GetPid() << std::endl;
-	int newCR = DoTempSynchRequest(type, var, arguments);
-
-    // OYSTEDAL: Again, CR is used to detect if a preemption has occurred.
-    // Temp synchs are commonly used during interrupts, and we don't want to
-    // stop executing the interrupt
-	if(m_currentRunning->GetPid() != newCR) {
-		PreEmpt(newCR);
-		if(this->peu->hwModel->cpus[0]->inInterrupt)
-			return true;
-		else
-			return false;
-	}
-	else
-#endif
-		return true;
 }
 
 void TaskScheduler::DeallocateTempSynch(void* var) {
@@ -428,7 +232,6 @@ void TaskScheduler::DeallocateTempSynch(void* var) {
 void
 TaskScheduler::PreEmpt(int cpu, int new_pid)
 {
-#if 1
     Ptr<Thread> cr = GetCurrentRunningThread(cpu);
 
     if (!this->peu->hwModel->cpus[cpu]->inInterrupt)
@@ -446,32 +249,6 @@ TaskScheduler::PreEmpt(int cpu, int new_pid)
 
     if (!this->peu->hwModel->cpus[cpu]->inInterrupt)
                   Simulator::ScheduleNow(&Thread::Dispatch, new_cr);
-
-#else
-    // OYSTEDAL: Current running used to detect the need for preemption in the
-    // currently running thread. 
-    
-    int oldPid = m_currentRunning->m_pid;
-
-    const int cpu = peu->GetObject<CPU>()->GetId();
-	if(!this->peu->hwModel->cpus[cpu]->inInterrupt)
-		if(!m_currentRunning->m_currentProcessing.done)
-			m_currentRunning->PreEmpt();
-
-	m_currentRunning = m_threads[new_pid];
-
-    NS_ASSERT(oldPid != new_pid);
-
-    NS_LOG_INFO("Context switch " << oldPid << " -> " << new_pid); 
-
-	// Do nothing if we are in an interrupt, because
-	// this will be done by the interrupt-controller
-	// upon entry/exit of handling interrupts
-	if(!this->peu->hwModel->cpus[cpu]->inInterrupt)
-		Simulator::ScheduleNow(&Thread::Dispatch, m_threads[new_pid]);
-
-//	std::cout << "------------- CONTEXT SWITCH: " << oldPid << " -> " << m_currentRunning->m_pid << std::endl;
-#endif
 }
 
 Ptr<Thread>
@@ -512,7 +289,6 @@ TaskScheduler::Fork(
   // - Get the previously running pids
   // - Perform fork
   // - Perform any preemptions that is provoked by the fork
-#if 1
   std::vector<int> previouslyRunning = DoCurrentRunning();
 
   int pid = DoFork(priority);
@@ -526,39 +302,6 @@ TaskScheduler::Fork(
   } else {
       CheckAllCPUsForPreemptions(0, previouslyRunning);
   }
-#else
-  // A fork may provoke a task switch, if the
-  // current running is the idle thread or the currently
-  // running thread has consumed its time slice. Therefore,
-  // we want to check whether the current running
-  // changes during the fork.
-  int crBeforeFork = this->m_currentRunning->GetPid();
-
-  // Call DoFork. For CPUs, a SchedSim should
-  // perform this task. For PEUs, this returns the first not-active thread
-  // in its bitmap.
-  int pid = DoFork(priority);
-  threadPids[threadName] = pid;
-
-  NS_LOG_INFO("Created thread " << threadName << " with pid " << pid); 
-
-  t->SetPid(pid);
-  m_threads[pid] = t;
-
-  // OYSTEDAL: Idle threads should be dispatched immediately for all cores. 
-
-  // If this is the first thread (should be the
-  // idle thread), dispatch it. Otherwise, we may
-  // have provoked a context switch, so check for this.
-  if(m_threads.size() == 1) {
-	    m_currentRunning = t;
-	    t->Dispatch();
-  } else if (this->DoCurrentRunning() != crBeforeFork) {
-		m_currentRunning->PreEmpt();
-	    m_currentRunning = t;
-	    t->Dispatch();
-  }
-#endif
 
   return t;
 }
@@ -574,7 +317,7 @@ void *TaskScheduler::AllocateTempSynch(int type, std::vector<uint32_t> arguments
 // The following should be implemented by the SchedSim-specific sub-class
 ////////////
 
-void* TaskScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> arguments){
+void* TaskScheduler::DoAllocateTempSynch(int type, const std::vector<uint32_t> &arguments) {
 	  NS_LOG_ERROR("DoAllocateTempSynch not specialized by SchedSim wrapper");
 	  return 0;
 }
@@ -586,8 +329,9 @@ void TaskScheduler::DoDeallocateTempSynch(void* var) {
 void
 TaskScheduler::DoTerminate()
 {
-  // If we wind up here, no SchedSim is specified. This is the
-  // case for PEUs other than the CPU.
+  /* If we wind up here, no SchedSim is specified. This is the
+   * case for PEUs other than the CPU.
+   */
 
   // Nothing to do.
 }
@@ -600,11 +344,11 @@ TaskScheduler::DoInitialize()
 
 int
 TaskScheduler::DoFork(int priority) {
-  // If we wind up here, no SchedSim is specified. This is the
-  // case for PEUs other than the CPU.
+  /* If we wind up here, no SchedSim is specified. This is the
+   * case for PEUs other than the CPU.
+   */
 
-  // Nothing to do. Simply return 0, this value will not be
-  // of importance.
+  // Nothing to do. Simply return 0, this value will not be of importance.
   return 0;
 }
 
@@ -615,7 +359,7 @@ TaskScheduler::DoHandleSchedulerEvent()
 }
 
 int
-TaskScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> arguments)
+TaskScheduler::DoRequest(int cpu, int type, const std::vector<uint32_t> &arguments)
 {
   NS_LOG_ERROR("DoRequest not specialized by SchedSim wrapper");
   return 0;
@@ -629,7 +373,7 @@ TaskScheduler::DoCurrentRunning()
 }
 
 void
-TaskScheduler::DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments)
+TaskScheduler::DoAllocateSynch(int type, const std::string &id, const std::vector<uint32_t> &arguments)
 {
   NS_LOG_ERROR("DoAllocateSynch not implemented by SchedSim");
 }
@@ -662,13 +406,11 @@ ParallelThreadsScheduler::GetTypeId ()
 }
 
 void
-ParallelThreadsScheduler::Initialize(Ptr<PEU> nonCPUPEU)
+ParallelThreadsScheduler::Initialize(const Ptr<PEU> &nonCPUPEU)
 {
-  // Initialize bitmap
-  // Create N threads according to attribute
-
-//  std::cout << " IIIIIIIIIIIII " << std::endl;
-
+  /* Initialize bitmap
+   * Create N threads according to attribute
+   */
   for(unsigned int i = 0; i < m_maxThreads; i++) {
     Ptr<Thread> t = CreateObject<Thread> ();
     t->SetPid(i);
@@ -676,18 +418,20 @@ ParallelThreadsScheduler::Initialize(Ptr<PEU> nonCPUPEU)
   } 
 }
 
-// We override Terminate, as threads should not
-// be removed, only be flagged as no longer active.
-// Can only be called by the running thread itself.
+/* We override Terminate, as threads should not
+ * be removed, only be flagged as no longer active.
+ * Can only be called by the running thread itself.
+ */
 void
 ParallelThreadsScheduler::Terminate(Ptr<PEU> peu, unsigned int pid)
 {
   m_freeList.push_back(pid);
 }
 
-// Returns nullptr if no free thread, a smart pointer to thread elsewise.
-// Priority is not used, but must be there to override the base class
-// version of this function
+/* Returns nullptr if no free thread, a smart pointer to thread elsewise.
+ * Priority is not used, but must be there to override the base class
+ * version of this function
+ */
 Ptr<Thread>
 ParallelThreadsScheduler::Fork(
 		std::string threadName,
@@ -709,8 +453,7 @@ ParallelThreadsScheduler::Fork(
   // Remove this thread from the free list
   m_freeList.pop_front();
 
-  // Create a new program location, and
-  // push onto the new thread's stack
+  // Create a new program location, and push onto the new thread's stack
   Ptr<ProgramLocation> pl;
   pl->program = program;
   pl->currentEvent = 0;

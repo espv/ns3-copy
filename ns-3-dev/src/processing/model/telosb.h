@@ -129,8 +129,9 @@ public:
     // Called when done writing packet into TXFIFO, and radio is ready to send
     void writtenToTxFifo(Ptr<Packet> packet);
 
-    // Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
-    // If acks are enabled, the ack has to be received before that can be done.
+    /* Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
+     * If acks are enabled, the ack has to be received before that can be done.
+     */
     void finishedTransmitting(Ptr<Packet> packet);
 
     void SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote);

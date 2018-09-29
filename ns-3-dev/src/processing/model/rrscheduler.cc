@@ -46,7 +46,6 @@ RoundRobinScheduler::GetTypeId ()
 
 RoundRobinScheduler::RoundRobinScheduler() : TaskScheduler()
 {
-    // m_currentRunning = nullptr;
     m_currentRunning.reserve(NUM_CPU);
 
     // Add idle threads
@@ -58,9 +57,6 @@ RoundRobinScheduler::RoundRobinScheduler() : TaskScheduler()
 RoundRobinScheduler::~RoundRobinScheduler () = default;
 
 void RoundRobinScheduler::Schedule() {
-    //NS_LOG_INFO("Schedule()");
-    //return;
-    //
     // OYSTEDAL: TODO: Add handling for idle threads.
 
     for (unsigned int cpu = 0; cpu < peu->hwModel->cpus.size(); ++cpu) {
@@ -116,9 +112,9 @@ void RoundRobinScheduler::RescheduleCPU(int cpu) {
         m_currentRunning[cpu] = m_runqueue.front();
         m_runqueue.pop_front();
     } else {
-        m_currentRunning[cpu] = cpu + 1; // This equals the PID of the idle
-                                         // thread for the CPU, which is set up
-                                         // by the constructor.
+        m_currentRunning[cpu] = cpu + 1; /* This equals the PID of the idle
+                                          * thread for the CPU, which is set up
+                                          * by the constructor. */
     }
 }
 

@@ -90,7 +90,6 @@ enum ExecutionEventType {
   SCHEDULER,
   SYNCHRONIZATION,
   QUEUE,
-  INTERRUPT,
   CONDITION,
   TEMPSYNCH,
   END,

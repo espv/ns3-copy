@@ -13,11 +13,6 @@ enum RequestType {
 #include "ns3/traced-callback.h"
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/local-state-variable.h"
-//#include "ns3/packet.h"
-
-//#include "program.h"
-//#include "thread.h"
-//#include "peu.h"
 
 #include <ns3/sync.h>
 
@@ -39,54 +34,24 @@ public:
 
   void Schedule();
 
-  // To keep track of mapping between PID and thread name.
-  // The latter is used with scheduler requests.
-  // std::map<std::string, int> threadPids;
-
-  // To start and handle the scheduling events
-  // virtual void Initialize(Ptr<PEU> cpuPEU);
-  // void HandleSchedulerEvent();
-
-  // Functions to install, remove and switch
-  // between threads
-  // virtual void Terminate(unsigned int pid); // Terminates the current running
-
-  /*
-  void PreEmpt(int new_pid);
-
-  // Functions to issue requests to the scheduler
-  bool Request(int type, std::vector<uint32_t> arguments);
-  bool SynchRequest(int type, std::string id, std::vector<uint32_t> arguments);
-  bool TempSynchRequest(int type, void* var, std::vector<uint32_t> arguments);
-  void AllocateSynch(int type, std::string id, std::vector<uint32_t> arguments);
-  void *AllocateTempSynch(int type, std::vector<uint32_t> arguments);
-  void DeallocateTempSynch(void* var);
-  int CurrentRunning(void);
-
-  // Used to get the synch type during parsing
-  uint32_t GetSynchReqType(std::string name);
-  */
-
-  // Ptr<Thread> m_currentRunning;
-  
+  /* To keep track of mapping between PID and thread name.
+   * The latter is used with scheduler requests.
+   * std::map<std::string, int> threadPids;
+   */
   std::list<int> m_runqueue;
   std::set<int> m_blocked;
   std::vector<int> m_currentRunning;
-  // unsigned int m_currentRunningPid;
-  // unsigned int m_nextpid;
 
 protected:
   void RescheduleCPU(int);
   void WakeupIdle();
-  // std::map<int, Ptr<Thread> > m_threads;
 
-  // The functions below must be implemented by a subclass
-  // for a specific SchedSim
+  // The functions below must be implemented by a subclass for a specific SchedSim
   virtual void DoInitialize();
   virtual void DoHandleSchedulerEvent();
   virtual int DoFork(int priority);
-  virtual void DoTerminate(void);
-  virtual std::vector<int> DoCurrentRunning(void);
+  virtual void DoTerminate();
+  virtual std::vector<int> DoCurrentRunning();
   virtual void DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments);
   virtual void* DoAllocateTempSynch(int type, std::vector<uint32_t> arguments);
   virtual void DoDeallocateTempSynch(void* var);

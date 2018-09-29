@@ -64,12 +64,13 @@ Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(std::strin
 	// Find the requested queue
 	auto it = localStateVariableQueue2s.find(queueID);
 
-	// If the queue does not exist, create it
-	// NOTE: this is the only mechanism by which new local state queues are created, i.e.,
-	//       upon the first appearance of the queueID in the signature. Since these queues
-	//       are referenced via smart pointers, and pointers are copied upon each entry
-	//       copy of a ProgramLocation, these queues will exist as long as they are by at least
-	//       one ProgramLocation.
+	/* If the queue does not exist, create it
+	 * NOTE: this is the only mechanism by which new local state queues are created, i.e.,
+	 * upon the first appearance of the queueID in the signature. Since these queues
+	 *       are referenced via smart pointers, and pointers are copied upon each entry
+	 *       copy of a ProgramLocation, these queues will exist as long as they are by at least
+	 *       one ProgramLocation.
+	 */
 	if (it == localStateVariableQueue2s.end())
 		localStateVariableQueue2s[queueID] = Create<StateVariableQueue2>();
 
@@ -80,12 +81,13 @@ Ptr<StateVariable> ProgramLocation::getLocalStateVariable(std::string svID) {
 	// Find the requested queue
 	auto it = localStateVariables.find(svID);
 
-	// If the queue does not exist, create it
-	// NOTE: this is the only mechanism by which new local state queues are created, i.e.,
-	//       upon the first appearance of the queueID in the signature. Since these queues
-	//       are referenced via smart pointers, and pointers are copied upon each entry
-	//       copy of a ProgramLocation, these queues will exist as long as they are by at least
-	//       one ProgramLocation.
+	/* If the queue does not exist, create it
+	 * NOTE: this is the only mechanism by which new local state queues are created, i.e.,
+	 *       upon the first appearance of the queueID in the signature. Since these queues
+	 *       are referenced via smart pointers, and pointers are copied upon each entry
+	 *       copy of a ProgramLocation, these queues will exist as long as they are by at least
+	 *       one ProgramLocation.
+	 */
 	if (it == localStateVariables.end())
 		localStateVariables[svID] = Create<StateVariable>();
 
@@ -114,12 +116,12 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 			debugOn = false;
 	}
 
-	//std::cout << "END " << (e->type==END) << " PROCESS " << (e->type==PROCESS) << " QUEUE " << (e->type==QUEUE) << " SCHEDULER " << (e->type==SCHEDULER) << " CONDITION " << (e->type==CONDITION) << std::endl;
 	switch (e->type) {
-		// When ending programs. Causes the program to be popped from the stack.
-		// If the stack is empty when we return from this function, Dispatch() will
-		// call Terminate() on the scheduler hosting this thread, causing this thread
-		// to be removed from the system.
+		/* When ending programs. Causes the program to be popped from the stack.
+		 * If the stack is empty when we return from this function, Dispatch() will
+		 * call Terminate() on the scheduler hosting this thread, causing this thread
+		 * to be removed from the system.
+		 */
 		case END:
 			return HandleEndEvent(e);
 		case PROCESS: 
@@ -138,19 +140,6 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 			return HandleSyncEvent(e);
 		case CONDITION: 
 			return HandleCondition(e);
-		case INTERRUPT: 
-			{
-				// For interrupts, called by PEUs other than the CPU. Sends a request
-				// for an interrupt to the interrupt controller, which will issue the
-				// interrupt to the CPU in due time.
-				auto ie = dynamic_cast<InterruptExecutionEvent *>(e);
-				peu->hwModel->m_interruptController->IssueInterrupt(ie->number, ie->service, m_programStack.top()->curPkt);
-
-				// Since only PEUs can issue interrupts, the PEU can continue our exeuction
-				// while the CPU (prospectively) handles the interrupt
-				return true;
-			}
-
 		case TEMPSYNCH:
 			{
 				auto tc = dynamic_cast<TempCompletion *>(e);
@@ -185,8 +174,9 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
                 return true;
             }
 
-			// Here, we have encountered an unrecognized statement type.
-			// Complain.
+			/* Here, we have encountered an unrecognized statement type.
+			 * Complain.
+			 */
 		default: 
 			{
 				NS_LOG_INFO("Encountered unhandled statement of type" << e->type << "\n");
@@ -199,10 +189,10 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 	// Handle prospective loop
 	if (m_currentLocation->lc) {
 		// Fetch info about the loop
-		int maxIterations = m_currentLocation->lc->maxIterations;
-		int curIteration = ++(m_currentLocation->curIteration);
-		int queueServedIndex = m_currentLocation->curServedQueue2;
-		int numQueue2s =
+		long maxIterations = m_currentLocation->lc->maxIterations;
+        long curIteration = ++(m_currentLocation->curIteration);
+        long queueServedIndex = m_currentLocation->curServedQueue2;
+        long numQueue2s =
 			m_currentLocation->lc->serviceQueue2s ?
 			m_currentLocation->lc->serviceQueue2sServed.size() :
 			(m_currentLocation->lc->stateQueue2s ?
@@ -219,11 +209,12 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			return true;
 		}
 
-		// If we have set rootProgram, we know we have encountered
-		// a condition during execution of the loop body, exchanging
-		// the program pointer with the one in the condition(s). Thus,
-		// when re-starting the loop, we need to re-set the program
-		// pointer to the root program.
+		/* If we have set rootProgram, we know we have encountered
+		 * a condition during execution of the loop body, exchanging
+		 * the program pointer with the one in the condition(s). Thus,
+		 * when re-starting the loop, we need to re-set the program
+		 * pointer to the root program.
+		 */
 		if (m_currentLocation->rootProgram) {
 			m_currentLocation->program = m_currentLocation->rootProgram;
 			m_currentLocation->rootProgram = nullptr;
@@ -243,12 +234,13 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			return true;
 		}
 
-		// Else wise, if the body does not have a de-queue event,
-		// i.e., an internal loop is service the queues (see
-		// comments on the field hadDequeue in program.h),
-		// this loop is here only to continue to iterate
-		// until the queues are empty or we hit a maximum
-		// number of iterations.
+		/* Else wise, if the body does not have a de-queue event,
+		 * i.e., an internal loop is service the queues (see
+		 * comments on the field hadDequeue in program.h),
+		 * this loop is here only to continue to iterate
+		 * until the queues are empty or we hit a maximum
+		 * number of iterations.
+		 */
 		auto curLc = m_currentLocation->lc;
 		if (!m_currentLocation->program->hasDequeue && m_currentLocation->program->hasInternalLoop) {
 			if (!iterationsToGo) {
@@ -314,9 +306,10 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 
 		// If go to next queue, do that. If no more queues, break loop.
 		if (goToNextQueue2) {
-			// Calculate next index. If -1, i.e., no more queues, break if not infinite loop.
-			// NOTE 09.08.14: We do NOT re-start on the first queue, even if we have an infinite
-			// loop. REASON: this is what we have outer loops for, e.g., as with softirqs!
+			/* Calculate next index. If -1, i.e., no more queues, break if not infinite loop.
+			 * NOTE 09.08.14: We do NOT re-start on the first queue, even if we have an infinite
+			 * loop. REASON: this is what we have outer loops for, e.g., as with softirqs!
+			 */
 			int nextQueue2 = (queueServedIndex + 1) < numQueue2s ? queueServedIndex + 1 : -1;
 			if (nextQueue2 == -1) {
 				m_programStack.pop();
@@ -343,8 +336,9 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			else { // See commends in program.h on LoopCondition members hasInternalLoop and hasDequeue
 				m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
 				if (!m_currentLocation->program->hasInternalLoop) {
-					// iterate queues until we find one which is not
-					// empty. If all are empty, return from LOOP.
+					/* iterate queues until we find one which is not
+					 * empty. If all are empty, return from LOOP.
+					 */
                     uint32_t index = 0;
 					if (curLc->serviceQueue2s) {
 						auto it = curLc->serviceQueue2sServed.begin();
@@ -394,14 +388,16 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		} else
 			m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
 
-		// At this point, we know we should continue from the beginning of the loop.
-		// Set event index to -1 (incremented to 0 by dispatch) and return true.
+		/* At this point, we know we should continue from the beginning of the loop.
+		 * Set event index to -1 (incremented to 0 by dispatch) and return true.
+		 */
 		m_currentLocation->currentEvent = -1;
 		return true;
 	}
 
-	// Else wise, we have a regular non-loop service. We pop the stack to
-	// exit the service and resume the calling service.
+	/* Else wise, we have a regular non-loop service. We pop the stack to
+	 * exit the service and resume the calling service.
+	 */
 	else {
 		m_programStack.pop();
 		return true;
@@ -412,8 +408,9 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 	auto ps = dynamic_cast<ProcessingStage *>(e);
 
 	if (ps->interrupt != nullptr) { // OYSTEDAL: We are in an interrupt
-		// TODO: consume from a PEU. For now, use CPU.
-		// Dirty hack for now: sample cycles, and calculate based on CPU frequency
+		/* TODO: consume from a PEU. For now, use CPU.
+		 * Dirty hack for now: sample cycles, and calculate based on CPU frequency
+		 */
 		auto pi = ps->Instantiate(m_currentLocation->curPkt);
 		int cpu = peu->GetObject<CPU>()->GetId();
 
@@ -429,16 +426,6 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 					cpu,
 					ps->interrupt,
 					m_currentLocation);
-#if 0
-							std::cout <<
-								"PEUSTART" << " - " << 
-                                "interrupt: " << ps->interrupt->name << " "
-								// m_currentLocation->program->sem->peu->taskScheduler->m_currentRunning->m_pid << " " <<
-								"caller: " << m_currentLocation->program->sem->name << " " <<
-								"now: " << Simulator::Now().GetNanoSeconds() << " " <<
-								"scheduled: " << Simulator::Now().GetNanoSeconds() + nanoseconds <<
-								std::endl;
-#endif
 		}
 		else
 			Simulator::ScheduleNow(
@@ -453,27 +440,24 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 
 		return true;
 	} else {
-		// First, obtain a processing instance with all sample
-		// values for all resources consumed filled in.
+		/* First, obtain a processing instance with all sample
+		 * values for all resources consumed filled in.
+		 */
 		m_currentProcessing = ps->Instantiate(m_currentLocation->curPkt);
 		m_currentProcessing.thread = this;
 
-		// Pass this instance to the PEU responsible of
-		// calculating and scheduling a completion event. We always
-		// return false, as the completion event will anyway
-		// call this threads ProcessingComplete().
+		/* Pass this instance to the PEU responsible of
+		 * calculating and scheduling a completion event. We always
+		 * return false, as the completion event will anyway
+		 * call this threads ProcessingComplete().
+		 */
 
-#if 1
         if (this->peu && m_currentLocation->program->sem->peu->IsCPU()) {
             this->peu->Consume(&m_currentProcessing);
         } else {
             m_currentLocation->program->sem->peu->Consume(&m_currentProcessing);
         }
         m_currentProcessing.done = false;
-#else
-		m_currentLocation->program->sem->peu->Consume(&m_currentProcessing);
-		m_currentProcessing.done = false;
-#endif
 
 		if (recordExecStats)
 			m_currentLocation->program->sem->cpuProcessing += (uint64_t)m_currentProcessing.remaining[CYCLES].amount;
@@ -512,8 +496,7 @@ bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	auto ee = dynamic_cast<ExecuteExecutionEvent *>(e);
 
-	// Obtain target. If it is an empty string, the target must be in the
-	// packet.
+	// Obtain target. If it is an empty string, the target must be in the packet.
 	std::string eeTarget = ee->service;
 
 	Ptr<SEM> newSem;
@@ -555,18 +538,18 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	}
 
 
-	// We must determined whether the PEU on which we should
-	// execute this program is the same as the one were currently
-	// running on. If it is, we simply push the program onto the
-	// program stack of the current thread. If not, we fork a new
-	// thread on the destination PEU and run the program there.
-	// Note that this is the only way for one PEU to start work
-	// on another PEU, if max threads are activated, nothing
-	// happends. But note also that it is possible to pass the
-	// packet via a queue, and instantiate the thread with a
-	// program from a SEM that is not sensitive to conditions
-	// from the packet.
-	//if (newSem->peu == peu) {
+	/* We must determined whether the PEU on which we should
+	 * execute this program is the same as the one were currently
+	 * running on. If it is, we simply push the program onto the
+	 * program stack of the current thread. If not, we fork a new
+	 * thread on the destination PEU and run the program there.
+	 * Note that this is the only way for one PEU to start work
+	 * on another PEU, if max threads are activated, nothing
+	 * happends. But note also that it is possible to pass the
+	 * packet via a queue, and instantiate the thread with a
+	 * program from a SEM that is not sensitive to conditions
+	 * from the packet.
+	 */
     // OYSTEDAL: Don't Fork() when we're executing on a diff CPU core.
     if (newSem->peu->IsCPU()) {
 		Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
@@ -583,15 +566,17 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 			newProgramLocation->curIteration = 0;
 			newProgramLocation->lc = lcPtr;
 
-			// Since regular services can be called as loops,
-			// we need to act according to whether the target
-			// is a loop or not
+			/* Since regular services can be called as loops,
+			 * we need to act according to whether the target
+			 * is a loop or not.
+			 */
 			if (newSem->lc) {
 				LoopCondition *newLc = newSem->lc;
 
-				// If target is a loop, but no queues are set,
-				// we don't have the "empty queues" program. This
-				// means we should use the regular root program
+				/* If target is a loop, but no queues are set,
+				 * we don't have the "empty queues" program. This
+				 * means we should use the regular root program
+				 */
 				uint64_t queueSize = newLc->serviceQueue2s ? newLc->serviceQueue2sServed.size() :
 					                 (newLc->stateQueue2s ? newLc->stateQueue2sServed.size() :
 					                  newLc->queuesServed.size());
@@ -599,9 +584,10 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				if (queueSize == 0)
 					newProgramLocation->program = newSem->rootProgram;
 
-				// If the target has queues, we always start at the
-				// first queue. If its empty, set the program to the
-				// empty queues program.
+				/* If the target has queues, we always start at the
+				 * first queue. If its empty, set the program to the
+				 * empty queues program.
+				 */
 				else {
 					newProgramLocation->curServedQueue2 = 0;
 					bool firstQueue2Empty =
@@ -620,8 +606,9 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 							newProgramLocation->program =
 								newSem->rootProgram;
 							if (!newSem->rootProgram->hasInternalLoop) {
-								// iterate queues until we find one which is not
-								// empty. If all are empty, return from LOOP.
+								/* iterate queues until we find one which is not empty.
+								 * If all are empty, return from LOOP.
+								 */
 								if (newLc->serviceQueue2s) {
 									uint32_t index = 0;
 									auto it = newLc->serviceQueue2sServed.begin();
@@ -696,19 +683,21 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 bool Thread::HandleQueue2Event(ExecutionEvent* e) {
     auto qe = dynamic_cast<Queue2ExecutionEvent *>(e);
     if (qe->enqueue) {
-		// If we have an en-queue event, simply insert into queue.
-		// We assume that the queue extist, as it should have been
-		// created during parsing of the header in the device-file
-		// initialization.
+		/* If we have an en-queue event, simply insert into queue.
+		 * We assume that the queue extist, as it should have been
+		 * created during parsing of the header in the device-file
+		 * initialization.
+		 */
 		auto ee = peu->hwModel->node->GetObject<ExecEnv>();
         if (qe->serviceQueue2) {
-			// Here, we want to push a service onto the service
-			// queue specified in the event. This may however
-			// either be a service specified in the event OR
-			// a service specified in the current packet. In
-			// the latter case, the service in the event is nullptr,
-			// meaning that we need to obtain the service from
-			// the packet.
+            /* Here, we want to push a service onto the service
+			 * queue specified in the event. This may however
+			 * either be a service specified in the event OR
+			 * a service specified in the current packet. In
+			 * the latter case, the service in the event is nullptr,
+			 * meaning that we need to obtain the service from
+			 * the packet.
+             */
 			Ptr<SEM> semToEnqueue = nullptr;
 			if (qe->semToEnqueue == nullptr) {
 				semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
@@ -730,21 +719,23 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 					m_currentLocation->lc->serviceQueue2sServed[m_currentLocation->curServedQueue2] :
 				    qe->servQueue2;
 
-			// Here, we want to dequeue the service, then (below) execute it.
-			// Note that we resolved which sem to enqueue (which may be "0")
-			// in the insertion above, so we don't need to resolve this again.
+			/* Here, we want to dequeue the service, then (below) execute it.
+			 * Note that we resolved which sem to enqueue (which may be "0")
+			 * in the insertion above, so we don't need to resolve this again.
+			 */
             Ptr<SEM> toExecute = queueToServe->front().first;
 			Ptr<ProgramLocation> newPl = queueToServe->front().second;
             queueToServe->pop();
 
             NS_LOG_INFO("Dequeueing service " << toExecute->name);
 
-			// Now, its time to execute the de-queued service
-			// Note that it is not possible to en-queue loop services
-			// into service queues, so its safe to assume the
-			// enqueued service is a regular service.
-			// COMMENTS ON THIS is in the EXECUTE events above - we do
-			// almost the same here.
+			/* Now, its time to execute the de-queued service
+			 * Note that it is not possible to en-queue loop services
+			 * into service queues, so its safe to assume the
+			 * enqueued service is a regular service.
+			 * COMMENTS ON THIS is in the EXECUTE events above - we do
+			 * almost the same here.
+			 */
             if (toExecute->peu->IsCPU()) {
 				Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
 				newProgramLocation->program = toExecute->rootProgram;
@@ -796,7 +787,12 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue2] :
 					qe->queue;
 
-			m_currentLocation->curPkt = queueToServe->Dequeue();
+            Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
+            Ptr<Queue2> rxfifo_queue = ee->queues["rxfifo"];
+            if (rxfifo_queue == queueToServe && queueToServe->IsEmpty()) {
+                std::cout << "Dequeueing from empty rxfifo" << std::endl;
+            }
+            m_currentLocation->curPkt = queueToServe->Dequeue();
 
 			// We need call activate any prospective triggers on the queue
 			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
@@ -812,8 +808,9 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 
 	return true;
 
-	// For now we ignore these statements and simply
-	// continue executing the program.
+	/* For now we ignore these statements and simply
+	 * continue executing the program.
+	 */
 }
 
 bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {
@@ -889,14 +886,15 @@ bool Thread::HandleSyncEvent(ExecutionEvent* e) {
 		}
 	}
 
-	// Execute the request. This will be routed through the
-	// implementation specific SchedSim, potentially next via
-	// wrappers to C-code as in LinSched, and finally to execute
-	// the proper function in the SchedSim code.
-	//
-	// Synchrequest returns true if there was a task switch,
-	// in which case we must return false. The next thread is
-	// already scheduled to execute.
+	/* Execute the request. This will be routed through the
+	 * implementation specific SchedSim, potentially next via
+	 * wrappers to C-code as in LinSched, and finally to execute
+	 * the proper function in the SchedSim code.
+	 *
+	 * Synchrequest returns true if there was a task switch,
+	 * in which case we must return false. The next thread is
+	 * already scheduled to execute.
+	 */
 	bool synchReturn = m_scheduler->SynchRequest(cpu, se->synchType, se->id, se->args);
 	if (recordExecStats)
 		if (!synchReturn)
@@ -909,9 +907,10 @@ bool Thread::HandleCondition(ExecutionEvent* e) {
 	auto ce = dynamic_cast<Condition *>(e);
     Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 
-	// If state condition AND write, write to local or global
-	// variable according to scope of the variable. Elsewise, change
-	// the currently running program by ce->getClosestEntry.
+	/* If state condition AND write, write to local or global
+	 * variable according to scope of the variable. Elsewise, change
+	 * the currently running program by ce->getClosestEntry.
+	 */
 	if (ce->condType == STATECONDITION) {
 		auto sce = (StateCondition *) ce;
 		if (sce->operation == CONDITIONWRITE) {
@@ -931,12 +930,13 @@ bool Thread::HandleCondition(ExecutionEvent* e) {
 		}
 	}
 
-	// We need to set the program pointer to the one obtained in teh
-	// condition. But first, store the root program in m_currentLocation
-	// so that if we are in a loop, and it re-starts, we can re-set
-	// the program pointer to the root program of that loop. But this
-	// should only happen if we have not already encountered a condition
-	// previously, which is indicated by rootCondition not being nullptr.
+	/* We need to set the program pointer to the one obtained in teh
+	 * condition. But first, store the root program in m_currentLocation
+	 * so that if we are in a loop, and it re-starts, we can re-set
+	 * the program pointer to the root program of that loop. But this
+	 * should only happen if we have not already encountered a condition
+	 * previously, which is indicated by rootCondition not being nullptr.
+	 */
 	if (m_currentLocation->rootProgram == nullptr)
 		m_currentLocation->rootProgram = m_currentLocation->program;
 
@@ -963,14 +963,14 @@ void Thread::ResumeProcessing() {
 }
 
 void Thread::PreEmpt() {
-	// Re-calculate remaining resources based on
-	// remaining time until the completion event finishes:
-	//
-	// fractionConsumed = MILLISECONDS / remaining time
-	// newRemaining = total * (1 - fractionConsumed)
-	//
-	// Then cancel the event
-	//
+	/* Re-calculate remaining resources based on
+	 * remaining time until the completion event finishes:
+	 *
+	 * fractionConsumed = MILLISECONDS / remaining time
+	 * newRemaining = total * (1 - fractionConsumed)
+	 *
+	 * Then cancel the event
+	 */
 
 	if(m_currentProcessing.remaining[NANOSECONDS].amount != 0) {
 		int64_t timeLeft = Simulator::GetDelayLeft(m_currentProcessing.processingCompleted).GetMilliSeconds();
@@ -982,28 +982,31 @@ void Thread::PreEmpt() {
                 remaining.amount = remaining.amount * (1 - fractionCompleted);
 	}
 
-	// Finally we cancel the event. If will be re-scheduled
-	// by PEU::Consume() at a later point.
+	/* Finally we cancel the event. If will be re-scheduled
+	 * by PEU::Consume() at a later point.
+	 */
 	Simulator::Cancel(m_currentProcessing.processingCompleted);
 }
 
 // Dispatch is allways called when executing a service on a PEU
 void Thread::Dispatch() {
-	// Make sure the stack is not empty, i.e., that we have
-	// at least a root program
+	/* Make sure the stack is not empty, i.e., that we have
+	 * at least a root program
+	 */
 	if (m_programStack.empty()) {
 		NS_LOG_ERROR("Attempted to dispatch thread " << m_pid << " without a root program.");
 	} else {
 
-		// In rare cases we might be interrupted between process statements,
-		// e.g., in the 310814-case where we where Simulator::ScheduleNow()
-		// scheduled an interrupt to be scheduled between context switches
-		// caused by a scheduler request (COMPL). In these cases, we must
-		// pre-empt ourselves once dispatches because at the point of
-		// dispatch, the CPU is actually interrupted. This pre-empt was not
-		// performed during interrupt, because there waS not processing
-		// statement executing due to the interrupt being issued between
-		// processing stages.
+		/* In rare cases we might be interrupted between process statements,
+		 * e.g., in the 310814-case where we where Simulator::ScheduleNow()
+		 * scheduled an interrupt to be scheduled between context switches
+		 * caused by a scheduler request (COMPL). In these cases, we must
+		 * pre-empt ourselves once dispatches because at the point of
+		 * dispatch, the CPU is actually interrupted. This pre-empt was not
+		 * performed during interrupt, because there waS not processing
+		 * statement executing due to the interrupt being issued between
+		 * processing stages.
+		 */
 		if(this->peu) {
             const int cpu = peu->GetObject<CPU>()->GetId();
             NS_LOG_INFO("Dispatched thread on CPU" << cpu);
@@ -1012,26 +1015,28 @@ void Thread::Dispatch() {
 				return;
 			}
         }
-		// Are we returning from being interrupted from processing by an
-		// interrupt of task switch? If so, we simply resume processing.
+		/* Are we returning from being interrupted from processing by an
+		 * interrupt of task switch? If so, we simply resume processing.
+		 */
 		if (!m_currentProcessing.done) {
 			ResumeProcessing();
 			return;
 		}
 
-		// Continue executing statements until handler returns true.
-		// In this case, we have one of the following cases:
-		// (1) We have encountered a processing stage, and the handler
-		//     has taken the approapriate action; either to schedule
-		//     Proceed() if the next scheduler event is scheduled at a
-		//     later point, or not if the next scheduler event preceeds
-		//     the end of the processing duration.
-		// (2) The handler have put this thread to sleep.
-		// (3) We have encountered the end of the root program. The handler
-		//     calls the scheduler wrapper to terminate the task. Note that
-		//     when we encounter the end of a child program, the handler
-		//     should pop the program stack, and set the state variables
-		//     accordingly, and thus not return true.
+		/* Continue executing statements until handler returns true.
+		 * In this case, we have one of the following cases:
+		 * (1) We have encountered a processing stage, and the handler
+		 *     has taken the approapriate action; either to schedule
+		 *     Proceed() if the next scheduler event is scheduled at a
+		 *     later point, or not if the next scheduler event preceeds
+		 *     the end of the processing duration.
+		 * (2) The handler have put this thread to sleep.
+		 * (3) We have encountered the end of the root program. The handler
+		 *     calls the scheduler wrapper to terminate the task. Note that
+		 *     when we encounter the end of a child program, the handler
+		 *     should pop the program stack, and set the state variables
+		 *     accordingly, and thus not return true.
+		 */
 		bool proceed = true;
 		while (proceed) {
 			m_currentLocation = m_programStack.top();
@@ -1052,10 +1057,11 @@ void Thread::Dispatch() {
 				}
 			}
 
-			// Must check if there are any more statements to execute. If not,
-			// terminate the thread. Note that this should never occur for
-			// single-threaded PEUs, as they should simply run one PEU in an
-			// infinite loop.
+			/* Must check if there are any more statements to execute. If not,
+			 * terminate the thread. Note that this should never occur for
+			 * single-threaded PEUs, as they should simply run one PEU in an
+			 * infinite loop.
+			 */
             if (m_programStack.empty()) {
                 if (m_scheduler->need_scheduling) {
                     m_scheduler->need_scheduling = false;

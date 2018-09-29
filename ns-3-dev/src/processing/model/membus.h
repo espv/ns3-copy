@@ -23,8 +23,9 @@ public:
 
   void Contend(ProcessingInstance *pi);
 
-  // freq is public (could be friend) to
-  // be accessable by PEUs
+  /* freq is public (could be friend) to
+   * be accessable by PEUs
+   */
   int freq; // Important!: Defined in KHz.
 
 private:

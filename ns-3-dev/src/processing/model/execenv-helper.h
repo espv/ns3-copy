@@ -14,11 +14,10 @@ class SEM;
 
 class ExecEnvHelper : public Object {
  public:
-  static TypeId GetTypeId(void);
+  static TypeId GetTypeId();
   ExecEnvHelper();
 
-  // Install and configure processing models on a set of nodes
-  // with a given configuration script
+  // Install and configure processing models on a set of nodes with a given configuration script
   void Install(std::string device, Ptr<Node> n);
   void Install(std::string device, NodeContainer nc);
 

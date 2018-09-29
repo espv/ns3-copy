@@ -731,10 +731,6 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			std::cout << *((Queue2ExecutionEvent *) curEvt) << std::endl;
 			break;
 		}
-		case INTERRUPT: {
-			std::cout << *((InterruptExecutionEvent *) curEvt) << std::endl;
-			break;
-		}
 		case CONDITION: {
 			std::cout << *((Condition *) curEvt) << std::endl;
 

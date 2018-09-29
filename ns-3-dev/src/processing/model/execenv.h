@@ -52,9 +52,10 @@ namespace ns3 {
 
         void ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time);
 
-        // The average number of CPU-cycles spent per trace-call
-        // This is deducted during ProcessingStage::Instantiate()
-        // for the resource "cycles" on the CPU.
+        /* The average number of CPU-cycles spent per trace-call
+         * This is deducted during ProcessingStage::Instantiate()
+         * for the resource "cycles" on the CPU.
+         */
         uint32_t m_traceOverhead;
 
         // Holds functions used to resolve conditions
@@ -65,30 +66,29 @@ namespace ns3 {
         // Holds global state variables
         std::map<std::string, uint32_t > globalStateVariables;
 
-        // Holds all intra-node queues used during
-        // execution.
+        // Holds all intra-node queues used during execution.
         std::map<std::string, Ptr<Queue2> > queues;
         std::map<std::string, std::vector<std::string> > eventqueues;
         std::map<Ptr<Queue2>, std::string> queueNames;
         std::vector<Ptr<Queue2> > queueOrder;
 
-        // Service queues hold the current packet to set, as well as the
-        // service to call.
+        // Service queues hold the current packet to set, as well as the service to call.
         std::map<std::string, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2s;
         std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> serviceQueue2Names;
         std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2Order;
 
-        // State queues only hold a set of values.
-        //
-        // DEPRECATED: Since we only support local state queues,
-        // we only store their order, as this is needed with the current design of loops.
-        //
-        // 210814: We DO support global state queues, in face we ONLY support that now. We had
-        // to move to this to allow collaborating threads to use the same state queue, and
-        // we currently have no way to pass local variables like state queues between threads.
-        // Thus, we had to allow two collaborating threads to share a state queue via global
-        // scope, i.e., via ExecEnv (see above). Due to time constraints, we still keep track
-        // of state queue order only via straings.
+        /* State queues only hold a set of values.
+         *
+         * DEPRECATED: Since we only support local state queues,
+         * we only store their order, as this is needed with the current design of loops.
+         *
+         * 210814: We DO support global state queues, in face we ONLY support that now. We had
+         * to move to this to allow collaborating threads to use the same state queue, and
+         * we currently have no way to pass local variables like state queues between threads.
+         * Thus, we had to allow two collaborating threads to share a state queue via global
+         * scope, i.e., via ExecEnv (see above). Due to time constraints, we still keep track
+         * of state queue order only via strings.
+         */
         std::vector<std::string> stateQueue2Order;
         std::map<std::string, Ptr<StateVariableQueue2> > stateQueue2s;
         std::map<Ptr<StateVariableQueue2>, std::string> stateQueue2Names;
@@ -107,21 +107,22 @@ namespace ns3 {
 
         // A map between real world service names and trigger names
 
-        // We want a map between service triggers and the SEM for cases
-        // where we want to call the "next" in the packet.
+        /* We want a map between service triggers and the SEM for cases
+         * where we want to call the "next" in the packet.
+         */
 
         /* Called to parameterize all services according to a device
            description file */
         void Initialize(std::string device);
 
-        // The hardware model containing:
-        // - Interrupt controller
-        // - memory bus
-        // - all PEUs present in the system
-        //     - Which in turn contain threads and taskschedulers
+        /* The hardware model containing:
+         * - Interrupt controller
+         * - memory bus
+         * - all PEUs present in the system
+         *     - Which in turn contain threads and taskschedulers
+         */
         Ptr<HWModel> hwModel;
 
-        //private:
         // To handle different sections of the device file
         void HandleQueue2(std::vector<std::string> tokens);
         void HandleSynch(std::vector<std::string> tokens);
@@ -142,21 +143,22 @@ namespace ns3 {
         // To parse device files
         void Parse(std::string device);
 
-        // Executed upon STOP/RESTART event to insert
-        // newly created program into existing SEM
+        /* Executed upon STOP/RESTART event to insert
+         * newly created program into existing SEM
+         */
         void addPgm(Program *curPgm, Program* existPgm);
         ProcessingStage addProcessingStages(ProcessingStage a, ProcessingStage b);
 
-        // Used to store condition information temporarily
-        // while parsing signatures
+        // Used to store condition information temporarily while parsing signatures
         std::map<std::string, struct condition> locationConditions;
         std::map<std::string, std::vector<struct condition> > dequeueConditions;
         std::map<std::string, std::vector<struct condition> > enqueueConditions;
         std::map<std::string, struct condition > loopConditions;
 
-        // Variables to hold data regarding triggers. Three
-        // types of triggers: services, de-queue operations
-        // and locations.
+        /* Variables to hold data regarding triggers. Three
+         * types of triggers: services, de-queue operations
+         * and locations.
+         */
         std::map<std::string, std::string> serviceTriggers;
         std::map<std::string, std::string> dequeueTriggers;
         std::map<std::string, std::string> locationTriggers;

@@ -6,7 +6,6 @@
 #include "ns3/timer.h"
 #include "ns3/traced-callback.h"
 #include "ns3/random-variable.h"
-//#include "ns3/packet.h"
 
 #include "program.h"
 
@@ -32,7 +31,7 @@ class ExecutionEvent;
  * type of temporary synchronization variable. */
 struct tempVar {
 	std::vector<std::string> users;
-	void *tempSynch;
+	void *tempSynch = nullptr;
 };
 
 class ProgramLocation : public SimpleRefCount<ProgramLocation>  {
@@ -60,16 +59,14 @@ public:
 	// For execution statistics
 	int64_t wasBlocked;
 
-	ProgramLocation(Ptr<ProgramLocation> pl) {
-
-	}
+	explicit ProgramLocation(Ptr<ProgramLocation> pl);
 
 	ProgramLocation() {
-		lc = NULL;
-		program = NULL;
-		rootProgram = NULL;
+		lc = nullptr;
+		program = nullptr;
+		rootProgram = nullptr;
 		currentEvent = 0;
-		curPkt = NULL;
+		curPkt = nullptr;
 		curIteration = 0;
 		curServedQueue2 = 0;
 		wasBlocked = 0;
@@ -80,19 +77,18 @@ public:
 class Thread : public Object
 {
 public:
-	static TypeId GetTypeId (void);
+	static TypeId GetTypeId ();
 
-	void SetRootProgram(std::string name);
 	void SetPid(int pid);
     void SetScheduler(Ptr<RoundRobinScheduler> scheduler);
 	void Dispatch();
 
 	void PreEmpt();
 
-	int GetPid(void);
+	int GetPid();
 
 	Thread ();
-	virtual ~Thread ();
+	~Thread () override;
 
 	// The PEU on which this thread executes
 	Ptr<PEU> peu;
@@ -113,15 +109,14 @@ public:
 	bool HandleSchedulerEvent(ExecutionEvent* e);
 	bool HandleSyncEvent(ExecutionEvent* e);
 	bool HandleCondition(ExecutionEvent* e);
-	bool HandleInterrupt(ExecutionEvent* e);
-	bool HandleTempSync(ExecutionEvent* e);
 	bool HandleIncomingCEPEvent(ExecutionEvent* e);
 
 	// For debug
 	void PrintGlobalTempvars(Ptr<ExecEnv> ee);
 
-	// When the root program encounters
-	// END, we must terminate the thread
+	/* When the root program encounters
+	 * END, we must terminate the thread
+	 */
 	void Terminate();
 
 	// Pointer to scheduler object
@@ -130,10 +125,11 @@ public:
 	// Program ID obtained from SchedSim
 	int m_pid;
 
-	// Currently executing processing instance.
-	// We don't need it to be a stack, since
-	// the processing instances for interrupts
-	// are stored in the PEU.
+	/* Currently executing processing instance.
+	 * We don't need it to be a stack, since
+	 * the processing instances for interrupts
+	 * are stored in the PEU.
+	 */
 	ProcessingInstance m_currentProcessing;
 
 	// The program and event currently running

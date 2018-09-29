@@ -27,15 +27,16 @@ class Packet;
 class ExecEnv;
 class ProgramLocation;
 
-// Variables to hold data regarding manual conditions
-// and triggers. Three types of conditions: manual,
-// queues and loops. The first entry is location,
-// queue name and service(/loop) name, respectively.
-// The second endtry is (a vector of) names to functions
-// providing the value based on NetSim state of packet
-// characteristics.
-//
-// FUTURE WORK: allow for comparisons on values
+/* Variables to hold data regarding manual conditions
+ * and triggers. Three types of conditions: manual,
+ * queues and loops. The first entry is location,
+ * queue name and service(/loop) name, respectively.
+ * The second endtry is (a vector of) names to functions
+ * providing the value based on NetSim state of packet
+ * characteristics.
+ *
+ * FUTURE WORK: allow for comparisons on values
+ */
 enum conditionScope {
   CONDITIONLOCAL,
   CONDITIONGLOBAL
@@ -61,8 +62,9 @@ struct condition {
   std::map<std::string, Callback<uint32_t, Ptr<Thread> > > conditionMap;
   std::map<std::string, Callback<void, Ptr<Thread>, uint32_t > > writeConditionMap;
 
-  // Condition functions working on a packet characteristics and other state
-  // variables other than those related to queues and threads
+  /* Condition functions working on a packet characteristics and other state
+   * variables other than those related to queues and threads
+   */
   uint32_t PacketSize(Ptr<Thread> t);
   uint32_t PacketL4Protocol(Ptr<Thread> t);
   uint32_t BCM4329DataOk(Ptr<Thread> t);

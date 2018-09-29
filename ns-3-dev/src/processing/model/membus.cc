@@ -24,8 +24,9 @@ MemBus::MemBus(int contentionModel)
 }
 
 
-// We want the consumption explicitly to
-// save time iterating the resource vector.
+/* We want the consumption explicitly to
+ * save time iterating the resource vector.
+ */
 void
 MemBus::Contend(ProcessingInstance *pi)
 {
