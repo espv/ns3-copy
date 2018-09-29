@@ -958,7 +958,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/ns3/traffic-control-layer.h
         ns-3-dev/build/ns3/traffic-control-module.h
         ns-3-dev/build/ns3/trailer.h
-        ns-3-dev/build/ns3/trex.h
         ns-3-dev/build/ns3/tta-ff-mac-scheduler.h
         ns-3-dev/build/ns3/tv-spectrum-transmitter-helper.h
         ns-3-dev/build/ns3/tv-spectrum-transmitter.h
@@ -3542,8 +3541,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/processing/model/telosb.h
         ns-3-dev/src/processing/model/thread.cc
         ns-3-dev/src/processing/model/thread.h
-        ns-3-dev/src/processing/model/trex.cc
-        ns-3-dev/src/processing/model/trex.h
         ns-3-dev/src/processing/wscript
         ns-3-dev/src/propagation/bindings/callbacks_list.py
         ns-3-dev/src/propagation/bindings/modulegen__gcc_ILP32.py
