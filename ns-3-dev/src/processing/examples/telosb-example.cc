@@ -192,7 +192,7 @@ int main(int argc, char *argv[])
     Simulator::Run();
     Simulator::Destroy();
 
-    NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
+    NS_LOG_INFO ("Packet size: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
                  ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<
                  ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
                  ps.nr_packets_forwarded << " / " << ps.nr_packets_total << " = " <<
@@ -258,7 +258,7 @@ int main(int argc, char *argv[])
         NS_LOG_INFO ("3 " << ps.all_intra_os_delays[i]);
         intraOsDelayDataSet->Add(ps.forwarded_packets_seqnos[i], ps.all_intra_os_delays[i]);
     }
-    NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", ps.pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
+    NS_LOG_INFO ("Packet size: " << ps.packet_size << ", ps.pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
                  ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<
                  ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
                  ps.nr_packets_forwarded << " / " << ps.nr_packets_total << " = " <<
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
   Simulator::Run();
   t = clock() - t;
   Simulator::Destroy();
-  NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", ps.pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
+  NS_LOG_INFO ("Packet size: " << ps.packet_size << ", ps.pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
                                ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<
                                ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
                                ps.nr_packets_forwarded << " / " << ps.nr_packets_total << " = " <<
@@ -379,7 +379,7 @@ auto
     Simulator::Run();
     t = clock() - t;
     Simulator::Destroy();
-    NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
+    NS_LOG_INFO ("Packet size: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " << ps.nr_rxfifo_flushes <<
                  ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " << ps.nr_packets_collision_missed <<
                  ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
                  ps.nr_packets_forwarded << " / " << ps.nr_packets_total << " = " <<
@@ -474,7 +474,7 @@ auto
                                 << ps.all_intra_os_delays.at(ps.all_intra_os_delays.size()/2) << "\n";
             numberForwardedFile << std::flush;
 
-            NS_LOG_INFO ("UDP payload: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " <<
+            NS_LOG_INFO ("Packet size: " << ps.packet_size << ", pps: " << ps.pps << ", RXFIFO flushes: " <<
                          ps.nr_rxfifo_flushes << ", bad CRC: " << ps.nr_packets_dropped_bad_crc << ", radio collision: " <<
                          ps.nr_packets_collision_missed <<
                          ", ip layer drop: " << ps.nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
@@ -496,10 +496,6 @@ auto
         writePlot(numberBadCrcPlot, "plots/numberBadCrc" + os.str() + ".gnu", numberBadCrcDataSet);
         writePlot(intraOsDelayPlot, "plots/intraOsDelay" + os.str() + ".gnu", intraOsDelayDataSet);
 
-        if (i == 66)
-          i = 36;
-        if (i == 125)
-          i = 66;
     }
 
     numberForwardedFile.close();
