@@ -52,6 +52,7 @@ def build(bld):
         # Espen
         'model/telosb.h',
         'model/cep.h',
+        'model/executioninfo.h',
 
     ]
 

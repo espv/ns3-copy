@@ -4423,7 +4423,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/wutils.py
         CMakeLists.txt
         README.md
-        ns-3-dev/scratch/gnex.cc)
+        ns-3-dev/scratch/gnex.cc ns-3-dev/src/processing/model/executioninfo.h)
 
 add_custom_target(
         Debug-configuration COMMAND configure-waf-scripts/configure_debug_waf.sh

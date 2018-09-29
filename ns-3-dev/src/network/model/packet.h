@@ -35,48 +35,12 @@
 #include "ns3/ptr.h"
 #include "ns3/deprecated.h"
 
-/* STEIN */
-#include "ns3/event-impl.h"
-#include "ns3/nstime.h"
-#include <vector>
-/* STEIN */
-
-/* ESPEN */
-#include "address.h"
-#include <map>
-/* ESPEN */
+// Espen
+#include "ns3/executioninfo.h"
+// Espen
 
 namespace ns3 {
 
-class SEM;
-
-class ExecutionInfo
-{
-public:
-    ExecutionInfo();
-    // Used to identify whether a service is allready
-    // called by the ExecEnv. If this is the same as
-    // the event executed by the scheduler, return false.
-    bool executedByExecEnv;
-
-    // Name and arguments for target service
-    std::string target;
-    std::map<std::string, std::string> targets;
-    EventImpl *targetFPM;
-    std::map<std::string, EventImpl *> targetFPMs;
-
-    // Used for temporary synchronization primitives
-    void *tempSynch;
-
-    // Used to indicate which service to execute when
-    // the packet is within a service queue
-    SEM *queuedService;
-
-    // EXPERIMENTATION:
-    std::vector<Time> timestamps;
-    int seqNr;
-};
-/* STEIN */
 
 // Forward declaration
 class Address;
