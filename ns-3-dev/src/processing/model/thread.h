@@ -47,7 +47,7 @@ public:
 	// To keep track of queues
 	LoopCondition *lc;
 	uint32_t curIteration;
-	uint32_t curServedQueue2;
+	int curServedQueue2;
 
 	// To store local state variables
 	std::map<std::string, Ptr<StateVariable> > localStateVariables;

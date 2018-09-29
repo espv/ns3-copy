@@ -199,10 +199,10 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 	// Handle prospective loop
 	if (m_currentLocation->lc) {
 		// Fetch info about the loop
-		uint32_t maxIterations = m_currentLocation->lc->maxIterations;
-		uint32_t curIteration = ++(m_currentLocation->curIteration);
-		uint32_t queueServedIndex = m_currentLocation->curServedQueue2;
-		uint64_t numQueue2s =
+		int maxIterations = m_currentLocation->lc->maxIterations;
+		int curIteration = ++(m_currentLocation->curIteration);
+		int queueServedIndex = m_currentLocation->curServedQueue2;
+		int numQueue2s =
 			m_currentLocation->lc->serviceQueue2s ?
 			m_currentLocation->lc->serviceQueue2sServed.size() :
 			(m_currentLocation->lc->stateQueue2s ?
@@ -317,7 +317,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			// Calculate next index. If -1, i.e., no more queues, break if not infinite loop.
 			// NOTE 09.08.14: We do NOT re-start on the first queue, even if we have an infinite
 			// loop. REASON: this is what we have outer loops for, e.g., as with softirqs!
-			uint32_t nextQueue2 = (queueServedIndex + 1) < numQueue2s ? queueServedIndex + 1 : -1;
+			int nextQueue2 = (queueServedIndex + 1) < numQueue2s ? queueServedIndex + 1 : -1;
 			if (nextQueue2 == -1) {
 				m_programStack.pop();
 				return true;
@@ -505,6 +505,8 @@ bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
 		++ieiceop->ps->factor;
         //HandleProcessingEvent(ieiceop->ps);
     }
+
+    return true;
 }
 
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
