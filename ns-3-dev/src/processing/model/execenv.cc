@@ -935,8 +935,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		execEvent->tokens = tokens;
 
 		// Print the constructed program for debug purposes
-		Program *curPgm = rootProgram;
-		PrintProgram(curPgm);
+		/*Program *curPgm = rootProgram;
+		PrintProgram(curPgm);*/
 
 		// Get the program pointer of the current SEM
 		Program **existingProgram;

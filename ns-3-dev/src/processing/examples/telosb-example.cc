@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 {
   LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
   // Debugging and tracing
-  debugOn = true;
+  debugOn = false;
   if (debugOn) {
       LogComponentEnable("TelosB", LOG_LEVEL_INFO);
       LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
@@ -113,9 +113,9 @@ int main(int argc, char *argv[])
   createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
-#define ONE_CONTEXT 1
+#define ONE_CONTEXT 0
 #define SIMULATION_OVERHEAD_TEST 0
-#define ALL_CONTEXTS 0
+#define ALL_CONTEXTS 1
 #define CC2420_MODEL 0
 #if CC2420_MODEL
     CC2420Helper cc2420;
