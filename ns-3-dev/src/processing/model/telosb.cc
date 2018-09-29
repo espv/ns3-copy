@@ -104,9 +104,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     execenv->globalStateVariables["packet-collided"] = 1;
     ps->nr_packets_dropped_bad_crc++;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": collision caused packet nr " << packet->m_executionInfo.seqNr << "'s CRC check to fail, dropping it");
-    if (!execenv->queues["rxfifo"]->IsEmpty()) {
-      execenv->queues["rxfifo"]->Dequeue();
-    } else {
+    if (execenv->queues["rxfifo"]->IsEmpty()) {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
         NS_LOG_INFO ("RXFIFO gets flushed");
