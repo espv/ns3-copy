@@ -5,6 +5,7 @@ HIRQ	 FIFO 	 -1    services
 
 # The IPAQ, which has a capacity of 3 packets
 ipaq FIFO 3 packets
+ipaq-postponed FIFO 3 packets
 # CC2420 Rxfifo
 rxfifo FIFO -1 packets
 
@@ -69,6 +70,7 @@ FRACTION 49%  1937 3880
 0 START
 x STATECOND ip-radio-busy read global 0
 x QUEUECOND ipaq ipaq empty
+x PKTQUEUE ENQUEUE ipaq-postponed
 0 STOP
 
 SIGEND
@@ -95,9 +97,23 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x QUEUECOND ipaq-postponed ipaq-postponed notempty
+x DEQUEUE PKTQUEUE 0 ipaq-postponed
 0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
 x TTWAKEUP scheduler
 x PROCESS 1409 0
+0 STOP
+
+
+# SendDone interrupt
+SIGSTART
+NAME HIRQ-6
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND ipaq-postponed ipaq-postponed empty
 0 STOP
 
 

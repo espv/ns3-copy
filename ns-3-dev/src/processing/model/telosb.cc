@@ -32,7 +32,6 @@ namespace ns3 {
 }
 
 // TODO: Replace some of the ad-hoc variables with proper queues and STATECOND variables that can be used by the execenv
-// TODO: Get the mote to drop packets at 65kbps with packet size 125 bytes, which worked before the recent changes
 // TODO: Tidy up telosb-example.cc
 
 void
@@ -47,15 +46,15 @@ TelosB::Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevic
 
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
+  Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
+  packet->m_executionInfo.executedByExecEnv = false;
+
   ps->firstNodeSending = false;
   --radio.nr_send_recv;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   packet->collided = radio.collision;
   if (radio.collision && radio.nr_send_recv == 0)
     radio.collision = false;
-
-  Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
 
   if (radio.rxfifo_overflow) {
     NS_LOG_INFO ("Dropping packet " << packet->m_executionInfo.seqNr << " due to RXFIFO overflow");
@@ -167,16 +166,6 @@ void TelosB::sendTask(Ptr<Packet> packet) {
   NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
 }
 
-void TelosB::sendViaCC2420(Ptr<Packet> packet) {
-  uint8_t nullBuffer[packet->GetSize()];
-  wmemset((wchar_t*)nullBuffer, 0, sizeof(uint8_t)*packet->GetSize());
-
-  // send with CCA
-  Ptr<CC2420Send> msg = CreateObject<CC2420Send>(nullBuffer, packet->GetSize(), true);
-
-  netDevice->descendingSignal(msg);
-}
-
 // Called when done writing packet into TXFIFO, and radio is ready to send
 void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
@@ -203,9 +192,9 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
     return;
   }
 
-  if (radio.nr_send_recv > 0) {
-    if (ccaOn) {  // 2500 comes from traces
-      Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::writtenToTxFifo, this, packet);
+    if (radio.nr_send_recv > 0) {
+      if (ccaOn) {  // 2500 comes from traces
+        Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::writtenToTxFifo, this, packet);
       return;
     }
     radio.collision = true;
@@ -216,10 +205,21 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   ++radio.nr_send_recv;
 }
 
+void TelosB::sendViaCC2420(Ptr<Packet> packet) {
+  uint8_t nullBuffer[packet->GetSize()];
+  wmemset((wchar_t*)nullBuffer, 0, sizeof(uint8_t)*packet->GetSize());
+
+  // send with CCA
+  Ptr<CC2420Send> msg = CreateObject<CC2420Send>(nullBuffer, packet->GetSize(), true);
+
+  netDevice->descendingSignal(msg);
+}
+
 // Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
 // If acks are enabled, the ack has to be received before that can be done.
 void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
+  packet->m_executionInfo.executedByExecEnv = false;
   ++ps->nr_packets_forwarded;
 
   execenv->globalStateVariables["ip-radio-busy"] = 0;
@@ -242,7 +242,8 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   }
 
   // Re-scheduling sendTask in case there is a packet waiting to be sent
-  execenv->ScheduleInterrupt (packet, "HIRQ-6", NanoSeconds(0));
+  if (!execenv->queues["ipaq-postponed"]->IsEmpty())
+    execenv->ScheduleInterrupt(execenv->queues["ipaq-postponed"]->Peek(), "HIRQ-6", NanoSeconds(0));
 }
 
 void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote) {
