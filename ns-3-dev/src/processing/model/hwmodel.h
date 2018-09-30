@@ -21,7 +21,7 @@
  */
 
 #ifndef HWMODEL_H
- *#define HWMODEL_H
+#define HWMODEL_H
 
 #include "ns3/object.h"
 #include "ns3/event-garbage-collector.h"
@@ -67,11 +67,7 @@ public:
   // - Interrupt controller
   std::map<std::string, Ptr<PEU> > m_PEUs;
   Ptr<MemBus> m_memBus;
-#if 0
-  Ptr<APIC> m_interruptController;
-#else
   Ptr<InterruptController> m_interruptController;
-#endif
 
   /* Needed to calculate the number of
    * memory lookups required for every

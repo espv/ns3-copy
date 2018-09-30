@@ -138,18 +138,13 @@ int RoundRobinScheduler::DoFork(int priority) {
 
 void RoundRobinScheduler::DoTerminate() {
     NS_ASSERT_MSG(0, "Process terminated in RRSched, not supported");
-    // m_runqueue.pop_front();
 }
 
 std::vector<int> RoundRobinScheduler::DoCurrentRunning() {
-    /*
-    if (m_runqueue.empty()) return 1;
-    return m_runqueue.front();
-    */
     return m_currentRunning;
 }
 
-void RoundRobinScheduler::DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments) {
+void RoundRobinScheduler::DoAllocateSynch(int type, const std::string &id, const std::vector<uint32_t> &arguments) {
     switch (type) {
         case 0: // Semaphore
             {
@@ -163,7 +158,7 @@ void RoundRobinScheduler::DoAllocateSynch(int type, std::string id, std::vector<
     }
 }
 
-void* RoundRobinScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> arguments) {
+void* RoundRobinScheduler::DoAllocateTempSynch(int type, const std::vector<uint32_t> &arguments) {
     switch (type) {
         case 1: // Completion
             {
@@ -193,14 +188,12 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
             {
                 pid = arguments[0];
                 if (!m_blocked.erase(pid)) {
-                    //std::cout << "But not really" << std::endl;
                     NS_LOG_ERROR( TaskScheduler::peu->m_name << " Tried to awake thread not present in the blocking queue! PID: " << pid);
                     break;
                 }
                 NS_LOG_INFO (TaskScheduler::peu->m_name << " Waking up " << pid);
                 m_runqueue.push_back(pid);
                 this->need_scheduling = true;
-                //this->Schedule();
                 break;
             }
             case SLEEPTHREAD: {
@@ -208,14 +201,7 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
                 pid = arguments[0];
                 m_blocked.insert(pid);
 
-                //auto it = std::find(m_currentRunning.begin(), m_currentRunning.end(), pid);
-                //*it = m_runqueue.front();
                 m_currentRunning[cpu] = cpu+1;
-                //WakeupIdle();
-                //m_runqueue.erase(it);
-                //this->Schedule();
-                //if (m_runqueue.empty())
-                //    m_runqueue.push_front(cpu + 1);
                 this->need_scheduling = true;
                 return 1;
             }
@@ -229,12 +215,6 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
 
 void RoundRobinScheduler::MigrateThread(int pid, Ptr<Thread> thread) {
     NS_ASSERT(0); // This should not be used.
-#if 0
-	NS_LOG_INFO ("Thread " << pid << " was migrated to " << TaskScheduler::peu->m_name);
-
-	m_runqueue.push_back(pid);
-	m_threads[pid] = thread;
-#endif
 }
 
 int RoundRobinScheduler::DoSynchRequest(int cpu, int type, std::string id, std::vector<uint32_t> arguments) {
@@ -251,18 +231,18 @@ int RoundRobinScheduler::DoSynchRequest(int cpu, int type, std::string id, std::
                 Ptr<Semaphore> semaphore = it->second;
 
                 if (semaphore->Up()) {
-                    // Someone was unblocked, which means that we're passing
-                    // the condition to the new process.
-                    // The new process won't call down themselves, so we must
-                    // do it ourself.
+                    /* Someone was unblocked, which means that we're passing
+                     * the condition to the new process.
+                     * The new process won't call down themselves, so we must
+                     * do it ourself.
+                     */
                     const int unblocked = semaphore->Unblock();
                     NS_LOG_INFO("Unblocked " << unblocked << " on semaphore " << id);
                     m_runqueue.push_back(unblocked);
 
                     WakeupIdle();
 
-                    // We are in big trouble if we weren't supposed to unblocked
-                    // on this semaphore after all.
+                    // We are in big trouble if we weren't supposed to unblocked on this semaphore after all.
                     NS_ASSERT_MSG(semaphore->Down(), "Unblocked on a semaphore that is not available!");
                 }
             }
@@ -299,14 +279,15 @@ int RoundRobinScheduler::DoSynchRequest(int cpu, int type, std::string id, std::
     return 0;
 }
 
-int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint32_t> arguments) {
+int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, const std::vector<uint32_t> &arguments) {
     switch (type) { // Completion
         case WAIT_COMPL:
             {
                 auto c = (Completion*)var;
 
-                // When we arrive here, the completion may be either completed
-                // or not. If it is completed, just keep running.
+                /* When we arrive here, the completion may be either completed
+                 * or not. If it is completed, just keep running.
+                 */
                 if (!c->IsCompleted()) {
                     c->SetWaiter(m_currentRunning[cpu]);
 
@@ -325,11 +306,6 @@ int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::v
                     m_runqueue.push_back(pid);
 
                     WakeupIdle();
-
-                    // HACK: Because the dpc_thread runs with higher priority,
-                    // put it in the front of the runqueue, and enable immediately
-                    // m_runqueue.push_front(pid);
-                    // RescheduleCPU(cpu);
                 } else {
                     NS_LOG_ERROR("Completion without waiting pid!");
                 }

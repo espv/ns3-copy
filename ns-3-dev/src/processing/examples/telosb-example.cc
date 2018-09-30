@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 {
   LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
   // Debugging and tracing
-  debugOn = false;
+  debugOn = true;
   if (debugOn) {
       LogComponentEnable("TelosB", LOG_LEVEL_INFO);
       LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);

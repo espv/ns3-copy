@@ -60,7 +60,7 @@ void Thread::DoneProcessing() {
 
 bool recordExecStats;
 
-Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(std::string queueID) {
+Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(const std::string &queueID) {
 	// Find the requested queue
 	auto it = localStateVariableQueue2s.find(queueID);
 
