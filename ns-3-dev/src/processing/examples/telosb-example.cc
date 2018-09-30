@@ -90,12 +90,6 @@ void writePlot2Lines(Gnuplot* plot, const std::string &filename, Gnuplot2dDatase
 int main(int argc, char *argv[])
 {
   LogComponentEnable("TelosBExample", LOG_LEVEL_ALL);
-  // Debugging and tracing
-  debugOn = true;
-  if (debugOn) {
-      LogComponentEnable("TelosB", LOG_LEVEL_INFO);
-      LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
-  }
 
   // Fetch from command line
   CommandLine cmd;
@@ -117,6 +111,18 @@ int main(int argc, char *argv[])
 #define SIMULATION_OVERHEAD_TEST 0
 #define ALL_CONTEXTS 1
 #define CC2420_MODEL 0
+
+#if ALL_CONTEXTS
+    debugOn = false;
+#else
+    debugOn = true;
+#endif
+
+    if (debugOn) {
+        LogComponentEnable("TelosB", LOG_LEVEL_INFO);
+        LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
+    }
+
 #if CC2420_MODEL
     CC2420Helper cc2420;
 
