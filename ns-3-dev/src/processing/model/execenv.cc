@@ -835,7 +835,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		else // It did exist: set currentlyHandled to it
 			currentlyHandled = m_serviceMap[tokens[1]];
 
-		// If we have a trigger specified on this service, we ainsert the string into the sem
+		// If we have a trigger specified on this service, we insert the string into the sem
 		auto foundTrigger = serviceTriggers.find(tokens[1]);
 
 		if (foundTrigger != serviceTriggers.end()) {
