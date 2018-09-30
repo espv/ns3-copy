@@ -49,8 +49,9 @@ ExecEnv::ExecEnv() :
 }
 
     static ProgramLocation *dummyProgramLoc;
-    // ScheduleInterrupt schedules an interrupt on the node.
-    // interruptId is the service name of the interrupt, such as HIRQ-123
+    /* ScheduleInterrupt schedules an interrupt on the node.
+     * interruptId is the service name of the interrupt, such as HIRQ-123
+     */
 
     void ExecEnv::ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time) {
 
@@ -152,9 +153,10 @@ ExecEnv::ExecEnv() :
 		return;
 	}
 
-	// Invoke the receive handler of our parent class to deal with any
-	// other frames. Specifically, this will handle Block Ack-related
-	// Management Action frames.
+	/* Invoke the receive handler of our parent class to deal with any
+	 * other frames. Specifically, this will handle Block Ack-related
+	 * Management Action frames.
+	 */
 	/* STEIN */
 	// RegularWifiMac::Receive (packet, hdr);
 	RegularWifiMac::Receive (packet, *hdr);
@@ -171,17 +173,10 @@ void ExecEnv::Initialize(std::string device) {
 	conditionFunctions->Initialize(GetObject<ExecEnv>());
 
 	// Create interrupt controller for the hwModel
-#if 0
-    Ptr<InterruptController> ic = CreateObject<APIC>();
-    hwModel->m_interruptController = ic;
-	hwModel->node = GetObject<Node>();
-	ic->hwModel = hwModel;
-#else
 	auto ic = CreateObject<InterruptController>();
 	hwModel->m_interruptController = ic;
 	hwModel->node = GetObject<Node>();
 	ic->hwModel = hwModel;
-#endif
 
 	// Parse device file to create the rest
 	Parse(std::move(device));
@@ -191,17 +186,18 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 	// Go throught types (currently only support FIFO)
 	if (tokens[1] == "FIFO") {
 
-		// If we have a service queue, we don't need to do anything for now.
-		// Its using a standard C++ map, which will initialize the elements
-		// as they are being used
+		/* If we have a service queue, we don't need to do anything for now.
+		 * Its using a standard C++ map, which will initialize the elements
+		 * as they are being used.
+		 */
 		if (tokens[3] == "services") {
-			//std::cout << "Encountered service FIFO queue" << tokens[0] << std::endl;
 			// Add empty vector (just to set the key)
 			this->serviceQueue2s[tokens[0]] = new std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > >();
 
-			// Add the queue to the end of queueOrder. This is used
-			// by conditions ("and" loops; they are really conditions
-			// as well).
+			/* Add the queue to the end of queueOrder. This is used
+			 * by conditions ("and" loops; they are really conditions
+			 * as well).
+			 */
 			serviceQueue2Order.push_back(serviceQueue2s[tokens[0]]);
 
 			// Add the queue to the reverse mapping
@@ -216,9 +212,10 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 			}
 		}
 
-		// We have a packet queue.
-		//
-		// No size = no upper bound on contents
+		/* We have a packet queue.
+		 *
+		 * No size = no upper bound on contents
+		 */
 		else if (tokens[2] == "-1")
 			queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxPackets", UintegerValue(4294967295));
 
@@ -242,9 +239,10 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 		exit(1);
 	}
 
-	// Add the queue to the end of queueOrder. This is used
-	// by conditions ("and" loops; they are really conditions
-	// as well).
+	/* Add the queue to the end of queueOrder. This is used
+	 * by conditions ("and" loops; they are really conditions
+	 * as well).
+	 */
 	queueOrder.push_back(queues[tokens[0]]);
 
 	// Add the queue to the reverse mapping
@@ -267,8 +265,6 @@ void ExecEnv::HandleSynch(std::vector<std::string> tokens) {
 		arguments.push_back((unsigned int) argvalue);
 	}
 
-	//std::cout << std::endl;
-
 	// Allocate the synch primitive
 	hwModel->cpus[0]->taskScheduler->AllocateSynch(type, name, arguments);
 }
@@ -276,8 +272,7 @@ void ExecEnv::HandleSynch(std::vector<std::string> tokens) {
 void ExecEnv::HandleThreads(std::vector<std::string> tokens) {
 	Program *program = m_serviceMap[tokens[1]]->rootProgram;
 
-	// Create an infinite loop around the root program if
-	// so is specified
+	// Create an infinite loop around the root program if so is specified
 	bool infinite = tokens[2] == "infinite";
 	m_serviceMap[tokens[1]]->peu->taskScheduler->Fork(tokens[0], program,
 			stringToUint32(tokens[3]), nullptr,
@@ -297,8 +292,9 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 		exit(1);
 	}
 
-	// Act accordint to type
-	// If we have a membus, create and install in hardware
+	/* Act accordint to type
+	 * If we have a membus, create and install in hardware
+	 */
 	if (tokens[0] == "MEMBUS") {
 		// Create memory bus for the hwModel
 		Ptr<MemBus> membus = CreateObjectWithAttributes<MemBus>("frequency", UintegerValue(freq));
@@ -309,8 +305,9 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
 	else if (tokens[0] == "PEU") {
 		Ptr<PEU> newPEU;
 
-		// Treat the name CPU specially. As it is the only PEU that
-		// can be intteruted, is has its own type and member variable in hwModel.
+		/* Treat the name CPU specially. As it is the only PEU that
+		 * can be intteruted, is has its own type and member variable in hwModel.
+		 */
 		ObjectFactory factory;
 		factory.SetTypeId(tokens[3]);
         if (is_prefix("cpu", tokens[2])) { // OYSTEDAL
@@ -372,9 +369,10 @@ void ExecEnv::HandleConditions(std::vector<std::string> tokens) {
 		newDeQCond.scope = tokens[2] == "global" ? CONDITIONGLOBAL : CONDITIONLOCAL;
 		dequeueConditions[tokens[1]].push_back(newDeQCond);
 	} else if (tokens[0] == "LOOP") {
-		// Note that for loops, we regard it to be sufficient with
-		// only one codition function, because _it_ can work
-		// internally with compound conditions.
+		/* Note that for loops, we regard it to be sufficient with
+		 * only one codition function, because _it_ can work
+		 * internally with compound conditions.
+		 */
 		loopConditions[tokens[1]].condName = tokens[2];
 		// A condition on a loop is allways local
 		loopConditions[tokens[1]].scope = CONDITIONLOCAL;
@@ -398,8 +396,7 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 		auto qIt = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), first);
 		auto qItLast = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), last);
 
-		// Iterate through all queues in between according
-		// to the queue order
+		// Iterate through all queues in between according to the queue order
 		while (true) {
 			if (std::find(lc->stateQueue2sServed.begin(), lc->stateQueue2sServed.end(),
 					      stateQueue2s[*qIt]) != lc->stateQueue2sServed.end())
@@ -413,17 +410,17 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 		Ptr<Queue2> firstQueue2 = queues[first];
 		Ptr<Queue2> lastQueue2 = queues[last];
 
-		// Iterate queues in the queue order, and
-		// search for each queue between and includingget
-		// firstQueue2 and lastQueue2 in lc->queues.
-		// Upon the first hit, set the
-		// dequeueOrLoopEncountered boolean variable
-		// to true.
+		/* Iterate queues in the queue order, and
+		 * search for each queue between and includingget
+		 * firstQueue2 and lastQueue2 in lc->queues.
+		 * Upon the first hit, set the
+		 * dequeueOrLoopEncountered boolean variable
+		 * to true.
+		 */
 		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue2);
 		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue2);
 
-		// Iterate through all queues in between according
-		// to the queue order
+		// Iterate through all queues in between according to the queue order
 		while (true) {
 			if (std::find(lc->queuesServed.begin(), lc->queuesServed.end(), *qIt) != lc->queuesServed.end())
 				return true;
@@ -455,9 +452,10 @@ void ExecEnv::fillQueue2s(std::string first, std::string last, LoopCondition *lc
 		auto firstQueue2 = queues[first];
 		auto lastQueue2 = queues[last];
 
-		// Iterate queues in the queue order, and
-		// insert each queue between and including
-		// firstQueue2 and lastQueue2 in lc->queues.
+		/* Iterate queues in the queue order, and
+		 * insert each queue between and including
+		 * firstQueue2 and lastQueue2 in lc->queues.
+		 */
 		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue2);
 		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue2);
 
@@ -469,9 +467,10 @@ void ExecEnv::fillQueue2s(std::string first, std::string last, LoopCondition *lc
 		if (qIt != queueOrder.end())
 			lc->queuesServed.push_back(*qIt);
 	} else if (lc->stateQueue2s) {
-		// Iterate queues in the queue order, and
-		// insert each queue between and including
-		// firstQueue2 and lastQueue2 in lc->queues.
+		/* Iterate queues in the queue order, and
+		 * insert each queue between and including
+		 * firstQueue2 and lastQueue2 in lc->queues.
+		 */
 		auto qIt = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), first);
 		auto qItLast = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), last);
 
@@ -486,9 +485,10 @@ void ExecEnv::fillQueue2s(std::string first, std::string last, LoopCondition *lc
 		auto firstQueue2 = serviceQueue2s[first];
 		auto lastQueue2 = serviceQueue2s[last];
 
-		// Iterate queues in the queue order, and
-		// insert each queue between and including
-		// firstQueue2 and lastQueue2 in lc->queues.
+		/* Iterate queues in the queue order, and
+		 * insert each queue between and including
+		 * firstQueue2 and lastQueue2 in lc->queues.
+		 */
 		auto qIt = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), firstQueue2);
 		auto qItLast = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), lastQueue2);
 
@@ -550,10 +550,11 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 				exit(1);
 			}
 
-			// Else wise, compute the combined averages and standard deviations
-			// NOTE: we currently only support normal distributions, this should be
-			// extended to lognormal.
-			// For normal
+			/* Else wise, compute the combined averages and standard deviations
+			 * NOTE: we currently only support normal distributions, this should be
+			 * extended to lognormal.
+			 * For normal.
+			 */
 			if (a.resourcesUsed[i].distributionType == "normal") {
 				// In normal distributions, param1 is average and param 2 the variance
 				double m2a = a.resourcesUsed[i].param2 * a.samples;
@@ -567,8 +568,7 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 				// Sigma is required for the calculation of the combined distribution
 				double sigma = avgb - avga;
 
-				// Calculate combined distribution parameters based on sigma
-				// and the input distribution parameters.
+				// Calculate combined distribution parameters based on sigma and the input distribution parameters.
 				double combavg = avga + sigma * (countb / countx);
 				double combvar = m2a + m2b
 						+ (sigma * sigma) * (counta * countb / countx);
@@ -596,9 +596,10 @@ ProcessingStage ExecEnv::addProcessingStages(ProcessingStage a, ProcessingStage 
 }
 
 void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
-	// Iterate through all events until we hit
-	// and END statement. We delete events and
-	// program branches as we go.
+	/* Iterate through all events until we hit
+	 * and END statement. We delete events and
+	 * program branches as we go.
+	 */
 	int execEventIndex = 0;
 	ExecutionEvent *curEventNew;
 	ExecutionEvent *curEventExist;
@@ -615,9 +616,10 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 		}
 
 		if (curEventNew->type == PROCESS) {
-			// If we have a PROCESS event, we set the
-			// one in the existing program to be the
-			// sum of the existing and the new
+			/* If we have a PROCESS event, we set the
+			 * one in the existing program to be the
+			 * sum of the existing and the new.
+			 */
 			auto curPSNew = *(ProcessingStage *) (curEventNew);
 			auto curPSExist = *(ProcessingStage *) (curEventExist);
 			*curEventExist = addProcessingStages(curPSNew, curPSExist);
@@ -635,17 +637,19 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 				exit(1);
 			}
 
-			// Here, we can safely free curPgm, as it will not
-			// be used after this point. Either the conditions
-			// program is inserted into the existing tree, or
-			// curPgm is set to the program in the existing tree.
+			/* Here, we can safely free curPgm, as it will not
+			 * be used after this point. Either the conditions
+			 * program is inserted into the existing tree, or
+			 * curPgm is set to the program in the existing tree.
+			 */
 			delete curPgm;
 
-			// If the value is exactly the same as one in the
-			// condition, simply update the curPgm pointer to
-			// the program in this entry.
-			// First, get the value of the condition, which
-			// resides as the only value in the condition.
+			/* If the value is exactly the same as one in the
+			 * condition, simply update the curPgm pointer to
+			 * the program in this entry.
+			 * First, get the value of the condition, which
+			 * resides as the only value in the condition.
+			 */
 			auto newProgram = curCond->getClosestEntryValue(0);
 			uint32_t conditionValue = newProgram.first;
 			auto closest = existCond->getClosestEntryValue(conditionValue);
@@ -660,16 +664,17 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 			}
 		}
 
-		// If we do not have a process nor a condition,
-		// we don't add anything, but we must make
-		// sure the two events are identical. Note that we
-		// have removed the packet characteristic for dequeue
-		// events.
-		//
-		// UPDATE 210814: We remove location from the comparison,
-		// because two events may correspond even if they are obtained
-		// from differing locations, e.g., in the case with HIRQ-12 on
-		// the N900.
+		/* If we do not have a process nor a condition,
+		 * we don't add anything, but we must make
+		 * sure the two events are identical. Note that we
+		 * have removed the packet characteristic for dequeue
+		 * events.
+		 *
+		 * UPDATE 210814: We remove location from the comparison,
+		 * because two events may correspond even if they are obtained
+		 * from differing locations, e.g., in the case with HIRQ-12 on
+		 * the N900.
+		 */
 		else {
 			std::vector<std::string> noLocTokensNew = curEventNew->tokens;
 			std::vector<std::string> noLocTokensExist = curEventExist->tokens;
@@ -794,10 +799,11 @@ int lineNr = 0;
 std::string line;
 
 void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
-	// Temporary variables used during parsing. Since the function
-	// returns for each event, while the variables hold values
-	// regarding series of events, we must keep their values
-	// between runs. This is why they are declared static.
+	/* Temporary variables used during parsing. Since the function
+	 * returns for each event, while the variables hold values
+	 * regarding series of events, we must keep their values
+	 * between runs. This is why they are declared static.
+	 */
 	static Ptr<SEM> currentlyHandled = nullptr;
 	static std::vector<std::string> currentDistributions;
 	static std::vector<enum ResourceType> currentResources;
@@ -807,8 +813,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	static std::string currentName;
 	static uint32_t nrSamples = 0;
 
-	// Pointer to the execution event and prospective
-	// condition created
+	// Pointer to the execution event and prospective condition created
 	ExecutionEvent *execEvent = nullptr;
 	Condition *c = nullptr;
 
@@ -830,8 +835,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		else // It did exist: set currentlyHandled to it
 			currentlyHandled = m_serviceMap[tokens[1]];
 
-		// If we have a trigger specified on this service, we
-		// insert the string into the sem
+		// If we have a trigger specified on this service, we ainsert the string into the sem
 		auto foundTrigger = serviceTriggers.find(tokens[1]);
 
 		if (foundTrigger != serviceTriggers.end()) {
@@ -871,9 +875,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		else if (tokens[1] == "memorystallcycles")
 			currentResources.push_back(MEMSTALLCYCLES);
 
-		// Easier if we just add the string here, and
-		// act according to this when handling a PROCESS
-		// event below
+		/* Easier if we just add the string here, and
+		 * act according to this when handling a PROCESS
+		 * event below.
+		 */
 		currentDistributions.push_back(tokens[2]);
 	}
 
@@ -886,19 +891,15 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	/************** EVENTS ****************/
 	/**************************************/
 
-	// When we encounter START, instantiate
-	// a new root condition
+	// When we encounter START, instantiate a new root condition
 	if (tokens[1] == "START" || tokens[1] == "LOOPSTART") {
 		currentProgram = new Program();
 		rootProgram = currentProgram;
 
-		// CurrentlyHandled is set when encountering the
-		// NAME field in the signature header
+		// CurrentlyHandled is set when encountering the NAME field in the signature header
 		currentProgram->sem = currentlyHandled;
 
-		// If we have a LOOPSTART, set the queues
-		// served and any additional conditions in
-		// the loopcondition.
+		// If we have a LOOPSTART, set the queues served and any additional conditions in the loopcondition.
 		if (tokens[1] == "LOOPSTART" && !currentlyHandled->lc) {
 			currentlyHandled->lc = new LoopCondition;
 
@@ -911,8 +912,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				fillQueue2s(tokens[3], tokens[4], currentlyHandled->lc);
 			}
 
-			// Check if we have specified an additional
-			// condition for this queue
+			// Check if we have specified an additional condition for this queue
 			auto foundLoopCond = loopConditions.find(currentName);
 			if (foundLoopCond != loopConditions.end()) {
 				currentlyHandled->lc->additionalCondition = conditionFunctions->conditionMap[foundLoopCond->second.condName];
@@ -954,10 +954,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			existingProgram = &(currentlyHandled->rootProgram);
 
 
-		// Since we may delete this event in addPgm (below), we must make sure
-		// to set any prospective trigger and debug data on this event
-		// before returning. For other event types, this is done at the end
-		// of this member function.
+		/* Since we may delete this event in addPgm (below), we must make sure
+		 * to set any prospective trigger and debug data on this event
+		 * before returning. For other event types, this is done at the end
+		 * of this member function.
+		 */
 		execEvent->tokens = tokens;
 		auto foundTrigger = locationTriggers.find(tokens[0]);
 		if (foundTrigger != locationTriggers.end())
@@ -970,9 +971,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		} else
 			execEvent->hasDebug = false;
 
-		// If the existing program is nullptr, we simply set it
-		// to our program. Else wise, we iterate the existing
-		// program to update probabilities and merge branch
+		/* If the existing program is nullptr, we simply set it
+		 * to our program. Else wise, we iterate the existing
+		 * program to update probabilities and merge branch
+		 */
 		if (*existingProgram == nullptr)
 			*existingProgram = rootProgram;
 		else
@@ -992,9 +994,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	if (tokens[1] == "PROCESS" || tokens[1] == "PEUSTART") {
-		// Iterate all HWE aggregates obtained during
-		// the parsing of the header.
-		// First, create the processing stage
+		/* Iterate all HWE aggregates obtained during the parsing of the header.
+		 * First, create the processing stage.
+		 */
 		auto ps = new ProcessingStage();
 		execEvent = ps;
 		ps->samples = nrSamples;
@@ -1003,15 +1005,15 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		if (tokens[1] == "PEUSTART")
 			intField = 1;
 
-		// Then, iterate according to all HWE aggregates
-		// specified in the header parsed above.
+		// Then, iterate according to all HWE aggregates specified in the header parsed above.
 		unsigned long numHWEs = currentResources.size();
 		int tokenIndex = 0;
 		for (size_t i = 0; i < numHWEs; i++) {
 			// Obtain the parameters of the given distribution
 			if (currentDistributions[i] == "normal") {
-				// The normal distribution takes two parameters:
-				// average and standard deviation
+				/* The normal distribution takes two parameters:
+				 * average and standard deviation.
+				 */
 				double average = stringToDouble(
 						tokens[intField + 2 + tokenIndex++]);
 				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
@@ -1024,8 +1026,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				ps->resourcesUsed[currentResources[i]].param2 = sd * sd;
 				ps->samples = nrSamples;
 			} else if (currentDistributions[i] == "lognormal") {
-				// The normal distribution takes two parameters:
-				// average and standard deviation
+				/* The normal distribution takes two parameters:
+				 * average and standard deviation
+				 */
 				double logaverage = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				double logsd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
 				ps->resourcesUsed[currentResources[i]].defined = true;
@@ -1038,10 +1041,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				ps->samples = nrSamples;
 			}
 
-			//
-			// TODO: other distributions - we currently only support normal and lognormal
-			// distributions. Lognormal appears to be the better estimator for cycles.
-			//
+			/*
+			 * TODO: other distributions - we currently only support normal and lognormal
+			 * distributions. Lognormal appears to be the better estimator for cycles.
+			 */
 		}
 
 		// If we have a PEUSTART, we want insert the SEM of the interrupt specified
@@ -1070,16 +1073,15 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		std::string cycles_per_cepop = tokens[4];
 		std::string deviation_per_cepop = tokens[5];
 
-		// Iterate all HWE aggregates obtained during
-		// the parsing of the header.
-		// First, create the processing stage
+		/* Iterate all HWE aggregates obtained during the parsing of the header.
+		 * First, create the processing stage.
+		 */
 		auto ps1 = new ProcessingStage();
 		ps1->samples = nrSamples;
 
 		int intField = 0;
 
-		// Then, iterate according to all HWE aggregates
-		// specified in the header parsed above.
+		// Then, iterate according to all HWE aggregates specified in the header parsed above.
 		unsigned long numHWEs = currentResources.size();
 		int tokenIndex = 0;
 		for (size_t i = 0; i < numHWEs; i++) {
@@ -1168,15 +1170,16 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(ieiceop->ieifsm->ps);
 	}
 
-	// Remember: unless the queue is explicitly specified,
-	// which happens only outside of loops, we don't have
-	// to specify any queue inside of this event. This is
-	// because then, which queue to serve is determined by
-	// the encapsulating loop structure.
-	// Note: We have to add queue events before conditions,
-	// because if there is a condition on a dequeued packet,
-	// it must be set to curPkt in thread.cc before being
-	// able to resolve the condition.
+	/* Remember: unless the queue is explicitly specified,
+	 * which happens only outside of loops, we don't have
+	 * to specify any queue inside of this event. This is
+	 * because then, which queue to serve is determined by
+	 * the encapsulating loop structure.
+	 * Note: We have to add queue events before conditions,
+	 * because if there is a condition on a dequeued packet,
+	 * it must be set to curPkt in thread.cc before being
+	 * able to resolve the condition.
+	 */
 	if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
 		// Create an event, and insert the queue
 		auto q = new Queue2ExecutionEvent();
@@ -1198,13 +1201,14 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				q->valueToEnqueue = stringToUint32(tokens[3]);
 			}
 
-			// We currently only support local statequeues, but might
-			// later, on a need-to-implement basis, extend this support
-			// also to packet and service queues.
-			//
-			// We also do not support global state queues for now, as
-			// this is not in demand (i.e., we're only using state
-			// queues for the spisizes queue on the N900).
+			/* We currently only support local statequeues, but might
+			 * later, on a need-to-implement basis, extend this support
+			 * also to packet and service queues.
+			 *
+			 * We also do not support global state queues for now, as
+			 * this is not in demand (i.e., we're only using state
+			 * queues for the spisizes queue on the N900).
+			 */
 			q->local = tokens[5] == "local";
 		}
 
@@ -1218,17 +1222,17 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				q->servQueue2 = serviceQueue2s[tokens[4]];
 		}
 
-		// If we have a checkpoint specified for the queue,
-		// set it. NOTICE that we may fire TWO triggers upon
-		// this event: (1) the one in the DEQUEUE event itself,
-		// and (2) the one in the SEM prospectively dequeued.
+		/* If we have a checkpoint specified for the queue,
+		 * set it. NOTICE that we may fire TWO triggers upon
+		 * this event: (1) the one in the DEQUEUE event itself,
+		 * and (2) the one in the SEM prospectively dequeued.
+		 */
 		if (tokens[1] == "DEQUEUE") {
 			auto dqTrigIt = dequeueTriggers.find(tokens[3]);
 			if (dqTrigIt != dequeueTriggers.end())
 				q->checkpoint = dqTrigIt->second;
 
-			// If we're inside a loop, update
-			// dequeueOrLoopEncountered
+			// If we're inside a loop, update dequeueOrLoopEncountered
 			if (currentlyHandled->lc != nullptr && (tokens[4] == "0" || queuesIn(tokens[4], tokens[4], currentlyHandled->lc))) {
 				dequeueOrLoopEncountered = true;
 				currentProgram->hasDequeue = true; // See comments in program.h this member
@@ -1256,9 +1260,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		auto newProgram = new Program();
 		newProgram->sem = currentlyHandled;
 
-		// All conditions are assumed to be local.
-		// State-conditions can be used to create
-		// global conditions.
+		/* All conditions are assumed to be local.
+		 * State-conditions can be used to create
+		 * global conditions.
+		 */
 		if (tokens[1] == "QUEUECOND") {
 			// Assume that the first and last queues are of the same type: packet or service queue
 			if (queues.find(tokens[2]) != queues.end()) {
@@ -1296,8 +1301,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			currentProgram->events.push_back(c);
 			currentProgram = newProgram;
 		} else if (tokens[1] == "STATECOND") {
-			// Can be global or local
-			// First find out if we have a condition specified for this location
+			/* Can be global or local.
+			 * First find out if we have a condition specified for this location
+			 */
 			bool definedInDeviceFile = tokens[2] == "definedindevicefile";
 			std::map<std::string, struct condition>::iterator foundCond;
 
@@ -1312,9 +1318,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				sc->operation = tokens[3] == "write" ? CONDITIONWRITE : CONDITIONREAD;
 				sc->scope = tokens[4] == "local" ? CONDITIONLOCAL : CONDITIONGLOBAL;
 
-				// CONT HERE - TODO: add name of variable if local, add to gobal vars.
-				// structure if not local. We currently assume that the values are
-				// integers.
+				/* CONT HERE - TODO: add name of variable if local, add to gobal vars.
+				 * structure if not local. We currently assume that the values are
+				 * integers.
+				 */
 
 				// See if state condition has read and/or write functions (TODO: Not tested yet!)
 				auto foundCond2 = conditionFunctions->conditionMap.find("readState" + sc->name);
@@ -1343,8 +1350,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 			}
 		} else if (tokens[1] == "PKTEXTR") {
-			// Can be global or local
-			// First find out if we have a condition specified for this location
+			/* Can be global or local
+			 * First find out if we have a condition specified for this location
+			 */
 			auto foundCond = locationConditions.find(tokens[0]);
 			if (foundCond != locationConditions.end()) {
 				c = (Condition *) new PacketCharacteristic();
@@ -1359,17 +1367,17 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				currentProgram = newProgram;
 			}
 		} else if (tokens[1] == "DEQUEUE" || tokens[1] == "ENQUEUE") {
-						// If queue is 0, we must first find the queue name.
-						// But before that, we must confirm that we are in
-						// fact within a loop.
+		    /* If queue is 0, we must first find the queue name.
+		     * But before that, we must confirm that we are in
+		     * fact within a loop.
+		     */
 			std::string queueName;
 			if (tokens[4] == "0") {
 				if (currentlyHandled->lc == nullptr) {
 					NS_FATAL_ERROR("Got queue 0 outside of loop");
 					exit(1);
 
-					// Elsewise, assume that all queues in the loop
-					// use the same extractor.
+					// Elsewise, assume that all queues in the loop use the same extractor.
 				} else {
 					// Differentiate between service and packet queues
 					if (currentlyHandled->lc->serviceQueue2s) {
@@ -1401,9 +1409,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				}
 			}
 
-			// Elsewise, we have explicitly specified the queue name. This is
-			// quite uncommon, as this means the analyser have not removed the
-			// name, and we are de-queuing outside of a loop.
+			/* Elsewise, we have explicitly specified the queue name. This is
+			 * quite uncommon, as this means the analyser have not removed the
+			 * name, and we are de-queuing outside of a loop.
+			 */
 			else
 				queueName = tokens[4];
 
@@ -1454,9 +1463,10 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	if (tokens[1] == "CALL" || tokens[1] == "LOOP") {
-		// Here, we have one service calling another. We create
-		// an ExecutionEvent, where the service is inserted
-		// into the "service" member.
+		/* Here, we have one service calling another. We create
+		 * an ExecutionEvent, where the service is inserted
+		 * into the "service" member.
+		 */
 		auto e = new ExecuteExecutionEvent();
 		e->service = tokens[2] == "0" ? "" : tokens[2];
 		if (tokens[2] == "0")
@@ -1471,30 +1481,34 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		}
 		execEvent = e;
 
-		// If we have a call to a loop, prepare a loop condition,
-		// and set dequeueOrLoopEncountered to true if it regards
-		// queue(s) of a prospectively encapsulating loop.
+		/* If we have a call to a loop, prepare a loop condition,
+		 * and set dequeueOrLoopEncountered to true if it regards
+		 * queue(s) of a prospectively encapsulating loop.
+		 */
 		if (tokens[1] == "LOOP") {
-			// We first copy the contents of the lc of the target
-			// service if it has one. Note that this includes the
-			// queues served, which may imply quite a bit of copying,
-			// but its bettwe to do it once here during initialization
-			// than repeatedly per execution during simulation.
+			/* We first copy the contents of the lc of the target
+			 * service if it has one. Note that this includes the
+			 * queues served, which may imply quite a bit of copying,
+			 * but its bettwe to do it once here during initialization
+			 * than repeatedly per execution during simulation.
+			 */
 			e->lc = new LoopCondition();
 			LoopCondition *targetServiceLC = this->m_serviceMap[tokens[2]]->lc;
 			if (targetServiceLC != nullptr)
 				*(e->lc) = *targetServiceLC;
 
-			// It is reasonable that parameters of the loop may
-			// change. This does not regard which queues served,
-			// though, as this is part of what defined the loop.
+			/* It is reasonable that parameters of the loop may
+			 * change. This does not regard which queues served,
+			 * though, as this is part of what defined the loop.
+			 */
 			e->lc->maxIterations = stringToUint32(tokens[6]);
 			e->lc->perQueue2 = tokens[3] == "1";
 
-			// If we have a nested loop then
-			// if we have a loop that servers one or more of the
-			// queues in currentlyHandled->lc, set
-			// dequeueOrLoopEncountered to true.
+			/* If we have a nested loop then
+			 * if we have a loop that servers one or more of the
+			 * queues in currentlyHandled->lc, set
+			 * dequeueOrLoopEncountered to true.
+			 */
 			if (currentlyHandled->lc != nullptr && queuesIn(tokens[3], tokens[4], currentlyHandled->lc)) {
 				dequeueOrLoopEncountered = true;
 				currentProgram->hasInternalLoop = true; // Se comments in program.h on this member
@@ -1506,17 +1520,18 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	if (tokens[1] == "SEMUP" || tokens[1] == "SEMDOWN" || tokens[1] == "WAITCOMPL" || tokens[1] == "COMPL") {
-		// Note that this may be on a tempsynch
-		// This is currently how it works in Linux,
-		// but it could easily be changed to be
-		// OS/scheduler-independent as the co-sim
-		// mechanism impl. by TaskScheduler
-		// provisions for that with the synchType etc.
-		// Ideally, the trace function should take
-		// the synch type as an argument. TODO if time.
-		// Alternatively, just let the analyzer set
-		// the number according to the type of the
-		// event.
+		/* Note that this may be on a tempsynch
+		 * This is currently how it works in Linux,
+		 * but it could easily be changed to be
+		 * OS/scheduler-independent as the co-sim
+		 * mechanism impl. by TaskScheduler
+		 * provisions for that with the synchType etc.
+		 * Ideally, the trace function should take
+		 * the synch type as an argument. TODO if time.
+		 * Alternatively, just let the analyzer set
+		 * the number according to the type of the
+		 * event.
+		 */
 		uint32_t synchType = currentlyHandled->peu->taskScheduler->GetSynchReqType(tokens[1]);
 		auto s = new SynchronizationExecutionEvent();
 		execEvent = s;
@@ -1534,10 +1549,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	if (tokens[1] == "TEMPSYNCH") {
-		// This is very simple - we just indicate its type.
-		// All of the action (creation of synch-prim. and
-		// setting the void-pointer in the packet to it <- NOT PACKET, IT MAY NOT EXIST!)
-		// happens in thread.cc
+		/* This is very simple - we just indicate its type.
+		 * All of the action (creation of synch-prim. and
+		 * setting the void-pointer in the packet to it <- NOT PACKET, IT MAY NOT EXIST!)
+		 * happens in thread.cc
+		 */
 		auto tc = new TempCompletion();
 		execEvent = tc;
 
@@ -1553,10 +1569,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	if (tokens[1] == "DEBUG") {
-		// This is very simple - we just indicate its type.
-		// All of the action (creation of synch-prim. and
-		// setting the void-pointer in the packet to it <- NOT PACKET, IT MAY NOT EXIST!)
-		// happens in thread.cc
+		/* This is very simple - we just indicate its type.
+		 * All of the action (creation of synch-prim. and
+		 * setting the void-pointer in the packet to it <- NOT PACKET, IT MAY NOT EXIST!)
+		 * happens in thread.cc
+		 */
 		auto de = new DebugExecutionEvent();
 		execEvent = de;
 		if (tokens.size() >= 2)
@@ -1584,18 +1601,20 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	}
 
 	if (execEvent) {
-		// We must set the packet characteristic to "0" for queue events, else wise
-		// addPgm will complain when encountering two events differing in
-		// terms of the packet extract. Differing packet extracts does
-		// not mean that the events differ, only that the packets dequeued
-		// have diferent characteristics.
+		/* We must set the packet characteristic to "0" for queue events, else wise
+		 * addPgm will complain when encountering two events differing in
+		 * terms of the packet extract. Differing packet extracts does
+		 * not mean that the events differ, only that the packets dequeued
+		 * have diferent characteristics.
+		 */
 		if (tokens[1] == "DEQUEUE" || tokens[1] == "ENQUEUE")
 			tokens[3] = "0";
 
 		execEvent->tokens = tokens;
 
-		// If we have a checkpoint specified on this location, we
-		// insert the string into the checkpoint value
+		/* If we have a checkpoint specified on this location, we
+		 * insert the string into the checkpoint value
+		 */
 		auto foundTrigger = locationTriggers.find(tokens[0]);
 
 		if (foundTrigger != locationTriggers.end())
@@ -1617,8 +1636,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		c->lineNr = lineNr;
 		c->line = line;
 
-		// If we have a checkpoint specified on this location, we
-		// insert the string into the checkpoint value
+        /* If we have a checkpoint specified on this location, we
+		 * insert the string into the checkpoint value
+         */
 		auto foundTrigger = locationTriggers.find(tokens[0]);
 
 		if (foundTrigger != locationTriggers.end())
@@ -1648,13 +1668,14 @@ std::vector<std::string> split(const char *str, char c = ' ')
     return result;
 }
 
-// Parse device file to create
-// - task scheulder
-// - SEMs
-// - LEUs
-// - PEUs
-// - Queue2s
-// - Snchronization primitives
+/* Parse device file to create
+ * - task scheulder
+ * - SEMs
+ * - LEUs
+ * - PEUs
+ * - Queue2s
+ * - Snchronization primitives
+ */
 void ExecEnv::Parse(std::string device) {
 	std::ifstream myfile;
 	std::string mode;
@@ -1667,13 +1688,12 @@ void ExecEnv::Parse(std::string device) {
 			std::getline(myfile, line);
 
 			std::istringstream iss(line);
-			std::vector<std::string> tokens; // = split(line.c_str());
+			std::vector<std::string> tokens;
 			std::copy(std::istream_iterator<std::string>(iss),
 					std::istream_iterator<std::string>(),
 					std::back_inserter<std::vector<std::string> >(tokens));
 
-			// If there was a blank line, we know we
-			// are done
+			// If there was a blank line, we know we are done
 			if (tokens.empty() || tokens[0].c_str()[0] == '#')
 				continue;
 
@@ -1714,22 +1734,23 @@ void ExecEnv::Parse(std::string device) {
 			} else
 				continue;
 
-			// Act according to the mode:
-			// queue: add to queue with correct parametesr
-			// sych: use taskscheduler of cpu to add synch
-			// threads: add to local map thread<->program for later forkin when all sigs (e.i., the whole file) is parsed
-			// sigstart: just set the mode
-			// scheduler: create the taskscheduler of the cpu looking up the class name in the scheduler<->schedsim static
-			//      map in TaskScheduler (e.g., "Linux" <-> "LinSched", and using an objectfactory to create an object of that type.
-			//      We support other types of schedulers for other PEUs as well, but if no scheduler is specified, a simple ParallellThreadsScheduler
-			//      is instantiated for that PEU.
-			// condition: register the condition in the local addr<->conditionname map for later addition to execution events during event parsing
+			/* Act according to the mode:
+			 * queue: add to queue with correct parametesr
+			 * sych: use taskscheduler of cpu to add synch
+			 * threads: add to local map thread<->program for later forkin when all sigs (e.i., the whole file) is parsed
+			 * sigstart: just set the mode
+			 * scheduler: create the taskscheduler of the cpu looking up the class name in the scheduler<->schedsim static
+			 *      map in TaskScheduler (e.g., "Linux" <-> "LinSched", and using an objectfactory to create an object of that type.
+			 *      We support other types of schedulers for other PEUs as well, but if no scheduler is specified, a simple ParallellThreadsScheduler
+			 *      is instantiated for that PEU.
+			 * condition: register the condition in the local addr<->conditionname map for later addition to execution events during event parsing
 
-			// Parse events to create SEMs (note, only later on some of the SEMs are used as roots at threads and PEUs!):
-			// name and distribution: store in local string
-			// resources: add to local vector of strings
-			//
-			// SIGEND: break
+			 * Parse events to create SEMs (note, only later on some of the SEMs are used as roots at threads and PEUs!):
+			 * name and distribution: store in local string
+			 * resources: add to local vector of strings
+			 *
+			 * SIGEND: break
+			 */
 
 		}
 	} else
