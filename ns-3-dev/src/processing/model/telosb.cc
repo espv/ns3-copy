@@ -31,9 +31,6 @@ namespace ns3 {
     NS_LOG_COMPONENT_DEFINE("TelosB");
 }
 
-// TODO: Replace some of the ad-hoc variables with proper queues and STATECOND variables that can be used by the execenv
-// TODO: Tidy up telosb-example.cc
-
 void
 TelosB::Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevice> netDevice) {
     node->GetObject<ExecEnv>()->cpuScheduler->allowNestedInterrupts = true;
