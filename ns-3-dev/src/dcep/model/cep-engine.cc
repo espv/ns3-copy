@@ -90,8 +90,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    CEPEngine::ProcessCepEvent(Ptr<CepEvent> e){
-        
+    CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
+    {
         GetObject<Detector>()->ProcessCepEvent(e);
     }
     
@@ -210,15 +210,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         ops.erase(ops.begin());
         if (ops.begin() != ops.end()) {
-            Ptr<Packet> newPacket = Create<Packet>();
-            ee->queues["from-CepOperatorProcessCepEvent"]->Enqueue(newPacket);
-            ee->Proceed(newPacket, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->globalStateVariables["CepOpsLeft"] = 1;
-        } else {
-            ee->globalStateVariables["CepOpsLeft"] = 0;
-            --ee->globalStateVariables["PacketsLeft"];
-            --ee->globalStateVariables["EventsLeft"];
-        }
+        }  // Sets CepOpsLeft, EventsLeft and PacketsLeft to 0 in trex.device
 
         //op->Evaluate(e, returned, MakeEvent(&Detector::ProceedFromEvaluate, this, cep, returned, op, producer));
         op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer);
@@ -238,13 +233,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Node> node = GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         if (ops.begin() != ops.end()) {
-            Ptr<Packet> newPacket = Create<Packet>();
-            ee->queues["from-ProcessCepEvent"]->Enqueue(newPacket);
-            ee->Proceed(newPacket, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->globalStateVariables["CepOpsLeft"] = 1;
-        } else {
-            ee->globalStateVariables["CepOpsLeft"] = 0;
-        }
+        }  // Sets CepOpsLeft to 0 in trex.device
     }
     
     

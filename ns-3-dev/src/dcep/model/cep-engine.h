@@ -23,6 +23,8 @@
 #include "ns3/traced-callback.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/event-impl.h"
+#include "ns3/packet.h"
+
 namespace ns3 {
 
     class CepEvent;
@@ -57,6 +59,7 @@ namespace ns3 {
         uint32_t event_class;
         uint32_t hopsCount;
         uint32_t prevHopsCount;
+        Ptr<Packet> pkt;
     };
     
     class CepEventPattern : public Object{
@@ -153,8 +156,6 @@ private:
         static TypeId GetTypeId (void);
         void ProcessCepEvent(Ptr<CepEvent> e);
         void CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
-
-        void ProceedFromEvaluate(Ptr<CEPEngine> cep, std::vector<Ptr<CepEvent> > &returned, Ptr<CepOperator> op, Ptr<Producer> producer);
        
     };
     

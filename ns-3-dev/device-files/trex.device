@@ -29,6 +29,7 @@ QUEUES
 HIRQ	            FIFO 	-1    services
 # Queue for posted tasks
 sq FIFO -1 services
+rcvd-pkts FIFO -1 packets
 
 # Bridge queues
 from-CepOperatorProcessCepEvent FIFO -1 packets
@@ -54,6 +55,8 @@ LOC process-or-cepop-loc loc-process-or-cepop
 LOC process-and-cepop-loc loc-process-and-cepop
 LOC process-then-cepop-loc loc-process-then-cepop
 LOC process-cepop-loc loc-process-cepop
+SERVICE handle-cepops handle-cepops
+LOC within-send-packet send-packet
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -90,8 +93,10 @@ FRACTION 100% 1 1
 
 0 START
 x STATECOND PacketsLeft read global 1
+x STATECOND PacketsLeft write global 0
 x PROCESS 1000 0
 x CALL process_received_packet
+x ENQUEUE PKTQUEUE 0 rcvd-pkts
 x TTWAKEUP event_thread
 0 STOP
 
@@ -99,7 +104,7 @@ SIGEND
 
 
 SIGSTART
-NAME HIRQ-1 # Receiving part
+NAME HIRQ-1  # Receiving part
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -119,7 +124,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x PROCESS 1000 0
+within-send-packet PROCESS 1000 0
 0 STOP
 
 SIGEND
@@ -146,26 +151,10 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 LOOPSTART		0 sq sq 0
-#x QUEUECOND sq sq notempty
-x CALL send-packet
 x                      DEQUEUE		SRVQUEUE 0 0
 0 RESTART
 
 SIGEND
-
-
-#SIGSTART
-#NAME process-packets
-#PEU cpu
-#RESOURCES cycles normal
-#FRACTION 100% 1 1
-#
-#0 LOOPSTART		0 sq sq 0
-###x QUEUECOND sq sq empty
-#x SLEEPTHREAD
-#0 RESTART
-#
-#SIGEND
 
 
 SIGSTART
@@ -175,6 +164,21 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x QUEUECOND sq sq empty
+x SLEEPTHREAD
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME packet_processing_thread  # Wake up when packet is received and to be sent
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND sq sq notempty
 x LOOP process-packets 0 sq sq 0
 x SLEEPTHREAD
 0 STOP
@@ -321,8 +325,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
+x STATECOND CepOpsLeft write global 0
 x STATECOND CepOpType read global 0
 x CALL handle-or-cepop
 x CALL handle-cepops
@@ -337,9 +341,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
-x DEQUEUE PKTQUEUE 0 h1-h2
+x STATECOND CepOpsLeft write global 0
 x STATECOND CepOpType read global 1
 x CALL handle-and-cepop
 x CALL handle-cepops
@@ -354,9 +357,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x DEQUEUE PKTQUEUE 0 h1-h2
 x STATECOND CepOpsLeft read global 1
-x DEQUEUE PKTQUEUE 0 h1-h2
+x STATECOND CepOpsLeft write global 0
 x STATECOND CepOpType read global 2
 x CALL handle-then-cepop
 x CALL handle-cepops
@@ -385,7 +387,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND EventsLeft read global 0
+x QUEUECOND rcvd-pkts rcvd-pkts empty
 x SLEEPTHREAD
 0 STOP
 
@@ -399,7 +401,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND EventsLeft read global 1
+x QUEUECOND rcvd-pkts rcvd-pkts notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts
 x PROCESS 1000 0
 x CALL handle-cepops
 0 STOP

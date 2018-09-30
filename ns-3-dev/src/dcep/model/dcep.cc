@@ -263,19 +263,14 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
                 // Invoke SEM that delays the execution of p->RcvCepEvent
-                if (!ee->globalStateVariables["PacketsLeft"])
-                    ee->globalStateVariables["PacketsLeft"] = 1;
-                else
-                    ee->globalStateVariables["PacketsLeft"]++;
-
-                if (!ee->globalStateVariables["EventsLeft"])
-                    ee->globalStateVariables["EventsLeft"] = 1;
-                else
-                    ee->globalStateVariables["EventsLeft"]++;
+                ee->globalStateVariables["PacketsLeft"] = 1;  // Need to include larger than and smaller than state conditionals
+                ee->globalStateVariables["EventsLeft"] = 1;
 
                 ee->eventqueues["event-queue"].push_back(event->type);
-                ee->ScheduleInterrupt (pkt, "HIRQ-1", Seconds(0));
-                ee->Proceed(pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
+                event->pkt = pkt;
+                ee->ScheduleInterrupt (event->pkt, "HIRQ-1", Seconds(0));
+                event->pkt->m_executionInfo.executedByExecEnv = false;
+                ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
 
                 break; 
             }

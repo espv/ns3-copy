@@ -70,7 +70,7 @@ FRACTION 49%  1937 3880
 0 START
 x STATECOND ip-radio-busy read global 0
 x QUEUECOND ipaq ipaq empty
-x PKTQUEUE ENQUEUE ipaq-postponed
+x ENQUEUE PKTQUEUE 0 ipaq-postponed
 0 STOP
 
 SIGEND

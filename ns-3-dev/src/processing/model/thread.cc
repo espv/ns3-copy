@@ -504,8 +504,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newSem = ee->sem;
 
 		if (m_currentLocation->curPkt != nullptr) {
-			ExecutionInfo *pktEI =
-				&(m_currentLocation->curPkt->m_executionInfo);
+			ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 			if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 				pktEI->executedByExecEnv = true;
 				EventImpl *toInvoke = pktEI->targetFPM;
@@ -811,9 +810,9 @@ bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {
 	auto se = dynamic_cast<SchedulerExecutionEvent *>(e);
 	std::vector<uint32_t> arguments;
 
-	if (se->schedType == AWAKE) {
+	if (se->schedType == AWAKE)
 		arguments.push_back((uint32_t)this->m_scheduler->threadPids[se->threadName]);
-	} else
+	else
 	    arguments.push_back((uint32_t)m_pid);
 
 	const int cpu = peu->GetObject<CPU>()->GetId();
