@@ -398,7 +398,7 @@ auto
                  t << ", install time in microseconds: " << install_time);
 #elif ALL_CONTEXTS
 
-    std::ofstream numberForwardedFile ("NumberPoints.txt");
+    std::ofstream numberForwardedFile ("all-contexts-output/NumberPoints.txt");
     if (!numberForwardedFile.is_open()) {
         NS_LOG_INFO ("Failed to open NumberPoints.txt, exiting");
         exit(-1);
