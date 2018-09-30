@@ -787,12 +787,6 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue2] :
 					qe->queue;
 
-			Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
-			Ptr<Queue2> rxfifo_queue = ee->queues["rxfifo"];
-			if (rxfifo_queue == queueToServe && queueToServe->IsEmpty()) {
-				std::cout << "Dequeueing from empty rxfifo" << std::endl;
-			}
-
             m_currentLocation->curPkt = queueToServe->Dequeue();
 
 			// We need call activate any prospective triggers on the queue

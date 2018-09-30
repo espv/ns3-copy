@@ -5,7 +5,7 @@ HIRQ	 FIFO 	 -1    services
 
 # The IPAQ, which has a capacity of 3 packets
 ipaq FIFO 3 packets
-# CC2420 RxFifo
+# CC2420 Rxfifo
 rxfifo FIFO -1 packets
 
 # The 3 packet queues below are "bridges" between functions. Conceptually, a thread is always working with at max
