@@ -121,7 +121,7 @@ class ParallelThreadsScheduler : public TaskScheduler
 
   ParallelThreadsScheduler();
 
-  virtual void Initialize(const Ptr<PEU> &cpuPEU);
+  virtual void Initialize(const Ptr<PEU> &noncpuPEU);
   virtual void Terminate(Ptr<PEU> peu, unsigned int pid);
   virtual Ptr<Thread> Fork(std::string,
 			Program *,
