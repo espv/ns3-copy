@@ -75,8 +75,8 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   }
 
   execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
-  execenv->queues["rxfifo"]->Enqueue(packet);
   if (receivingPacket) {
+    execenv->queues["rxfifo"]->Enqueue(packet);
     NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: " << execenv->queues["rxfifo"]->GetNPackets());
     return;
   }
