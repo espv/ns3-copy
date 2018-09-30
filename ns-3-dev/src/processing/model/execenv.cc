@@ -1189,10 +1189,16 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		if (tokens[2] == "SRVQUEUE") {
 			q->serviceQueue2 = true;
 			if (tokens[1] == "ENQUEUE") {
-				q->semToEnqueue = m_serviceMap[tokens[3]];
-				if (q->semToEnqueue == nullptr) {
-					std::cout << "SEM " << tokens[3] << " is not defined. Make sure it is defined above the function that calls invokes it" << std::endl;
-					exit(1);
+				if (tokens.size() <= 2)
+					q->semToEnqueue = nullptr;
+				else {
+					q->semToEnqueue = m_serviceMap[tokens[3]];
+					if (q->semToEnqueue == nullptr) {
+						std::cout << "SEM " << tokens[3]
+								  << " is not defined. Make sure it is defined above the function that calls invokes it"
+								  << std::endl;
+						exit(1);
+					}
 				}
 			}
 		} else if (tokens[2] == "STATEQUEUE") {
