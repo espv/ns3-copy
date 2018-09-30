@@ -692,7 +692,7 @@ void ExecEnv::addPgm(Program *curPgm, Program* existPgm) {
 
 		// We can safely free the handled event
 		t = curEventNew->type;
-		delete curEventNew;
+		//delete curEventNew;  // TODO: Espen, find out why this statement causes a crash
 		execEventIndex++;
 	} while (t != END);
 }
