@@ -102,7 +102,7 @@ TaskScheduler::HandleSchedulerEvent()
 // Creates and initializes data structures for this node as well as 
 // creating the idle thread.
 void
-TaskScheduler::Initialize(const Ptr<PEU> &cpuPEU)
+TaskScheduler::Initialize(Ptr<PEU> cpuPEU)
 {
   // Set the CPU
   peu = cpuPEU;
@@ -211,7 +211,7 @@ TaskScheduler::DoSynchRequest(int cpu, int type, std::string id,  std::vector<ui
 }
 
 int
-TaskScheduler::DoTempSynchRequest(int cpu, int type, void *var, const std::vector<uint32_t> &arguments)
+TaskScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint32_t> arguments)
 {
   NS_LOG_ERROR("DoTempSynchRequest not implemented in SchedSim");
   return -1;
@@ -317,7 +317,7 @@ void *TaskScheduler::AllocateTempSynch(int type, std::vector<uint32_t> arguments
 // The following should be implemented by the SchedSim-specific sub-class
 ////////////
 
-void* TaskScheduler::DoAllocateTempSynch(int type, const std::vector<uint32_t> &arguments) {
+void* TaskScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> arguments) {
 	  NS_LOG_ERROR("DoAllocateTempSynch not specialized by SchedSim wrapper");
 	  return 0;
 }
@@ -359,7 +359,7 @@ TaskScheduler::DoHandleSchedulerEvent()
 }
 
 int
-TaskScheduler::DoRequest(int cpu, int type, const std::vector<uint32_t> &arguments)
+TaskScheduler::DoRequest(int cpu, int type, std::vector<uint32_t> arguments)
 {
   NS_LOG_ERROR("DoRequest not specialized by SchedSim wrapper");
   return 0;
@@ -373,7 +373,7 @@ TaskScheduler::DoCurrentRunning()
 }
 
 void
-TaskScheduler::DoAllocateSynch(int type, const std::string &id, const std::vector<uint32_t> &arguments)
+TaskScheduler::DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments)
 {
   NS_LOG_ERROR("DoAllocateSynch not implemented by SchedSim");
 }
@@ -406,7 +406,7 @@ ParallelThreadsScheduler::GetTypeId ()
 }
 
 void
-ParallelThreadsScheduler::Initialize(const Ptr<PEU> &nonCPUPEU)
+ParallelThreadsScheduler::Initialize(Ptr<PEU> nonCPUPEU)
 {
   /* Initialize bitmap
    * Create N threads according to attribute

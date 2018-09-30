@@ -144,7 +144,7 @@ std::vector<int> RoundRobinScheduler::DoCurrentRunning() {
     return m_currentRunning;
 }
 
-void RoundRobinScheduler::DoAllocateSynch(int type, const std::string &id, const std::vector<uint32_t> &arguments) {
+void RoundRobinScheduler::DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments) {
     switch (type) {
         case 0: // Semaphore
             {
@@ -158,7 +158,7 @@ void RoundRobinScheduler::DoAllocateSynch(int type, const std::string &id, const
     }
 }
 
-void* RoundRobinScheduler::DoAllocateTempSynch(int type, const std::vector<uint32_t> &arguments) {
+void* RoundRobinScheduler::DoAllocateTempSynch(int type, std::vector<uint32_t> arguments) {
     switch (type) {
         case 1: // Completion
             {
@@ -279,7 +279,7 @@ int RoundRobinScheduler::DoSynchRequest(int cpu, int type, std::string id, std::
     return 0;
 }
 
-int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, const std::vector<uint32_t> &arguments) {
+int RoundRobinScheduler::DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint32_t> arguments) {
     switch (type) { // Completion
         case WAIT_COMPL:
             {

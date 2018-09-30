@@ -53,7 +53,7 @@ public:
 	std::map<std::string, Ptr<StateVariableQueue2> > localStateVariableQueue2s;
 
 	// Methods
-	Ptr<StateVariableQueue2> getLocalStateVariableQueue2(const std::string &queueID);
+	Ptr<StateVariableQueue2> getLocalStateVariableQueue2(std::string queueID);
 	Ptr<StateVariable> getLocalStateVariable(std::string);
 
 	// For execution statistics

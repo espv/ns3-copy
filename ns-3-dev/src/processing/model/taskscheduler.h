@@ -42,7 +42,7 @@ public:
   bool allowNestedInterrupts = false;
 
   // To start and handle the scheduling events
-  virtual void Initialize(const Ptr<PEU> &cpuPEU);
+  virtual void Initialize(Ptr<PEU> cpuPEU);
   void HandleSchedulerEvent();
 
   // Functions to install, remove and switch
@@ -87,12 +87,12 @@ protected:
   virtual int DoFork(int priority);
   virtual void DoTerminate(void);
   virtual std::vector<int> DoCurrentRunning(void);
-  virtual void DoAllocateSynch(int type, const std::string &id, const std::vector<uint32_t> &arguments);
-  virtual void* DoAllocateTempSynch(int type, const std::vector<uint32_t> &arguments);
+  virtual void DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments);
+  virtual void* DoAllocateTempSynch(int type, std::vector<uint32_t> arguments);
   virtual void DoDeallocateTempSynch(void* var);
-  virtual int DoRequest(int cpu, int type, const std::vector<uint32_t> &arguments);
+  virtual int DoRequest(int cpu, int type, std::vector<uint32_t> arguments);
   virtual int DoSynchRequest(int cpu, int type, std::string id, std::vector<uint32_t> arguments);
-  virtual int DoTempSynchRequest(int cpu, int type, void *var, const std::vector<uint32_t> &arguments);
+  virtual int DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint32_t> arguments);
   virtual uint32_t DoGetSynchReqType(std::string name);
 
   Ptr<PEU> peu;
@@ -121,7 +121,7 @@ class ParallelThreadsScheduler : public TaskScheduler
 
   ParallelThreadsScheduler();
 
-  virtual void Initialize(const Ptr<PEU> &nonCPUPEU);
+  virtual void Initialize(Ptr<PEU> nonCPUPEU);
   virtual void Terminate(Ptr<PEU> peu, unsigned int pid);
   virtual Ptr<Thread> Fork(std::string,
 			Program *,

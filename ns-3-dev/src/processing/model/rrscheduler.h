@@ -48,12 +48,12 @@ protected:
   virtual int DoFork(int priority);
   virtual void DoTerminate();
   virtual std::vector<int> DoCurrentRunning();
-  virtual void DoAllocateSynch(int type, const std::string &id, const std::vector<uint32_t> &arguments);
-  virtual void* DoAllocateTempSynch(int type, const std::vector<uint32_t> &arguments);
+  virtual void DoAllocateSynch(int type, std::string id, std::vector<uint32_t> arguments);
+  virtual void* DoAllocateTempSynch(int type, std::vector<uint32_t> arguments);
   virtual void DoDeallocateTempSynch(void* var);
   virtual int DoRequest(int cpu, int type, std::vector<uint32_t> arguments);
   virtual int DoSynchRequest(int cpu, int type, std::string id, std::vector<uint32_t> arguments);
-  virtual int DoTempSynchRequest(int cpu, int type, void *var, const std::vector<uint32_t> &arguments);
+  virtual int DoTempSynchRequest(int cpu, int type, void *var, std::vector<uint32_t> arguments);
   virtual uint32_t DoGetSynchReqType(std::string name);
 
   void MigrateThread(int pid, Ptr<Thread> thread);
