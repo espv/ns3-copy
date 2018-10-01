@@ -72,7 +72,8 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
   execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
   if (receivingPacket) {
     execenv->queues["rxfifo"]->Enqueue(packet);
-    NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: " << execenv->queues["rxfifo"]->GetNPackets());
+    NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: "
+                 << execenv->queues["rxfifo"]->GetNPackets());
     return;
   }
 
@@ -98,7 +99,8 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
   if (packet->collided) {
     execenv->globalStateVariables["packet-collided"] = 1;
     ps->nr_packets_dropped_bad_crc++;
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": collision caused packet nr " << packet->m_executionInfo.seqNr << "'s CRC check to fail, dropping it");
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": collision caused packet nr " << packet->m_executionInfo.seqNr
+                                  << "'s CRC check to fail, dropping it");
     if (execenv->queues["rxfifo"]->IsEmpty()) {
       receivingPacket = false;
       if (radio.rxfifo_overflow && radio.bytes_in_rxfifo > 0) {
@@ -114,7 +116,9 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     execenv->Proceed(packet, "receivedone", &TelosB::receiveDone_task, this, packet);
   }
 
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload " << packet->m_executionInfo.seqNr << ", receivingPacket: " << receivingPacket << ", packet collided: " << packet->collided);
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload " << packet->m_executionInfo.seqNr
+                                << ", receivingPacket: " << receivingPacket << ", packet collided: "
+                                << packet->collided);
 }
 
 void TelosB::receiveDone_task(Ptr<Packet> packet) {
@@ -124,7 +128,8 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
 
   if (jitterExperiment) {
     /* In the jitter experiment, we fill the IP layer queue up by enqueueing the same packet three times instead of once.
-     * That means we must increase the number of packets getting processed, which depends on how many packets are currently in the send queue.
+     * That means we must increase the number of packets getting processed, which depends on how many packets are
+     * currently in the send queue.
      */
     execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);
@@ -139,7 +144,8 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
   } else {
     ++ps->nr_packets_dropped_ip_layer;
     execenv->globalStateVariables["ipaq-full"] = 1;
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet "
+                                  << packet->m_executionInfo.seqNr);
   }
 
   if (execenv->queues["rxfifo"]->IsEmpty()) {
@@ -170,14 +176,17 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   if (!packet->attemptedSent) {
     packet->attemptedSent = true;
     packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    int64_t intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() - packet->m_executionInfo.timestamps[1].GetMicroSeconds();
+    int64_t intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() -
+                             packet->m_executionInfo.timestamps[1].GetMicroSeconds();
     ps->time_received_packets.push_back (packet->m_executionInfo.timestamps[1].GetMicroSeconds());
     ps->forwarded_packets_seqnos.push_back (packet->m_executionInfo.seqNr);
     ps->all_intra_os_delays.push_back(intra_os_delay);
     ps->total_intra_os_delay += intra_os_delay;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo " << packet->m_executionInfo.seqNr);
-    NS_LOG_INFO (id << " writtenToTxFifo: DELTA: " << intra_os_delay << ", UDP payload size (36+payload bytes): " << packet->GetSize () << ", seq no " << packet->m_executionInfo.seqNr);
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo, number forwarded: " << ++number_forwarded_and_acked << ", seq no " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (id << " writtenToTxFifo: DELTA: " << intra_os_delay << ", UDP payload size (36+payload bytes): "
+                    << packet->GetSize () << ", seq no " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo, number forwarded: "
+                                  << ++number_forwarded_and_acked << ", seq no " << packet->m_executionInfo.seqNr);
   }
 
   // TODO: Use only the CC2420 model to transmit packets
@@ -197,7 +206,10 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
     NS_LOG_INFO ("Forwarding packet " << packet->m_executionInfo.seqNr << " causes collision");
   }
 
-  Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5) + MicroSeconds (192), &TelosB::finishedTransmitting, this, packet);
+  Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5) + MicroSeconds (192),
+                      &TelosB::finishedTransmitting,
+                      this,
+                      packet);
   ++radio.nr_send_recv;
 }
 
@@ -211,7 +223,8 @@ void TelosB::sendViaCC2420(Ptr<Packet> packet) {
   netDevice->descendingSignal(msg);
 }
 
-/* Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
+/* Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to
+ * ever re-transmit it.
  * If acks are enabled, the ack has to be received before that can be done.
  */
 void TelosB::finishedTransmitting(Ptr<Packet> packet) {
@@ -221,12 +234,16 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
 
   execenv->globalStateVariables["ip-radio-busy"] = 0;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: " << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0] << ", UDP payload size: " << packet->GetSize () << ", seq no: " << packet->m_executionInfo.seqNr);
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: "
+                                << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0]
+                                << ", UDP payload size: " << packet->GetSize ()
+                                << ", seq no: " << packet->m_executionInfo.seqNr);
   execenv->queues["ipaq"]->Dequeue();
   --radio.nr_send_recv;
 
   if (radio.collision) {
-    NS_LOG_INFO (Simulator::Now() << " Collision occured, destroying packet to be forwarded, radio.nr_send_recv: " << radio.nr_send_recv << ", receivingPacket: " << receivingPacket);
+    NS_LOG_INFO (Simulator::Now() << " Collision occured, destroying packet to be forwarded, radio.nr_send_recv: "
+                                  << radio.nr_send_recv << ", receivingPacket: " << receivingPacket);
     if (radio.nr_send_recv == 0)
       radio.collision = false;
   }
