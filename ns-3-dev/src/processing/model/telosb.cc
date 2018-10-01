@@ -197,9 +197,9 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
     return;
   }
 
-    if (radio.nr_send_recv > 0) {
-      if (ccaOn) {  // 2500 comes from traces
-        Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::writtenToTxFifo, this, packet);
+  if (radio.nr_send_recv > 0) {
+    if (ccaOn) {  // 2500 comes from traces
+      Simulator::Schedule(MicroSeconds(2400 + rand() % 200), &TelosB::writtenToTxFifo, this, packet);
       return;
     }
     radio.collision = true;
@@ -231,14 +231,11 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   packet->m_executionInfo.executedByExecEnv = false;
   ++ps->nr_packets_forwarded;
-
-  execenv->globalStateVariables["ip-radio-busy"] = 0;
   packet->m_executionInfo.timestamps.push_back(Simulator::Now());
   NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: "
                                 << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0]
                                 << ", UDP payload size: " << packet->GetSize ()
                                 << ", seq no: " << packet->m_executionInfo.seqNr);
-  execenv->queues["ipaq"]->Dequeue();
   --radio.nr_send_recv;
 
   if (radio.collision) {
