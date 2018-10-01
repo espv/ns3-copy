@@ -37,3 +37,6 @@ build-dir/
 build/
 /.cproject
 /.project
+
+all-contexts-outpu/
+

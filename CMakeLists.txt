@@ -835,7 +835,6 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/build/ns3/service-flow-record.h
         ns-3-dev/build/ns3/service-flow.h
         ns-3-dev/build/ns3/sgi-hashmap.h
-        ns-3-dev/build/ns3/sharedresource.h
         ns-3-dev/build/ns3/simple-channel.h
         ns-3-dev/build/ns3/simple-device-energy-model.h
         ns-3-dev/build/ns3/simple-frame-capture-model.h
