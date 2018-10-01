@@ -131,13 +131,12 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
      * That means we must increase the number of packets getting processed, which depends on how many packets are
      * currently in the send queue.
      */
-    execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);
+    execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);
     execenv->globalStateVariables["ipaq-full"] = 0;
     execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
   } else if (execenv->queues["ipaq"]->GetNPackets() < 3) {
-    execenv->queues["ipaq"]->Enqueue(packet);
     execenv->globalStateVariables["ipaq-full"] = 0;
     execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);

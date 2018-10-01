@@ -175,6 +175,7 @@ FRACTION 99%  1939 1940
 0 START
 within-receiveDone-task PROCESS 2000 0
 x STATECOND ipaq-full read global 0
+x ENQUEUE PKTQUEUE 0 ipaq
 x                                PROCESS        9279 0
 x PROCESS 17 0 PERBYTE
 0                  ENQUEUE		SRVQUEUE sendTask softirq::tasks
