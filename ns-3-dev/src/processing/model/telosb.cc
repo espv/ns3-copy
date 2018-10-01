@@ -7,7 +7,6 @@
 #include <fstream>
 #include <iostream>
 #include <string.h>
-#include <time.h>
 #include <ctime>
 #include <random>
 
@@ -182,8 +181,8 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   }
 
   // TODO: Use only the CC2420 model to transmit packets
-  // DO NOT SEND
   if (fakeSending) {
+    // DO NOT SEND
     ++radio.nr_send_recv;
     Simulator::Schedule(Seconds(0), &TelosB::finishedTransmitting, this, packet);
     return;
@@ -212,8 +211,9 @@ void TelosB::sendViaCC2420(Ptr<Packet> packet) {
   netDevice->descendingSignal(msg);
 }
 
-// Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
-// If acks are enabled, the ack has to be received before that can be done.
+/* Radio is finished transmitting packet, and packet can now be removed from the send queue as there is no reason to ever re-transmit it.
+ * If acks are enabled, the ack has to be received before that can be done.
+ */
 void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   packet->m_executionInfo.executedByExecEnv = false;
@@ -288,11 +288,12 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
 
   Ptr<CC2420Recv> recvMsg = DynamicCast<CC2420Recv>(msg);
   if(recvMsg){
-    //NS_LOG_INFO ("THIS is the place where the device model gets involved and forwards the packet to mote 3");
-    //NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-    //        << "s mote " << GetId() << " received " << recvMsg->getSize()
-    //        << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
-    //        << " and RSSI=" << recvMsg->getRSSI() << " bytes");
+    /* NS_LOG_INFO ("THIS is the place where the device model gets involved and forwards the packet to mote 3");
+     * NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
+     *         << "s mote " << GetId() << " received " << recvMsg->getSize()
+     *         << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
+     *         << " and RSSI=" << recvMsg->getRSSI() << " bytes");
+     */
 
     Ptr<Packet> packet = Create<Packet>(ps->packet_size);
     ps->nr_packets_total++;
@@ -375,8 +376,9 @@ void ProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *
   m1->SendPacket(toSend, m2, m3);
 }
 
-// GenerateTraffic schedules the generation of packets according to the duration
-// of the experinment and the specified (static) rate.
+/* GenerateTraffic schedules the generation of packets according to the duration
+ * of the experinment and the specified (static) rate.
+ */
 void ProtocolStack::GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, TelosB *m2, TelosB *m3) {
   static uint32_t curSeqNr = 0;
 
@@ -393,8 +395,9 @@ void ProtocolStack::GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, T
 }
 
 
-// GenerateTraffic schedules the generation of packets according to the duration
-// of the experiment and the specified (static) rate.
+/* GenerateTraffic schedules the generation of packets according to the duration
+ * of the experiment and the specified (static) rate.
+ */
 void ProtocolStack::GenerateTraffic2(Ptr<Node> n, uint32_t pktSize, Time time, TelosB *m1, TelosB *m2, TelosB *m3) {
   Simulator::Schedule(time, &ProtocolStack::GenerateTraffic, this, n, pktSize, m1, m2, m3);
 }
