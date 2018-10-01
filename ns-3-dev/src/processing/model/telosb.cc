@@ -256,8 +256,7 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   }
 
   // Re-scheduling sendTask in case there is a packet waiting to be sent
-  if (!execenv->queues["ipaq-postponed"]->IsEmpty())
-    execenv->ScheduleInterrupt(execenv->queues["ipaq-postponed"]->Peek(), "HIRQ-6", NanoSeconds(0));
+  execenv->ScheduleInterrupt(packet, "HIRQ-6", NanoSeconds(0));
 }
 
 void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote) {
