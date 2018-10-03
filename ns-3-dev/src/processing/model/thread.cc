@@ -478,6 +478,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 			ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 			if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 				pktEI->executedByExecEnv = true;
+				pktEI->curThread = this;
 				EventImpl *toInvoke = pktEI->targetFPM;
 				toInvoke->Invoke();
 				toInvoke->Unref();
@@ -500,6 +501,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 		if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 			pktEI->executedByExecEnv = true;
+			pktEI->curThread = this;
 			EventImpl *toInvoke = pktEI->targetFPM;
 			toInvoke->Invoke();
 			toInvoke->Unref();
@@ -764,6 +766,7 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 			if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo.target == queueTarget) {
 				Ptr<Packet> curPkt = m_currentLocation->curPkt;
 				curPkt->m_executionInfo.executedByExecEnv = true;
+				curPkt->m_executionInfo.curThread = this;
 				EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
 				toInvoke->Invoke();
 				toInvoke->Unref();
@@ -1015,6 +1018,7 @@ void Thread::Dispatch() {
 				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
 				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {
 					pktEI->executedByExecEnv = true;
+					pktEI->curThread = this;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
                     toInvoke->Unref();

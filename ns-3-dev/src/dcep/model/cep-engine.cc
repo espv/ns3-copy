@@ -471,12 +471,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         /* everything is a match*/
         returned.push_back(e);
         // Here we insert the incoming event into the sequence
-        Ptr<Packet> dp = Create<Packet>();
         Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         p->HandleNewCepEvent(q, returned);
         // Enqueue OrCepOp SEM and execute once
-        ee->globalStateVariables["cepOpDoneYet"] = 1;
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 1;
         return true; 
     }
     

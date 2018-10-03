@@ -10,6 +10,7 @@
 #include <vector>
 
 namespace ns3 {
+    class Thread;
     class SEM;
 
     class ExecutionInfo {
@@ -21,6 +22,7 @@ namespace ns3 {
          * the event executed by the scheduler, return false.
          */
         bool executedByExecEnv;
+        Thread *curThread;
 
         // Name and arguments for target service
         std::string target;
