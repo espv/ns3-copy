@@ -261,10 +261,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 event->delay = delay;
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
+                event->pkt = pkt;
                 Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
 
-                ee->eventqueues["event-queue"].push_back(event->type);
-                event->pkt = pkt;
                 ee->ScheduleInterrupt (event->pkt, "HIRQ-1", Seconds(0));
                 event->pkt->m_executionInfo.executedByExecEnv = false;
                 ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);

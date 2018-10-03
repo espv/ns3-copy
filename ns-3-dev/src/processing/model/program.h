@@ -95,7 +95,6 @@ enum ExecutionEventType {
   END,
   DEBUG,
   MEASURE,
-  INCOMINGCEPEVENT,
   LASTTYPE,
 };
 

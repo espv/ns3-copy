@@ -127,8 +127,6 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 		case PROCESS: 
 			// PROCESS: Passed to the HWModels for handling.
 			return HandleProcessingEvent(e);
-		case INCOMINGCEPEVENT:
-			return HandleIncomingCEPEvent(e);
 		case EXECUTE:
 			return HandleExecuteEvent(e);
 		case QUEUE: 
@@ -464,33 +462,6 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 
 		return false;
 	}
-}
-
-bool Thread::HandleIncomingCEPEvent(ExecutionEvent* e) {
-	auto ieiceop = dynamic_cast<InsertEventIntoCEPOp *>(e);
-	std::cout << "In HandleIncomingCEPEvent()" << std::endl;
-	auto ee = peu->hwModel->node->GetObject<ExecEnv>();
-	if (ee->eventqueues["event-queue"].empty())
-		return false;
-	std::string event = ee->eventqueues["event-queue"].at(0);
-	ee->eventqueues["event-queue"].erase(ee->eventqueues["event-queue"].begin());
-
-    ieiceop->ieifsm->ps->factor = 0;
-    ieiceop->ps->factor = 0;
-    for (auto it = ieiceop->pCEPEngine->operators.begin(); it != ieiceop->pCEPEngine->operators.end(); ++it) {
-        Ptr<CEPOp> op = *it;
-        op->InsertEvent(event);
-		for (int i = 0; i != op->helper->GetNumberSequences(); ++i) {
-            //HandleProcessingEvent(ieiceop->ieifsm->ps);
-            // The factor determines how much processing happens
-            ++ieiceop->ieifsm->ps->factor;
-		}
-		// The factor determines how much processing happens
-		++ieiceop->ps->factor;
-        //HandleProcessingEvent(ieiceop->ps);
-    }
-
-    return true;
 }
 
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {

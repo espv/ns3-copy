@@ -32,11 +32,6 @@ sq FIFO -1 services
 rcvd-pkts FIFO -1 packets
 cepops FIFO -1 packets
 
-# Bridge queues
-from-CepOperatorProcessCepEvent FIFO -1 packets
-from-ProcessCepEvent FIFO -1 packets
-from-ScheduleSend FIFO -1 packets
-
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 4 cpu0 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
@@ -49,13 +44,6 @@ process_event_SEM 0 0
 CONDITIONS
 
 TRIGGERS
-#BACKSERVICE service fsm ns3::TelosB  # We will call node->GetObject<ns3::TelosB>()->FSM when service is called. Object factory is used to setType to ns3::TelosB, perhaps?
-LOC received_event_loc received_event
-
-LOC process-or-cepop-loc loc-process-or-cepop
-LOC process-and-cepop-loc loc-process-and-cepop
-LOC process-then-cepop-loc loc-process-then-cepop
-LOC process-cepop-loc loc-process-cepop
 SERVICE handle-cepops handle-cepops
 LOC within-send-packet send-packet
 

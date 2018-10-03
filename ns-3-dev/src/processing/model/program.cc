@@ -52,12 +52,11 @@ std::string ExecutionEvent::typeStrings[] = {
 		  "SCHEDULER",
 		  "SYNCHRONIZATION",
 		  "QUEUE",
-		  "INTERRUPT",
 		  "CONDITION",
 		  "TEMPSYNCH",
 		  "END",
 		  "DEBUG",
-          "MEASURE"
+		  "MEASURE"
 };
 
 
@@ -299,12 +298,6 @@ ProcessingStage::Instantiate(Ptr<Packet> packet) {
   return toReturn;
 }
 
-InsertEventIntoCEPOp::InsertEventIntoCEPOp() {
-    ExecutionEvent::type = INCOMINGCEPEVENT;
-}
-
-InsertEventIntoFSM::InsertEventIntoFSM() = default;
-
 InterruptExecutionEvent::InterruptExecutionEvent(int IRQNr)
   : number(IRQNr)
 {
@@ -380,10 +373,6 @@ std::ostream& operator<<(std::ostream& out, ExecutionEvent& event)
 	}
 	case PROCESS: {
 		out << "PROCESS";
-		break;
-	}
-	case INCOMINGCEPEVENT: {
-		out << "INCOMINGCEPEVENT";
 		break;
 	}
 	case SCHEDULER: {

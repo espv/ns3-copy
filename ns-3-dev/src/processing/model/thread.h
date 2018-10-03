@@ -107,7 +107,6 @@ public:
 	bool HandleSchedulerEvent(ExecutionEvent* e);
 	bool HandleSyncEvent(ExecutionEvent* e);
 	bool HandleCondition(ExecutionEvent* e);
-	bool HandleIncomingCEPEvent(ExecutionEvent* e);
 
 	// For debug
 	void PrintGlobalTempvars(Ptr<ExecEnv> ee);

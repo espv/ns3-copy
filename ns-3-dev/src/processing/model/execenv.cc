@@ -719,10 +719,6 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			std::cout << *((ProcessingStage *) curEvt) << std::endl;
 			break;
 		}
-		case INCOMINGCEPEVENT: {
-			std::cout << *((InsertEventIntoCEPOp *) curEvt) << std::endl;
-			break;
-		}
 		case SCHEDULER: {
 			std::cout << *((SchedulerExecutionEvent *) curEvt) << std::endl;
 			break;
@@ -1063,111 +1059,6 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// Add this PS to the current program
 		currentProgram->events.push_back(ps);
-	}
-
-	// Handle incoming CEP event
-	if (tokens[1] == "HANDLEINCOMINGCEPEVENT") {
-		Ptr<Node> node = GetObject<Node>();
-		std::string cycles_per_fsm = tokens[2];
-		std::string deviation_per_fsm = tokens[3];
-		std::string cycles_per_cepop = tokens[4];
-		std::string deviation_per_cepop = tokens[5];
-
-		/* Iterate all HWE aggregates obtained during the parsing of the header.
-		 * First, create the processing stage.
-		 */
-		auto ps1 = new ProcessingStage();
-		ps1->samples = nrSamples;
-
-		int intField = 0;
-
-		// Then, iterate according to all HWE aggregates specified in the header parsed above.
-		unsigned long numHWEs = currentResources.size();
-		int tokenIndex = 0;
-		for (size_t i = 0; i < numHWEs; i++) {
-			// Obtain the parameters of the given distribution
-			if (currentDistributions[i] == "normal") {
-				// The normal distribution takes two parameters:
-				// average and standard deviation
-				double average = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				ps1->resourcesUsed[currentResources[i]].defined = true;
-				ps1->resourcesUsed[currentResources[i]].consumption = NormalVariable(average, sd * sd);
-				ps1->resourcesUsed[currentResources[i]].distributionType = "normal";
-				ps1->resourcesUsed[currentResources[i]].param1 = average;
-				ps1->resourcesUsed[currentResources[i]].param2 = sd * sd;
-				ps1->samples = nrSamples;
-			} else if (currentDistributions[i] == "lognormal") {
-				// The normal distribution takes two parameters:
-				// average and standard deviation
-				double logaverage = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				double logsd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				ps1->resourcesUsed[currentResources[i]].defined = true;
-				ps1->resourcesUsed[currentResources[i]].consumption = LogNormalVariable(logaverage, logsd);
-				ps1->resourcesUsed[currentResources[i]].distributionType = "lognormal";
-				ps1->resourcesUsed[currentResources[i]].param1 = logaverage;
-				ps1->resourcesUsed[currentResources[i]].param2 = logsd;
-				ps1->samples = nrSamples;
-			}
-
-			//
-			// TODO: other distributions - we currently only support normal and lognormal
-			// distributions. Lognormal appears to be the better estimator for cycles.
-			//
-		}
-
-		// Iterate all HWE aggregates obtained during
-		// the parsing of the header.
-		// First, create the processing stage
-		auto ps2 = new ProcessingStage();
-		ps2->samples = nrSamples;
-
-		for (size_t i = 0; i < numHWEs; i++) {
-			// Obtain the parameters of the given distribution
-			if (currentDistributions[i] == "normal") {
-				// The normal distribution takes two parameters:
-				// average and standard deviation
-				double average = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				double sd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				ps2->resourcesUsed[currentResources[i]].defined = true;
-				ps2->resourcesUsed[currentResources[i]].consumption = NormalVariable(average, sd * sd);
-				ps2->resourcesUsed[currentResources[i]].distributionType = "normal";
-				ps2->resourcesUsed[currentResources[i]].param1 = average;
-				ps2->resourcesUsed[currentResources[i]].param2 = sd * sd;
-				ps2->samples = nrSamples;
-			} else if (currentDistributions[i] == "lognormal") {
-				// The normal distribution takes two parameters:
-				// average and standard deviation
-				double logaverage = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				double logsd = stringToDouble(tokens[intField + 2 + tokenIndex++]);
-				ps2->resourcesUsed[currentResources[i]].defined = true;
-				ps2->resourcesUsed[currentResources[i]].consumption = LogNormalVariable(logaverage, logsd);
-				ps2->resourcesUsed[currentResources[i]].distributionType = "lognormal";
-				ps2->resourcesUsed[currentResources[i]].param1 = logaverage;
-				ps2->resourcesUsed[currentResources[i]].param2 = logsd;
-				ps2->samples = nrSamples;
-			}
-
-			//
-			// TODO: other distributions - we currently only support normal and lognormal
-			// distributions. Lognormal appears to be the better estimator for cycles.
-			//
-		}
-
-		// ProcessingStage ps1(cycles_per_cepop, deviation_per_cepop);
-		// ProcessingStage ps2(cycles_per_fsm, deviation_per_fsm);
-		auto ieifsm = new InsertEventIntoFSM(/*ps2*/);
-		ieifsm->ps = ps2;
-		auto ieiceop = new InsertEventIntoCEPOp(/*ps1, ieifsm*/);
-		ieiceop->ieifsm = ieifsm;
-		ieiceop->ps = ps1;
-		ieiceop->pCEPEngine = node->GetObject<ProcessCEPEngine>();
-		execEvent = ieiceop;
-
-		// Add the event to the current program
-		currentProgram->events.push_back(ieiceop);
-		currentProgram->events.push_back(ieiceop->ps);
-		currentProgram->events.push_back(ieiceop->ieifsm->ps);
 	}
 
 	/* Remember: unless the queue is explicitly specified,
