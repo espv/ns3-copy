@@ -190,22 +190,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         if (ops.begin() == ops.end())
             return;
-        std::cout << "Detector::CepOperatorProcessCepEvent" << std::endl;
         Ptr<CepOperator> op = (Ptr<CepOperator>) *ops.begin();
 
         bool proceed = false;
         std::vector<Ptr<CepEvent> > returned;
-
-        /*if(op->Evaluate(e, returned))
-        {
-            proceed = true;
-        }
-
-        if(proceed)
-        {
-            Ptr<Query> q = cep->GetQuery(op->queryId);
-            producer->HandleNewCepEvent(q, returned);
-        }*/
 
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         ops.erase(ops.begin());
@@ -213,18 +201,14 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->queues["cepops"]->Enqueue(e->pkt);
-            //ee->globalStateVariables["CepOpsLeft"] = 1;
-        }  // Sets CepOpsLeft, EventsLeft and PacketsLeft to 0 in trex.device
+        }
 
-        //op->Evaluate(e, returned, MakeEvent(&Detector::ProceedFromEvaluate, this, cep, returned, op, producer));
         op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer);
     }
     
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
     {
-        // Have to sort the CepOperator vector by type of operator (then, or, and)
-        std::cout << "Detector::ProcessCepEvent" << std::endl;
         Ptr<CEPEngine> cep = GetObject<CEPEngine>();
 
         std::vector<Ptr<CepOperator>> ops;
@@ -236,9 +220,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (ops.begin() != ops.end()) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            //ee->globalStateVariables["CepOpsLeft"] = 1;
             ee->queues["cepops"]->Enqueue(e->pkt);
-        }  // Sets CepOpsLeft to 0 in trex.device
     }
     
     
