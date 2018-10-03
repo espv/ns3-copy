@@ -221,6 +221,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->queues["cepops"]->Enqueue(e->pkt);
+        }
     }
     
     
