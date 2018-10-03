@@ -212,7 +212,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (ops.begin() != ops.end()) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->globalStateVariables["CepOpsLeft"] = 1;
+            ee->queues["cepops"]->Enqueue(e->pkt);
+            //ee->globalStateVariables["CepOpsLeft"] = 1;
         }  // Sets CepOpsLeft, EventsLeft and PacketsLeft to 0 in trex.device
 
         //op->Evaluate(e, returned, MakeEvent(&Detector::ProceedFromEvaluate, this, cep, returned, op, producer));
@@ -235,7 +236,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (ops.begin() != ops.end()) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->globalStateVariables["CepOpsLeft"] = 1;
+            //ee->globalStateVariables["CepOpsLeft"] = 1;
+            ee->queues["cepops"]->Enqueue(e->pkt);
         }  // Sets CepOpsLeft to 0 in trex.device
     }
     
@@ -513,7 +515,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return event1 == eType || event2 == eType;
     }
     
-    
+
      
     /*********** BUFFER MANAGEMENT******************
      *****************************************************

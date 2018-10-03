@@ -262,9 +262,6 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
-                // Invoke SEM that delays the execution of p->RcvCepEvent
-                ee->globalStateVariables["PacketsLeft"] = 1;  // Need to include larger than and smaller than state conditionals
-                ee->globalStateVariables["EventsLeft"] = 1;
 
                 ee->eventqueues["event-queue"].push_back(event->type);
                 event->pkt = pkt;
