@@ -474,7 +474,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         p->HandleNewCepEvent(q, returned);
-        // Enqueue OrCepOp SEM and execute once
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 1;
         return true; 
     }
