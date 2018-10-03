@@ -190,7 +190,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         if (ops.begin() == ops.end())
             return;
-        Ptr<CepOperator> op = (Ptr<CepOperator>) *ops.begin();
+        auto op = *ops.begin();
 
         bool proceed = false;
         std::vector<Ptr<CepEvent> > returned;
@@ -209,14 +209,14 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
     {
-        Ptr<CEPEngine> cep = GetObject<CEPEngine>();
+        auto cep = GetObject<CEPEngine>();
 
         std::vector<Ptr<CepOperator>> ops;
         cep->GetOpsByInputCepEventType(e->type, ops);
         Ptr<Producer> producer = GetObject<Producer>();
 
-        Ptr<Node> node = GetObject<Dcep>()->GetNode();
-        Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
+        auto node = GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
         if (ops.begin() != ops.end()) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
