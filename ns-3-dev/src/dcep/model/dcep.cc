@@ -270,14 +270,15 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
                 break; 
             }
-                
-                
+
             case QUERY: /* handle query*/
             {
                 NS_LOG_INFO ("DCEP: RECEIVED QUERY MESSAGE");
                 Ptr<Query> q = CreateObject<Query>();
                 q->deserialize(data, size);
                 p->RecvQuery(q);
+                // Since the send-packet SEM is invoked for each packet to be sent, query or event, maybe we should
+                // invoke a HIRQ here as well, but with different state condition variable. (packet type EVENT or QUERY)
                 break;
             }
                 
