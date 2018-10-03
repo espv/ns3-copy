@@ -193,16 +193,14 @@ void RoundRobinScheduler::DoDeallocateTempSynch(void* var) {
                 }
                 NS_LOG_INFO (TaskScheduler::peu->m_name << " Waking up " << pid);
                 m_runqueue.push_back(pid);
-                this->need_scheduling = true;
+                WakeupIdle();
                 break;
             }
             case SLEEPTHREAD: {
                 // We insert the pid into the blocking queue, to be awakened later.
                 pid = arguments[0];
                 m_blocked.insert(pid);
-
-                m_currentRunning[cpu] = cpu+1;
-                this->need_scheduling = true;
+                RescheduleCPU(cpu);
                 return 1;
             }
             default: {
