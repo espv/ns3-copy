@@ -151,6 +151,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             {
                 cepOp = CreateObject<OrOperator>();
             }
+            else if (q->op == "then")
+            {
+                cepOp = CreateObject<ThenOperator>();
+            }
             else
             {
                 NS_ABORT_MSG ("UNKNOWN OPERATOR");
@@ -192,7 +196,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             return;
         auto op = *ops.begin();
 
-        bool proceed = false;
         std::vector<Ptr<CepEvent> > returned;
 
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
@@ -347,6 +350,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         std::vector<Ptr<CepEvent>> events2;
         bufman->put_event(e);//wait for event with corresponding sequence number
         bufman->read_events(events1, events2);
+
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 0;
         
         if((!events1.empty()) && (!events2.empty()))
         {
@@ -395,19 +400,14 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         std::vector<Ptr<CepEvent>> events1;
         std::vector<Ptr<CepEvent>> events2;
+        bufman->put_event(e);//wait for event with corresponding sequence number
         bufman->read_events(events1, events2);
 
-        if((!events1.empty()) && (!events2.empty()))
-        {
-            if (e->type == events1.front()->type)
-            {
-                return DoEvaluate(e, events2, returned, bufman->events2, q, p);
-            }
-            else
-            {
-                return DoEvaluate(e, events1, returned, bufman->events1, q, p);
-            }
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 0;
 
+        if(!events1.empty() && !events2.empty() && e->type == event2)
+        {
+            return DoEvaluate(e, events1, returned, bufman->events1, q, p);
         }
         return false;
     }
