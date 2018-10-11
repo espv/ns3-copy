@@ -224,7 +224,7 @@ private:
 
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
         bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
-        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents);
+        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents, Ptr<Query> q, Ptr<Producer> p);
         bool ExpectingCepEvent(std::string);
         std::string event1;
         std::string event2;

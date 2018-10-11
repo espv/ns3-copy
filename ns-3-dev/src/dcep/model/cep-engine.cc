@@ -345,6 +345,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         std::vector<Ptr<CepEvent>> events1;
         std::vector<Ptr<CepEvent>> events2;
+        bufman->put_event(e);//wait for event with corresponding sequence number
         bufman->read_events(events1, events2);
         
         if((!events1.empty()) && (!events2.empty()))
@@ -352,58 +353,41 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             if (e->type == events1.front()->type)
             {
                 return DoEvaluate(e, events2, returned, bufman->events2, q, p);
-                //for (uint32_t i = 0; i < events2.size(); i++, it++)
-                //{
-                //    if(e->m_seq == bufman->events2[i]->m_seq)
-                //    {
-                //        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-                //  //      Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-                //        e->CopyCepEvent(e1);
-                //        // Here we insert the incoming event into the sequence
-                //        // Split loop into recursion.
-                //        // Return a recursive call to some function
-//
-                //        events2[i]->CopyCepEvent(e2);
-                //
-                //        bufman->events2.erase(it);
-                //        returned.push_back(e1);
-                //        returned.push_back(e2);
-//
-                //        return true;
-                //    }
-                //}
-                
             }
             else
             {
-                //auto it = bufman->events1.begin();
                 return DoEvaluate(e, events1, returned, bufman->events1, q, p);
-                //for (uint32_t i = 0; i < bufman->events1.size(); i++, it++)
-                //{
-                //    if(e->m_seq == bufman->events1[i]->m_seq)
-                //    {
-                //        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-                //        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-                //        e->CopyCepEvent(e1);
-                //        // Here we insert the incoming event into the sequence
-                //        bufman->events1[i]->CopyCepEvent(e2);
-//
-                //        bufman->events1.erase(it);
-                //        returned.push_back(e1);
-                //        returned.push_back(e2);
-                //        return true;
-                //    }
-                //}
             }
             
         }
-        bufman->put_event(e);//wait for event with corresponding sequence number
         return false;
     }
 
     bool
-    ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents) {
+    ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
+        if (events.empty())
+            return false;
 
+        Ptr<CepEvent> existingEvent = *events.begin();
+        if(newEvent->m_seq == existingEvent->m_seq) {
+            Ptr<CepEvent> e1 = CreateObject<CepEvent>();
+            Ptr<CepEvent> e2 = CreateObject<CepEvent>();
+            newEvent->CopyCepEvent(e1);
+            // Here we insert the incoming event into the sequence
+            // Split loop into recursion.
+            // Return a recursive call to some function
+
+            existingEvent->CopyCepEvent(e2);
+
+            bufmanEvents.erase(events.begin());
+            returned.push_back(e1);
+            returned.push_back(e2);
+
+            p->HandleNewCepEvent(q, returned);
+            return true;
+        }
+        events.erase(events.begin());
+        return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
     }
 
     bool
@@ -417,51 +401,14 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             if (e->type == events1.front()->type)
             {
-                auto it = events2.begin();
-                for (uint32_t i = 0; i < events2.size(); i++, it++)
-                {
-                    if(e->m_seq == bufman->events2[i]->m_seq)
-                    {
-                        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-                        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-                        e->CopyCepEvent(e1);
-                        // Here we insert the incoming event into the sequence
-                        // Split loop into recursion.
-                        // Return a recursive call to some function
-                        events2[i]->CopyCepEvent(e2);
-
-                        bufman->events2.erase(it);
-                        returned.push_back(e1);
-                        returned.push_back(e2);
-
-                        return true;
-                    }
-                }
-
+                return DoEvaluate(e, events2, returned, bufman->events2, q, p);
             }
             else
             {
-                auto it = bufman->events1.begin();
-                for (uint32_t i = 0; i < bufman->events1.size(); i++, it++)
-                {
-                    if(e->m_seq == bufman->events1[i]->m_seq)
-                    {
-                        Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-                        Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-                        e->CopyCepEvent(e1);
-                        // Here we insert the incoming event into the sequence
-                        bufman->events1[i]->CopyCepEvent(e2);
-
-                        bufman->events1.erase(it);
-                        returned.push_back(e1);
-                        returned.push_back(e2);
-                        return true;
-                    }
-                }
+                return DoEvaluate(e, events1, returned, bufman->events1, q, p);
             }
 
         }
-        bufman->put_event(e);//wait for event with corresponding sequence number
         return false;
     }
     
