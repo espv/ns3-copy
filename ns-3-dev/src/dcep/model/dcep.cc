@@ -354,7 +354,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q1->op = "true";
         q1->assigned = false;
         q1->currentHost.Set("0.0.0.0");
-        q1->parent_output = "AandB";
+        q1->parent_output = "AthenB";
         NS_LOG_INFO ("Setup query " << q1->eventType);
         dcep->DispatchQuery(q1);
         
@@ -374,7 +374,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q2->op = "true";
         q2->assigned = false;
         q2->currentHost.Set("0.0.0.0");
-        q2->parent_output = "AandB";
+        q2->parent_output = "AthenB";
         NS_LOG_INFO ("Setup query " << q2->eventType);
         dcep->DispatchQuery(q2);
         
@@ -385,11 +385,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         q3->isFinal = true;
         q3->isAtomic = false;
-        q3->eventType = "AandB";
+        q3->eventType = "AthenB";
         q3->output_dest = Ipv4Address::GetAny();
-        q3->inevent1 = "A";
-        q3->inevent2 = "B";
-        q3->op = "and";
+        q3->inevent1 = "B";
+        q3->inevent2 = "A";
+        q3->op = "then";
         q3->assigned = false;
         q3->currentHost.Set("0.0.0.0");
         NS_LOG_INFO ("Setup query " << q3->eventType);
