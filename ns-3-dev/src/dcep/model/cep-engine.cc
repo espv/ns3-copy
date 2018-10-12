@@ -317,11 +317,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     bool
-    AndOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> > &returned, std::vector<Ptr<CepEvent>> bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
-        if (events.empty())
+    AndOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> > &returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
+        if (events->empty())
             return false;
 
-        Ptr<CepEvent> existingEvent = *events.begin();
+        Ptr<CepEvent> existingEvent = *events->begin();
         if(newEvent->m_seq == existingEvent->m_seq) {
             Ptr<CepEvent> e1 = CreateObject<CepEvent>();
             Ptr<CepEvent> e2 = CreateObject<CepEvent>();
@@ -332,14 +332,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
             existingEvent->CopyCepEvent(e2);
 
-            bufmanEvents.erase(events.begin());
+            for (auto it = bufmanEvents->begin(); it != bufmanEvents->end(); it++) {
+                auto e = *it;
+                if (e->m_seq == newEvent->m_seq) {
+                    bufmanEvents->erase(it);
+                    break;
+                }
+            }
             returned.push_back(e1);
             returned.push_back(e2);
 
             p->HandleNewCepEvent(q, returned);
             return true;
         }
-        events.erase(events.begin());
+        events->erase(events->begin());
         return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
     }
     
@@ -353,15 +359,15 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 0;
         
-        if((!events1.empty()) && (!events2.empty()))
+        if (!events1.empty() && !events2.empty())
         {
             if (e->type == events1.front()->type)
             {
-                return DoEvaluate(e, events2, returned, bufman->events2, q, p);
+                return DoEvaluate(e, &events2, returned, &bufman->events2, q, p);
             }
             else
             {
-                return DoEvaluate(e, events1, returned, bufman->events1, q, p);
+                return DoEvaluate(e, &events1, returned, &bufman->events1, q, p);
             }
             
         }
@@ -369,11 +375,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     bool
-    ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
-        if (events.empty())
+    ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
+        if (events->empty())
             return false;
 
-        Ptr<CepEvent> existingEvent = *events.begin();
+        Ptr<CepEvent> existingEvent = *events->begin();
         if(newEvent->m_seq == existingEvent->m_seq) {
             Ptr<CepEvent> e1 = CreateObject<CepEvent>();
             Ptr<CepEvent> e2 = CreateObject<CepEvent>();
@@ -384,14 +390,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
             existingEvent->CopyCepEvent(e2);
 
-            bufmanEvents.erase(events.begin());
+            for (auto it = bufmanEvents->begin(); it != bufmanEvents->end(); it++) {
+                auto e = *it;
+                if (e->m_seq == newEvent->m_seq) {
+                    bufmanEvents->erase(it);
+                    break;
+                }
+            }
             returned.push_back(e1);
             returned.push_back(e2);
 
             p->HandleNewCepEvent(q, returned);
             return true;
         }
-        events.erase(events.begin());
+        events->erase(events->begin());
         return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
     }
 
@@ -407,7 +419,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         if(!events1.empty() && !events2.empty() && e->type == event2)
         {
-            return DoEvaluate(e, events1, returned, bufman->events1, q, p);
+            return DoEvaluate(e, &events1, returned, &bufman->events1, q, p);
         }
         return false;
     }
