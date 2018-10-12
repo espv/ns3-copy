@@ -221,9 +221,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto node = GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
         if (ops.begin() != ops.end()) {
-            e->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->queues["cepops"]->Enqueue(e->pkt);
+            //e->pkt->m_executionInfo.executedByExecEnv = false;
+            //ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            //ee->queues["cepops"]->Enqueue(e->pkt);
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+            CepOperatorProcessCepEvent(e, ops, cep, producer);
         }
     }
     
@@ -318,8 +320,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
     bool
     AndOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> > &returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
-        if (events->empty())
+        if (events->empty()) {
+            // No sequences left
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
             return false;
+        }
 
         Ptr<CepEvent> existingEvent = *events->begin();
         if(newEvent->m_seq == existingEvent->m_seq) {
@@ -343,10 +349,18 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             returned.push_back(e2);
 
             p->HandleNewCepEvent(q, returned);
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
             return true;
         }
         events->erase(events->begin());
-        return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
+
+        Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+        newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+        newEvent->pkt->m_executionInfo.executedByExecEnv = false;
+        ee->Proceed(newEvent->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, newEvent, events, returned, bufmanEvents, q, p);
+        //return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
     }
     
     bool
@@ -357,8 +371,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->put_event(e);//wait for event with corresponding sequence number
         bufman->read_events(events1, events2);
 
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 0;
-        
         if (!events1.empty() && !events2.empty())
         {
             if (e->type == events1.front()->type)
@@ -370,14 +382,22 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 return DoEvaluate(e, &events1, returned, &bufman->events1, q, p);
             }
             
+        } else {
+            // No sequences left
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         }
         return false;
     }
 
     bool
     ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p) {
-        if (events->empty())
+        if (events->empty()) {
+            // No sequences left
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
             return false;
+        }
 
         Ptr<CepEvent> existingEvent = *events->begin();
         if(newEvent->m_seq == existingEvent->m_seq) {
@@ -401,10 +421,18 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             returned.push_back(e2);
 
             p->HandleNewCepEvent(q, returned);
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
             return true;
         }
         events->erase(events->begin());
-        return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
+
+        Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+        newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+        newEvent->pkt->m_executionInfo.executedByExecEnv = false;
+        ee->Proceed(newEvent->pkt, "handle-then-cepops", &ThenOperator::DoEvaluate, this, newEvent, events, returned, bufmanEvents, q, p);
+        //return DoEvaluate(newEvent, events, returned, bufmanEvents, q, p);
     }
 
     bool
@@ -415,11 +443,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->put_event(e);//wait for event with corresponding sequence number
         bufman->read_events(events1, events2);
 
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 0;
-
         if(!events1.empty() && !events2.empty() && e->type == event2)
         {
             return DoEvaluate(e, &events1, returned, &bufman->events1, q, p);
+        } else {
+            // No sequences left
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         }
         return false;
     }
@@ -433,7 +463,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         p->HandleNewCepEvent(q, returned);
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("cepOpDoneYet")->value = 1;
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
         return true; 
     }
     

@@ -45,6 +45,8 @@ CONDITIONS
 
 TRIGGERS
 SERVICE handle-cepops handle-cepops
+SERVICE handle-and-cepops handle-and-cepops
+SERVICE handle-then-cepops handle-then-cepops
 LOC within-send-packet send-packet
 
 # Entrypoint function for the PEU defined above
@@ -179,8 +181,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 1
+x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
+x PROCESS 1000 0
 x CALL handle-or-cepop
 0 STOP
 
@@ -193,8 +196,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 1
-x STATECOND InsertedSequence read local 1
+x STATECOND CepOpDoneYet read local 0
+x STATECOND InsertedSequence read local 0
 x CALL handle-or-cepop
 0 STOP
 
@@ -208,7 +211,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 0
+x STATECOND CepOpDoneYet read local 1
 0 STOP
 
 SIGEND
@@ -221,8 +224,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 1
+x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
+x PROCESS 1000 0
 x CALL handle-and-cepop
 0 STOP
 
@@ -235,8 +239,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 1
-x STATECOND InsertedSequence read local 1
+x STATECOND CepOpDoneYet read local 0
+x STATECOND InsertedSequence read local 0
 x CALL handle-and-cepop
 0 STOP
 
@@ -250,7 +254,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 0
+x STATECOND CepOpDoneYet read local 1
 0 STOP
 
 SIGEND
@@ -263,8 +267,9 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 1
+x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
+x PROCESS 1000 0
 x CALL handle-then-cepop
 0 STOP
 
@@ -278,8 +283,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 1
-x STATECOND InsertedSequence read local 1
+x STATECOND CepOpDoneYet read local 0
+x STATECOND InsertedSequence read local 0
 x CALL handle-then-cepop
 0 STOP
 
@@ -293,7 +298,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x STATECOND SequencesLeft read local 0
+x STATECOND CepOpDoneYet read local 1
 0 STOP
 
 SIGEND
