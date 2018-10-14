@@ -377,15 +377,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         if (!events1->empty() && !events2->empty())
         {
+            Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+            auto ee = node->GetObject<ExecEnv>();
+            e->pkt->m_executionInfo.executedByExecEnv = false;
             if (e->type == events1->front()->type)
             {
                 delete events1;  // Not going to use events1
-                return DoEvaluate(e, events2, returned, &bufman->events2, q, p, ops, cep);
+                ee->Proceed(e->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, events2, returned, &bufman->events2, q, p, ops, cep);
+                //return DoEvaluate(e, events2, returned, &bufman->events2, q, p, ops, cep);
             }
             else
             {
                 delete events2;  // Not going to use events2
-                return DoEvaluate(e, events1, returned, &bufman->events1, q, p, ops, cep);
+                ee->Proceed(e->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, events1, returned, &bufman->events1, q, p, ops, cep);
+                //return DoEvaluate(e, events1, returned, &bufman->events1, q, p, ops, cep);
             }
             
         } else {
@@ -457,7 +462,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(!events1->empty() && !events2->empty() && e->type == event2)
         {
             delete events2;  // Not going to use events2
-            return DoEvaluate(e, events1, returned, &bufman->events1, q, p, ops, cep);
+            Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+            auto ee = node->GetObject<ExecEnv>();
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(e->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, events1, returned, &bufman->events1, q, p, ops, cep);
+            //return DoEvaluate(e, events1, returned, &bufman->events1, q, p, ops, cep);
         } else {
             // No sequences left
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
