@@ -45,8 +45,8 @@ CONDITIONS
 
 TRIGGERS
 SERVICE handle-cepops handle-cepops
-SERVICE handle-and-cepops handle-and-cepops
-SERVICE handle-then-cepops handle-then-cepops
+SERVICE handle-and-cepop handle-and-cepop
+SERVICE handle-then-cepop handle-then-cepop
 LOC within-send-packet send-packet
 
 # Entrypoint function for the PEU defined above

@@ -183,7 +183,7 @@ private:
         static TypeId GetTypeId ();
         
         virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
-        virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p) = 0;
+        virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
         virtual bool ExpectingCepEvent (std::string) = 0;
         uint32_t queryId;
     };
@@ -193,8 +193,8 @@ private:
         static TypeId GetTypeId ();
         
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
-        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
-        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p);
+        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
+        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool ExpectingCepEvent (std::string);
         std::string event1;
         std::string event2;
@@ -209,7 +209,7 @@ private:
         static TypeId GetTypeId ();
         
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
+        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool ExpectingCepEvent (std::string);
         std::string event1;
         std::string event2;
@@ -223,8 +223,8 @@ private:
         static TypeId GetTypeId ();
 
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p);
-        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p);
+        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
+        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool ExpectingCepEvent(std::string);
         std::string event1;
         std::string event2;

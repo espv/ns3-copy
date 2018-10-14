@@ -306,6 +306,99 @@ EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5), T1 a1, T2 a2, T3 a3, T4 a4, T5
 template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6,
           typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6);
+
+/**
+ * \copybrief MakeEvent(void(*f)(void))
+ * \tparam U1 Formal type of the first argument to the function.
+ * \tparam U2 Formal type of the second argument to the function.
+ * \tparam U3 Formal type of the third argument to the function.
+ * \tparam U4 Formal type of the fourth argument to the function.
+ * \tparam U5 Formal type of the fifth argument to the function.
+ * \tparam U6 Formal type of the sixth argument to the function.
+ * \tparam T1 Actual type of the first argument to the function.
+ * \tparam T2 Actual type of the second argument to the function.
+ * \tparam T3 Actual type of the third argument to the function.
+ * \tparam T4 Actual type of the fourth argument to the function.
+ * \tparam T5 Actual type of the fifth argument to the function.
+ * \tparam T6 Actual type of the sixth argument to the function.
+ * \tparam T7 Actual type of the seventh argument to the function.
+ * \param f The function pointer.
+ * \param a1 First argument to be bound to the function.
+ * \param a2 Second argument to be bound to the function.
+ * \param a3 Third argument to be bound to the function.
+ * \param a4 Fourth argument to be bound to the function.
+ * \param a5 Fifth argument to be bound to the function.
+ * \param a6 Sixth argument to be bound to the function.
+ * \param a7 Seventh argument to be bound to the function.
+ * \returns The constructed EventImpl.
+ */
+template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7,
+            typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6,U7), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7);
+
+/**
+ * \copybrief MakeEvent(void(*f)(void))
+ * \tparam U1 Formal type of the first argument to the function.
+ * \tparam U2 Formal type of the second argument to the function.
+ * \tparam U3 Formal type of the third argument to the function.
+ * \tparam U4 Formal type of the fourth argument to the function.
+ * \tparam U5 Formal type of the fifth argument to the function.
+ * \tparam U6 Formal type of the sixth argument to the function.
+ * \tparam T1 Actual type of the first argument to the function.
+ * \tparam T2 Actual type of the second argument to the function.
+ * \tparam T3 Actual type of the third argument to the function.
+ * \tparam T4 Actual type of the fourth argument to the function.
+ * \tparam T5 Actual type of the fifth argument to the function.
+ * \tparam T6 Actual type of the sixth argument to the function.
+ * \tparam T7 Actual type of the seventh argument to the function.
+ * \tparam T8 Actual type of the eight argument to the function.
+ * \param f The function pointer.
+ * \param a1 First argument to be bound to the function.
+ * \param a2 Second argument to be bound to the function.
+ * \param a3 Third argument to be bound to the function.
+ * \param a4 Fourth argument to be bound to the function.
+ * \param a5 Fifth argument to be bound to the function.
+ * \param a6 Sixth argument to be bound to the function.
+ * \param a7 Seventh argument to be bound to the function.
+ * \param a8 Eight argument to be bound to the function.
+ * \returns The constructed EventImpl.
+ */
+template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8,
+            typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6,U7,U8), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8);
+
+/**
+ * \copybrief MakeEvent(void(*f)(void))
+ * \tparam U1 Formal type of the first argument to the function.
+ * \tparam U2 Formal type of the second argument to the function.
+ * \tparam U3 Formal type of the third argument to the function.
+ * \tparam U4 Formal type of the fourth argument to the function.
+ * \tparam U5 Formal type of the fifth argument to the function.
+ * \tparam U6 Formal type of the sixth argument to the function.
+ * \tparam T1 Actual type of the first argument to the function.
+ * \tparam T2 Actual type of the second argument to the function.
+ * \tparam T3 Actual type of the third argument to the function.
+ * \tparam T4 Actual type of the fourth argument to the function.
+ * \tparam T5 Actual type of the fifth argument to the function.
+ * \tparam T6 Actual type of the sixth argument to the function.
+ * \tparam T7 Actual type of the seventh argument to the function.
+ * \tparam T8 Actual type of the eight argument to the function.
+ * \tparam T9 Actual type of the ninth argument to the function.
+ * \param f The function pointer.
+ * \param a1 First argument to be bound to the function.
+ * \param a2 Second argument to be bound to the function.
+ * \param a3 Third argument to be bound to the function.
+ * \param a4 Fourth argument to be bound to the function.
+ * \param a5 Fifth argument to be bound to the function.
+ * \param a6 Sixth argument to be bound to the function.
+ * \param a7 Seventh argument to be bound to the function.
+ * \param a8 Eight argument to be bound to the function.
+ * \param a9 Ninth argument to be bound to the function.
+ * \returns The constructed EventImpl.
+ */
+template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8, typename U9,
+            typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6,U7,U8,U9), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, T9 a9);
 /**@}*/
 
 } // namespace ns3
@@ -629,6 +722,156 @@ private:
   return ev;
 }
 
+template <typename MEM, typename OBJ,
+        typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+EventImpl * MakeEvent (MEM mem_ptr, OBJ obj,
+                       T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
+{
+    // seven argument version
+    class EventMemberImpl7: public EventImpl
+    {
+    public:
+        EventMemberImpl7 (OBJ obj, MEM function, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
+                : m_obj (obj),
+                  m_function (function),
+                  m_a1 (a1),
+                  m_a2 (a2),
+                  m_a3 (a3),
+                  m_a4 (a4),
+                  m_a5 (a5),
+                  m_a6 (a6),
+                  m_a7 (a7)
+        {
+        }
+
+        /* STEIN */
+        OBJ m_obj;
+        MEM m_function;
+        /* STEIN */
+    protected:
+        virtual ~EventMemberImpl7 ()
+        {
+        }
+    private:
+        virtual void Notify (void)
+        {
+            (EventMemberImplObjTraits<OBJ>::GetReference (m_obj).*m_function)(m_a1, m_a2, m_a3, m_a4, m_a5, m_a6, m_a7);
+        }
+        /*OBJ m_obj;
+        MEM m_function;*/
+        typename TypeTraits<T1>::ReferencedType m_a1;
+        typename TypeTraits<T2>::ReferencedType m_a2;
+        typename TypeTraits<T3>::ReferencedType m_a3;
+        typename TypeTraits<T4>::ReferencedType m_a4;
+        typename TypeTraits<T5>::ReferencedType m_a5;
+        typename TypeTraits<T6>::ReferencedType m_a6;
+        typename TypeTraits<T7>::ReferencedType m_a7;
+    } *ev = new EventMemberImpl7 (obj, mem_ptr, a1, a2, a3, a4, a5, a6, a7);
+    return ev;
+}
+
+template <typename MEM, typename OBJ,
+        typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+EventImpl * MakeEvent (MEM mem_ptr, OBJ obj,
+                       T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
+{
+    // eight argument version
+    class EventMemberImpl8: public EventImpl
+    {
+    public:
+        EventMemberImpl8 (OBJ obj, MEM function, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
+                : m_obj (obj),
+                  m_function (function),
+                  m_a1 (a1),
+                  m_a2 (a2),
+                  m_a3 (a3),
+                  m_a4 (a4),
+                  m_a5 (a5),
+                  m_a6 (a6),
+                  m_a7 (a7),
+                  m_a8 (a8)
+        {
+        }
+
+        /* STEIN */
+        OBJ m_obj;
+        MEM m_function;
+        /* STEIN */
+    protected:
+        virtual ~EventMemberImpl8 ()
+        {
+        }
+    private:
+        virtual void Notify (void)
+        {
+            (EventMemberImplObjTraits<OBJ>::GetReference (m_obj).*m_function)(m_a1, m_a2, m_a3, m_a4, m_a5, m_a6, m_a7, m_a8);
+        }
+        /*OBJ m_obj;
+        MEM m_function;*/
+        typename TypeTraits<T1>::ReferencedType m_a1;
+        typename TypeTraits<T2>::ReferencedType m_a2;
+        typename TypeTraits<T3>::ReferencedType m_a3;
+        typename TypeTraits<T4>::ReferencedType m_a4;
+        typename TypeTraits<T5>::ReferencedType m_a5;
+        typename TypeTraits<T6>::ReferencedType m_a6;
+        typename TypeTraits<T7>::ReferencedType m_a7;
+        typename TypeTraits<T8>::ReferencedType m_a8;
+    } *ev = new EventMemberImpl8 (obj, mem_ptr, a1, a2, a3, a4, a5, a6, a7, a8);
+    return ev;
+}
+
+template <typename MEM, typename OBJ,
+        typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+EventImpl * MakeEvent (MEM mem_ptr, OBJ obj,
+                       T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, T9 a9)
+{
+    // nine argument version
+    class EventMemberImpl9: public EventImpl
+    {
+    public:
+        EventMemberImpl9 (OBJ obj, MEM function, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, T9 a9)
+                : m_obj (obj),
+                  m_function (function),
+                  m_a1 (a1),
+                  m_a2 (a2),
+                  m_a3 (a3),
+                  m_a4 (a4),
+                  m_a5 (a5),
+                  m_a6 (a6),
+                  m_a7 (a7),
+                  m_a8 (a8),
+                  m_a9 (a9)
+        {
+        }
+
+        /* STEIN */
+        OBJ m_obj;
+        MEM m_function;
+        /* STEIN */
+    protected:
+        virtual ~EventMemberImpl9 ()
+        {
+        }
+    private:
+        virtual void Notify (void)
+        {
+            (EventMemberImplObjTraits<OBJ>::GetReference (m_obj).*m_function)(m_a1, m_a2, m_a3, m_a4, m_a5, m_a6, m_a7, m_a8, m_a9);
+        }
+        /*OBJ m_obj;
+        MEM m_function;*/
+        typename TypeTraits<T1>::ReferencedType m_a1;
+        typename TypeTraits<T2>::ReferencedType m_a2;
+        typename TypeTraits<T3>::ReferencedType m_a3;
+        typename TypeTraits<T4>::ReferencedType m_a4;
+        typename TypeTraits<T5>::ReferencedType m_a5;
+        typename TypeTraits<T6>::ReferencedType m_a6;
+        typename TypeTraits<T7>::ReferencedType m_a7;
+        typename TypeTraits<T8>::ReferencedType m_a8;
+        typename TypeTraits<T9>::ReferencedType m_a9;
+    } *ev = new EventMemberImpl9 (obj, mem_ptr, a1, a2, a3, a4, a5, a6, a7, a8, a9);
+    return ev;
+}
+
 template <typename U1, typename T1>
 EventImpl * MakeEvent (void (*f)(U1), T1 a1)
 {
@@ -834,6 +1077,138 @@ private:
     typename TypeTraits<T5>::ReferencedType m_a5;
     typename TypeTraits<T6>::ReferencedType m_a6;
   } *ev = new EventFunctionImpl6 (f, a1, a2, a3, a4, a5, a6);
+  return ev;
+}
+
+template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7,
+        typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7>
+EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6,U7), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
+{
+  // seven arg version
+  class EventFunctionImpl7 : public EventImpl
+  {
+  public:
+      typedef void (*F)(U1,U2,U3,U4,U5,U6,U7);
+
+      EventFunctionImpl7 (F function, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7)
+              : m_function (function),
+                m_a1 (a1),
+                m_a2 (a2),
+                m_a3 (a3),
+                m_a4 (a4),
+                m_a5 (a5),
+                m_a6 (a6),
+                m_a7 (a7)
+      {
+      }
+  protected:
+      virtual ~EventFunctionImpl7 ()
+      {
+      }
+  private:
+      virtual void Notify (void)
+      {
+        (*m_function)(m_a1, m_a2, m_a3, m_a4, m_a5, m_a6, m_a7);
+      }
+      F m_function;
+      typename TypeTraits<T1>::ReferencedType m_a1;
+      typename TypeTraits<T2>::ReferencedType m_a2;
+      typename TypeTraits<T3>::ReferencedType m_a3;
+      typename TypeTraits<T4>::ReferencedType m_a4;
+      typename TypeTraits<T5>::ReferencedType m_a5;
+      typename TypeTraits<T6>::ReferencedType m_a6;
+      typename TypeTraits<T7>::ReferencedType m_a7;
+  } *ev = new EventFunctionImpl7 (f, a1, a2, a3, a4, a5, a6, a7);
+  return ev;
+}
+
+template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8,
+        typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6,U7), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
+{
+  // eight arg version
+  class EventFunctionImpl8 : public EventImpl
+  {
+  public:
+      typedef void (*F)(U1,U2,U3,U4,U5,U6,U7,U8);
+
+      EventFunctionImpl8 (F function, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
+              : m_function (function),
+                m_a1 (a1),
+                m_a2 (a2),
+                m_a3 (a3),
+                m_a4 (a4),
+                m_a5 (a5),
+                m_a6 (a6),
+                m_a7 (a7),
+                m_a8 (a8)
+      {
+      }
+  protected:
+      virtual ~EventFunctionImpl8 ()
+      {
+      }
+  private:
+      virtual void Notify (void)
+      {
+        (*m_function)(m_a1, m_a2, m_a3, m_a4, m_a5, m_a6, m_a7, m_a8);
+      }
+      F m_function;
+      typename TypeTraits<T1>::ReferencedType m_a1;
+      typename TypeTraits<T2>::ReferencedType m_a2;
+      typename TypeTraits<T3>::ReferencedType m_a3;
+      typename TypeTraits<T4>::ReferencedType m_a4;
+      typename TypeTraits<T5>::ReferencedType m_a5;
+      typename TypeTraits<T6>::ReferencedType m_a6;
+      typename TypeTraits<T7>::ReferencedType m_a7;
+      typename TypeTraits<T8>::ReferencedType m_a8;
+  } *ev = new EventFunctionImpl8 (f, a1, a2, a3, a4, a5, a6, a7, a8);
+  return ev;
+}
+
+template <typename U1, typename U2, typename U3, typename U4, typename U5, typename U6, typename U7, typename U8, typename U9,
+        typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8, typename T9>
+EventImpl * MakeEvent (void (*f)(U1,U2,U3,U4,U5,U6,U7,U8,U9), T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, T9 a9)
+{
+  // nine arg version
+  class EventFunctionImpl9 : public EventImpl
+  {
+  public:
+      typedef void (*F)(U1,U2,U3,U4,U5,U6,U7,U8,U9);
+
+      EventFunctionImpl9 (F function, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8, T9 a9)
+              : m_function (function),
+                m_a1 (a1),
+                m_a2 (a2),
+                m_a3 (a3),
+                m_a4 (a4),
+                m_a5 (a5),
+                m_a6 (a6),
+                m_a7 (a7),
+                m_a8 (a8),
+                m_a9 (a9)
+      {
+      }
+  protected:
+      virtual ~EventFunctionImpl9 ()
+      {
+      }
+  private:
+      virtual void Notify (void)
+      {
+        (*m_function)(m_a1, m_a2, m_a3, m_a4, m_a5, m_a6, m_a7, m_a8, m_a9);
+      }
+      F m_function;
+      typename TypeTraits<T1>::ReferencedType m_a1;
+      typename TypeTraits<T2>::ReferencedType m_a2;
+      typename TypeTraits<T3>::ReferencedType m_a3;
+      typename TypeTraits<T4>::ReferencedType m_a4;
+      typename TypeTraits<T5>::ReferencedType m_a5;
+      typename TypeTraits<T6>::ReferencedType m_a6;
+      typename TypeTraits<T7>::ReferencedType m_a7;
+      typename TypeTraits<T8>::ReferencedType m_a8;
+      typename TypeTraits<T9>::ReferencedType m_a9;
+  } *ev = new EventFunctionImpl9 (f, a1, a2, a3, a4, a5, a6, a7, a8, a9);
   return ev;
 }
 

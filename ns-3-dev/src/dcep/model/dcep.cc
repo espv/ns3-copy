@@ -406,6 +406,23 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q4->currentHost.Set("0.0.0.0");
         NS_LOG_INFO ("Setup query " << q4->eventType);
         dcep->DispatchQuery(q4);
+
+        Ptr<Query> q5 = CreateObject<Query> ();
+        q5->actionType = NOTIFICATION;
+
+        q5->id = query_counter++;
+
+        q5->isFinal = true;
+        q5->isAtomic = false;
+        q5->eventType = "AorB";
+        q5->output_dest = Ipv4Address::GetAny();
+        q5->inevent1 = "A";
+        q5->inevent2 = "B";
+        q5->op = "or";
+        q5->assigned = false;
+        q5->currentHost.Set("0.0.0.0");
+        NS_LOG_INFO ("Setup query " << q5->eventType);
+        dcep->DispatchQuery(q5);
         
 
     }
