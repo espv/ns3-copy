@@ -183,7 +183,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-x PROCESS 1000 0
+x PROCESS 314252 0
 x CALL handle-or-cepop
 0 STOP
 
@@ -213,7 +213,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-x PROCESS 1000 0
+x PROCESS 314252 0
 0 STOP
 
 SIGEND
