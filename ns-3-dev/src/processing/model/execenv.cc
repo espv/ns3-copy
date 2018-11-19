@@ -69,8 +69,8 @@ ExecEnv::ExecEnv() :
 							this->m_serviceMap[interruptId],
                             dummyProgramLoc);
 
-        static int numCPUCores = 2;
-        cpuToBeUsed = (cpuToBeUsed+1) % numCPUCores;  // Using two cores
+        #define NUMCPUCORES 1
+        cpuToBeUsed = (cpuToBeUsed+1) % NUMCPUCORES;
     }
 
 
