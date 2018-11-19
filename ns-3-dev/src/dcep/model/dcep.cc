@@ -40,30 +40,6 @@
 
 namespace ns3 {
 
-    static ProgramLocation *dummyProgramLoc;
-
-    // ScheduleInterrupt schedules an interrupt on the node.
-    // interruptId is the service name of the interrupt, such as HIRQ-123
-    void ScheduleInterrupt(Ptr<ExecEnv> ee, Ptr<Packet> packet, const char* interruptId, Time time) {
-
-        // TODO: Model the interrupt distribution somehow
-        static int cpu = 0;
-
-        dummyProgramLoc = new ProgramLocation();
-        dummyProgramLoc->tempvar = tempVar();
-        dummyProgramLoc->curPkt = packet;
-        dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-        dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
-
-        Simulator::Schedule(time,
-                            &InterruptController::IssueInterruptWithServiceOnCPU,
-                            ee->hwModel->m_interruptController,
-                            cpu,
-                            ee->m_serviceMap[interruptId],
-                            dummyProgramLoc);
-
-    }
-
 NS_OBJECT_ENSURE_REGISTERED(Dcep);
 NS_LOG_COMPONENT_DEFINE ("Dcep");
 
@@ -250,9 +226,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         {
             case EVENT: /*handle event*/
             {
-                NS_LOG_INFO ("DCEP: RECEIVED EVENT MESSAGE");   
+                NS_LOG_INFO ("DCEP: RECEIVED EVENT MESSAGE");
                 Ptr<CepEvent> event = CreateObject<CepEvent>();
-                
+
                 event->deserialize(data, size);
                 /* setting link delay from source to this node*/
                 event->delay = delay;

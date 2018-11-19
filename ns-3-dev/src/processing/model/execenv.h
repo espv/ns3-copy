@@ -59,6 +59,7 @@ namespace ns3 {
          * for the resource "cycles" on the CPU.
          */
         uint32_t m_traceOverhead;
+        int cpuToBeUsed = 0;
 
         // Holds functions used to resolve conditions
         Ptr<ConditionFunctions> conditionFunctions;

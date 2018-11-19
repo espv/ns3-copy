@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
+#include <cstring>
 
 #include "ns3/object-factory.h"
 
@@ -55,9 +56,6 @@ ExecEnv::ExecEnv() :
 
     void ExecEnv::ScheduleInterrupt(Ptr<Packet> packet, const char* interruptId, Time time) {
 
-        // TODO: Model the interrupt distribution somehow
-        static int cpu = 0;
-
         dummyProgramLoc = new ProgramLocation();
         dummyProgramLoc->tempvar = tempVar();
         dummyProgramLoc->curPkt = packet;
@@ -67,10 +65,12 @@ ExecEnv::ExecEnv() :
         Simulator::Schedule(time,
                             &InterruptController::IssueInterruptWithServiceOnCPU,
                             this->hwModel->m_interruptController,
-                            cpu,
+                            cpuToBeUsed,
 							this->m_serviceMap[interruptId],
                             dummyProgramLoc);
 
+        static int numCPUCores = 2;
+        cpuToBeUsed = (cpuToBeUsed+1) % numCPUCores;  // Using two cores
     }
 
 
