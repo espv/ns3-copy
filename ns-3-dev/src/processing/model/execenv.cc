@@ -62,15 +62,13 @@ ExecEnv::ExecEnv() :
         dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
         dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
 
+        static int cpu = 0;
         Simulator::Schedule(time,
                             &InterruptController::IssueInterruptWithServiceOnCPU,
                             this->hwModel->m_interruptController,
-                            cpuToBeUsed,
+                            cpu,
 							this->m_serviceMap[interruptId],
                             dummyProgramLoc);
-
-        #define NUMCPUCORES 1
-        cpuToBeUsed = (cpuToBeUsed+1) % NUMCPUCORES;
     }
 
 
