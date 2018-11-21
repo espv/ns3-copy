@@ -29,13 +29,14 @@ QUEUES
 HIRQ	            FIFO 	-1    services
 # Queue for posted tasks
 sq FIFO -1 services
-rcvd-pkts FIFO -1 packets
-cepops FIFO -1 packets
+rcvd-pkts FIFO 10 packets
+cepops FIFO 10 packets
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
-PEU 4 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 4 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 1200 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 1200 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 1200 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
 SYNCH
 # name type arguments

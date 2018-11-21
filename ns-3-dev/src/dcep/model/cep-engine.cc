@@ -439,6 +439,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             p->HandleNewCepEvent(q, returned);
             newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
             newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            //bufman->clean_up();
             //return true;
         } else {
             newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;

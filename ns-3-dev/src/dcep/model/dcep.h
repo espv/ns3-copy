@@ -67,6 +67,7 @@ private:
         uint16_t m_cepPort; 
         uint16_t event_code;
         uint32_t events_load;
+        uint32_t event_interval;
         uint16_t operators_load;
         std::string placementPolicy;
         std::string routing_protocol;
@@ -95,6 +96,7 @@ public:
     
 private:
 
+  int number_received;
   std::vector<Query> m_queries;
   TracedCallback<Ptr<Query> > nquery;
   
@@ -121,6 +123,7 @@ class DataSource : public Object
 
       std::string m_eventType;
       uint32_t numCepEvents;
+      uint32_t cepEventsInterval;
       uint32_t eventRate;
       uint32_t counter;
       uint32_t eventCode;

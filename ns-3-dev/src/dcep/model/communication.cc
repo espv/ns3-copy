@@ -164,9 +164,9 @@ NS_LOG_COMPONENT_DEFINE("Communication");
                            << delay.GetMilliSeconds()
                                );
                       
-                       uint8_t *buffer = new uint8_t[dcepHeader.GetContentSize()];
+                       auto buffer = new uint8_t[dcepHeader.GetContentSize()];
                        packet->CopyData(buffer, dcepHeader.GetContentSize());
-                       dcep->rcvRemoteMsg(buffer,dcepHeader.GetContentSize(),dcepHeader.GetContentType(), delay.GetMilliSeconds());
+                       dcep->rcvRemoteMsg(buffer,(uint32_t)dcepHeader.GetContentSize(),dcepHeader.GetContentType(), (uint64_t)delay.GetMilliSeconds());
                   
                 }
                }   
