@@ -17,6 +17,7 @@
  */
 
 
+#include <string.h>
 #include "placement.h"
 #include "ns3/uinteger.h"
 #include "ns3/names.h"
@@ -25,7 +26,7 @@
 #include"dcep.h"
 #include "ns3/ipv4.h"
 #include "ns3/string.h"
-#include "src/core/model/object.h"
+#include "ns3/object.h"
 #include "communication.h"
 #include "cep-engine.h"
 #include "common.h"
@@ -33,10 +34,10 @@
 #include "dcep-header.h"
 #include "ns3/abort.h"
 #include "resource-manager.h"
-#include "src/network/utils/ipv4-address.h"
+#include "ns3/ipv4-address.h"
 #include "dcep-state.h"
 #include "ns3/processing-module.h"
-#include "../../processing/model/cep.h"
+#include "ns3/cep.h"
 
 namespace ns3 {
 
@@ -202,7 +203,7 @@ namespace ns3 {
             e->hopsCount = entry.distance + e->hopsCount;
             
             SerializedCepEvent *message = e->serialize();
-            uint8_t *buffer = new uint8_t[message->size];
+            auto buffer = new uint8_t[message->size];
             memcpy(buffer, message, message->size);
             DcepHeader dcepHeader;
             dcepHeader.SetContentType(EVENT);

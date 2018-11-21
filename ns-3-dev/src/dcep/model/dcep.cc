@@ -246,7 +246,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 event->pkt->m_executionInfo.executedByExecEnv = false;
                 ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
 
-                break; 
+                break;
             }
 
             case QUERY: /* handle query*/

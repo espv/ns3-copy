@@ -29,19 +29,21 @@ QUEUES
 HIRQ	            FIFO 	-1    services
 # Queue for posted tasks
 sq FIFO -1 services
-rcvd-pkts FIFO 10 packets
-cepops FIFO 10 packets
+rcvd-pkts FIFO 3 packets
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
-PEU 1200 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 1200 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 1200 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu3 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu4 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu5 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 3 cpu6 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
 SYNCH
 # name type arguments
 # type 0 is a semaphore
-process_event_SEM 0 0
 
 CONDITIONS
 
@@ -88,7 +90,13 @@ FRACTION 100% 1 1
 x PROCESS 1000 0
 x CALL process_received_packet
 x ENQUEUE PKTQUEUE 0 rcvd-pkts
-x TTWAKEUP event_thread
+x TTWAKEUP event_thread1
+x TTWAKEUP event_thread2
+x TTWAKEUP event_thread3
+x TTWAKEUP event_thread4
+x TTWAKEUP event_thread5
+x TTWAKEUP event_thread6
+x TTWAKEUP event_thread7
 0 STOP
 
 SIGEND
@@ -102,7 +110,13 @@ FRACTION 100% 1 1
 
 0 START
 x                  ENQUEUE		SRVQUEUE receive-packet sq
-x TTWAKEUP packet_thread
+x TTWAKEUP packet_thread1
+x TTWAKEUP packet_thread2
+x TTWAKEUP packet_thread3
+x TTWAKEUP packet_thread4
+x TTWAKEUP packet_thread5
+x TTWAKEUP packet_thread6
+x TTWAKEUP packet_thread7
 0 STOP
 
 SIGEND
@@ -129,7 +143,13 @@ FRACTION 100% 1 1
 
 0 START
 x                  ENQUEUE		SRVQUEUE send-packet sq
-x TTWAKEUP packet_thread
+x TTWAKEUP packet_thread1
+x TTWAKEUP packet_thread2
+x TTWAKEUP packet_thread3
+x TTWAKEUP packet_thread4
+x TTWAKEUP packet_thread5
+x TTWAKEUP packet_thread6
+x TTWAKEUP packet_thread7
 0 STOP
 
 SIGEND
@@ -361,8 +381,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND cepops cepops notempty
-x DEQUEUE PKTQUEUE 0 cepops
+x STATECOND AllCepOpsDoneYet read local 0
+x STATECOND AllCepOpsDoneYet write local 1
 x STATECOND CepOpType read local 0
 x CALL handle-or-cepop
 x CALL handle-cepops
@@ -378,8 +398,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND cepops cepops notempty
-x DEQUEUE PKTQUEUE 0 cepops
+x STATECOND AllCepOpsDoneYet read local 0
+x STATECOND AllCepOpsDoneYet write local 1
 x STATECOND CepOpType read local 1
 x CALL handle-and-cepop
 x CALL handle-cepops
@@ -395,8 +415,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND cepops cepops notempty
-x DEQUEUE PKTQUEUE 0 cepops
+x STATECOND AllCepOpsDoneYet read local 0
+x STATECOND AllCepOpsDoneYet write local 1
 x STATECOND CepOpType read local 2
 x CALL handle-then-cepop
 x CALL handle-cepops
@@ -412,7 +432,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND cepops cepops empty
+x STATECOND AllCepOpsDoneYet read local 1
 0 STOP
 
 SIGEND
@@ -427,6 +447,7 @@ FRACTION 100% 1 1
 0 START
 x QUEUECOND rcvd-pkts rcvd-pkts empty
 x SLEEPTHREAD
+x PROCESS 60000 0
 0 STOP
 
 SIGEND
@@ -449,5 +470,17 @@ SIGEND
 
 
 THREADS
-packet_thread packet_processing_thread infinite 0
-event_thread event_processing_thread infinite 0
+packet_thread1 packet_processing_thread infinite 0
+packet_thread2 packet_processing_thread infinite 0
+packet_thread3 packet_processing_thread infinite 0
+packet_thread4 packet_processing_thread infinite 0
+packet_thread5 packet_processing_thread infinite 0
+packet_thread6 packet_processing_thread infinite 0
+packet_thread7 packet_processing_thread infinite 0
+event_thread1 event_processing_thread infinite 0
+event_thread2 event_processing_thread infinite 0
+event_thread3 event_processing_thread infinite 0
+event_thread4 event_processing_thread infinite 0
+event_thread5 event_processing_thread infinite 0
+event_thread6 event_processing_thread infinite 0
+event_thread7 event_processing_thread infinite 0

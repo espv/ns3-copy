@@ -96,7 +96,7 @@ public:
     
 private:
 
-  int number_received;
+  int number_received = 0;
   std::vector<Query> m_queries;
   TracedCallback<Ptr<Query> > nquery;
   
