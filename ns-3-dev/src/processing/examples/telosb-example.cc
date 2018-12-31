@@ -107,9 +107,9 @@ int main(int argc, char *argv[])
   createPlot(&delayPlot, "delayplot.png", "intra-os delay", &delayDataSet);
 
 #define READ_TRACES 0
-#define ONE_CONTEXT 0
+#define ONE_CONTEXT 1
 #define SIMULATION_OVERHEAD_TEST 0
-#define ALL_CONTEXTS 1
+#define ALL_CONTEXTS 0
 #define CC2420_MODEL 0
 
 #if ALL_CONTEXTS
