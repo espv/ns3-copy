@@ -219,13 +219,24 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         
         GetObject<Sink>()->receiveFinalCepEvent(event);
     }
+
+    void
+    Dcep::check_constraints(Ptr<CepEvent> event)
+    {
+        Ptr<Placement> p = GetObject<Placement>();
+        Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
+        auto constraints_done = event->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done");
+        constraints_done->value = 1;
+        event->pkt->m_executionInfo.executedByExecEnv = false;
+        ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
+    }
     
     void
     Dcep::rcvRemoteMsg(uint8_t* data, uint32_t size, uint16_t msg_type, uint64_t delay)
     {
-        
+
         Ptr<Placement> p = GetObject<Placement>();
-        
+
         switch(msg_type)
         {
             case EVENT: /*handle event*/
@@ -242,9 +253,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 event->pkt = pkt;
                 Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
 
-                ee->ScheduleInterrupt (event->pkt, "HIRQ-1", Seconds(0));
                 event->pkt->m_executionInfo.executedByExecEnv = false;
-                ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
+                ee->Proceed(event->pkt, "check-constraints", &Dcep::check_constraints, this, event);
+
+                ee->ScheduleInterrupt (event->pkt, "HIRQ-1", Seconds(0));
 
                 break;
             }

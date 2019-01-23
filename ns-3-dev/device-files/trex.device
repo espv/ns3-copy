@@ -51,6 +51,7 @@ TRIGGERS
 SERVICE handle-cepops handle-cepops
 SERVICE handle-and-cepop handle-and-cepop
 SERVICE handle-then-cepop handle-then-cepop
+SERVICE check-constraints check-constraints
 LOC within-send-packet send-packet
 
 # Entrypoint function for the PEU defined above
@@ -68,7 +69,7 @@ SIGEND
 
 
 SIGSTART
-NAME check_constraints
+NAME check-constraints
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -77,14 +78,14 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x PROCESS 1000 0
-x CALL check_constraints
+x CALL check-constraints
 0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME check_constraints
+NAME check-constraints
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -93,14 +94,14 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x PROCESS 2000 0
-x CALL check_constraints
+x CALL check-constraints
 0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME check_constraints
+NAME check-constraints
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -109,14 +110,14 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 2
 x PROCESS 3000 0
-x CALL check_constraints
+x CALL check-constraints
 0 STOP
 
 SIGEND
 
 
 SIGSTART
-NAME check_constraints
+NAME check-constraints
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
@@ -136,7 +137,7 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1000 0
-x CALL check_constraints
+x CALL check-constraints
 0 STOP
 
 SIGEND
