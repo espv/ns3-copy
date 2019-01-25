@@ -151,16 +151,16 @@ NS_LOG_COMPONENT_DEFINE("Communication");
                 if (InetSocketAddress::IsMatchingType (from))
                 {
                        NS_LOG_INFO ("At time " << Simulator::Now ().GetMilliSeconds()
-                       << "s packet of type " << dcepHeader.GetContentType()
+                       << " ms packet of type " << dcepHeader.GetContentType()
                        << " from "
                        << InetSocketAddress::ConvertFrom(from).GetIpv4 ()
                            << " destination was "
                            << ipv4.GetDestination()
-                           << "local address "
+                           << " local address "
                            << this->host_address
-                               << "packet size "
+                               << " packet size "
                                << packet->GetSize()
-                           << "delay "
+                           << " delay "
                            << delay.GetMilliSeconds()
                                );
                       
@@ -231,7 +231,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             {
 
                 NS_LOG_INFO ("SUCCESSFUL TX from : " << host_address
-                        << "packet size "
+                        << " packet size "
                         << pp->GetSize());
                 itemSent = true;
                 m_sent++;
