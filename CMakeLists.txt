@@ -1862,6 +1862,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/src/dcep/doc/dcep.rst
         ns-3-dev/src/dcep/examples/dcep-example.cc
         ns-3-dev/src/dcep/examples/MANETSimulation.cc
+        ns-3-dev/src/dcep/examples/MANETSimulation-one-source.cc
         ns-3-dev/src/dcep/examples/wscript
         ns-3-dev/src/dcep/helper/dcep-app-helper.cc
         ns-3-dev/src/dcep/helper/dcep-app-helper.h
