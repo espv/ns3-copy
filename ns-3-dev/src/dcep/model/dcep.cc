@@ -378,9 +378,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q3->op = "then";
         q3->assigned = false;
         q3->currentHost.Set("0.0.0.0");
-        q2->parent_output = "AthenB";
+        q3->parent_output = "AthenB";
         NS_LOG_INFO ("Setup query " << q3->eventType);
-        dcep->DispatchQuery(q3);
+        //dcep->DispatchQuery(q3);
 
         Ptr<Query> q4 = CreateObject<Query> ();
         q4->actionType = NOTIFICATION;
@@ -396,7 +396,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q4->op = "and";
         q4->assigned = false;
         q4->currentHost.Set("0.0.0.0");
-        q4->parent_output = "AthenB";
+        q4->parent_output = "AandB";
         NS_LOG_INFO ("Setup query " << q4->eventType);
         //dcep->DispatchQuery(q4);
 
@@ -416,7 +416,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q5->currentHost.Set("0.0.0.0");
         q5->parent_output = "AorB";
         NS_LOG_INFO ("Setup query " << q5->eventType);
-        //dcep->DispatchQuery(q5);
+        dcep->DispatchQuery(q5);
         
 
     }
