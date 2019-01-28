@@ -247,7 +247,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 /* setting link delay from source to this node*/
                 event->delay = delay;
 
-                NS_LOG_INFO ("DCEP: RECEIVED EVENT MESSAGE OF TYPE " << event->type);
+                static int cnt = 0;
+                NS_LOG_INFO ("DCEP: RECEIVED EVENT MESSAGE OF TYPE " << event->type << ", SEQ NO " << event->m_seq << ", RCVD EVENT NUMBER " << ++cnt);
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 event->pkt = pkt;
@@ -526,7 +527,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 NS_LOG_INFO("counter " << counter);
                 if(counter < numCepEvents)
                 {
-                    Simulator::Schedule (MilliSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
+                    Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
                 }
                     
               

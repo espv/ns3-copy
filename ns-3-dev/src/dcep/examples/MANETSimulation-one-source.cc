@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
     std::string placementPolicy ("centralized");
     std::string adaptationMechanism ("FastAdaptationMechanism");
     uint32_t numberOfCepEvents = 100;
-    uint32_t numStationary = 3;
+    uint32_t numStationary = 2;  // Two stationaries where one is data source and the other sink
     uint32_t numMobile = 7;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
