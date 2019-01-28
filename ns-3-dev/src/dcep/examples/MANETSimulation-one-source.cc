@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
     
     std::string placementPolicy ("centralized");
     std::string adaptationMechanism ("FastAdaptationMechanism");
-    uint32_t numberOfCepEvents = 1;
+    uint32_t numberOfCepEvents = 1000;
     uint32_t numStationary = 2;  // Two stationaries where one is data source and the other sink
     uint32_t numMobile = 7;
     uint32_t allNodes = numMobile+numStationary;
@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement_policy", StringValue(placementPolicy));
-        
+
     }
     
     
