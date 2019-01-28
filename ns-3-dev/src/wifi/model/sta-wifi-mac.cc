@@ -701,8 +701,8 @@ StaWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
   //other frames. Specifically, this will handle Block Ack-related
   //Management Action frames.
   /* STEIN */
-  // RegularWifiMac::Receive(packet, hdr);
-  RegularWifiMac::Receive(packet, *hdr);
+  RegularWifiMac::Receive(packet, hdr);
+  //RegularWifiMac::Receive(packet, *hdr);
   /* STEIN */
 }
 

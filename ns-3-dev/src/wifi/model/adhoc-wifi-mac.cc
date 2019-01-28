@@ -190,15 +190,15 @@ AdhocWifiMac::SetLinkUpCallback (Callback<void> linkUp)
 
 void
 /* STEIN */
-// AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
-AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
+AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
+//AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
 /* STEIN */
 {
   /* STEIN */
   /* NOTE: Since callers of this function assume that this functions is
            executing immediately, hdr is allocated on the stack. This means,
            if we return, hdr will be lost. */
-  WifiMacHeader *hdr = &hdrCopy;
+  //WifiMacHeader *hdr = &hdrCopy;
   /* STEIN */
 
 
@@ -295,8 +295,8 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, WifiMacHeader hdrCopy)
   //other frames. Specifically, this will handle Block Ack-related
   //Management Action frames.
   /* STEIN */
-  // RegularWifiMac::Receive (packet, hdr);
-  RegularWifiMac::Receive (packet, *hdr);
+  RegularWifiMac::Receive (packet, hdr);
+  //RegularWifiMac::Receive (packet, *hdr);
   /* STEIN */
 }
 

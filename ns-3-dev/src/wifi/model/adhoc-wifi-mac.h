@@ -74,8 +74,8 @@ public:
 
 private:
   /* STEIN */
-  // virtual void Receive (Ptr<Packet> packet, const WifiMacHeader *hdr);
-  virtual void Receive (Ptr<Packet> packet, WifiMacHeader hdr);
+  virtual void Receive (Ptr<Packet> packet, const WifiMacHeader *hdr);
+  //virtual void Receive (Ptr<Packet> packet, WifiMacHeader hdr);
   /* STEIN */
 };
 

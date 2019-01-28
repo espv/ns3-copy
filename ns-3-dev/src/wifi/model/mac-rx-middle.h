@@ -44,8 +44,8 @@ public:
    * typedef for callback
    */
   /* STEIN */
-  // typedef Callback<void, Ptr<Packet>, const WifiMacHeader*> ForwardUpCallback;
-  typedef Callback<void, Ptr<Packet>, WifiMacHeader> ForwardUpCallback;
+   typedef Callback<void, Ptr<Packet>, const WifiMacHeader*> ForwardUpCallback;
+  //typedef Callback<void, Ptr<Packet>, WifiMacHeader> ForwardUpCallback;
   /* STEIN */
 
   MacRxMiddle ();

@@ -398,8 +398,8 @@ protected:
    * \param hdr a pointer to the MAC header of the received frame.
    */
   /* STEIN */
-  // virtual void Receive (Ptr<Packet> packet, const WifiMacHeader *hdr);
-  virtual void Receive (Ptr<Packet> packet, WifiMacHeader hdr);
+  virtual void Receive (Ptr<Packet> packet, const WifiMacHeader *hdr);
+  // virtual void Receive (Ptr<Packet> packet, WifiMacHeader hdr);
   /* STEIN */
   /**
    * The packet we sent was successfully received by the receiver

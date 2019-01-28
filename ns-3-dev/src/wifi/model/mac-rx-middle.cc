@@ -340,8 +340,8 @@ MacRxMiddle::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
       originator->SetSequenceControl (hdr->GetSequenceControl ());
     }
   /* STEIN */
-  // m_callback (aggregate, hdr);
-  m_callback (aggregate, *hdr);
+  m_callback (aggregate, hdr);
+  // m_callback (aggregate, *hdr);
   /* STEIN */
 }
 
