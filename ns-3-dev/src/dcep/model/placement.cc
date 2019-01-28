@@ -120,6 +120,8 @@ namespace ns3 {
         remoteCepEventReceived (e);
         
         if (e->event_class == FINAL_EVENT) {
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("AllCepOpsDoneYet")->value = 1;
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
             SendCepEventToSink(e);
         }
         else
@@ -182,11 +184,26 @@ namespace ns3 {
     {
         GetObject<CEPEngine>()->ProcessCepEvent(e);
     }
+
+    Ipv4Address
+    Placement::SinkAddressForEvent(Ptr<CepEvent> e)
+    {
+        if (e->type == "E")
+            return Ipv4Address("10.0.0.3");
+
+        return Ipv4Address("");
+    }
     
     void
     Placement::SendCepEventToSink(Ptr<CepEvent> e)
     {
-        GetObject<Dcep>()->SendFinalCepEventToSink(e);
+        //SendCepEvent(e, sinkAddress);
+        //auto dcep = GetObject<Dcep>();
+        auto dest = SinkAddressForEvent(e);
+        //if (dest == Ipv4Address(""))
+        //    GetObject<Dcep>()->SendFinalCepEventToSink(e);
+        //else
+        SendCepEvent(e, dest);
     }
     
     
@@ -217,8 +234,9 @@ namespace ns3 {
         }
         else
         {
-           eventsList.push_back(e);
-            Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
+            GetObject<Dcep>()->SendFinalCepEventToSink(e);
+            //eventsList.push_back(e);
+            // Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
         }
     }
     

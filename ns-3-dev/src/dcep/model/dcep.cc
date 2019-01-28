@@ -216,7 +216,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         this->RxFinalCepEvent(1);
         this->RxFinalCepEventDelay(event->delay);
         this->RxFinalCepEventHops(event->hopsCount);
-        
+
         GetObject<Sink>()->receiveFinalCepEvent(event);
     }
 
@@ -372,7 +372,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         q3->isFinal = true;
         q3->isAtomic = false;
-        q3->eventType = "AthenB";
+        q3->eventType = "C";  // Used to be "AthenB", but that is unnecessary
         q3->output_dest = Ipv4Address::GetAny();
         q3->inevent1 = "A";
         q3->inevent2 = "B";
@@ -390,7 +390,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         q4->isFinal = true;
         q4->isAtomic = false;
-        q4->eventType = "AandB";
+        q4->eventType = "D";
         q4->output_dest = Ipv4Address::GetAny();
         q4->inevent1 = "A";
         q4->inevent2 = "B";
@@ -408,7 +408,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         q5->isFinal = true;
         q5->isAtomic = false;
-        q5->eventType = "AorB";
+        q5->eventType = "E";
         q5->output_dest = Ipv4Address::GetAny();
         q5->inevent1 = "A";
         q5->inevent2 = "B";
