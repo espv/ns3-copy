@@ -57,8 +57,8 @@ int main(int argc, char** argv) {
     std::string placementPolicy ("centralized");
     std::string adaptationMechanism ("FastAdaptationMechanism");
     uint32_t numberOfCepEvents = 1000;
-    uint32_t numStationary = 2;  // Two stationaries where one is data source and the other sink
-    uint32_t numMobile = 7;
+    uint32_t numStationary = 3;  // Two stationaries where one is data source and the other sink
+    uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
     uint32_t eventInterval = 1000000;  // Interval in nanoseconds
@@ -110,9 +110,9 @@ int main(int argc, char** argv) {
     Ptr<ListPositionAllocator> positionAlloc2 = CreateObject<ListPositionAllocator> ();
     
     
-    positionAlloc2->Add (Vector (300.0, 300.0, 0.0));//sink
-    positionAlloc2->Add (Vector (1275.0, 50.0, 0.0));
-    positionAlloc2->Add (Vector (1275.0, 400.0, 0.0));
+    positionAlloc2->Add (Vector (350.0, 350.0, 0.0));//sink
+    positionAlloc2->Add (Vector (150.0, 150.0, 0.0));
+    positionAlloc2->Add (Vector (550.0, 550.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 310.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 510.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 710.0, 0.0));
@@ -170,12 +170,12 @@ int main(int argc, char** argv) {
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement_policy", StringValue(placementPolicy));
-        if(i+1 < numStationary)
+        if(i == 0)
         {
             NS_LOG_INFO("sink...");
             dcepApps.Get(i)->SetAttribute("IsSink", BooleanValue(true));
         }
-        else//data generator
+        else if (i == 1)//data generator
         {
             NS_LOG_INFO("generator...");
             dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));

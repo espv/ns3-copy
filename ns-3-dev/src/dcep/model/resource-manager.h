@@ -46,7 +46,7 @@ namespace ns3
             ResourceManager ();
 
             void Configure (void);
-            void getRoute(olsr::RoutingTableEntry &);
+            int getRoute(olsr::RoutingTableEntry &);
             
         private:
 

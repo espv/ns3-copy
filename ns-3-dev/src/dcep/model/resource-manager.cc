@@ -63,7 +63,7 @@ namespace ns3
     }
     
     
-    void
+    int
     ResourceManager::getRoute(olsr::RoutingTableEntry &rentry) {
 
         /*
@@ -77,7 +77,7 @@ namespace ns3
             NS_LOG_INFO("DESTINATION IS LOCAL NODE, SOMEONE IS SCRUING UP! ABORTING...");
             //NS_FATAL_ERROR_NO_MSG ();
             rentry.nextAddr = GetObject<Communication>()->GetLocalAddress();
-            return;
+            return -1;
         }
 
         if (olsr_routing_protocol) {
@@ -108,6 +108,7 @@ namespace ns3
             }
         }
 
+        return 0;
     }
     
 }

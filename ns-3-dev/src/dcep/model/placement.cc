@@ -213,7 +213,10 @@ namespace ns3 {
         olsr::RoutingTableEntry entry;
         
         entry.destAddr = dest;
-        GetObject<ResourceManager>()->getRoute(entry);
+        if (GetObject<ResourceManager>()->getRoute(entry) == -1) {
+            GetObject<Dcep>()->SendFinalCepEventToSink(e);
+            return;
+        }
         if(entry.distance > 0)
         {
             //set here and when nely produced
@@ -234,9 +237,8 @@ namespace ns3 {
         }
         else
         {
-            GetObject<Dcep>()->SendFinalCepEventToSink(e);
-            //eventsList.push_back(e);
-            // Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
+            eventsList.push_back(e);
+            Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
         }
     }
     
