@@ -37,10 +37,11 @@
 #include "common.h"
 #include "message-types.h"
 #include "ns3/socket-factory.h"
-#include "src/internet/model/ipv4-header.h"
+#include "ns3/ipv4-header.h"
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
+#include <ns3/tcp-header.h>
 #include "ns3/abort.h"
 #include "dcep-header.h"
 
@@ -106,7 +107,8 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         /* setup cep server socket */
         if (m_socket == 0)
         {
-          TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");
+          TypeId tid = TypeId::LookupByName ("ns3::UdpSocketFactory");  // If using UDP
+          //TypeId tid = TypeId::LookupByName ("ns3::TcpSocketFactory");  // If using TCP
           m_socket = Socket::CreateSocket (disnode, tid);
           InetSocketAddress local = InetSocketAddress (Ipv4Address::GetAny (),
                                                        m_port);
@@ -121,7 +123,6 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         }
        
         m_socket->SetRecvCallback (MakeCallback (&Communication::HandleRead, this));
-        
     }
     
     
@@ -142,7 +143,6 @@ NS_LOG_COMPONENT_DEFINE("Communication");
                 Ipv4Header ipv4;
                 
                 //packet->RemoveHeader(seqTs);
-                    
                 packet->RemoveHeader(ipv4);
                 packet->RemoveHeader(dcepHeader);
                 

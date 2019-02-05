@@ -12,6 +12,7 @@
  */
 
 #include <cstdlib>
+#include <ns3/point-to-point-module.h>
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
@@ -61,7 +62,7 @@ int main(int argc, char** argv) {
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
-    uint32_t eventInterval = 1000000;  // Interval in nanoseconds
+    uint32_t eventInterval = 10000000;  // Interval in nanoseconds
     
     std::string format ("OMNet++");
     std::string experiment ("dcep-performance-test"); //the current study
@@ -76,11 +77,28 @@ int main(int argc, char** argv) {
     cmd.AddValue ("StateSize", "Size of the operator state ", stateSize);
     cmd.AddValue ("RunID", "", runID);
     cmd.Parse (argc, argv);
-    
+
     NodeContainer allNodesContainer;
     allNodesContainer.Create (allNodes);
-    
-    WifiHelper wifi;
+    NodeContainer n0n1(allNodesContainer.Get(0), allNodesContainer.Get(1));
+    NodeContainer n1n2(allNodesContainer.Get(1), allNodesContainer.Get(2));
+
+    std::string bandwidth = "5Mbps";
+    std::string delay = "5ms";
+
+    PointToPointHelper pointToPoint1;
+    PointToPointHelper pointToPoint2;
+    pointToPoint1.SetDeviceAttribute ("DataRate", StringValue (bandwidth));
+    pointToPoint2.SetDeviceAttribute ("DataRate", StringValue (bandwidth));
+    pointToPoint1.SetChannelAttribute ("Delay", StringValue (delay));
+    pointToPoint2.SetChannelAttribute ("Delay", StringValue (delay));
+
+    NetDeviceContainer devices1;
+    NetDeviceContainer devices2;
+    devices1 = pointToPoint1.Install (n0n1);
+    devices2 = pointToPoint2.Install (n1n2);
+
+    /*WifiHelper wifi;
     
     wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
 
@@ -101,7 +119,7 @@ int main(int argc, char** argv) {
                                   "ControlMode",StringValue (phyMode));
     
     wifiMac.SetType ("ns3::AdhocWifiMac");
-    NetDeviceContainer devices = wifi.Install (wifiPhy, wifiMac, allNodesContainer);
+    NetDeviceContainer devices = wifi.Install (wifiPhy, wifiMac, allNodesContainer);*/
     
     
     Ns2MobilityHelper ns2 = Ns2MobilityHelper (mobilityTraceFile);
@@ -145,10 +163,13 @@ int main(int argc, char** argv) {
     istack.Install (allNodesContainer);
 
     Ipv4AddressHelper ipv4;
-    Ipv4InterfaceContainer wifiInterfaces;
+    Ipv4InterfaceContainer wifiInterfaces1;
+    Ipv4InterfaceContainer wifiInterfaces2;
     NS_LOG_INFO ("Assigning IP Addresses......");
     ipv4.SetBase ("10.0.0.0", "255.255.255.0");
-    wifiInterfaces = ipv4.Assign (devices);
+    wifiInterfaces1 = ipv4.Assign (devices1);
+    ipv4.SetBase ("10.0.1.0", "255.255.255.0");
+    wifiInterfaces2 = ipv4.Assign (devices2);
     
     DcepAppHelper dcepApphelper;
 
@@ -164,7 +185,7 @@ int main(int argc, char** argv) {
     // Espen
 
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
-    Ipv4Address sinkAddress = wifiInterfaces.GetAddress (0);
+    Ipv4Address sinkAddress = wifiInterfaces1.GetAddress (0);
     
     for(uint32_t i = 0; i < numStationary; i++)
     {

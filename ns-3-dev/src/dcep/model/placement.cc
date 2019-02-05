@@ -189,7 +189,7 @@ namespace ns3 {
     Placement::SinkAddressForEvent(Ptr<CepEvent> e)
     {
         if (e->type == "E")
-            return Ipv4Address("10.0.0.3");
+            return Ipv4Address("10.0.0.1");
 
         return Ipv4Address("");
     }
@@ -317,13 +317,11 @@ namespace ns3 {
         else if (dstate->GetNextHop(eType).IsEqual(GetObject<Communication>()->GetLocalAddress()))
         {
             
-            /*if(dstate->GetQuery(eType)->isAtomic)
+            if(dstate->GetQuery(eType)->isAtomic)
             {
                  GetObject<Dcep>()->ActivateDatasource(dstate->GetQuery(eType));
             }
-               
-                
-            else*//* Send to local CEP engine*/
+            else/* Send to local CEP engine*/
                 SendQueryToCepEngine (dstate->GetQuery(eType));
         }
         else
@@ -438,7 +436,7 @@ namespace ns3 {
             }
             else if (q->eventType == "E") 
             {
-                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.6"));
+                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
                 placed = true;
             }
             else if (q->eventType == "F") 

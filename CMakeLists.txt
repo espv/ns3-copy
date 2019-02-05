@@ -1334,6 +1334,7 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/examples/wireless/wscript
         ns-3-dev/scratch/subdir/scratch-simulator-subdir.cc
         ns-3-dev/scratch/scratch-simulator.cc
+        ns-3-dev/scratch/tcp-example.cc
         ns-3-dev/src/antenna/bindings/callbacks_list.py
         ns-3-dev/src/antenna/bindings/modulegen__gcc_ILP32.py
         ns-3-dev/src/antenna/bindings/modulegen__gcc_LP64.py
@@ -4447,5 +4448,9 @@ add_custom_target(
 )
 add_custom_target(
         gnex COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
+)
+add_custom_target(
+        tcp-example COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )
