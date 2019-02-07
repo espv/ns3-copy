@@ -490,10 +490,15 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         p->HandleNewCepEvent(q, returned);
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+        auto constraintsFulfilled = q->constraints(e);
+        if (constraintsFulfilled) {
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+        } else {
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+        }
         e->pkt->m_executionInfo.executedByExecEnv = false;
         ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), e, ops, cep, p);
-        return true; 
+        return constraintsFulfilled;
     }
     
     bool

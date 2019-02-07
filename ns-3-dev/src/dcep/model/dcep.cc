@@ -227,6 +227,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
         auto constraints_done = event->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done");
+        // Here, we need to loop through all queries and check if event fulfills any of them. How we do that, we don't know yet.
         constraints_done->value = 1;
         event->pkt->m_executionInfo.executedByExecEnv = false;
         ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
@@ -328,7 +329,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "or" + event2;
-            for (int temp = 1; temp <= 100; temp++)
+            for (int temp = 1; temp <= 1; temp++)
             {
                 Ptr<Query> q1 = CreateObject<Query> ();
                 q1->actionType = NOTIFICATION;
@@ -339,7 +340,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->output_dest = Ipv4Address::GetAny();
                 q1->inevent1 = event1;
                 q1->inevent2 = "";
-                //q1->constraints
+                q1->constraints = [=](Ptr<CepEvent> e) {
+                    return e->values["value"] == temp;
+                };
                 q1->op = "true";
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
@@ -355,7 +358,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->output_dest = Ipv4Address::GetAny();
                 q2->inevent1 = event2;
                 q2->inevent2 = "";
-                //q2->constraints
+                q2->constraints = [=](Ptr<CepEvent> e) {
+                    return true;
+                };
                 q2->op = "true";
                 q2->assigned = false;
                 q2->currentHost.Set("0.0.0.0");
@@ -371,6 +376,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q3->output_dest = Ipv4Address::GetAny();
                 q3->inevent1 = event1;
                 q3->inevent2 = event2;
+                q3->constraints = [=](Ptr<CepEvent> e) {
+                    //return e->values["value"] == temp;
+                    return true;
+                };
                 q3->op = "or";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");

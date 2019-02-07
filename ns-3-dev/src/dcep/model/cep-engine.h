@@ -25,6 +25,7 @@
 #include "ns3/event-impl.h"
 #include "ns3/packet.h"
 #include <map>
+#include <functional>
 
 namespace ns3 {
 
@@ -95,6 +96,7 @@ namespace ns3 {
         std::string inevent2;
         std::string parent_output;
         std::string op;
+        std::function<bool(Ptr<CepEvent> e)> constraints;
         /*
          * the event notification for the event of type above is the
          * one the sink is interested in.
