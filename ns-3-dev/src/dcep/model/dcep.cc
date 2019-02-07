@@ -512,7 +512,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             
             if(m_eventType != " ")
             {
-               counter++;
+                counter++;
                 Ptr<CepEvent> e = CreateObject<CepEvent>();
                 NS_LOG_INFO("creating event of type " << m_eventType);
                 e->type = m_eventType;
@@ -523,8 +523,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 e->prevHopsCount = 0;
                 NS_LOG_INFO("CepEvent number  " << e->m_seq);
                 dcep->DispatchAtomicCepEvent(e);
-                
-                NS_LOG_INFO("counter " << counter);
+
                 if(counter < numCepEvents)
                 {
                     Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
