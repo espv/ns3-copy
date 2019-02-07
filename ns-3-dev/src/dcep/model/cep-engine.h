@@ -24,6 +24,7 @@
 #include "ns3/ipv4-address.h"
 #include "ns3/event-impl.h"
 #include "ns3/packet.h"
+#include <map>
 
 namespace ns3 {
 
@@ -60,6 +61,7 @@ namespace ns3 {
         uint32_t hopsCount;
         uint32_t prevHopsCount;
         Ptr<Packet> pkt;
+        std::map<std::string, int> values;
     };
     
     class CepEventPattern : public Object{
@@ -104,6 +106,18 @@ namespace ns3 {
         void deserialize(uint8_t *buffer, uint32_t);
         uint32_t getSerializedSize();
          
+    };
+
+    class TRexR5Query : public Query
+    {
+
+    public:
+        static TypeId GetTypeId (void);
+
+        TRexR5Query();
+
+        bool areConstraintsFulfilled();
+
     };
     
 class CEPEngine : public Object
@@ -186,6 +200,9 @@ private:
         virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
         virtual bool ExpectingCepEvent (std::string) = 0;
         uint32_t queryId;
+        Ptr<CEPEngine> cepEngine;
+        std::string event1;
+        std::string event2;
     };
     
     class AndOperator: public CepOperator {
@@ -196,8 +213,6 @@ private:
         bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool ExpectingCepEvent (std::string);
-        std::string event1;
-        std::string event2;
         
     private:
         Ptr<BufferManager> bufman;
@@ -211,8 +226,6 @@ private:
         void Configure (Ptr<Query>, Ptr<CEPEngine>);
         bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool ExpectingCepEvent (std::string);
-        std::string event1;
-        std::string event2;
     
     private:
         Ptr<BufferManager> bufman;
@@ -226,8 +239,6 @@ private:
         bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         bool ExpectingCepEvent(std::string);
-        std::string event1;
-        std::string event2;
 
     private:
         Ptr<BufferManager> bufman;

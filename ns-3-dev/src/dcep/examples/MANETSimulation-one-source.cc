@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     std::string bandwidth = "5Mbps";
     std::string delay = "5ms";
 
-    PointToPointHelper pointToPoint1;
+    /*PointToPointHelper pointToPoint1;
     PointToPointHelper pointToPoint2;
     pointToPoint1.SetDeviceAttribute ("DataRate", StringValue (bandwidth));
     pointToPoint2.SetDeviceAttribute ("DataRate", StringValue (bandwidth));
@@ -96,9 +96,9 @@ int main(int argc, char** argv) {
     NetDeviceContainer devices1;
     NetDeviceContainer devices2;
     devices1 = pointToPoint1.Install (n0n1);
-    devices2 = pointToPoint2.Install (n1n2);
+    devices2 = pointToPoint2.Install (n1n2);*/
 
-    /*WifiHelper wifi;
+    WifiHelper wifi;
     
     wifi.SetStandard (WIFI_PHY_STANDARD_80211n_5GHZ);
 
@@ -119,17 +119,16 @@ int main(int argc, char** argv) {
                                   "ControlMode",StringValue (phyMode));
     
     wifiMac.SetType ("ns3::AdhocWifiMac");
-    NetDeviceContainer devices = wifi.Install (wifiPhy, wifiMac, allNodesContainer);*/
+    NetDeviceContainer devices = wifi.Install (wifiPhy, wifiMac, allNodesContainer);
     
     
     Ns2MobilityHelper ns2 = Ns2MobilityHelper (mobilityTraceFile);
     
     MobilityHelper staticMobility;
     Ptr<ListPositionAllocator> positionAlloc2 = CreateObject<ListPositionAllocator> ();
-    
-    
-    positionAlloc2->Add (Vector (350.0, 350.0, 0.0));//sink
+
     positionAlloc2->Add (Vector (150.0, 150.0, 0.0));
+    positionAlloc2->Add (Vector (350.0, 350.0, 0.0));//sink
     positionAlloc2->Add (Vector (550.0, 550.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 310.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 510.0, 0.0));
@@ -163,13 +162,13 @@ int main(int argc, char** argv) {
     istack.Install (allNodesContainer);
 
     Ipv4AddressHelper ipv4;
-    Ipv4InterfaceContainer wifiInterfaces1;
-    Ipv4InterfaceContainer wifiInterfaces2;
+    Ipv4InterfaceContainer wifiInterfaces;
+    //Ipv4InterfaceContainer wifiInterfaces2;
     NS_LOG_INFO ("Assigning IP Addresses......");
     ipv4.SetBase ("10.0.0.0", "255.255.255.0");
-    wifiInterfaces1 = ipv4.Assign (devices1);
-    ipv4.SetBase ("10.0.1.0", "255.255.255.0");
-    wifiInterfaces2 = ipv4.Assign (devices2);
+    wifiInterfaces = ipv4.Assign (devices);
+    /*ipv4.SetBase ("10.0.1.0", "255.255.255.0");
+    wifiInterfaces2 = ipv4.Assign (devices2);*/
     
     DcepAppHelper dcepApphelper;
 
@@ -185,22 +184,24 @@ int main(int argc, char** argv) {
     // Espen
 
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
-    Ipv4Address sinkAddress = wifiInterfaces1.GetAddress (0);
-    
+    Ipv4Address sinkAddress = wifiInterfaces.GetAddress (1);
+
+    Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
+    uint32_t random_number = x->GetInteger (1,99999);
     for(uint32_t i = 0; i < numStationary; i++)
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement_policy", StringValue(placementPolicy));
-        if(i == 0)
+        if(i == 1)
         {
             NS_LOG_INFO("sink...");
             dcepApps.Get(i)->SetAttribute("IsSink", BooleanValue(true));
         }
-        else if (i == 1)//data generator
+        else if (i == 0)//data generator
         {
             NS_LOG_INFO("generator...");
             dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
-            dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (i));
+            dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (random_number % 20 + 2));
             dcepApps.Get(i)->SetAttribute("number_of_events", UintegerValue (numberOfCepEvents));
             dcepApps.Get(i)->SetAttribute("event_interval", UintegerValue (eventInterval));
 

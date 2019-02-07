@@ -76,13 +76,15 @@ namespace ns3
     DcepState::HandlerLocalPlacement(std::string eType)
     {
         OperatorState ostate = GetState(eType);
+        if (ostate == ACTIVE)
+            return;
         if(ostate == UNDEFINED)
         {
             SetState (eType, ACTIVE);
         }
-        else 
+        else
         {
-            NS_ABORT_MSG("UNRECOGNIZED STATE TRASITION PREVIOUS STATE WAS " << ostate );
+            NS_ABORT_MSG("UNRECOGNIZED STATE TRANSITION PREVIOUS STATE WAS " << ostate );
         }
     }
     
@@ -119,13 +121,15 @@ namespace ns3
         if(ee->source_query->isFinal)
         {
             ee->source_query->output_dest = GetObject<Communication>()->GetSinkAddress();
-        }
-        
-        if ((q->eventType == "AorB") || (q->eventType == "AandB"))
-        {
             ee->dataSources.push_back("10.0.0.2");
             ee->dataSources.push_back("10.0.0.3");
         }
+        
+        /*if ((q->eventType == "AorB") || (q->eventType == "AandB"))
+        {
+            ee->dataSources.push_back("10.0.0.2");
+            ee->dataSources.push_back("10.0.0.3");
+        }*/
         this->eventRoutingTable.push_back(ee);
     }
     

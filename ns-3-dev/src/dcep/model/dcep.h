@@ -92,6 +92,7 @@ public:
   virtual ~Sink ();
  
     void BuildAndSendQuery(void);
+    void BuildTRexQueries(Ptr<Dcep> dcep);
     void receiveFinalCepEvent(Ptr<CepEvent> e);
     
     
@@ -123,6 +124,7 @@ class DataSource : public Object
     private:
 
       std::string m_eventType;
+      std::map<std::string, int> m_eventValues;
       uint32_t numCepEvents;
       uint32_t cepEventsInterval;
       uint32_t eventRate;

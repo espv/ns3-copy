@@ -141,6 +141,7 @@ namespace ns3 {
     void
     Placement::ForwardProducedCepEvent(Ptr<CepEvent> e)
     {
+        Ptr<Node> node = GetObject<Dcep> ()->GetNode();
         Ptr<DcepState> dstate = GetObject<DcepState>();
         Ipv4Address dest = dstate->GetOuputDest(e->type);
         
@@ -188,10 +189,10 @@ namespace ns3 {
     Ipv4Address
     Placement::SinkAddressForEvent(Ptr<CepEvent> e)
     {
-        if (e->type == "E")
-            return Ipv4Address("10.0.0.1");
+        //if (e->type == "E")
+        return Ipv4Address("10.0.0.3");
 
-        return Ipv4Address("");
+        //return Ipv4Address("");
     }
     
     void
@@ -398,6 +399,7 @@ namespace ns3 {
         
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<DcepState> dstate = GetObject<DcepState>();
+        Ptr<Node> node = GetObject<Dcep> ()->GetNode();
         dstate->CreateCepEventRoutingTableEntry(q);
         Ptr<Communication> cm = GetObject<Communication>();
         bool placed = false;
@@ -409,9 +411,7 @@ namespace ns3 {
         }
         else if (q->isAtomic) 
         {
-            olsr::RoutingTableEntry entry;
-
-            if(q->eventType == "A")
+            /*if(q->eventType == "A")
             {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.2"));
                 placed = true;
@@ -419,7 +419,7 @@ namespace ns3 {
             }
             else if(q->eventType == "B")
             {
-                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.3"));
+                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.2"));
                 placed = true;
                 
             }
@@ -453,7 +453,10 @@ namespace ns3 {
             {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.9"));
                 placed = true;
-            }
+            }*/
+
+            dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
+            placed = true;
 
         }
 

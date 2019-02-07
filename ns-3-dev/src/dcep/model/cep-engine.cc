@@ -281,7 +281,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->selection_policy = SINGLE_SELECTION; //default
         bufman->Configure(this);
         this->bufman = bufman;
-        AggregateObject(cep);
+        cepEngine = cep;
     }
 
     void
@@ -297,7 +297,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->selection_policy = SINGLE_SELECTION; //default
         bufman->Configure(this);
         this->bufman = bufman;
-        AggregateObject(cep);
+        cepEngine = cep;
     }
     
     void
@@ -313,12 +313,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->selection_policy = SINGLE_SELECTION; //default
         bufman->Configure(this);
         this->bufman = bufman;
-        AggregateObject(cep);
+        cepEngine = cep;
     }
 
     bool
     AndOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> > &returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) {
-        Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+        Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
 
         if (events->empty()) {
@@ -378,7 +378,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         if (!events1->empty() && !events2->empty())
         {
-            Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+            Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
             auto ee = node->GetObject<ExecEnv>();
             e->pkt->m_executionInfo.executedByExecEnv = false;
             if (e->type == events1->front()->type)
@@ -404,7 +404,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
     bool
     ThenOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) {
-        Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+        Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
         if (events->empty()) {
             // No sequences left
@@ -464,7 +464,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(!events1->empty() && !events2->empty() && e->type == event2)
         {
             delete events2;  // Not going to use events2
-            Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+            Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
             auto ee = node->GetObject<ExecEnv>();
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, events1, returned, &bufman->events1, q, p, ops, cep);
@@ -485,7 +485,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         /* everything is a match*/
         returned.push_back(e);
         // Here we insert the incoming event into the sequence
-        Ptr<Node> node = GetObject<CEPEngine>()->GetObject<Dcep>()->GetNode();
+        Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
         p->HandleNewCepEvent(q, returned);
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
@@ -744,7 +744,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         event_class = e->event_class;
         delay = e->delay;
         hopsCount = e->hopsCount;
-        e->m_seq = m_seq;
+        m_seq = e->m_seq;
+        values = e->values;
     }
     
     CepEvent::CepEvent()
@@ -774,6 +775,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         message->hopsCount = this->hopsCount;
         message->prevHopsCount = this->prevHopsCount;
         message->m_seq = this->m_seq;
+        message->values = this->values;
         NS_LOG_INFO("serialized type " << message->type);
         
         return message;
@@ -792,6 +794,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->hopsCount = message->hopsCount;
         this->prevHopsCount = message->prevHopsCount;
         this->event_class = message->event_class;
+        this->values = message->values;
+
+        for (auto it : this->values)
+        {
+            std::cout << it.first  << ':' << it.second << std::endl ;
+        }
     }
     
     void

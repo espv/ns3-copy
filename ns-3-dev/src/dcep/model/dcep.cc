@@ -37,6 +37,7 @@
 #include <chrono>
 #include <iostream>
 #include <fstream>
+#include <random>
 
 namespace ns3 {
 
@@ -124,9 +125,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         
         
         Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
-       uint32_t mrand = x->GetInteger (1,30);
-       mrand = mrand;
-       std::cout << "generated number: " << mrand << std::endl;
+        uint32_t mrand = x->GetInteger (1,30);
+        mrand = mrand;
+        std::cout << "generated number: " << mrand << std::endl;
 
         Ptr<Sink> sink = CreateObject<Sink>();
         Ptr<DataSource> datasource = CreateObject<DataSource>();
@@ -318,6 +319,68 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     }
 
     void
+    Sink::BuildTRexQueries(Ptr<Dcep> dcep)
+    {
+        std::list<std::string> eventTypes {"BC", "DE", "FG", "HI", "JK", "LM", "NO", "PQ", "RS", "TU"};
+        uint32_t query_counter = 1;
+        for (auto eventType : eventTypes)
+        {
+            auto event1 = eventType.substr(0, 1);
+            auto event2 = eventType.substr(1, 1);
+            auto parent_output = event1 + "or" + event2;
+            for (int temp = 1; temp <= 1; temp++)
+            {
+                Ptr<Query> q1 = CreateObject<Query> ();
+                q1->actionType = NOTIFICATION;
+                q1->id = query_counter++;
+                q1->isFinal = false;
+                q1->isAtomic = true;
+                q1->eventType = event1;
+                q1->output_dest = Ipv4Address::GetAny();
+                q1->inevent1 = event1;
+                q1->inevent2 = "";
+                //q1->constraints
+                q1->op = "true";
+                q1->assigned = false;
+                q1->currentHost.Set("0.0.0.0");
+                q1->parent_output = parent_output;
+                dcep->DispatchQuery(q1);
+
+                Ptr<Query> q2 = CreateObject<Query> ();
+                q2->actionType = NOTIFICATION;
+                q2->id = query_counter++;
+                q2->isFinal = false;
+                q2->isAtomic = true;
+                q2->eventType = event2;
+                q2->output_dest = Ipv4Address::GetAny();
+                q2->inevent1 = event2;
+                q2->inevent2 = "";
+                //q2->constraints
+                q2->op = "true";
+                q2->assigned = false;
+                q2->currentHost.Set("0.0.0.0");
+                q2->parent_output = parent_output;
+                dcep->DispatchQuery(q2);
+
+                Ptr<Query> q3 = CreateObject<Query> ();
+                q3->actionType = NOTIFICATION;
+                q3->id = query_counter++;
+                q3->isFinal = true;
+                q3->isAtomic = false;
+                q3->eventType = "A";  // Output for all queries
+                q3->output_dest = Ipv4Address::GetAny();
+                q3->inevent1 = event1;
+                q3->inevent2 = event2;
+                q3->op = "or";
+                q3->assigned = false;
+                q3->currentHost.Set("0.0.0.0");
+                q3->parent_output = parent_output;
+                dcep->DispatchQuery(q3);
+            }
+        }
+    }
+
+    void
     Sink::BuildAndSendQuery(){
 
        uint32_t query_counter = 1;
@@ -326,8 +389,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
          * create and configure the query
          * 
          */
-       Ptr<Dcep> dcep = GetObject<Dcep> ();
-       
+        Ptr<Dcep> dcep = GetObject<Dcep> ();
+        BuildTRexQueries(dcep);
+        /*
         Ptr<Query> q1 = CreateObject<Query> ();
        
         q1->actionType = NOTIFICATION;
@@ -336,14 +400,14 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         q1->isFinal = false;
         q1->isAtomic = true;
-        q1->eventType = "A";
+        q1->eventType = "B";
         q1->output_dest = Ipv4Address::GetAny();
-        q1->inevent1 = "A";
+        q1->inevent1 = "B";
         q1->inevent2 = "";
         q1->op = "true";
         q1->assigned = false;
         q1->currentHost.Set("0.0.0.0");
-        q1->parent_output = "AthenB";
+        q1->parent_output = "BorC";
         NS_LOG_INFO ("Setup query " << q1->eventType);
         dcep->DispatchQuery(q1);
 
@@ -354,14 +418,14 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         q2->isFinal = false;
         q2->isAtomic = true;
-        q2->eventType = "B";
+        q2->eventType = "C";
         q2->output_dest = Ipv4Address::GetAny();
-        q2->inevent1 = "B";
+        q2->inevent1 = "C";
         q2->inevent2 = "";
         q2->op = "true";
         q2->assigned = false;
         q2->currentHost.Set("0.0.0.0");
-        q2->parent_output = "AthenB";
+        q2->parent_output = "BorC";
         NS_LOG_INFO ("Setup query " << q2->eventType);
         dcep->DispatchQuery(q2);
 
@@ -417,7 +481,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q5->currentHost.Set("0.0.0.0");
         q5->parent_output = "AorB";
         NS_LOG_INFO ("Setup query " << q5->eventType);
-        dcep->DispatchQuery(q5);
+        dcep->DispatchQuery(q5);*/
         
 
     }
@@ -477,33 +541,94 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             Ptr<Dcep> dcep = GetObject<Dcep>();
             
             NS_LOG_INFO ("Starting to generate events of type " << m_eventType );
-            
-            
+
+            Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
+            uint32_t random_number = x->GetInteger (1,99999);
+
             switch(eventCode)
             {
                 case 1:
                     m_eventType = "A";
                     break;
-                case 2:
+                case 2:  // Fire
                     m_eventType = "B";
+                    m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 3:
+                case 3:  // Humidity
                     m_eventType = "C";
+                    m_eventValues["percentage"] = 25;
                     break;
-                case 4:
+                case 4:  // Fire
                     m_eventType = "D";
+                    m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 5: 
+                case 5:  // Humidity
                     m_eventType = "E";
+                    m_eventValues["percentage"] = 25;
                     break;
                 case 6:
                     m_eventType = "F";
+                    m_eventValues["value"] = random_number % 100 + 1;
                     break;
                 case 7:
                     m_eventType = "G";
+                    m_eventValues["percentage"] = 25;
                     break;
                 case 8:
                     m_eventType = "H";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 9:
+                    m_eventType = "I";
+                    m_eventValues["percentage"] = 25;
+                    break;
+                case 10:
+                    m_eventType = "J";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 11:
+                    m_eventType = "K";
+                    m_eventValues["percentage"] = 25;
+                    break;
+                case 12:
+                    m_eventType = "L";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 13:
+                    m_eventType = "M";
+                    m_eventValues["percentage"] = 25;
+                    break;
+                case 14:
+                    m_eventType = "N";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 15:
+                    m_eventType = "O";
+                    m_eventValues["percentage"] = 25;
+                    break;
+                case 16:
+                    m_eventType = "P";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 17:
+                    m_eventType = "Q";
+                    m_eventValues["percentage"] = 25;
+                    break;
+                case 18:
+                    m_eventType = "R";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 19:
+                    m_eventType = "S";
+                    m_eventValues["percentage"] = 25;
+                    break;
+                case 20:
+                    m_eventType = "T";
+                    m_eventValues["value"] = random_number % 100 + 1;
+                    break;
+                case 21:
+                    m_eventType = "U";
+                    m_eventValues["percentage"] = 25;
                     break;
                 default:
                     m_eventType = " ";
@@ -521,6 +646,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 e->m_seq = counter;
                 e->hopsCount = 0;
                 e->prevHopsCount = 0;
+                e->values = m_eventValues;
                 NS_LOG_INFO("CepEvent number  " << e->m_seq);
                 dcep->DispatchAtomicCepEvent(e);
 

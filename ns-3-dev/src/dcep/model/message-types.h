@@ -66,7 +66,7 @@ namespace ns3
         uint64_t m_seq;
         uint32_t hopsCount;
         uint32_t prevHopsCount;
-        
+        std::map<std::string,int> values;
     };
     
     
