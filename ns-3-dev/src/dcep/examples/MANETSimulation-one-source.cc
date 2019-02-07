@@ -42,7 +42,7 @@ static TRexProtocolStack ps;
 int main(int argc, char** argv) {
 
     // Real-world experiment limits bandwidth to 6mpbs by running "sudo wondershaper eth0 6000 6000" where 6000 kbps for up and download
-    std::string phyMode ("OfdmRate6Mbps");
+    std::string phyMode ("OfdmRate54Mbps");
     double rss = 0;  // -dBm
     std::string mobilityTraceFile ("bonn-motion/bonnmotion-3.0.1/bin/mobility4adaptation.ns_movements");
     
@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
-    uint32_t eventInterval = 10000000;  // Interval in nanoseconds
+    uint32_t eventInterval = 1000000000;  // Interval in nanoseconds
     
     std::string format ("OMNet++");
     std::string experiment ("dcep-performance-test"); //the current study

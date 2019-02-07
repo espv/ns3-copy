@@ -328,7 +328,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "or" + event2;
-            for (int temp = 1; temp <= 1; temp++)
+            for (int temp = 1; temp <= 100; temp++)
             {
                 Ptr<Query> q1 = CreateObject<Query> ();
                 q1->actionType = NOTIFICATION;
