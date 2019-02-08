@@ -194,7 +194,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     {
         NS_LOG_FUNCTION(this);
         NS_LOG_INFO("DCEP: received query to dispatch");
-        
+
         GetObject<Placement>()->RecvQuery(q);
     }
     
@@ -208,7 +208,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Dcep::ActivateDatasource(Ptr<Query> q)
     {
-        GetObject<DataSource>()->GenerateAtomicCepEvents();
+        GetObject<DataSource>()->GenerateAtomicCepEvents(q->eventType);
     }
     
     void 
@@ -377,9 +377,6 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->inevent2 = "";
                 Ptr<Constraint> c = CreateObject<Constraint> ();
                 q1->constraints.push_back(c);
-                /*q1->constraints = [=](Ptr<CepEvent> e) {
-                    return e->values["value"] == temp;
-                };*/
                 q1->op = "true";
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
@@ -395,9 +392,6 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->output_dest = Ipv4Address::GetAny();
                 q2->inevent1 = event2;
                 q2->inevent2 = "";
-                /*q2->constraints = [=](Ptr<CepEvent> e) {
-                    return true;
-                };*/
                 q2->op = "true";
                 q2->assigned = false;
                 q2->currentHost.Set("0.0.0.0");
@@ -413,10 +407,6 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q3->output_dest = Ipv4Address::GetAny();
                 q3->inevent1 = event1;
                 q3->inevent2 = event2;
-                /*q3->constraints = [=](Ptr<CepEvent> e) {
-                    //return e->values["value"] == temp;
-                    return true;
-                };*/
                 q3->op = "or";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");
@@ -582,14 +572,16 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     }
 
     void
-    DataSource::GenerateAtomicCepEvents(){
-        
-            Ptr<Dcep> dcep = GetObject<Dcep>();
-            
-            NS_LOG_INFO ("Starting to generate events of type " << m_eventType );
+    DataSource::GenerateAtomicCepEvents(std::string eventType){
 
-            Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
-            uint32_t random_number = x->GetInteger (1,99999);
+        m_eventType = eventType;
+        
+        Ptr<Dcep> dcep = GetObject<Dcep>();
+
+        NS_LOG_INFO ("Starting to generate events of type " << m_eventType );
+
+        Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
+        uint32_t random_number = x->GetInteger (1,99999);
 
             switch(eventCode)
             {
@@ -696,13 +688,13 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 NS_LOG_INFO("CepEvent number  " << e->m_seq);
                 dcep->DispatchAtomicCepEvent(e);
 
-                if(counter < numCepEvents)
-                {
-                    Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
-                }
-                    
-              
+            if(counter < numCepEvents)
+            {
+                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, m_eventType);
             }
+
+
+        }
             
     }
     

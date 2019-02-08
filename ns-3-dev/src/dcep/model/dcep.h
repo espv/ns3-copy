@@ -121,7 +121,7 @@ class DataSource : public Object
       virtual ~DataSource ();
       
       void Configure();
-      void GenerateAtomicCepEvents();
+      void GenerateAtomicCepEvents(std::string eventType);
       
     private:
 

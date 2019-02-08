@@ -231,6 +231,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             {
 
                 NS_LOG_INFO ("SUCCESSFUL TX from : " << host_address
+                        << " to : " << ipv4.GetDestination()
                         << " packet size "
                         << pp->GetSize());
                 itemSent = true;
@@ -252,7 +253,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
             if(m_sendQueue2->GetNPackets() != 0)//only schedule when there are more packet to send
             {
-                NS_LOG_INFO ("SCHEDULING TRANSMISSION");
+                NS_LOG_INFO (Simulator::Now() << ": SCHEDULING TRANSMISSION");
                 Simulator::Schedule (Seconds(1), &Communication::send, this);
             }
         }
