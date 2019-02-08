@@ -20,6 +20,7 @@
 #define DCEP_H
 
 #include <stdint.h>
+#include <ns3/cep-engine.h>
 #include "ns3/type-id.h"
 #include "ns3/nstime.h"
 #include "ns3/ipv4-address.h"
@@ -54,7 +55,8 @@ class Dcep : public Application
         void DispatchAtomicCepEvent (Ptr<CepEvent> e);
         void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
         void SendFinalCepEventToSink(Ptr<CepEvent>);
-        void check_constraints(Ptr<CepEvent> event);
+        void CheckConstraints(Ptr<CepEvent> event);
+        void DoCheckConstraints(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
 
         Ptr<Node> node;
 private:

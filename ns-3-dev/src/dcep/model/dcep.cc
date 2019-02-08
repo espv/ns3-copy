@@ -222,15 +222,43 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     }
 
     void
-    Dcep::check_constraints(Ptr<CepEvent> event)
+    Dcep::DoCheckConstraints(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
-        auto constraints_done = event->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done");
-        // Here, we need to loop through all queries and check if event fulfills any of them. How we do that, we don't know yet.
-        constraints_done->value = 1;
-        event->pkt->m_executionInfo.executedByExecEnv = false;
-        ee->Proceed(event->pkt, "handle-cepops", &Placement::RcvCepEvent, p, event);
+        if (ops.begin() == ops.end()) {
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(e->pkt, "handle-cepops", &Placement::RcvCepEvent, p, e);
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
+            return;
+        }
+        auto op = *ops.begin();
+        ops.erase(ops.begin());
+
+        // We assume the constraints type is always integers
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
+
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-fulfilled")->value = op->constraints(e) ? 1 : 0;
+        e->pkt->m_executionInfo.executedByExecEnv = false;
+        ee->Proceed(e->pkt, "check-constraints", &Dcep::DoCheckConstraints, this, e, ops, cep, producer);
+    }
+
+    void
+    Dcep::CheckConstraints(Ptr<CepEvent> e)
+    {
+        auto cep = GetObject<CEPEngine>();
+
+        std::vector<Ptr<CepOperator>> ops;
+        cep->GetOpsByInputCepEventType(e->type, ops);
+        Ptr<Producer> producer = GetObject<Producer>();
+
+        auto node = GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+
+        //e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+        DoCheckConstraints(e, ops, cep, producer);
     }
     
     void
@@ -257,7 +285,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
 
                 event->pkt->m_executionInfo.executedByExecEnv = false;
-                ee->Proceed(event->pkt, "check-constraints", &Dcep::check_constraints, this, event);
+                ee->Proceed(event->pkt, "check-constraints", &Dcep::CheckConstraints, this, event);
 
                 ee->ScheduleInterrupt (event->pkt, "HIRQ-1", Seconds(0));
 

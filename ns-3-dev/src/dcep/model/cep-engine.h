@@ -109,18 +109,6 @@ namespace ns3 {
         uint32_t getSerializedSize();
          
     };
-
-    class TRexR5Query : public Query
-    {
-
-    public:
-        static TypeId GetTypeId (void);
-
-        TRexR5Query();
-
-        bool areConstraintsFulfilled();
-
-    };
     
 class CEPEngine : public Object
     {
@@ -205,6 +193,7 @@ private:
         Ptr<CEPEngine> cepEngine;
         std::string event1;
         std::string event2;
+        std::function<bool(Ptr<CepEvent> e)> constraints;
     };
     
     class AndOperator: public CepOperator {

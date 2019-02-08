@@ -274,6 +274,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->queryId = q->id;
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
+        this->constraints = q->constraints;
             
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
         
@@ -290,6 +291,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->queryId = q->id;
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
+        this->constraints = q->constraints;
 
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
 
@@ -306,6 +308,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->queryId = q->id;
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
+        this->constraints = q->constraints;
 
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
         
