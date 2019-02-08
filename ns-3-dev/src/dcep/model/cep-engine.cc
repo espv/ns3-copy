@@ -37,6 +37,8 @@
 #include "ns3/processing-module.h"
 #include "ns3/event-impl.h"
 
+#include <algorithm>
+
 
 namespace ns3 {
 
@@ -225,6 +227,17 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         //e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
         CepOperatorProcessCepEvent(e, ops, cep, producer);
+    }
+
+
+    TypeId
+    Constraint::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::Constraint")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
     }
     
     
@@ -493,7 +506,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         p->HandleNewCepEvent(q, returned);
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-        auto constraintsFulfilled = q->constraints(e);
+        bool constraintsFulfilled = true;
+        for (auto c : q->constraints)
+        {
+            if (false)
+                constraintsFulfilled = false;
+        }
         if (constraintsFulfilled) {
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         } else {
@@ -872,7 +890,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         message->parent_output = this->parent_output;
         message->size = sizeof(SerializedQuery);
-        
+        auto constraints_begin = this->constraints.begin();
+        auto constraints_end = this->constraints.end();
+        auto message_constraints_begin = message->constraints.begin();
+        message->constraints = this->constraints;
         return message;
     }
     
@@ -880,7 +901,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     Query::deserialize(uint8_t *buffer, uint32_t size)
     {
         NS_LOG_INFO ("1");
-       SerializedQuery *message = new SerializedQuery();
+        SerializedQuery *message = new SerializedQuery();
         memcpy(message, buffer, size);
         NS_LOG_INFO("DESERIALIZED MESSAGE " << message->eventType);
         this->actionType = message->actionType;
@@ -905,6 +926,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         NS_LOG_INFO ("1");
         this->op = message->op;
         this->assigned = message->assigned;
+        this->constraints = message->constraints;
         NS_LOG_INFO ("1");
     }
     

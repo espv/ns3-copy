@@ -55,6 +55,7 @@ namespace ns3
         std::string parent_output;
         std::string op;
         bool assigned;
+        std::vector<Ptr<Constraint> > constraints;
     };
     
     class SerializedCepEvent: public DcepMessage

@@ -240,7 +240,14 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
 
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-fulfilled")->value = op->constraints(e) ? 1 : 0;
+        bool constraintsFulfilled = true;
+        for (auto c : op->constraints)
+        {
+            if (false)
+                constraintsFulfilled = false;
+        }
+        //e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-fulfilled")->value = op->constraints(e) ? 1 : 0;
+        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-fulfilled")->value = constraintsFulfilled;
         e->pkt->m_executionInfo.executedByExecEnv = false;
         ee->Proceed(e->pkt, "check-constraints", &Dcep::DoCheckConstraints, this, e, ops, cep, producer);
     }
@@ -368,9 +375,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->output_dest = Ipv4Address::GetAny();
                 q1->inevent1 = event1;
                 q1->inevent2 = "";
-                q1->constraints = [=](Ptr<CepEvent> e) {
+                Ptr<Constraint> c = CreateObject<Constraint> ();
+                q1->constraints.push_back(c);
+                /*q1->constraints = [=](Ptr<CepEvent> e) {
                     return e->values["value"] == temp;
-                };
+                };*/
                 q1->op = "true";
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
@@ -386,9 +395,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->output_dest = Ipv4Address::GetAny();
                 q2->inevent1 = event2;
                 q2->inevent2 = "";
-                q2->constraints = [=](Ptr<CepEvent> e) {
+                /*q2->constraints = [=](Ptr<CepEvent> e) {
                     return true;
-                };
+                };*/
                 q2->op = "true";
                 q2->assigned = false;
                 q2->currentHost.Set("0.0.0.0");
@@ -404,10 +413,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q3->output_dest = Ipv4Address::GetAny();
                 q3->inevent1 = event1;
                 q3->inevent2 = event2;
-                q3->constraints = [=](Ptr<CepEvent> e) {
+                /*q3->constraints = [=](Ptr<CepEvent> e) {
                     //return e->values["value"] == temp;
                     return true;
-                };
+                };*/
                 q3->op = "or";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");

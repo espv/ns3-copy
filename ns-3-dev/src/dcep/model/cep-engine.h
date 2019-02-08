@@ -25,7 +25,6 @@
 #include "ns3/event-impl.h"
 #include "ns3/packet.h"
 #include <map>
-#include <functional>
 
 namespace ns3 {
 
@@ -35,6 +34,7 @@ namespace ns3 {
     class SerializedCepEvent;
     class SerializedQuery;
     class Producer;
+    class CEPEngine;
     
     class Window : public Object{
     public:
@@ -75,7 +75,19 @@ namespace ns3 {
        // std::string temporalConstraintValue;
       
     };
-//    
+
+    /* This simple Constraint class assumes two things: that the
+     * value is of type int and that it is an equality constraint. */
+    class Constraint: public Object {
+    public:
+        static TypeId GetTypeId ();
+
+        uint32_t type;
+        Ptr<CEPEngine> cepEngine;
+        std::string var_name;
+        int var_value;
+    };
+
     class Query : public Object
     {
         
@@ -96,7 +108,7 @@ namespace ns3 {
         std::string inevent2;
         std::string parent_output;
         std::string op;
-        std::function<bool(Ptr<CepEvent> e)> constraints;
+        std::vector<Ptr<Constraint> > constraints;
         /*
          * the event notification for the event of type above is the
          * one the sink is interested in.
@@ -193,7 +205,7 @@ private:
         Ptr<CEPEngine> cepEngine;
         std::string event1;
         std::string event2;
-        std::function<bool(Ptr<CepEvent> e)> constraints;
+        std::vector<Ptr<Constraint> > constraints;
     };
     
     class AndOperator: public CepOperator {
