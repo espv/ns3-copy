@@ -295,7 +295,10 @@ namespace ns3 {
         Ptr<Packet> p = Create<Packet> (buffer, message->size);
         
         p->AddHeader (dcepHeader);
-        GetObject<Dcep>()->SendPacket(p, dstate->GetNextHop(eType));
+        static float seconds_to_send = 0;
+        Simulator::Schedule(Seconds(seconds_to_send), &Dcep::SendPacket, GetObject<Dcep> (), p, dstate->GetNextHop(eType));
+        seconds_to_send += 0.01;
+        //GetObject<Dcep>()->SendPacket(p, dstate->GetNextHop(eType));
 
     }
     
@@ -462,7 +465,7 @@ namespace ns3 {
 
         if (placed) 
         {
-            NS_LOG_INFO ("QUERY PLACED");
+            NS_LOG_INFO ("QUERY WILL BE PLACED");
             newLocalPlacement(q->eventType);
             if(dstate->GetNextHop(q->eventType).IsEqual(cm->GetLocalAddress()))
             {

@@ -121,8 +121,8 @@ namespace ns3
         if(ee->source_query->isFinal)
         {
             ee->source_query->output_dest = GetObject<Communication>()->GetSinkAddress();
-            ee->dataSources.push_back("10.0.0.2");
-            ee->dataSources.push_back("10.0.0.3");
+            ee->dataSources.push_back("10.0.0.1");
+            //ee->dataSources.push_back("10.0.0.3");
         }
         
         /*if ((q->eventType == "AorB") || (q->eventType == "AandB"))
@@ -139,8 +139,8 @@ namespace ns3
     {
         for (uint32_t i = 0; i < eventRoutingTable.size(); i++)
         {
-            if (((eventRoutingTable[i]->source_query->inevent1 == e->type) ||
-                    (eventRoutingTable[i]->source_query->inevent2 == e->type)) && (!eventRoutingTable[i]->source_query->isAtomic))
+            if ((eventRoutingTable[i]->source_query->inevent1 == e->type ||
+                    (eventRoutingTable[i]->source_query->inevent2 == e->type)) && !eventRoutingTable[i]->source_query->isAtomic)
             {
                 if (eventRoutingTable[i]->state == ACTIVE)
                 {

@@ -64,13 +64,12 @@ namespace ns3
         void SetCurrentProcessor (std::string eventType, Ipv4Address adr);
         void SetOutDest (std::string eventType, Ipv4Address adr);
         void CreateCepEventRoutingTableEntry (Ptr<Query> q);
-        
-        
+
+        Ptr<CepEventRoutingTableEntry> lookUpCepEventRoutingTable(std::string eventType);
     private:
         void HandlerLocalPlacement (std::string eType);
         
         void SetState (std::string eventType, OperatorState state);
-        Ptr<CepEventRoutingTableEntry> lookUpCepEventRoutingTable(std::string eventType);
         std::vector<Ptr<CepEventRoutingTableEntry> > eventRoutingTable;
     };
 }

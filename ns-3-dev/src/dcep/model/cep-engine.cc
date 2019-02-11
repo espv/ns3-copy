@@ -216,6 +216,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
     {
+        std::cout << "Received event of type " << e->type << std::endl;
         auto cep = GetObject<CEPEngine>();
 
         std::vector<Ptr<CepOperator>> ops;

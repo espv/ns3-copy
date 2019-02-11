@@ -32,6 +32,7 @@
 #include "ns3/boolean.h"
 #include "ns3/processing-module.h"
 #include "ns3/object-base.h"
+#include "dcep-state.h"
 
 #include <ctime>
 #include <chrono>
@@ -208,6 +209,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Dcep::ActivateDatasource(Ptr<Query> q)
     {
+        //Simulator::Schedule(Seconds(10), &DataSource::GenerateAtomicCepEvents, GetObject<DataSource>());
         GetObject<DataSource>()->GenerateAtomicCepEvents();
     }
     
@@ -358,7 +360,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     Sink::BuildTRexQueries(Ptr<Dcep> dcep)
     {
         std::list<std::string> eventTypes {"BC", "DE", "FG", "HI", "JK", "LM", "NO", "PQ", "RS", "TU"};
+        int complex_event_cnt = 0;
         uint32_t query_counter = 1;
+        double in_seconds = 0;
         for (auto eventType : eventTypes)
         {
             auto event1 = eventType.substr(0, 1);
@@ -377,14 +381,13 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->inevent2 = "";
                 Ptr<Constraint> c = CreateObject<Constraint> ();
                 q1->constraints.push_back(c);
-                /*q1->constraints = [=](Ptr<CepEvent> e) {
-                    return e->values["value"] == temp;
-                };*/
                 q1->op = "true";
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
                 q1->parent_output = parent_output;
-                dcep->DispatchQuery(q1);
+                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
+                //in_seconds += 0.01;
+                //dcep->DispatchQuery(q1);
 
                 Ptr<Query> q2 = CreateObject<Query> ();
                 q2->actionType = NOTIFICATION;
@@ -395,33 +398,30 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->output_dest = Ipv4Address::GetAny();
                 q2->inevent1 = event2;
                 q2->inevent2 = "";
-                /*q2->constraints = [=](Ptr<CepEvent> e) {
-                    return true;
-                };*/
                 q2->op = "true";
                 q2->assigned = false;
                 q2->currentHost.Set("0.0.0.0");
                 q2->parent_output = parent_output;
-                dcep->DispatchQuery(q2);
+                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
+                //in_seconds += 0.01;
+                //dcep->DispatchQuery(q2);
 
-                Ptr<Query> q3 = CreateObject<Query> ();
+                Ptr<Query> q3 = CreateObject<Query> ();  // q3 = complex event
                 q3->actionType = NOTIFICATION;
                 q3->id = query_counter++;
                 q3->isFinal = true;
                 q3->isAtomic = false;
-                q3->eventType = "A";  // Output for all queries
+                q3->eventType = std::to_string(complex_event_cnt++);
                 q3->output_dest = Ipv4Address::GetAny();
                 q3->inevent1 = event1;
                 q3->inevent2 = event2;
-                /*q3->constraints = [=](Ptr<CepEvent> e) {
-                    //return e->values["value"] == temp;
-                    return true;
-                };*/
                 q3->op = "or";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");
                 q3->parent_output = parent_output;
-                dcep->DispatchQuery(q3);
+                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
+                //in_seconds += 0.01;
+                //dcep->DispatchQuery(q3);
             }
         }
     }
@@ -584,19 +584,22 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     DataSource::GenerateAtomicCepEvents(){
         
-            Ptr<Dcep> dcep = GetObject<Dcep>();
-            
-            NS_LOG_INFO ("Starting to generate events of type " << m_eventType );
+        Ptr<Dcep> dcep = GetObject<Dcep>();
+        Ptr<Node> node = dcep->GetNode();
 
-            Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
+        Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
+
+        NS_LOG_INFO ("Starting to generate events of type " << eventCode );
+
+        do {
             uint32_t random_number = x->GetInteger (1,99999);
-
-            switch(eventCode)
-            {
-                case 1:
+            eventCode = random_number % 22 + 1;
+            random_number = x->GetInteger (1,99999);
+            switch (eventCode) {
+                case 1:  // Fire
                     m_eventType = "A";
                     break;
-                case 2:  // Fire
+                case 2:  // Temperature
                     m_eventType = "B";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
@@ -604,7 +607,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     m_eventType = "C";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 4:  // Fire
+                case 4:  // Temperature
                     m_eventType = "D";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
@@ -612,67 +615,67 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     m_eventType = "E";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 6:
+                case 6:  // Temperature
                     m_eventType = "F";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 7:
+                case 7:  // Humidity
                     m_eventType = "G";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 8:
+                case 8:  // Temperature
                     m_eventType = "H";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 9:
+                case 9:  // Humidity
                     m_eventType = "I";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 10:
+                case 10:  // Temperature
                     m_eventType = "J";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 11:
+                case 11:  // Humidity
                     m_eventType = "K";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 12:
+                case 12:  // Temperature
                     m_eventType = "L";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 13:
+                case 13:  // Humidity
                     m_eventType = "M";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 14:
+                case 14:  // Temperature
                     m_eventType = "N";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 15:
+                case 15:  // Humidity
                     m_eventType = "O";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 16:
+                case 16:  // Temperature
                     m_eventType = "P";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 17:
+                case 17:  // Humidity
                     m_eventType = "Q";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 18:
+                case 18:  // Temperature
                     m_eventType = "R";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 19:
+                case 19:  // Humidity
                     m_eventType = "S";
                     m_eventValues["percentage"] = 25;
                     break;
-                case 20:
+                case 20:  // Temperature
                     m_eventType = "T";
                     m_eventValues["value"] = random_number % 100 + 1;
                     break;
-                case 21:
+                case 21:  // Humidity
                     m_eventType = "U";
                     m_eventValues["percentage"] = 25;
                     break;
@@ -680,29 +683,28 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     m_eventType = " ";
 
             }
-            
-            if(m_eventType != " ")
-            {
-                counter++;
-                Ptr<CepEvent> e = CreateObject<CepEvent>();
-                NS_LOG_INFO("creating event of type " << m_eventType);
-                e->type = m_eventType;
-                e->event_class = ATOMIC_EVENT;
-                e->delay = 0; //initializing delay
-                e->m_seq = counter;
-                e->hopsCount = 0;
-                e->prevHopsCount = 0;
-                e->values = m_eventValues;
-                NS_LOG_INFO("CepEvent number  " << e->m_seq);
-                dcep->DispatchAtomicCepEvent(e);
+        } while (dcep->GetObject<DcepState>()->lookUpCepEventRoutingTable(m_eventType)->source_query == nullptr);
 
-                if(counter < numCepEvents)
-                {
-                    Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
-                }
-                    
-              
+        if(m_eventType != " ")
+        {
+            counter++;
+            Ptr<CepEvent> e = CreateObject<CepEvent>();
+            NS_LOG_INFO("creating event of type " << m_eventType);
+            e->type = m_eventType;
+            e->event_class = ATOMIC_EVENT;
+            e->delay = 0; //initializing delay
+            e->m_seq = counter;
+            e->hopsCount = 0;
+            e->prevHopsCount = 0;
+            e->values = m_eventValues;
+            NS_LOG_INFO("CepEvent number  " << e->m_seq);
+            dcep->DispatchAtomicCepEvent(e);
+
+            if(counter < numCepEvents)
+            {
+                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
             }
+        }
             
     }
     
