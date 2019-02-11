@@ -209,8 +209,12 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Dcep::ActivateDatasource(Ptr<Query> q)
     {
+        auto ds = GetObject<DataSource> ();
         //Simulator::Schedule(Seconds(10), &DataSource::GenerateAtomicCepEvents, GetObject<DataSource>());
-        GetObject<DataSource>()->GenerateAtomicCepEvents(q->eventType);
+        if (!ds->IsActive()) {
+            ds->Activate();;
+            ds->GenerateAtomicCepEvents(q->eventType);
+        }
     }
     
     void 
@@ -245,7 +249,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         bool constraintsFulfilled = true;
         for (auto c : op->constraints)
         {
-            if (false)
+            if (e->values[c->var_name] != c->var_value)
                 constraintsFulfilled = false;
         }
         //e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-fulfilled")->value = op->constraints(e) ? 1 : 0;
@@ -368,7 +372,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "or" + event2;
-            for (int temp = 1; temp <= 1; temp++)
+            for (int temp = 1; temp <= 100; temp++)
             {
                 Ptr<Query> q1 = CreateObject<Query> ();
                 q1->actionType = NOTIFICATION;
@@ -379,8 +383,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->output_dest = Ipv4Address::GetAny();
                 q1->inevent1 = event1;
                 q1->inevent2 = "";
-                Ptr<Constraint> c = CreateObject<Constraint> ();
-                q1->constraints.push_back(c);
+                /*Ptr<Constraint> c = CreateObject<Constraint> ();
+                c->var_name = "value";
+                c->var_value = temp;
+                q1->constraints.push_back(c);*/
                 q1->op = "true";
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
@@ -415,6 +421,14 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q3->output_dest = Ipv4Address::GetAny();
                 q3->inevent1 = event1;
                 q3->inevent2 = event2;
+                Ptr<Constraint> c = CreateObject<Constraint> ();
+                c->var_name = "value";
+                c->var_value = temp % 10;
+                q3->constraints.push_back(c);
+                /*c = CreateObject<Constraint> ();
+                c->var_name = "percentage";
+                c->var_value = temp % 10;
+                q3->constraints.push_back(c);*/
                 q3->op = "or";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");
@@ -581,6 +595,16 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
       NS_LOG_FUNCTION (this);
     }
 
+    bool DataSource::IsActive()
+    {
+        return active;
+    }
+
+    void DataSource::Activate()
+    {
+        active = true;
+    }
+
     void
     DataSource::GenerateAtomicCepEvents(std::string eventType){
         
@@ -592,8 +616,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         NS_LOG_INFO ("Starting to generate events of type " << eventCode );
 
         do {
+            m_eventValues.clear();
             uint32_t random_number = x->GetInteger (1,99999);
-            eventCode = random_number % 22 + 1;
+            eventCode = (random_number%10)*2+2;  // We only want to select Temperature
             random_number = x->GetInteger (1,99999);
             switch (eventCode) {
                 case 1:  // Fire
@@ -601,7 +626,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 2:  // Temperature
                     m_eventType = "B";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 3:  // Humidity
                     m_eventType = "C";
@@ -609,7 +634,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 4:  // Temperature
                     m_eventType = "D";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 5:  // Humidity
                     m_eventType = "E";
@@ -617,7 +642,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 6:  // Temperature
                     m_eventType = "F";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 7:  // Humidity
                     m_eventType = "G";
@@ -625,7 +650,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 8:  // Temperature
                     m_eventType = "H";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 9:  // Humidity
                     m_eventType = "I";
@@ -633,7 +658,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 10:  // Temperature
                     m_eventType = "J";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 11:  // Humidity
                     m_eventType = "K";
@@ -641,7 +666,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 12:  // Temperature
                     m_eventType = "L";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 13:  // Humidity
                     m_eventType = "M";
@@ -649,7 +674,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 14:  // Temperature
                     m_eventType = "N";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 15:  // Humidity
                     m_eventType = "O";
@@ -657,7 +682,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 16:  // Temperature
                     m_eventType = "P";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 17:  // Humidity
                     m_eventType = "Q";
@@ -665,7 +690,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 18:  // Temperature
                     m_eventType = "R";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 19:  // Humidity
                     m_eventType = "S";
@@ -673,7 +698,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     break;
                 case 20:  // Temperature
                     m_eventType = "T";
-                    m_eventValues["value"] = random_number % 100 + 1;
+                    m_eventValues["value"] = random_number % 10;
                     break;
                 case 21:  // Humidity
                     m_eventType = "U";
@@ -689,7 +714,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         {
             counter++;
             Ptr<CepEvent> e = CreateObject<CepEvent>();
-            NS_LOG_INFO("creating event of type " << m_eventType);
+            NS_LOG_INFO("creating event of type " << m_eventType << " cnt " << counter);
             e->type = m_eventType;
             e->event_class = ATOMIC_EVENT;
             e->delay = 0; //initializing delay

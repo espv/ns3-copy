@@ -188,7 +188,6 @@ namespace ns3
             {
                 eventRoutingTable[i]->next_hop = adr;
                 NS_LOG_INFO ("NEXT HOP " << eventRoutingTable[i]->next_hop);
-                std::cout << "NEXT HOP " << eventRoutingTable[i]->next_hop << std::endl;
             }
         }
         

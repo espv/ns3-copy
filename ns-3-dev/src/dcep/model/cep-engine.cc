@@ -103,11 +103,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         for(auto op : ops_queue)
         {
-           // Ptr<CepEventPattern> ep = q->GetObject<CepEventPattern>();
+            //Ptr<CepEventPattern> ep = q->GetObject<CepEventPattern>();
             //Ptr<CepEventPattern> ep = q->ep;
             if(op->ExpectingCepEvent(eventType))
             {
-                NS_LOG_INFO("found query expecting event type " << eventType);
+                //NS_LOG_INFO("found query expecting event type " << eventType);
                 ops.push_back(op);
             }
         }
@@ -495,25 +495,27 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
         return false;
     }
-    
+
     bool
     OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
+        static int cnt = 0;
+        std::cout << "OrOperator::Evaluate cnt " << cnt++ << std::endl;
         /* everything is a match*/
         returned.push_back(e);
         // Here we insert the incoming event into the sequence
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        p->HandleNewCepEvent(q, returned);
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
         bool constraintsFulfilled = true;
         for (auto c : q->constraints)
         {
-            if (false)
+            if (e->values[c->var_name] != c->var_value)
                 constraintsFulfilled = false;
         }
         if (constraintsFulfilled) {
+            p->HandleNewCepEvent(q, returned);
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         } else {
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;

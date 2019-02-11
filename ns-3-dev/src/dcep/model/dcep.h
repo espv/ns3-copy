@@ -122,6 +122,8 @@ class DataSource : public Object
       
       void Configure();
       void GenerateAtomicCepEvents(std::string eventType);
+      bool IsActive();
+      void Activate();
       
     private:
 
@@ -133,7 +135,7 @@ class DataSource : public Object
       uint32_t counter;
       uint32_t eventCode;
       TracedCallback<Ptr<CepEvent>> nevent;
-      
+      bool active;
 
     };
 
