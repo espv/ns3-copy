@@ -76,6 +76,7 @@ namespace ns3
     DcepState::HandlerLocalPlacement(std::string eType)
     {
         OperatorState ostate = GetState(eType);
+        std::cout << "HandlerLocalPlacement" << std::endl;
         if (ostate == ACTIVE)
             return;
         if(ostate == UNDEFINED)
@@ -100,7 +101,7 @@ namespace ns3
             er = (Ptr<CepEventRoutingTableEntry>) * it;
 
             if (er->source_query->eventType == eventType) {
-               // NS_LOG_INFO("Found entry with event type " << er->source_query->eventType);
+                // NS_LOG_INFO("Found entry with event type " << er->source_query->eventType);
                 return er;
             }
 
@@ -142,10 +143,12 @@ namespace ns3
             if ((eventRoutingTable[i]->source_query->inevent1 == e->type ||
                     (eventRoutingTable[i]->source_query->inevent2 == e->type)) && !eventRoutingTable[i]->source_query->isAtomic)
             {
-                if (eventRoutingTable[i]->state == ACTIVE)
-                {
+                // Commented out by Espen because I have multiple queries that lead to the complex event A
+                // Multiple complex events of same type is not supported with this type of state handling
+                //if (eventRoutingTable[i]->state == ACTIVE)
+                //{
                     return true;
-                }
+                //}
                 
             }
         }
@@ -185,6 +188,7 @@ namespace ns3
             {
                 eventRoutingTable[i]->next_hop = adr;
                 NS_LOG_INFO ("NEXT HOP " << eventRoutingTable[i]->next_hop);
+                std::cout << "NEXT HOP " << eventRoutingTable[i]->next_hop << std::endl;
             }
         }
         

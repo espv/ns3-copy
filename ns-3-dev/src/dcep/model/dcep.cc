@@ -195,7 +195,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     {
         NS_LOG_FUNCTION(this);
         NS_LOG_INFO("DCEP: received query to dispatch");
-        
+
         GetObject<Placement>()->RecvQuery(q);
     }
     
@@ -210,7 +210,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     Dcep::ActivateDatasource(Ptr<Query> q)
     {
         //Simulator::Schedule(Seconds(10), &DataSource::GenerateAtomicCepEvents, GetObject<DataSource>());
-        GetObject<DataSource>()->GenerateAtomicCepEvents();
+        GetObject<DataSource>()->GenerateAtomicCepEvents(q->eventType);
     }
     
     void 
@@ -582,7 +582,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     }
 
     void
-    DataSource::GenerateAtomicCepEvents(){
+    DataSource::GenerateAtomicCepEvents(std::string eventType){
         
         Ptr<Dcep> dcep = GetObject<Dcep>();
         Ptr<Node> node = dcep->GetNode();
@@ -702,8 +702,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
             if(counter < numCepEvents)
             {
-                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this);
+                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, m_eventType);
             }
+
+
         }
             
     }
