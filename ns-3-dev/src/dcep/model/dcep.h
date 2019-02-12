@@ -56,7 +56,7 @@ class Dcep : public Application
         void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
         void SendFinalCepEventToSink(Ptr<CepEvent>);
         void CheckConstraints(Ptr<CepEvent> event);
-        void DoCheckConstraints(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
+        void DoCheckConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, int> values);
 
         Ptr<Node> node;
 private:

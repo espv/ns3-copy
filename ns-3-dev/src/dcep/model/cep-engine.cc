@@ -194,8 +194,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
-        if (ops.begin() == ops.end())
+        if (ops.begin() == ops.end()) {
+            e->pkt->m_executionInfo.timestamps.push_back(Simulator::Now());
+            std::cout << Simulator::Now() << ": DCEP-Sim has finished processing packet " << e->pkt->GetUid() << ", full processing delay: " << e->pkt->m_executionInfo.timestamps[1]-e->pkt->m_executionInfo.timestamps[0] << std::endl;
             return;
+        }
         auto op = *ops.begin();
 
         std::vector<Ptr<CepEvent> > returned;

@@ -33,7 +33,7 @@ rcvd-pkts FIFO 32 packets
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
-PEU 60000000 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 128 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 256 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 3 cpu3 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
@@ -77,8 +77,8 @@ FRACTION 100% 1 1
 0 START
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
-#x PROCESS 1000 0
-x PROCESS 360000 0  # 5
+x STATECOND constraint-processed read local 1
+x PROCESS 3600 0  # 5
 x CALL check-constraints
 0 STOP
 
@@ -93,29 +93,8 @@ FRACTION 100% 1 1
 
 0 START
 x STATECOND constraints-done read local 0
-x STATECOND constraint-type read local 1
-#x PROCESS 2000 0
-x PROCESS 360000 0  # 5
-x PROCESS 360000 0  # 5
-x CALL check-constraints
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME check-constraints
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND constraints-done read local 0
-x STATECOND constraint-type read local 2
-#x PROCESS 3000 0
-x PROCESS 360000 0  # 5
-x PROCESS 360000 0  # 5
-x PROCESS 360000 0  # 5
+x STATECOND constraint-type read local 0
+x STATECOND constraint-processed read local 0
 x CALL check-constraints
 0 STOP
 
@@ -142,8 +121,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x PROCESS 1000 0
-x PROCESS 360000 0  # 6
+x PROCESS 36000 0  # 6
 x CALL check-constraints
 0 STOP
 
@@ -157,9 +135,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-#x PROCESS 1000 0
-x PROCESS 360000 0 # 1
-x PROCESS 360000 0 # 2
+x PROCESS 36000 0 # 1
+x PROCESS 36000 0 # 2
 x CALL process_received_packet
 x ENQUEUE PKTQUEUE 0 rcvd-pkts
 x TTWAKEUP event_thread1
@@ -201,7 +178,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-within-send-packet PROCESS 54000 0
+within-send-packet PROCESS 0 0 #54000 0
 0 STOP
 
 SIGEND
@@ -277,9 +254,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-#x PROCESS 314252 0
-x PROCESS 360000 0  # 9
-#x PROCESS 360000 0  # 10
+#x PROCESS 36000 0  # 9
 x CALL handle-or-cepop
 0 STOP
 
@@ -309,9 +284,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-#x PROCESS 314252 0
-x PROCESS 360000 0  # 9
-#x PROCESS 360000 0  # 10
+#x PROCESS 36000 0  # 9
 0 STOP
 
 SIGEND
@@ -340,11 +313,9 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-#x PROCESS 654321 0
-x PROCESS 360000 0  # 9
-x PROCESS 360000 0  # 10
-x PROCESS 360000 0  # 11
-#x PROCESS 360000 0  # 12
+#x PROCESS 36000 0  # 9
+#x PROCESS 36000 0  # 10
+#x PROCESS 36000 0  # 11
 x CALL handle-and-cepop
 0 STOP
 
@@ -374,11 +345,9 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-#x PROCESS 654321 0
-x PROCESS 360000 0  # 9
-x PROCESS 360000 0  # 10
-x PROCESS 360000 0  # 11
-#x PROCESS 360000 0  # 12
+#x PROCESS 36000 0  # 9
+#x PROCESS 36000 0  # 10
+#x PROCESS 36000 0  # 11
 0 STOP
 
 SIGEND
@@ -407,10 +376,8 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-#x PROCESS 123456 0
-x PROCESS 360000 0  # 9
-x PROCESS 360000 0  # 10
-#x PROCESS 360000 0  # 11
+#x PROCESS 36000 0  # 9
+#x PROCESS 36000 0  # 10
 x CALL handle-then-cepop
 0 STOP
 
@@ -441,10 +408,8 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-#x PROCESS 123456 0
-x PROCESS 360000 0  # 9
-x PROCESS 360000 0  # 10
-#x PROCESS 360000 0  # 11
+#x PROCESS 36000 0  # 9
+#x PROCESS 36000 0  # 10
 0 STOP
 
 SIGEND
@@ -537,8 +502,7 @@ FRACTION 100% 1 1
 0 START
 x QUEUECOND rcvd-pkts rcvd-pkts empty
 x SLEEPTHREAD
-x PROCESS 60000 0
-#x PROCESS 360000 0  # 3
+x PROCESS 6000 0
 0 STOP
 
 SIGEND
@@ -553,10 +517,7 @@ FRACTION 100% 1 1
 0 START
 x QUEUECOND rcvd-pkts rcvd-pkts notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts
-#x PROCESS 1000 0
-x PROCESS 360000 0  # 4
-#x PROCESS 360000 0  # 7
-#x PROCESS 360000 0  # 8
+x PROCESS 36000 0  # 4
 x CALL handle-cepops
 0 STOP
 
