@@ -371,7 +371,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         {
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
-            auto parent_output = event1 + "or" + event2;
+            auto parent_output = event1 + "then" + event2;
             for (int temp = 1; temp <= 100; temp++)
             {
                 Ptr<Query> q1 = CreateObject<Query> ();
@@ -429,7 +429,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 c->var_name = "percentage";
                 c->var_value = temp % 10;
                 q3->constraints.push_back(c);*/
-                q3->op = "or";
+                q3->op = "then";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");
                 q3->parent_output = parent_output;
@@ -618,7 +618,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         do {
             m_eventValues.clear();
             uint32_t random_number = x->GetInteger (1,99999);
-            eventCode = (random_number%10)*2+2;  // We only want to select Temperature
+            eventCode = (random_number%20)+2;  // Want to select Temperature and Humidity
+            //eventCode = (random_number%10)*2+2;  // We only want to select Temperature
             random_number = x->GetInteger (1,99999);
             switch (eventCode) {
                 case 1:  // Fire

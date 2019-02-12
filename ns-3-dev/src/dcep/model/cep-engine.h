@@ -182,7 +182,7 @@ private:
         void Configure(Ptr<CepOperator> op);
         void read_events(std::vector<Ptr<CepEvent> >& event1, 
         std::vector<Ptr<CepEvent> >& event2);
-        void put_event(Ptr<CepEvent>);
+        void put_event(Ptr<CepEvent>, CepOperator *op);
         void clean_up();
         uint32_t consumption_policy;
         uint32_t selection_policy;
