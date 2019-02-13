@@ -200,11 +200,11 @@ namespace ns3 {
     {
         //SendCepEvent(e, sinkAddress);
         //auto dcep = GetObject<Dcep>();
-        auto dest = SinkAddressForEvent(e);
+        //auto dest = SinkAddressForEvent(e);
         //if (dest == Ipv4Address(""))
-        //    GetObject<Dcep>()->SendFinalCepEventToSink(e);
+        GetObject<Dcep>()->SendFinalCepEventToSink(e);
         //else
-        SendCepEvent(e, dest);
+        //SendCepEvent(e, dest);
     }
     
     

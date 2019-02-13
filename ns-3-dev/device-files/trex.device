@@ -29,7 +29,7 @@ QUEUES
 HIRQ	            FIFO 	-1    services
 # Queue for posted tasks
 sq FIFO -1 services
-rcvd-pkts FIFO 32 packets
+rcvd-pkts FIFO -1 packets
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
@@ -78,7 +78,7 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 1
-x PROCESS 3600 0  # 5
+#x PROCESS 36000 0  # 5
 x CALL check-constraints
 0 STOP
 
@@ -178,7 +178,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-within-send-packet PROCESS 0 0 #54000 0
+within-send-packet PROCESS 5400 0 #54000 0
 0 STOP
 
 SIGEND
@@ -254,7 +254,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-#x PROCESS 36000 0  # 9
+x PROCESS 36000 0  # 9
 x CALL handle-or-cepop
 0 STOP
 
@@ -284,7 +284,7 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-#x PROCESS 36000 0  # 9
+x PROCESS 36000 0  # 9
 0 STOP
 
 SIGEND
@@ -313,9 +313,9 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-#x PROCESS 36000 0  # 9
-#x PROCESS 36000 0  # 10
-#x PROCESS 36000 0  # 11
+x PROCESS 36000 0  # 9
+x PROCESS 36000 0  # 10
+x PROCESS 36000 0  # 11
 x CALL handle-and-cepop
 0 STOP
 
@@ -345,9 +345,9 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-#x PROCESS 36000 0  # 9
-#x PROCESS 36000 0  # 10
-#x PROCESS 36000 0  # 11
+x PROCESS 36000 0  # 9
+x PROCESS 36000 0  # 10
+x PROCESS 36000 0  # 11
 0 STOP
 
 SIGEND
@@ -408,8 +408,8 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 1
 x STATECOND InsertedSequence read local 1
-#x PROCESS 36000 0  # 9
-#x PROCESS 36000 0  # 10
+x PROCESS 36000 0  # 9
+x PROCESS 36000 0  # 10
 0 STOP
 
 SIGEND

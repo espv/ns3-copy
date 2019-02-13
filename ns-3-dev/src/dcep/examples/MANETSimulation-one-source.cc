@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
-    uint32_t eventInterval = 100000000000;  // Interval in nanoseconds
+    uint64_t eventInterval = 1000000000000;  // Interval in nanoseconds
     
     std::string format ("OMNet++");
     std::string experiment ("dcep-performance-test"); //the current study
