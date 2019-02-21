@@ -337,53 +337,42 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     bool
-    AndOperator::DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent>> *events, std::vector<Ptr<CepEvent> > &returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) {
+    AndOperator::DoEvaluate(Ptr<CepEvent> newEvent2, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *events1, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) {
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
-
-        if (events->empty()) {
+        if (events1->empty()) {
             // No sequences left
-            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-            newEvent->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(newEvent->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), newEvent, ops, cep, p);
+            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(newEvent2->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), newEvent2, ops, cep, p);
             return false;
         }
 
-        Ptr<CepEvent> existingEvent = *events->begin();
-        events->erase(events->begin());
-        if(newEvent->m_seq == existingEvent->m_seq) {
-            Ptr<CepEvent> e1 = CreateObject<CepEvent>();
-            Ptr<CepEvent> e2 = CreateObject<CepEvent>();
-            newEvent->CopyCepEvent(e1);
+        Ptr<CepEvent> curEvent1 = *events1->begin();
+        events1->erase(events1->begin());
+        // Create a complex event from each atomic event number 1.
+
+        // If curEvent1 came before or after newEvent2 less than the window size, we trigger the rule
+        if(Abs(curEvent1->timestamp - newEvent2->timestamp) < q->window) {
             // Here we insert the incoming event into the sequence
             // Split loop into recursion.
             // Return a recursive call to some function
 
-            existingEvent->CopyCepEvent(e2);
-
-            for (auto it = bufmanEvents->begin(); it != bufmanEvents->end(); it++) {
-                auto e = *it;
-                if (e->m_seq == newEvent->m_seq) {
-                    bufmanEvents->erase(it);
-                    break;
-                }
-            }
-            returned.push_back(e1);
-            returned.push_back(e2);
+            bufman->consume(curEvent1, newEvent2);
+            returned.push_back(curEvent1);
+            returned.push_back(newEvent2);
 
             p->HandleNewCepEvent(q, returned);
-            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
-            //return true;
+            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         } else {
-            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
         }
 
-        newEvent->pkt->m_executionInfo.executedByExecEnv = false;
-        ee->Proceed(newEvent->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, newEvent, events, returned, bufmanEvents, q, p, ops, cep);
-        return false;
+        newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
+        ee->Proceed(newEvent2->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, newEvent2, returned, events1, q, p, ops, cep);
     }
     
     bool
@@ -391,7 +380,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         auto events1 = new std::vector<Ptr<CepEvent>>();
         auto events2 = new std::vector<Ptr<CepEvent>>();
-        bufman->put_event(e, this);//wait for event with corresponding sequence number
+        bufman->put_event(e, this);  //wait for event with corresponding sequence number
         bufman->read_events(*events1, *events2);
 
         e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 1;
@@ -404,14 +393,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             if (e->type == events1->front()->type)
             {
                 delete events1;  // Not going to use events1
-                ee->Proceed(e->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, events2, returned, &bufman->events2, q, p, ops, cep);
-                //return DoEvaluate(e, events2, returned, &bufman->events2, q, p, ops, cep);
+                ee->Proceed(e->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, returned, events2, q, p, ops, cep);
             }
             else
             {
                 delete events2;  // Not going to use events2
-                ee->Proceed(e->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, events1, returned, &bufman->events1, q, p, ops, cep);
-                //return DoEvaluate(e, events1, returned, &bufman->events1, q, p, ops, cep);
+                ee->Proceed(e->pkt, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
             }
             
         } else {
@@ -440,8 +427,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         // Create a complex event from each atomic event number 1.
 
         if(curEvent1->timestamp + q->window > newEvent2->timestamp) {
-            // Consume curEvent1 by deleting it from bufman->events1
-            // Consume curEvent2 by deleting it from bufman->events2
             // Here we insert the incoming event into the sequence
             // Split loop into recursion.
             // Return a recursive call to some function
@@ -592,7 +577,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
         
     }
-    
+
     void
     BufferManager::put_event(Ptr<CepEvent> e, CepOperator *op)
     {
