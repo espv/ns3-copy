@@ -137,7 +137,9 @@ class CEPEngine : public Object
         void Configure();
         void ProcessCepEvent(Ptr<CepEvent> e);
         void GetOpsByInputCepEventType(std::string eventType, std::vector<Ptr<CepOperator> >& ops);
-        
+        void CheckConstraints(Ptr<CepEvent> e);
+        void DoCheckConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, int> values);
+
         /**
          * this method instantiates the query and 
          * stores it in the query pool

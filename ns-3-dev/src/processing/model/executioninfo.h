@@ -22,7 +22,7 @@ namespace ns3 {
          * the event executed by the scheduler, return false.
          */
         bool executedByExecEnv;
-        Thread *curThread;
+        Thread *curThread = nullptr;
 
         // Name and arguments for target service
         std::string target;

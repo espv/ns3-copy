@@ -139,11 +139,6 @@ class Placement : public Object
          */
         void ForwardQuery(std::string eType);
         void SendQueryToCepEngine (Ptr<Query> q);
-
-
-        Ipv4Address SinkAddressForEvent(Ptr<CepEvent> e);
-
-        
         
         void RecvQuery(Ptr<Query> q);
         

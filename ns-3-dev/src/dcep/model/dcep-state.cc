@@ -118,11 +118,11 @@ namespace ns3
     {
         Ptr<CepEventRoutingTableEntry> ee = CreateObject<CepEventRoutingTableEntry>();
         ee->source_query = q;
-        ee->state = UNDEFINED;
+        ee->state = ACTIVE;
         if(ee->source_query->isFinal)
         {
             ee->source_query->output_dest = GetObject<Communication>()->GetSinkAddress();
-            ee->dataSources.push_back("10.0.0.1");
+            //ee->dataSources.push_back("10.0.0.1");
             //ee->dataSources.push_back("10.0.0.3");
         }
         

@@ -155,13 +155,13 @@ namespace ns3 {
         {
             if (dest.IsEqual(GetObject<Communication>()->GetLocalAddress()))
             {
-                if (dstate->IsActive(e->type))
-                {
+                //if (dstate->IsActive(e->type))
+                //{
                     SendCepEventToCepEngine(e);
-                }
-                else
+                //}
+                //else
                 {
-                    NS_ABORT_MSG ("PLACEMENT MECHANISM: CORRESPONDING OPERATOR NOT ACTIVE");
+                    //NS_ABORT_MSG ("PLACEMENT MECHANISM: CORRESPONDING OPERATOR NOT ACTIVE");
                 }
             }
             else
@@ -186,28 +186,14 @@ namespace ns3 {
         GetObject<CEPEngine>()->ProcessCepEvent(e);
     }
 
-    Ipv4Address
-    Placement::SinkAddressForEvent(Ptr<CepEvent> e)
-    {
-        //if (e->type == "E")
-        return Ipv4Address("10.0.0.3");
-
-        //return Ipv4Address("");
-    }
     
     void
     Placement::SendCepEventToSink(Ptr<CepEvent> e)
     {
-        //SendCepEvent(e, sinkAddress);
-        //auto dcep = GetObject<Dcep>();
-        //auto dest = SinkAddressForEvent(e);
-        //if (dest == Ipv4Address(""))
         GetObject<Dcep>()->SendFinalCepEventToSink(e);
-        //else
-        //SendCepEvent(e, dest);
     }
-    
-    
+
+
     void
     Placement::SendCepEvent(Ptr<CepEvent> e, Ipv4Address dest)
     {
@@ -458,7 +444,7 @@ namespace ns3 {
                 placed = true;
             }*/
 
-            dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
+            dstate->SetNextHop(q->eventType, cm->GetLocalAddress());
             placed = true;
 
         }
@@ -470,7 +456,7 @@ namespace ns3 {
             if(dstate->GetNextHop(q->eventType).IsEqual(cm->GetLocalAddress()))
             {
                 NS_LOG_INFO ("QUERY PLACED ON LOCAL NODE");
-                if (!q->isAtomic) 
+                if (!q->isAtomic)
                     dstate->SetOutDest(q->eventType, cm->GetLocalAddress());
                 else
                     dstate->SetOutDest(q->eventType, cm->GetSinkAddress());

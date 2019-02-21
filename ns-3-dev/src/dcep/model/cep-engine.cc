@@ -90,11 +90,87 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         GetObject<Placement>()->ForwardProducedCepEvent(e);
     }
+
+    void
+    CEPEngine::DoCheckConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, int> values)
+    {
+        Ptr<Placement> p = GetObject<Placement>();
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        if (values.begin() == values.end()) {
+            if (!e->skipProcessing) {
+                e->pkt->m_executionInfo.executedByExecEnv = false;
+                ee->Proceed(e->pkt, "handle-cepops", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
+                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "constraints-done")->value = 1;
+            } else {
+                GetObject<Detector>()->ProcessCepEvent(e);
+            }
+            return;
+        }
+        auto k = values.begin()->first;
+        values.erase(values.begin());
+
+        if (!e->skipProcessing) {
+            // We assume the constraints type is always integers
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
+
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+            if (constraints[k])
+                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "constraint-processed")->value = 1;
+            else
+                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "constraint-processed")->value = 0;
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(e->pkt, "check-constraints", &CEPEngine::DoCheckConstraints, this, e, constraints, cep,
+                        producer, values);
+        } else {
+            DoCheckConstraints(e, constraints, cep, producer, values);
+        }
+    }
+
+    void
+    CEPEngine::CheckConstraints(Ptr<CepEvent> e)
+    {
+        auto cep = GetObject<CEPEngine>();
+
+        std::vector<Ptr<CepOperator>> ops;
+        cep->GetOpsByInputCepEventType(e->type, ops);
+        std::map<std::string, Ptr<Constraint> > constraints;
+        for (auto cepop : ops)
+        {
+            for (auto c : cepop->constraints)
+            {
+                constraints[c->var_name] = c;
+            }
+        }
+        Ptr<Producer> producer = GetObject<Producer>();
+
+        auto node = GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+
+        std::map<std::string, int> values;
+        for (auto const& x : e->values)
+        {
+            values[x.first] = x.second;
+        }
+        DoCheckConstraints(e, constraints, cep, producer, values);
+    }
     
     void
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
     {
-        GetObject<Detector>()->ProcessCepEvent(e);
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+
+        if (!e->skipProcessing) {
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            e->pkt->m_executionInfo.timestamps.push_back(Simulator::Now());
+            ee->Proceed(e->pkt, "check-constraints", &CEPEngine::CheckConstraints, this, e);
+
+            ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
+        } else {
+            CheckConstraints(e);
+        }
     }
     
     
@@ -210,7 +286,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (!e->skipProcessing) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("AllCepOpsDoneYet")->value = 0;
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
         }
         op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);

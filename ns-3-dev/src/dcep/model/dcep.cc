@@ -212,7 +212,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         auto ds = GetObject<DataSource> ();
         //Simulator::Schedule(Seconds(10), &DataSource::GenerateAtomicCepEvents, GetObject<DataSource>());
         if (!ds->IsActive()) {
-            ds->Activate();;
+            ds->Activate();
             ds->GenerateAtomicCepEvents(q->eventType);
         }
     }
@@ -225,62 +225,6 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         this->RxFinalCepEventHops(event->hopsCount);
 
         GetObject<Sink>()->receiveFinalCepEvent(event);
-    }
-
-    void
-    Dcep::DoCheckConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, int> values)
-    {
-        Ptr<Placement> p = GetObject<Placement>();
-        Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
-        if (values.begin() == values.end()) {
-            e->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(e->pkt, "handle-cepops", &Placement::RcvCepEvent, p, e);
-            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
-            return;
-        }
-        auto k = values.begin()->first;
-        values.erase(values.begin());
-
-        // We assume the constraints type is always integers
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
-
-        e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
-
-        if (constraints[k])
-            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
-        else
-            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
-        e->pkt->m_executionInfo.executedByExecEnv = false;
-        ee->Proceed(e->pkt, "check-constraints", &Dcep::DoCheckConstraints, this, e, constraints, cep, producer, values);
-    }
-
-    void
-    Dcep::CheckConstraints(Ptr<CepEvent> e)
-    {
-        auto cep = GetObject<CEPEngine>();
-
-        std::vector<Ptr<CepOperator>> ops;
-        cep->GetOpsByInputCepEventType(e->type, ops);
-        std::map<std::string, Ptr<Constraint> > constraints;
-        for (auto cepop : ops)
-        {
-            for (auto c : cepop->constraints)
-            {
-                constraints[c->var_name] = c;
-            }
-        }
-        Ptr<Producer> producer = GetObject<Producer>();
-
-        auto node = GetObject<Dcep>()->GetNode();
-        auto ee = node->GetObject<ExecEnv>();
-
-        //e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-        std::map<std::string, int> values;
-        for (auto const& x : e->values)
-        {
-            values[x.first] = x.second;
-        }
-        DoCheckConstraints(e, constraints, cep, producer, values);
     }
     
     void
@@ -304,13 +248,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 event->pkt = pkt;
-                Ptr<ExecEnv> ee = GetNode()->GetObject<ExecEnv>();
 
-                pkt->m_executionInfo.executedByExecEnv = false;
-                pkt->m_executionInfo.timestamps.push_back(Simulator::Now());
-                ee->Proceed(event->pkt, "check-constraints", &Dcep::CheckConstraints, this, event);
-
-                ee->ScheduleInterrupt (event->pkt, "HIRQ-1", Seconds(0));
+                p->RcvCepEvent(event);
 
                 break;
             }
@@ -740,6 +679,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             e->prevHopsCount = 0;
             e->values = m_eventValues;
             e->timestamp = Simulator::Now();
+            e->pkt = Create<Packet>();  // Dummy packet for processing delay
             NS_LOG_INFO("CepEvent number  " << e->m_seq);
             dcep->DispatchAtomicCepEvent(e);
 
