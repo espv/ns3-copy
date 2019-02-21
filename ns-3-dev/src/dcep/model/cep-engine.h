@@ -64,6 +64,10 @@ namespace ns3 {
         Time timestamp;
         Ptr<Packet> pkt;
         std::map<std::string, int> values;
+
+        // Added by Espen to exempt certain generated complex events from being processed,
+        // to be able to chain together queries
+        bool skipProcessing;
     };
     
     class CepEventPattern : public Object{
@@ -116,6 +120,7 @@ namespace ns3 {
          * one the sink is interested in.
          */ 
         bool isFinal;
+        bool isFinalWithinNode;
         bool assigned;
         
         SerializedQuery* serialize();
