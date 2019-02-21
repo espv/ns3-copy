@@ -346,6 +346,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
             newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(newEvent2->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), newEvent2, ops, cep, p);
+            delete events1;
             return false;
         }
 
@@ -419,6 +420,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
             newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(newEvent2->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), newEvent2, ops, cep, p);
+            delete events1;
             return false;
         }
 
