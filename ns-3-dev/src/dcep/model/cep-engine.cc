@@ -435,11 +435,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             return false;
         }
 
-        Ptr<CepEvent> existingEvent = *events2->begin();
+        Ptr<CepEvent> curEvent1 = *events1->begin();
+        Ptr<CepEvent> curEvent2 = *events2->begin();
         events1->erase(events1->begin());
         // Create a complex event from each atomic event number 1.
 
-        //if(newEvent->m_seq == existingEvent->m_seq) {
+        if(curEvent1->timestamp + q->window > curEvent2->timestamp) {
             Ptr<CepEvent> e1 = CreateObject<CepEvent>();
             Ptr<CepEvent> e2 = CreateObject<CepEvent>();
             newEvent->CopyCepEvent(e1);
@@ -447,7 +448,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             // Split loop into recursion.
             // Return a recursive call to some function
 
-            existingEvent->CopyCepEvent(e2);
+            curEvent2->CopyCepEvent(e2);
 
             // Erase our event in the events2 vector when we're done
             for (auto it = events2->begin(); it != events2->end(); it++) {
@@ -465,10 +466,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
             //bufman->clean_up();
             //return true;
-        //} else {
-        //    newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-        //    newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-        //}
+        } else {
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+            newEvent->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+        }
 
         newEvent->pkt->m_executionInfo.executedByExecEnv = false;
         ee->Proceed(newEvent->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, newEvent, events2, returned, events1, q, p, ops, cep);

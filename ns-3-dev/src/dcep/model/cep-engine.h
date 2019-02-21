@@ -61,6 +61,7 @@ namespace ns3 {
         uint32_t event_class;
         uint32_t hopsCount;
         uint32_t prevHopsCount;
+        Time timestamp;
         Ptr<Packet> pkt;
         std::map<std::string, int> values;
     };
@@ -109,6 +110,7 @@ namespace ns3 {
         std::string parent_output;
         std::string op;
         std::vector<Ptr<Constraint> > constraints;
+        Time window;
         /*
          * the event notification for the event of type above is the
          * one the sink is interested in.
