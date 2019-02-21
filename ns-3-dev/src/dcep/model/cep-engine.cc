@@ -607,8 +607,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             NS_LOG_INFO("BufferManager::put_event: Unknown event type");
         }
 
-        return;
-
         /*
         if(events1.empty() && events2.empty())
         {
