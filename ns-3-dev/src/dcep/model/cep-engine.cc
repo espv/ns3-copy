@@ -682,6 +682,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             
             Ptr<CepEvent> new_event = CreateObject<CepEvent>();
+            new_event->timestamp = Simulator::Now();
             uint64_t delay = 0;
             uint32_t hops = 0;
             for(auto e : events)
@@ -706,9 +707,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             }
             
             new_event->m_seq = events.back()->m_seq;
-            
+
             Ptr<Forwarder> forwarder = GetObject<Forwarder>();
             forwarder->ForwardNewCepEvent(new_event);
+            new_event->pkt = Create<Packet>();
+            Ptr<CEPEngine> cepEngine = GetObject<CEPEngine>();
+            cepEngine->ProcessCepEvent(new_event);
         }
     }
 
