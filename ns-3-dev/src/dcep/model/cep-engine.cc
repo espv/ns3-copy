@@ -446,7 +446,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             // Split loop into recursion.
             // Return a recursive call to some function
 
-            bufman->clean_up(curEvent1, newEvent2);
+            bufman->consume(curEvent1, newEvent2);
             returned.push_back(curEvent1);
             returned.push_back(newEvent2);
 
@@ -642,7 +642,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    BufferManager::clean_up(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
+    BufferManager::consume(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
     {
         switch(consumption_policy)
         {

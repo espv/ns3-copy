@@ -185,7 +185,7 @@ private:
         void read_events(std::vector<Ptr<CepEvent> >& event1, 
         std::vector<Ptr<CepEvent> >& event2);
         void put_event(Ptr<CepEvent>, CepOperator *op);
-        void clean_up(Ptr<CepEvent> e1, Ptr<CepEvent> e2);
+        void consume(Ptr<CepEvent> e1, Ptr<CepEvent> e2);
         uint32_t consumption_policy;
         uint32_t selection_policy;
         std::vector<Ptr<CepEvent> > events1;
