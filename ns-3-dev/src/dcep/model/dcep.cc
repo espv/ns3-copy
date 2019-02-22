@@ -680,6 +680,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             e->values = m_eventValues;
             e->timestamp = Simulator::Now();
             e->pkt = Create<Packet>();  // Dummy packet for processing delay
+            e->skipProcessing = false;
             NS_LOG_INFO("CepEvent number  " << e->m_seq);
             dcep->DispatchAtomicCepEvent(e);
 

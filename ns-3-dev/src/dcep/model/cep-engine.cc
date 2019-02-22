@@ -271,8 +271,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
         if (ops.begin() == ops.end()) {
-            e->pkt->m_executionInfo.timestamps.push_back(Simulator::Now());
-            std::cout << Simulator::Now() << ": DCEP-Sim has finished processing packet " << e->pkt->GetUid() << ", full processing delay: " << e->pkt->m_executionInfo.timestamps[1]-e->pkt->m_executionInfo.timestamps[0] << std::endl;
+            if (!e->skipProcessing) {
+                e->pkt->m_executionInfo.timestamps.push_back(Simulator::Now());
+                std::cout << Simulator::Now() << ": DCEP-Sim has finished processing packet " << e->pkt->GetUid()
+                          << ", full processing delay: "
+                          << e->pkt->m_executionInfo.timestamps[1] - e->pkt->m_executionInfo.timestamps[0] << std::endl;
+            }
             return;
         }
         auto op = *ops.begin();
@@ -294,7 +298,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
     {
-        std::cout << "Received event of type " << e->type << std::endl;
+        //std::cout << "Received event of type " << e->type << std::endl;
         auto cep = GetObject<CEPEngine>();
 
         std::vector<Ptr<CepOperator>> ops;
