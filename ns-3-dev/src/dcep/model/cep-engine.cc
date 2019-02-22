@@ -290,6 +290,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (!e->skipProcessing) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
+            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("AllCepOpsDoneYet")->value = 0;
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
         }
         op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
