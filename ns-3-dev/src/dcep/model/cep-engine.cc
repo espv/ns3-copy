@@ -202,6 +202,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         return NULL;
     }
+
+    Ptr<CepOperator> CEPEngine::GetOperator(uint32_t queryId)
+    {
+        for (auto op : ops_queue) {
+            if (op->queryId == queryId)
+            {
+                return op;
+            }
+        }
+    }
     
     void
     CEPEngine::RecvQuery(Ptr<Query> q)
@@ -378,6 +388,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
         this->constraints = q->constraints;
+        if (q->prevQuery != nullptr)
+            this->prevOperator = cep->GetOperator(q->prevQuery->id);
             
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
         
@@ -395,6 +407,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
         this->constraints = q->constraints;
+        if (q->prevQuery != nullptr)
+            this->prevOperator = cep->GetOperator(q->prevQuery->id);
 
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
 
@@ -412,6 +426,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->event1 = q->inevent1;
         this->event2 = q->inevent2;
         this->constraints = q->constraints;
+        if (q->prevQuery != nullptr)
+            this->prevOperator = cep->GetOperator(q->prevQuery->id);
 
         Ptr<BufferManager> bufman = CreateObject<BufferManager>();
         
@@ -453,11 +469,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             // Split loop into recursion.
             // Return a recursive call to some function
 
-            bufman->consume(curEvent1, newEvent2);
             returned.push_back(curEvent1);
             returned.push_back(newEvent2);
+            Consume(returned);
 
-            p->HandleNewCepEvent(q, returned);
+            p->HandleNewCepEvent(q, returned, this);
             newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
             newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         } else {
@@ -543,11 +559,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             // Split loop into recursion.
             // Return a recursive call to some function
 
-            bufman->consume(curEvent1, newEvent2);
             returned.push_back(curEvent1);
             returned.push_back(newEvent2);
 
-            p->HandleNewCepEvent(q, returned);
+            Consume(returned);
+
+            p->HandleNewCepEvent(q, returned, this);
             if (!newEvent2->skipProcessing) {
                 newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
                         "CepOpDoneYet")->value = 0;
@@ -645,7 +662,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 constraintsFulfilled = false;
         }
         if (constraintsFulfilled) {
-            p->HandleNewCepEvent(q, returned);
+            p->HandleNewCepEvent(q, returned, this);
             if (!e->skipProcessing)
                 e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         } else {
@@ -679,7 +696,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         return event1 == eType || event2 == eType;
     }
-    
+
+
+    void
+    CepOperator::Consume(std::vector<Ptr<CepEvent> > &events)
+    {
+        bufman->consume(events);
+    }
 
      
     /*********** BUFFER MANAGEMENT******************
@@ -773,27 +796,33 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    BufferManager::consume(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
+    BufferManager::consume(std::vector<Ptr<CepEvent> > &events)
     {
         switch(consumption_policy)
         {
             case SELECTED_CONSUMPTION:
                 NS_LOG_INFO("Applying consumption policy " << SELECTED_CONSUMPTION);
                 // Consuming event 1
-                for (auto it = events1.begin(); it != events1.end(); it++) {
-                    auto e = *it;
-                    if (e->m_seq == e1->m_seq) {
-                        events1.erase(it);
-                        break;
+                for (auto event : events) {
+                    for (auto it = events1.begin(); it != events1.end(); it++) {
+                        auto e = *it;
+                        if (e->m_seq == event->m_seq) {
+                            events1.erase(it);
+                            break;
+                        }
                     }
-                }
 
-                // Consuming event 2
-                for (auto it = events2.begin(); it != events2.end(); it++) {
-                    auto e = *it;
-                    if (e->m_seq == e2->m_seq) {
-                        events2.erase(it);
-                        break;
+                    // Consuming event 2
+                    for (auto it = events2.begin(); it != events2.end(); it++) {
+                        auto e = *it;
+                        if (e->m_seq == event->m_seq) {
+                            events2.erase(it);
+                            break;
+                        }
+                    }
+
+                    if (event->event_class == INTERMEDIATE_EVENT) {
+                        event->generatedByOp->Consume(event->prevEvents);
                     }
                 }
                 break;
@@ -821,7 +850,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     void
-    Producer::HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events){
+    Producer::HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, CepOperator *op){
         if(q->actionType == NOTIFICATION)
         {
             
@@ -833,19 +862,25 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             {
                 delay = std::max(delay, e->delay);
                 hops = hops + e->hopsCount;
+                new_event->prevEvents.push_back(e);
             }
             
             new_event->type = q->eventType;
             
             new_event->delay = delay; 
             new_event->hopsCount = hops;
+
+            new_event->generatedByOp = op;
             
             
             if(q->isFinal)
             {
                 new_event->event_class = FINAL_EVENT;
             }
-            else
+            else if (q->isFinalWithinNode)
+            {
+                new_event->event_class = INTERMEDIATE_EVENT;
+            } else
             {
                 new_event->event_class = COMPOSITE_EVENT;
             }
@@ -858,8 +893,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 Ptr<CEPEngine> cepEngine = GetObject<CEPEngine>();
                 cepEngine->ProcessCepEvent(new_event);
             } else {
+                // Here we consume the previous events
                 Ptr<Forwarder> forwarder = GetObject<Forwarder>();
                 forwarder->ForwardNewCepEvent(new_event);
+                op->Consume(events);
             }
         }
     }

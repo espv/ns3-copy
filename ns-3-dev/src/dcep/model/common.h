@@ -51,7 +51,8 @@ namespace ns3 {
         ATOMIC_EVENT,
         COMPOSITE_EVENT,
         FINAL_EVENT,
-        SYSTEM_EVENT
+        SYSTEM_EVENT,
+        INTERMEDIATE_EVENT
     };
     
     enum message_types {

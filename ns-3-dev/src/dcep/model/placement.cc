@@ -371,8 +371,9 @@ namespace ns3 {
             if (!PlaceQuery(q)) 
             {
                 Simulator::Schedule(Seconds(3.0), &CentralizedPlacementPolicy::DoPlacement, this);
-            } else
+            } else {
                 p->RemoveQuery(q);
+            }
         }
 
     }

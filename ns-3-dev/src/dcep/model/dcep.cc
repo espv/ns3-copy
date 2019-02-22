@@ -341,7 +341,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->currentHost.Set("0.0.0.0");
                 q1->parent_output = parent_output;
                 q1->window = Seconds(15);
-                q1->isFinalWithinNode = true;
+                q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
                 //in_seconds += 0.01;
                 //dcep->DispatchQuery(q1);
