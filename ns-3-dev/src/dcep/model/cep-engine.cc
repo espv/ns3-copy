@@ -286,7 +286,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         ops.erase(ops.begin());
 
-
+        // The !skipProcessing part must happen before the evaluation of the operator, and
+        // the else part must happen afterward. Therefore, they are detached.
+        // Before the evaluation
         if (!e->skipProcessing) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(e->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
@@ -294,6 +296,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
         }
         op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
+        // After the evaluation
+        if (e->skipProcessing) {
+            CepOperatorProcessCepEvent(e, ops, cep, producer);
+        }
     }
     
     void
@@ -513,10 +519,17 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto ee = node->GetObject<ExecEnv>();
         if (events1->empty()) {
             // No sequences left
-            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-            newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(newEvent2->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), newEvent2, ops, cep, p);
+            if (!newEvent2->skipProcessing) {
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "CepOpDoneYet")->value = 1;
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "InsertedSequence")->value = 0;
+                newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
+                ee->Proceed(newEvent2->pkt, "handle-cepops", &Detector::CepOperatorProcessCepEvent,
+                            cep->GetObject<Detector>(), newEvent2, ops, cep, p);
+            } else {
+                cep->GetObject<Detector>()->CepOperatorProcessCepEvent(newEvent2, ops, cep, p);
+            }
             delete events1;
             return false;
         }
@@ -535,15 +548,28 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             returned.push_back(newEvent2);
 
             p->HandleNewCepEvent(q, returned);
-            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            if (!newEvent2->skipProcessing) {
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "CepOpDoneYet")->value = 0;
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "InsertedSequence")->value = 1;
+            }
         } else {
-            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            if (!newEvent2->skipProcessing) {
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "CepOpDoneYet")->value = 0;
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
+                        "InsertedSequence")->value = 0;
+            }
         }
 
-        newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
-        ee->Proceed(newEvent2->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, newEvent2, returned, events1, q, p, ops, cep);
+        if (!newEvent2->skipProcessing) {
+            newEvent2->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(newEvent2->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, newEvent2, returned,
+                        events1, q, p, ops, cep);
+        } else {
+            DoEvaluate(newEvent2, returned, events1, q, p, ops, cep);
+        }
     }
 
     bool
@@ -579,8 +605,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             /* Note, we don't need to check if e->skipProcessing is true here because e->skipProcessing
              * should only happen for event 1, and this only happens if e->type == event2
              */
-            e->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(e->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
+            if (!e->skipProcessing) {
+                e->pkt->m_executionInfo.executedByExecEnv = false;
+                ee->Proceed(e->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p,
+                            ops, cep);
+            } else {
+                DoEvaluate(e, returned, events1, q, p, ops, cep);
+            }
         } else {
             // No sequences left
             if (!e->skipProcessing) {
