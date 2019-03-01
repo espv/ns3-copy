@@ -16,6 +16,7 @@
 #include <ns3/drop-tail-queue2.h>
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/adhoc-wifi-mac.h"
+#include "ns3/cep-engine.h"
 
 #include <iostream>
 #include <fstream>
@@ -208,6 +209,8 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 				stateQueue2s[tokens[0]] = Create<StateVariableQueue2>();
 				stateQueue2Names[stateQueue2s[tokens[0]]] = tokens[0];
 			}
+		} else if (tokens[3] == "cepqueries") {
+			//this->cepQueryQueues[tokens[0]] = new std::queue<Ptr<CepOperator> > ();
 		}
 
 		/* We have a packet queue.

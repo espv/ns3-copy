@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <queue>
+#include <ns3/cep-engine.h>
 
 #include "ns3/object.h"
 #include "ns3/empty.h"
@@ -71,7 +72,6 @@ namespace ns3 {
 
         // Holds all intra-node queues used during execution.
         std::map<std::string, Ptr<Queue2> > queues;
-        std::map<std::string, std::vector<std::string> > eventqueues;
         std::map<Ptr<Queue2>, std::string> queueNames;
         std::vector<Ptr<Queue2> > queueOrder;
 
@@ -79,6 +79,10 @@ namespace ns3 {
         std::map<std::string, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2s;
         std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> serviceQueue2Names;
         std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2Order;
+
+        //std::map<std::string, std::queue<Ptr<CepOperator> > *, std::string> cepQueryQueues;
+        //std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> cepQueryQueueNames;
+        //std::vector<std::queue<Ptr<SEM>, Ptr<ProgramLocation> > *> cepQueryQueueOrder;
 
         /* State queues only hold a set of values.
          *
