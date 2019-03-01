@@ -50,7 +50,7 @@ void ScheduleInterrupt(Ptr<Node> node, const char* interruptId) {
     dummyProgramLoc->tempvar = tempVar();
     dummyProgramLoc->curPkt = Ptr<Packet>();
     dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-    dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
+    dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
 
     Simulator::ScheduleNow(&InterruptController::IssueInterruptWithServiceOnCPU,
                            ee->hwModel->m_interruptController,

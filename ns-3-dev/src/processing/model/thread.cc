@@ -60,9 +60,9 @@ void Thread::DoneProcessing() {
 
 bool recordExecStats;
 
-Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(std::string queueID) {
+Ptr<StateVariableQueue> ProgramLocation::getLocalStateVariableQueue(std::string queueID) {
 	// Find the requested queue
-	auto it = localStateVariableQueue2s.find(queueID);
+	auto it = localStateVariableQueues.find(queueID);
 
 	/* If the queue does not exist, create it
 	 * NOTE: this is the only mechanism by which new local state queues are created, i.e.,
@@ -71,10 +71,10 @@ Ptr<StateVariableQueue2> ProgramLocation::getLocalStateVariableQueue2(std::strin
 	 *       copy of a ProgramLocation, these queues will exist as long as they are by at least
 	 *       one ProgramLocation.
 	 */
-	if (it == localStateVariableQueue2s.end())
-		localStateVariableQueue2s[queueID] = Create<StateVariableQueue2>();
+	if (it == localStateVariableQueues.end())
+		localStateVariableQueues[queueID] = Create<StateVariableQueue>();
 
-	return localStateVariableQueue2s[queueID];
+	return localStateVariableQueues[queueID];
 }
 
 Ptr<StateVariable> ProgramLocation::getLocalStateVariable(std::string svID) {
@@ -131,7 +131,9 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 			return HandleExecuteEvent(e);
 		case QUEUE: 
 			// Used to enqueue or dequeue packets into/from queues.
-			return HandleQueue2Event(e);
+			return HandleQueueEvent(e);
+	    case COPYQUEUE:
+	        return HandleCopyQueueEvent(e);
 		case SCHEDULER: 
 			return HandleSchedulerEvent(e);
 		case SYNCHRONIZATION: 
@@ -189,14 +191,14 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		// Fetch info about the loop
 		long maxIterations = m_currentLocation->lc->maxIterations;
         long curIteration = ++(m_currentLocation->curIteration);
-        long queueServedIndex = m_currentLocation->curServedQueue2;
-        long numQueue2s =
-			m_currentLocation->lc->serviceQueue2s ?
-			m_currentLocation->lc->serviceQueue2sServed.size() :
-			(m_currentLocation->lc->stateQueue2s ?
-			 m_currentLocation->lc->stateQueue2sServed.size() :
+        long queueServedIndex = m_currentLocation->curServedQueue;
+        long numQueues =
+			m_currentLocation->lc->serviceQueues ?
+			m_currentLocation->lc->serviceQueuesServed.size() :
+			(m_currentLocation->lc->stateQueues ?
+			 m_currentLocation->lc->stateQueuesServed.size() :
 			 m_currentLocation->lc->queuesServed.size());
-		bool perQueue2 = m_currentLocation->lc->perQueue2;
+		bool perQueue = m_currentLocation->lc->perQueue;
 		Ptr<Packet> curPacket = m_currentLocation->curPkt;
 		bool condPassed = !m_currentLocation->lc->hasAdditionalCondition ? true :
                           (bool)m_currentLocation->lc->additionalCondition(this);
@@ -222,7 +224,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		bool iterationsToGo = infiniteLoop || (curIteration < maxIterations);
 
 		// If we have no queues, continue if maxIterations allows
-		if (numQueue2s == 0) {
+		if (numQueues == 0) {
 			if (iterationsToGo)
 				m_currentLocation->currentEvent = -1; // Incremented to 0 by dispatch
 			else {
@@ -246,28 +248,28 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 				return true;
 			}
 
-			if (curLc->serviceQueue2s) {
-				auto it = curLc->serviceQueue2sServed.begin();
+			if (curLc->serviceQueues) {
+				auto it = curLc->serviceQueuesServed.begin();
 				for (;
-						it != curLc->serviceQueue2sServed.end()
+						it != curLc->serviceQueuesServed.end()
 						&& (*it)->empty(); it++)
 					;
 
 				// If all queues were empty, pop program and return.
-				if (it == curLc->serviceQueue2sServed.end()) {
+				if (it == curLc->serviceQueuesServed.end()) {
 					// We do not pop thread of execution, as we did not push it yet
 					m_programStack.pop();
 					return true;
 				}
-			} else if (curLc->stateQueue2s) {
-				auto it = curLc->stateQueue2sServed.begin();
+			} else if (curLc->stateQueues) {
+				auto it = curLc->stateQueuesServed.begin();
 				for (;
-						it != curLc->stateQueue2sServed.end()
+						it != curLc->stateQueuesServed.end()
 						&& !(*it)->empty(); it++)
 					;
 
 				// If all queues were empty, pop program and return.
-				if (it == curLc->stateQueue2sServed.end()) {
+				if (it == curLc->stateQueuesServed.end()) {
 					// We do not pop thread of execution, as we did not push it yet
 					m_programStack.pop();
 					return true;
@@ -293,44 +295,44 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 
 		// If we don't have any more iterations to
 		// execute, break loop
-		if (!iterationsToGo && !perQueue2) {
+		if (!iterationsToGo && !perQueue) {
 			m_programStack.pop();
 			return true;
 		}
 
 		bool curEmptyProgram = (m_currentLocation->program
-				== m_currentLocation->lc->emptyQueue2s);
-		bool goToNextQueue2 = curEmptyProgram || !iterationsToGo;
+				== m_currentLocation->lc->emptyQueues);
+		bool goToNextQueue = curEmptyProgram || !iterationsToGo;
 
 		// If go to next queue, do that. If no more queues, break loop.
-		if (goToNextQueue2) {
+		if (goToNextQueue) {
 			/* Calculate next index. If -1, i.e., no more queues, break if not infinite loop.
 			 * NOTE 09.08.14: We do NOT re-start on the first queue, even if we have an infinite
 			 * loop. REASON: this is what we have outer loops for, e.g., as with softirqs!
 			 */
-			int nextQueue2 = (queueServedIndex + 1) < numQueue2s ? queueServedIndex + 1 : -1;
-			if (nextQueue2 == -1) {
+			int nextQueue = (queueServedIndex + 1) < numQueues ? queueServedIndex + 1 : -1;
+			if (nextQueue == -1) {
 				m_programStack.pop();
 				return true;
 			}
 
 			// Else wise, update m_currentLocation wrt. queue served
 			else {
-				queueServedIndex = m_currentLocation->curServedQueue2 = nextQueue2;
+				queueServedIndex = m_currentLocation->curServedQueue = nextQueue;
 				m_currentLocation->curIteration = 0;
 			}
 		}
 
 		// If if THIS ONE queue is empty, set program to empty queues (should be called empty queue) program
 		bool queueEmpty =
-			m_currentLocation->lc->serviceQueue2s ?
-			m_currentLocation->lc->serviceQueue2sServed[queueServedIndex]->empty() :
-			(m_currentLocation->lc->stateQueue2s ?
-			 m_currentLocation->lc->stateQueue2sServed[queueServedIndex]->empty() :
+			m_currentLocation->lc->serviceQueues ?
+			m_currentLocation->lc->serviceQueuesServed[queueServedIndex]->empty() :
+			(m_currentLocation->lc->stateQueues ?
+			 m_currentLocation->lc->stateQueuesServed[queueServedIndex]->empty() :
 			 m_currentLocation->lc->queuesServed[queueServedIndex]->IsEmpty());
 		if (queueEmpty) {
-			if (curLc->emptyQueue2s != nullptr)
-				m_currentLocation->program = curLc->emptyQueue2s;
+			if (curLc->emptyQueues != nullptr)
+				m_currentLocation->program = curLc->emptyQueues;
 			else { // See commends in program.h on LoopCondition members hasInternalLoop and hasDequeue
 				m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
 				if (!m_currentLocation->program->hasInternalLoop) {
@@ -338,34 +340,34 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 					 * empty. If all are empty, return from LOOP.
 					 */
                     uint32_t index = 0;
-					if (curLc->serviceQueue2s) {
-						auto it = curLc->serviceQueue2sServed.begin();
+					if (curLc->serviceQueues) {
+						auto it = curLc->serviceQueuesServed.begin();
 						for (;
-								it != curLc->serviceQueue2sServed.end()
+								it != curLc->serviceQueuesServed.end()
 								&& (*it)->empty(); it++)
 							index++;
 
 						// If all queues were empty, pop program and return.
-						if (it == curLc->serviceQueue2sServed.end()) {
+						if (it == curLc->serviceQueuesServed.end()) {
 							// We do not pop thread of execution, as we did not push it yet
 							m_programStack.pop();
 							return true;
 						} else
-							m_currentLocation->curServedQueue2 = index;
-					} else if (curLc->stateQueue2s) {
-						auto it = curLc->stateQueue2sServed.begin();
+							m_currentLocation->curServedQueue = index;
+					} else if (curLc->stateQueues) {
+						auto it = curLc->stateQueuesServed.begin();
 						for (;
-								it != curLc->stateQueue2sServed.end()
+								it != curLc->stateQueuesServed.end()
 								&& (*it)->empty(); it++)
 							index++;
 
 						// If all queues were empty, pop program and return.
-						if (it == curLc->stateQueue2sServed.end()) {
+						if (it == curLc->stateQueuesServed.end()) {
 							// We do not pop thread of execution, as we did not push it yet
 							m_programStack.pop();
 							return true;
 						} else
-							m_currentLocation->curServedQueue2 = index;
+							m_currentLocation->curServedQueue = index;
 					} else {
 						auto it = curLc->queuesServed.begin();
 						for (;
@@ -379,7 +381,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 							m_programStack.pop();
 							return true;
 						} else
-							m_currentLocation->curServedQueue2 = index;
+							m_currentLocation->curServedQueue = index;
 					}
 				}
 			}
@@ -528,7 +530,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
 		newProgramLocation->curPkt = m_programStack.top()->curPkt;
 		newProgramLocation->localStateVariables = m_programStack.top()->localStateVariables;
-		newProgramLocation->localStateVariableQueue2s = m_programStack.top()->localStateVariableQueue2s;
+		newProgramLocation->localStateVariableQueues = m_programStack.top()->localStateVariableQueues;
 		newProgramLocation->tempvar = m_programStack.top()->tempvar;
 
 		// Set up loop state if this is a loop statement
@@ -548,8 +550,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				 * we don't have the "empty queues" program. This
 				 * means we should use the regular root program
 				 */
-				uint64_t queueSize = newLc->serviceQueue2s ? newLc->serviceQueue2sServed.size() :
-					                 (newLc->stateQueue2s ? newLc->stateQueue2sServed.size() :
+				uint64_t queueSize = newLc->serviceQueues ? newLc->serviceQueuesServed.size() :
+					                 (newLc->stateQueues ? newLc->stateQueuesServed.size() :
 					                  newLc->queuesServed.size());
 
 				if (queueSize == 0)
@@ -560,19 +562,19 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				 * empty queues program.
 				 */
 				else {
-					newProgramLocation->curServedQueue2 = 0;
-					bool firstQueue2Empty =
-						newLc->serviceQueue2s ?
-						newLc->serviceQueue2sServed[0]->empty() :
-						(newLc->stateQueue2s ?
-						 newLc->stateQueue2sServed[0]->empty() :
+					newProgramLocation->curServedQueue = 0;
+					bool firstQueueEmpty =
+						newLc->serviceQueues ?
+						newLc->serviceQueuesServed[0]->empty() :
+						(newLc->stateQueues ?
+						 newLc->stateQueuesServed[0]->empty() :
 						 newLc->queuesServed[0]->IsEmpty());
 
-					if (!firstQueue2Empty)
+					if (!firstQueueEmpty)
 						newProgramLocation->program = newSem->rootProgram;
 					else {
-						if (newLc->emptyQueue2s != nullptr)
-							newProgramLocation->program = newLc->emptyQueue2s;
+						if (newLc->emptyQueues != nullptr)
+							newProgramLocation->program = newLc->emptyQueues;
 						else { // See commends in program.h on LoopCondition members hasInternalLoop and hasDequeue
 							newProgramLocation->program =
 								newSem->rootProgram;
@@ -580,39 +582,39 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 								/* iterate queues until we find one which is not empty.
 								 * If all are empty, return from LOOP.
 								 */
-								if (newLc->serviceQueue2s) {
+								if (newLc->serviceQueues) {
 									uint32_t index = 0;
-									auto it = newLc->serviceQueue2sServed.begin();
+									auto it = newLc->serviceQueuesServed.begin();
 									for (;
 											it
-											!= newLc->serviceQueue2sServed.end()
+											!= newLc->serviceQueuesServed.end()
 											&& (*it)->empty(); it++)
 										index++;
 
 									// If all queues were empty, pop program and return.
 									if (it
-											== newLc->serviceQueue2sServed.end())
+											== newLc->serviceQueuesServed.end())
 										// We do not pop thread of execution, as we did not push it yet
 										return true;
 									else
-										m_currentLocation->curServedQueue2 =
+										m_currentLocation->curServedQueue =
 											index;
-								} else if (newLc->stateQueue2s) {
+								} else if (newLc->stateQueues) {
 									uint32_t index = 0;
-									auto it = newLc->stateQueue2sServed.begin();
+									auto it = newLc->stateQueuesServed.begin();
 									for (;
 											it
-											!= newLc->stateQueue2sServed.end()
+											!= newLc->stateQueuesServed.end()
 											&& (*it)->empty(); it++)
 										index++;
 
 									// If all queues were empty, pop program and return.
 									if (it
-											== newLc->stateQueue2sServed.end())
+											== newLc->stateQueuesServed.end())
 										// We do not pop thread of execution, as we did not push it yet
 										return true;
 									else
-										m_currentLocation->curServedQueue2 = index;
+										m_currentLocation->curServedQueue = index;
 								} else {
 									uint32_t index = 0;
 									auto it = newLc->queuesServed.begin();
@@ -627,7 +629,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 										// We do not pop thread of execution, as we did not push it yet
 										return true;
 									else
-										m_currentLocation->curServedQueue2 = index;
+										m_currentLocation->curServedQueue = index;
 								}
 							}
 						}
@@ -644,15 +646,15 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newSem->peu->taskScheduler->Fork("", newSem->rootProgram, 0,
 				m_programStack.top()->curPkt,
 				m_programStack.top()->localStateVariables,
-				m_programStack.top()->localStateVariableQueue2s, false);
+				m_programStack.top()->localStateVariableQueues, false);
 	}
 
 	// We should immediately continue with the next event in the called program
 	return true;
 }
 
-bool Thread::HandleQueue2Event(ExecutionEvent* e) {
-    auto qe = dynamic_cast<Queue2ExecutionEvent *>(e);
+bool Thread::HandleQueueEvent(ExecutionEvent* e) {
+    auto qe = dynamic_cast<QueueExecutionEvent *>(e);
     if (qe->enqueue) {
 		/* If we have an en-queue event, simply insert into queue.
 		 * We assume that the queue extist, as it should have been
@@ -660,7 +662,7 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 		 * initialization.
 		 */
 		auto ee = peu->hwModel->node->GetObject<ExecEnv>();
-        if (qe->serviceQueue2) {
+        if (qe->servQueue != nullptr) {
             /* Here, we want to push a service onto the service
 			 * queue specified in the event. This may however
 			 * either be a service specified in the event OR
@@ -676,19 +678,24 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 				semToEnqueue = qe->semToEnqueue;
 
 			auto toBeEnqueued = std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(semToEnqueue, m_programStack.top());
-			qe->servQueue2->push(toBeEnqueued);
+			qe->servQueue->push(toBeEnqueued);
 
-		} else if (qe->stateQueue2) {
-			ee->stateQueue2s[qe->queueName]->stateVariableQueue2.push(qe->valueToEnqueue);
-		} else
-			qe->queue->Enqueue(m_currentLocation->curPkt);
+		} else if (qe->isStateQueue) {
+			ee->stateQueues[qe->queueName]->stateVariableQueue.push(qe->valueToEnqueue);
+		} else if (qe->isPacketQueue) {
+            qe->queue->Enqueue(m_currentLocation->curPkt);
+        } else if (qe->isCepEventQueue) {
+            qe->cepEventQueue->push(m_currentLocation->curCepEvent);
+        } else if (qe->isCepQueryQueue) {
+			qe->cepQueryQueue->push(m_currentLocation->curCepQuery);
+        }
 	} else
 		// Check if we are dealing with a service queue
-        if (qe->serviceQueue2) {
+        if (qe->isServiceQueue) {
 			// Obtain queue from encapsulated loop if not defined in the event
-			auto queueToServe = (qe->servQueue2 == nullptr) ?
-					m_currentLocation->lc->serviceQueue2sServed[m_currentLocation->curServedQueue2] :
-				    qe->servQueue2;
+			auto queueToServe = (qe->servQueue == nullptr) ?
+					m_currentLocation->lc->serviceQueuesServed[m_currentLocation->curServedQueue] :
+				    qe->servQueue;
 
 			/* Here, we want to dequeue the service, then (below) execute it.
 			 * Note that we resolved which sem to enqueue (which may be "0")
@@ -714,19 +721,19 @@ bool Thread::HandleQueue2Event(ExecutionEvent* e) {
 				newProgramLocation->curPkt = newPl->curPkt;  // Added by Espen
 				newProgramLocation->lc = newPl->lc;
 				newProgramLocation->localStateVariables = newPl->localStateVariables;
-				newProgramLocation->localStateVariableQueue2s = newPl->localStateVariableQueue2s;
+				newProgramLocation->localStateVariableQueues = newPl->localStateVariableQueues;
 				newProgramLocation->tempvar = m_currentLocation->tempvar;
 				m_programStack.push(newProgramLocation);
 			} else
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,
 						0, newPl->curPkt, newPl->localStateVariables,
-						newPl->localStateVariableQueue2s, false);
+						newPl->localStateVariableQueues, false);
 
 			// We should immediately continue with the next event in the called program
 			return true;
-		} else if (qe->stateQueue2) {
+		} else if (qe->isStateQueue) {
 			/*
-DEPRECATED: Do nothing. Reason: ExecEnv inserted a subsequent StateQueue2Condition statement,
+DEPRECATED: Do nothing. Reason: ExecEnv inserted a subsequent StateQueueCondition statement,
 which will need the first value in the queue, and thus the value is dequeued
 below where statements of type Condition are handled.
 
@@ -740,22 +747,22 @@ for all types of queues, including state queues. We use a special local variable
 during interpretation of a condition statement following a dequeue statement that
 works on a state queue.
 
-Ptr<LocalStateVariableQueue2> queueToServe = (!qe->queueName.compare("")) ?
-m_currentLocation->lc->stateQueue2sServed[m_currentLocation->curServedQueue2] :
-m_currentLocation->getLocalStateQueue2(qe->queueName);
+Ptr<LocalStateVariableQueue> queueToServe = (!qe->queueName.compare("")) ?
+m_currentLocation->lc->stateQueuesServed[m_currentLocation->curServedQueue] :
+m_currentLocation->getLocalStateQueue(qe->queueName);
 
-m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2.pop(); */
+m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.pop(); */
 			Ptr<ExecEnv> ee = peu->hwModel->node->GetObject<ExecEnv>();
 
 			m_currentLocation->getLocalStateVariable("dequeuedStateVariable")->value =
-				ee->stateQueue2s[qe->queueName]->stateVariableQueue2.front();
-			ee->stateQueue2s[qe->queueName]->stateVariableQueue2.pop();
+				ee->stateQueues[qe->queueName]->stateVariableQueue.front();
+			ee->stateQueues[qe->queueName]->stateVariableQueue.pop();
 
 			return true;
 		} else {
 			// Obtain queue from encapsulated loop if not defined in the event
 			Ptr<Queue2> queueToServe = (qe->queue == nullptr) ?
-					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue2] :
+					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue] :
 					qe->queue;
 
             m_currentLocation->curPkt = queueToServe->Dequeue();
@@ -778,6 +785,29 @@ m_currentLocation->localStateVariableQueue2s[qe->queueName]->stateVariableQueue2
 	/* For now we ignore these statements and simply
 	 * continue executing the program.
 	 */
+}
+
+bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
+	auto cqe = dynamic_cast<CopyQueueExecutionEvent *>(e);
+	Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+	if (cqe->isCepQueryQueue) {
+		auto fromQueue = execEnv->cepQueryQueues[cqe->fromQueue];
+		*execEnv->cepQueryQueues[cqe->toQueue] = *fromQueue;
+	} else if (cqe->isCepEventQueue) {
+		auto fromQueue = execEnv->cepEventQueues[cqe->fromQueue];
+		*execEnv->cepEventQueues[cqe->toQueue] = *fromQueue;
+	} else if (cqe->isPacketQueue) {
+		auto fromQueue = execEnv->queues[cqe->fromQueue];
+		*execEnv->queues[cqe->toQueue] = *fromQueue;
+	} else if (cqe->isServiceQueue) {
+		auto fromQueue = execEnv->serviceQueues[cqe->fromQueue];
+		*execEnv->serviceQueues[cqe->toQueue] = *fromQueue;
+	} else if (cqe->isStateQueue) {
+		auto fromQueue = execEnv->stateQueues[cqe->fromQueue];
+		*execEnv->stateQueues[cqe->toQueue] = *fromQueue;
+	} else {
+		NS_ASSERT_MSG(0, "Error processing COPYQUEUE event at line " << e->lineNr << " in the device file");
+	}
 }
 
 bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {

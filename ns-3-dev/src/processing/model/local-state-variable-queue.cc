@@ -10,12 +10,12 @@
 
 namespace ns3 {
 
-StateVariableQueue2::StateVariableQueue2() = default;
+StateVariableQueue::StateVariableQueue() = default;
 
-StateVariableQueue2::~StateVariableQueue2() = default;
+StateVariableQueue::~StateVariableQueue() = default;
 
-bool StateVariableQueue2::empty() {
-	return stateVariableQueue2.empty();
+bool StateVariableQueue::empty() {
+	return stateVariableQueue.empty();
 }
 
 }

@@ -12,6 +12,7 @@
 #include "ns3/condition.h"
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
+#include "ns3/cep-engine.h"
 
 #include <vector>
 #include <stack>
@@ -89,6 +90,7 @@ enum ExecutionEventType {
   SCHEDULER,
   SYNCHRONIZATION,
   QUEUE,
+  COPYQUEUE,
   CONDITION,
   TEMPSYNCH,
   END,
@@ -163,8 +165,8 @@ class Condition : public ExecutionEvent {
   std::list<std::pair<uint32_t, Program *> > programs;
   Callback<uint32_t, Ptr<Thread> > getConditionState;
   Callback<void, Ptr<Thread> , uint32_t> setConditionState;
-  Callback<uint32_t, Ptr<Queue2>, Ptr<Queue2> > getConditionQueue2s;
-  Callback<uint32_t, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> getServiceConditionQueue2s;
+  Callback<uint32_t, Ptr<Queue2>, Ptr<Queue2> > getConditionQueues;
+  Callback<uint32_t, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> getServiceConditionQueues;
   Callback<uint32_t, std::string > getConditionThread;
 
   // Functions used to insert an entry
@@ -181,54 +183,54 @@ class Condition : public ExecutionEvent {
   friend std::ostream& operator<<(std::ostream& out, Condition& event);
 };
 
-class Queue2Condition : public Condition {
+class QueueCondition : public Condition {
  public:
-  Queue2Condition();
-  virtual ~Queue2Condition();
+  QueueCondition();
+  virtual ~QueueCondition();
 
   // In order to save time, we want direct pointer
   // to queues in stead of strings that identify them.
   // The interpreter in thread.cc will use
-  // processing->conditionFunctions->Queue2Condition(queue)
-  // on each queue between firstQueue2 and lastQueue2 according
+  // processing->conditionFunctions->QueueCondition(queue)
+  // on each queue between firstQueue and lastQueue according
   // to processing->queueOrder.
-  Ptr<Queue2> firstQueue2;
-  Ptr<Queue2> lastQueue2;
+  Ptr<Queue2> firstQueue;
+  Ptr<Queue2> lastQueue;
 
-  friend std::ostream& operator<<(std::ostream& out, Queue2Condition& event);
+  friend std::ostream& operator<<(std::ostream& out, QueueCondition& event);
 };
 
-class StateQueue2Condition : public Condition {
+class StateQueueCondition : public Condition {
  public:
-  StateQueue2Condition();
-  virtual ~StateQueue2Condition();
+  StateQueueCondition();
+  virtual ~StateQueueCondition();
 
 
   // In order to save time, we want direct pointer
   // to queues in stead of strings that identify them.
   // The interpreter in t|hread.cc will use
-  // processing->conditionFunctions->Queue2Condition(queue)
-  // on each queue between firstQueue2 and lastQueue2 according
+  // processing->conditionFunctions->QueueCondition(queue)
+  // on each queue between firstQueue and lastQueue according
   // to processing->queueOrder.
   std::string queueName;
 };
 
-class ServiceQueue2Condition : public Condition {
+class ServiceQueueCondition : public Condition {
  public:
-  ServiceQueue2Condition();
-  virtual ~ServiceQueue2Condition();
+  ServiceQueueCondition();
+  virtual ~ServiceQueueCondition();
 
 
   // In order to save time, we want direct pointer
   // to queues in stead of strings that identify them.
   // The interpreter in thread.cc will use
-  // processing->conditionFunctions->Queue2Condition(queue)
-  // on each queue between firstQueue2 and lastQueue2 according
+  // processing->conditionFunctions->QueueCondition(queue)
+  // on each queue between firstQueue and lastQueue according
   // to processing->queueOrder.
-  std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *firstQueue2;
-  std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *lastQueue2;
+  std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *firstQueue;
+  std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *lastQueue;
 
-  friend std::ostream& operator<<(std::ostream& out, ServiceQueue2Condition& event);
+  friend std::ostream& operator<<(std::ostream& out, ServiceQueueCondition& event);
 };
 
 class ThreadCondition : public Condition {
@@ -293,12 +295,12 @@ class LoopCondition : public Condition {
   // number of iterations.
 
   uint32_t maxIterations;
-  bool perQueue2; // maxIterations in total, or per queue?
-  bool serviceQueue2s;
-  bool stateQueue2s;
+  bool perQueue; // maxIterations in total, or per queue?
+  bool serviceQueues;
+  bool stateQueues;
   std::vector<Ptr<Queue2> > queuesServed;
-  std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2sServed;
-  std::vector<Ptr<StateVariableQueue2> > stateQueue2sServed;
+  std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueuesServed;
+  std::vector<Ptr<StateVariableQueue> > stateQueuesServed;
 
 
   // When the conditional for continuing iteration in a loop
@@ -313,7 +315,7 @@ class LoopCondition : public Condition {
   // program is added when (1) there is no de-queue statement in the
   // signature and (2) the signature is not empty. In thread.cc, when
   // the queues are empty, this program is executed _once_ if not NULL.
-  Program *emptyQueue2s;
+  Program *emptyQueues;
 
   // The potentially additional condition function
   bool hasAdditionalCondition;
@@ -375,18 +377,23 @@ public:
   friend std::ostream& operator<<(std::ostream& out, SynchronizationExecutionEvent& event);
 };
 
-class Queue2ExecutionEvent : public ExecutionEvent {
+class QueueExecutionEvent : public ExecutionEvent {
 public:
-	Queue2ExecutionEvent();
-	virtual ~Queue2ExecutionEvent();
+	QueueExecutionEvent();
+	virtual ~QueueExecutionEvent();
 
 	bool enqueue;
-	bool serviceQueue2;
-	bool stateQueue2;
+	bool isServiceQueue;
+	bool isStateQueue;
+	bool isPacketQueue;
+	bool isCepEventQueue;
+	bool isCepQueryQueue;
 	bool local;
 	std::string threadToWake;
 	Ptr<Queue2> queue;
-	std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *servQueue2;
+	std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *servQueue;
+	std::queue<Ptr<CepEvent> > *cepEventQueue;
+	std::queue<Ptr<CepOperator> > *cepQueryQueue;
 	std::string queueName;
 
 	// If we have an enqeueue with a service, we must
@@ -395,7 +402,21 @@ public:
 
 	// If we have a state queue
 	uint32_t valueToEnqueue;
-	  friend std::ostream& operator<<(std::ostream& out, Queue2ExecutionEvent& event);
+	  friend std::ostream& operator<<(std::ostream& out, QueueExecutionEvent& event);
+};
+
+class CopyQueueExecutionEvent : public ExecutionEvent {
+public:
+    CopyQueueExecutionEvent();
+
+    bool isServiceQueue;
+    bool isStateQueue;
+    bool isPacketQueue;
+    bool isCepEventQueue;
+    bool isCepQueryQueue;
+
+    std::string fromQueue;
+    std::string toQueue;
 };
 
 class SEM;

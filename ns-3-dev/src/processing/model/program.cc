@@ -96,19 +96,19 @@ TempCompletion::TempCompletion()
 TempCompletion::~TempCompletion() = default;
 
 
-Queue2Condition::Queue2Condition()
+QueueCondition::QueueCondition()
 {
   Condition::condType = QUEUECONDITION;
 }
-Queue2Condition::~Queue2Condition() = default;
+QueueCondition::~QueueCondition() = default;
 
 
-ServiceQueue2Condition::ServiceQueue2Condition()
+ServiceQueueCondition::ServiceQueueCondition()
 {
   Condition::condType = SERVICEQUEUECONDITION;
 }
 
-ServiceQueue2Condition::~ServiceQueue2Condition() = default;
+ServiceQueueCondition::~ServiceQueueCondition() = default;
 
 ThreadCondition::ThreadCondition()
 {
@@ -133,29 +133,48 @@ StateCondition::StateCondition()
 StateCondition::~StateCondition() = default;
 
 
-Queue2ExecutionEvent::Queue2ExecutionEvent()
+QueueExecutionEvent::QueueExecutionEvent()
 {
 	ExecutionEvent::type = QUEUE;
 	semToEnqueue = nullptr;
 	valueToEnqueue = 0;
-	serviceQueue2 = false;
-	stateQueue2 = false;
+	isServiceQueue = false;
+	isStateQueue = false;
+	isPacketQueue = false;
+	isCepEventQueue = false;
+	isCepQueryQueue = false;
 	local = false;
-	servQueue2 = nullptr;
+	servQueue = nullptr;
 	queue = nullptr;
 	queueName = "";
+    cepEventQueue = nullptr;
+    cepQueryQueue = nullptr;
 }
-Queue2ExecutionEvent::~Queue2ExecutionEvent() = default;
+QueueExecutionEvent::~QueueExecutionEvent() = default;
+
+
+CopyQueueExecutionEvent::CopyQueueExecutionEvent()
+{
+	ExecutionEvent::type = COPYQUEUE;
+	isServiceQueue = false;
+	isStateQueue = false;
+	isPacketQueue = false;
+    isCepEventQueue = false;
+    isCepQueryQueue = false;
+
+	fromQueue = "";
+	toQueue = "";
+}
 
 
 LoopCondition::LoopCondition()
 {
   Condition::condType = LOOPCONDITION;
-  emptyQueue2s = nullptr;
+  emptyQueues = nullptr;
   hasAdditionalCondition = false;
-  perQueue2 = false;
-  serviceQueue2s = false;
-  stateQueue2s = false;
+  perQueue = false;
+  serviceQueues = false;
+  stateQueues = false;
 }
 LoopCondition::~LoopCondition() = default;
 
@@ -237,10 +256,10 @@ Condition::getClosestEntry(Ptr<Thread> t)
 	else if(condType == PACKETCHARACTERISTIC)
 		value = getConditionState(t);
 	else if(condType == QUEUECONDITION)
-		value = getConditionQueue2s(((Queue2Condition *)this)->firstQueue2, ((Queue2Condition *)this)->lastQueue2);
+		value = getConditionQueues(((QueueCondition *)this)->firstQueue, ((QueueCondition *)this)->lastQueue);
 	else if(condType == SERVICEQUEUECONDITION) {
-		value = getServiceConditionQueue2s(((ServiceQueue2Condition *)this)->firstQueue2,
-				                           ((ServiceQueue2Condition *)this)->lastQueue2);
+		value = getServiceConditionQueues(((ServiceQueueCondition *)this)->firstQueue,
+				                           ((ServiceQueueCondition *)this)->lastQueue);
 	} else if(condType == THREADCONDITION)
 		value = getConditionThread(((ThreadCondition *)this)->threadId);
 
@@ -347,11 +366,11 @@ SynchronizationExecutionEvent::SynchronizationExecutionEvent()
 }
 SynchronizationExecutionEvent::~SynchronizationExecutionEvent() = default;
 
-StateQueue2Condition::StateQueue2Condition() {
+StateQueueCondition::StateQueueCondition() {
 	Condition::condType = STATEQUEUECONDITION;
 	queueName = "";
 }
-StateQueue2Condition::~StateQueue2Condition() = default;
+StateQueueCondition::~StateQueueCondition() = default;
 
 
 /************************************************************** */
@@ -463,9 +482,9 @@ std::ostream& operator<<(std::ostream& out, Condition& event)
 
 std::ostream& operator<<(std::ostream& out, LoopCondition& event){
 	out << *((Condition *) &event) << ": ";
-	unsigned long queueSize = event.serviceQueue2s ? event.serviceQueue2sServed.size() : event.queuesServed.size();
-	out << "MI: " << event.maxIterations << ", PQ: " << event.perQueue2 << ", SQ: " << event.serviceQueue2s << ", QS: " << queueSize <<
-			", EQ: " << event.emptyQueue2s << ", AC: " << event.hasAdditionalCondition;
+	unsigned long queueSize = event.serviceQueues ? event.serviceQueuesServed.size() : event.queuesServed.size();
+	out << "MI: " << event.maxIterations << ", PQ: " << event.perQueue << ", SQ: " << event.serviceQueues << ", QS: " << queueSize <<
+			", EQ: " << event.emptyQueues << ", AC: " << event.hasAdditionalCondition;
 
 	return out;
 }
@@ -546,11 +565,11 @@ std::ostream& operator<<(std::ostream& out, SynchronizationExecutionEvent& event
 	return out;
 }
 
- std::ostream& operator<<(std::ostream& out, Queue2ExecutionEvent& event) {
+ std::ostream& operator<<(std::ostream& out, QueueExecutionEvent& event) {
 	 out << *((ExecutionEvent *) &event) << ": ";
-	 out << (event.enqueue ? "ENQUEUE " : "DEQUEUE ") << (event.serviceQueue2 ? "SERVICE(" : "PACKET(") <<
-			 (event.serviceQueue2 ? (event.semToEnqueue == nullptr ? "0" : event.semToEnqueue->name) : "") << ") from/to " <<
-					 (event.serviceQueue2 ? (void *) event.servQueue2 : (void *) PeekPointer(event.queue));
+	 out << (event.enqueue ? "ENQUEUE " : "DEQUEUE ") << (event.servQueue == nullptr ? "SERVICE(" : "PACKET(") <<
+			 (event.servQueue == nullptr ? (event.semToEnqueue == nullptr ? "0" : event.semToEnqueue->name) : "") << ") from/to " <<
+					 (event.servQueue == nullptr ? (void *) event.servQueue : (void *) PeekPointer(event.queue));
 
 	 return out;
  }

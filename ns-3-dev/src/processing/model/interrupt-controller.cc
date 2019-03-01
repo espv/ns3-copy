@@ -52,7 +52,7 @@ int getInterruptNumber(std::string str) {
 void
 InterruptController::IssueInterruptWithService(const Ptr<SEM> &intSem, struct tempVar tempsynch, const Ptr<Packet> &current,
 		std::map<std::string, Ptr<StateVariable> > localStateVariables,
-		std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s)
+		std::map<std::string, Ptr<StateVariableQueue> > localStateVariablesQueues)
 {
     NS_ASSERT(0);
     static int cpu = 0;
@@ -60,7 +60,7 @@ InterruptController::IssueInterruptWithService(const Ptr<SEM> &intSem, struct te
     p->tempvar = std::move(tempsynch);
     p->curPkt = current;
     p->localStateVariables = std::move(localStateVariables);
-    p->localStateVariableQueue2s = std::move(localStateVariablesQueue2s);
+    p->localStateVariableQueues = std::move(localStateVariablesQueues);
 
     IssueInterruptWithServiceOnCPU(cpu, intSem, p);
     // cpu = (cpu + 1) % 2;
@@ -93,7 +93,7 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
     ir.toCall = nullptr;
     ir.tempsynch = programLoc->tempvar;
     ir.localStateVariables = programLoc->localStateVariables;
-    ir.localStateVariablesQueue2s = programLoc->localStateVariableQueue2s;
+    ir.localStateVariablesQueues = programLoc->localStateVariableQueues;
 
     /* If no interrupt is currently handled,
      * we issue an interrupt to the CPU.

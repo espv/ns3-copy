@@ -90,7 +90,7 @@ class CPU : public PEU
   static TypeId GetTypeId (void);
   Ptr<Thread> interruptThread;
   std::string hirqHandler;
-  std::string hirqQueue2;
+  std::string hirqQueue;
 
   bool IsCPU() { return true; }
 

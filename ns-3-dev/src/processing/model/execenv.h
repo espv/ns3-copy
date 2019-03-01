@@ -76,13 +76,17 @@ namespace ns3 {
         std::vector<Ptr<Queue2> > queueOrder;
 
         // Service queues hold the current packet to set, as well as the service to call.
-        std::map<std::string, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2s;
-        std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> serviceQueue2Names;
-        std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2Order;
+        std::map<std::string, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueues;
+        std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> serviceQueueNames;
+        std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueueOrder;
 
         std::map<std::string, std::queue<Ptr<CepOperator> > *> cepQueryQueues;
         std::map<std::queue<Ptr<CepOperator> > *, std::string> cepQueryQueueNames;
         std::vector<std::queue<Ptr<CepOperator> > *> cepQueryQueueOrder;
+
+        std::map<std::string, std::queue<Ptr<CepEvent> > *> cepEventQueues;
+        std::map<std::queue<Ptr<CepEvent> > *, std::string> cepEventQueueNames;
+        std::vector<std::queue<Ptr<CepEvent> > *> cepEventQueueOrder;
 
         /* State queues only hold a set of values.
          *
@@ -96,9 +100,9 @@ namespace ns3 {
          * scope, i.e., via ExecEnv (see above). Due to time constraints, we still keep track
          * of state queue order only via strings.
          */
-        std::vector<std::string> stateQueue2Order;
-        std::map<std::string, Ptr<StateVariableQueue2> > stateQueue2s;
-        std::map<Ptr<StateVariableQueue2>, std::string> stateQueue2Names;
+        std::vector<std::string> stateQueueOrder;
+        std::map<std::string, Ptr<StateVariableQueue> > stateQueues;
+        std::map<Ptr<StateVariableQueue>, std::string> stateQueueNames;
 
         /* Contains all services: m_serviceMap according to
            real world function names, and serviceTriggermap
@@ -131,7 +135,7 @@ namespace ns3 {
         Ptr<HWModel> hwModel;
 
         // To handle different sections of the device file
-        void HandleQueue2(std::vector<std::string> tokens);
+        void HandleQueue(std::vector<std::string> tokens);
         void HandleSynch(std::vector<std::string> tokens);
         void HandleThreads(std::vector<std::string> tokens);
         void HandleHardware(std::vector<std::string> tokens);
@@ -146,7 +150,7 @@ namespace ns3 {
         void PrintProgram(Program *curPgm);
         void PrintSEM(Program *curPgm, int numIndent);
         bool queuesIn(std::string first, std::string last, LoopCondition *lc);
-        void fillQueue2s(std::string first, std::string last, LoopCondition *lc);
+        void fillQueues(std::string first, std::string last, LoopCondition *lc);
         // To parse device files
         void Parse(std::string device);
 

@@ -32,7 +32,7 @@ class InterruptRequest {
   Ptr<Packet> current;
   struct tempVar tempsynch;
   std::map<std::string, Ptr<StateVariable> > localStateVariables;
-  std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s;
+  std::map<std::string, Ptr<StateVariableQueue> > localStateVariablesQueues;
 
   // For interrupts without processing
   EventImpl *toCall;
@@ -50,7 +50,7 @@ public:
   virtual void IssueInterruptNoProcessing(int interruptNumber, EventImpl *callback);
   virtual void IssueInterruptWithService(const Ptr<SEM> &intSem, struct tempVar tempsynch, const Ptr<Packet> &current,
                                          std::map<std::string, Ptr<StateVariable> > localStateVariables,
-                                         std::map<std::string, Ptr<StateVariableQueue2> > localStateVariablesQueue2s);
+                                         std::map<std::string, Ptr<StateVariableQueue> > localStateVariablesQueues);
 
   virtual void IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Ptr<ProgramLocation> programLoc);
 

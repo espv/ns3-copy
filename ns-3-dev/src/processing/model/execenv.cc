@@ -60,7 +60,7 @@ ExecEnv::ExecEnv() :
         dummyProgramLoc->tempvar = tempVar();
         dummyProgramLoc->curPkt = packet;
         dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
-        dummyProgramLoc->localStateVariableQueue2s = std::map<std::string, Ptr<StateVariableQueue2> >();
+        dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
 
         static int cpu = 0;
         Simulator::Schedule(time,
@@ -126,7 +126,7 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
 					tempVar(),
 					Ptr<Packet>(),
 					std::map<std::string, Ptr<StateVariable> >(),
-					std::map<std::string, Ptr<StateVariableQueue2> >());
+					std::map<std::string, Ptr<StateVariableQueue> >());
 			return;
 		} else
 			packet->m_executionInfo.timestamps.push_back(Simulator::Now());
@@ -180,7 +180,7 @@ void ExecEnv::Initialize(std::string device) {
 	Parse(std::move(device));
 }
 
-void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
+void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 	// Go throught types (currently only support FIFO)
 	if (tokens[1] == "FIFO") {
 
@@ -190,26 +190,28 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 		 */
 		if (tokens[3] == "services") {
 			// Add empty vector (just to set the key)
-			this->serviceQueue2s[tokens[0]] = new std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > >();
+			this->serviceQueues[tokens[0]] = new std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > >();
 
 			/* Add the queue to the end of queueOrder. This is used
 			 * by conditions ("and" loops; they are really conditions
 			 * as well).
 			 */
-			serviceQueue2Order.push_back(serviceQueue2s[tokens[0]]);
+			serviceQueueOrder.push_back(serviceQueues[tokens[0]]);
 
 			// Add the queue to the reverse mapping
-			serviceQueue2Names[serviceQueue2s[tokens[0]]] = tokens[0];
+			serviceQueueNames[serviceQueues[tokens[0]]] = tokens[0];
 
 			return;
 		} else if (tokens[3] == "states") {
-			stateQueue2Order.push_back(tokens[0]);
+			stateQueueOrder.push_back(tokens[0]);
 			if (tokens[4] == "global") {
-				stateQueue2s[tokens[0]] = Create<StateVariableQueue2>();
-				stateQueue2Names[stateQueue2s[tokens[0]]] = tokens[0];
+				stateQueues[tokens[0]] = Create<StateVariableQueue>();
+				stateQueueNames[stateQueues[tokens[0]]] = tokens[0];
 			}
 		} else if (tokens[3] == "cepqueries") {
 			this->cepQueryQueues[tokens[0]] = new std::queue<Ptr<CepOperator> > ();
+		} else if (tokens[3] == "cepevents") {
+			this->cepEventQueues[tokens[0]] = new std::queue<Ptr<CepEvent> > ();
 		}
 
 		/* We have a packet queue.
@@ -277,7 +279,7 @@ void ExecEnv::HandleThreads(std::vector<std::string> tokens) {
 	m_serviceMap[tokens[1]]->peu->taskScheduler->Fork(tokens[0], program,
 			stringToUint32(tokens[3]), nullptr,
 			std::map<std::string, Ptr<StateVariable> >(),
-			std::map<std::string, Ptr<StateVariableQueue2> >(), infinite);
+			std::map<std::string, Ptr<StateVariableQueue> >(), infinite);
 }
 
 void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
@@ -327,7 +329,7 @@ void ExecEnv::HandleHardware(std::vector<std::string> tokens) {
             Ptr<CPU> cpu = newPEU->GetObject<CPU>();
             hwModel->AddCPU(cpu);
 			cpu->hirqHandler = tokens[5];
-			cpu->hirqQueue2 = tokens[6];
+			cpu->hirqQueue = tokens[6];
 
             newPEU->hwModel = hwModel;
 
@@ -392,33 +394,33 @@ void ExecEnv::HandleTriggers(std::vector<std::string> tokens) {
 }
 
 bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
-	if(lc->stateQueue2s) {
-		auto qIt = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), first);
-		auto qItLast = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), last);
+	if(lc->stateQueues) {
+		auto qIt = std::find(stateQueueOrder.begin(), stateQueueOrder.end(), first);
+		auto qItLast = std::find(stateQueueOrder.begin(), stateQueueOrder.end(), last);
 
 		// Iterate through all queues in between according to the queue order
 		while (true) {
-			if (std::find(lc->stateQueue2sServed.begin(), lc->stateQueue2sServed.end(),
-					      stateQueue2s[*qIt]) != lc->stateQueue2sServed.end())
+			if (std::find(lc->stateQueuesServed.begin(), lc->stateQueuesServed.end(),
+					      stateQueues[*qIt]) != lc->stateQueuesServed.end())
 				return true;
-			if (qIt == qItLast || qIt == stateQueue2Order.end())
+			if (qIt == qItLast || qIt == stateQueueOrder.end())
 				break;
 			qIt++;
 		}
 	}
-	else if (!lc->serviceQueue2s) {
-		Ptr<Queue2> firstQueue2 = queues[first];
-		Ptr<Queue2> lastQueue2 = queues[last];
+	else if (!lc->serviceQueues) {
+		Ptr<Queue2> firstQueue = queues[first];
+		Ptr<Queue2> lastQueue = queues[last];
 
 		/* Iterate queues in the queue order, and
 		 * search for each queue between and includingget
-		 * firstQueue2 and lastQueue2 in lc->queues.
+		 * firstQueue and lastQueue in lc->queues.
 		 * Upon the first hit, set the
 		 * dequeueOrLoopEncountered boolean variable
 		 * to true.
 		 */
-		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue2);
-		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue2);
+		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue);
+		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue);
 
 		// Iterate through all queues in between according to the queue order
 		while (true) {
@@ -429,16 +431,16 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 			qIt++;
 		}
 	} else {
-		auto firstQueue2 = serviceQueue2s[first];
-		auto lastQueue2 = serviceQueue2s[last];
+		auto firstQueue = serviceQueues[first];
+		auto lastQueue = serviceQueues[last];
 
-		auto qIt = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), firstQueue2);
-		auto qItLast = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), lastQueue2);
+		auto qIt = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), firstQueue);
+		auto qItLast = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), lastQueue);
 
 		for (; qIt != qItLast; qIt++)
-			if (std::find(lc->serviceQueue2sServed.begin(),
-					lc->serviceQueue2sServed.end(), *qIt)
-					!= lc->serviceQueue2sServed.end())
+			if (std::find(lc->serviceQueuesServed.begin(),
+					lc->serviceQueuesServed.end(), *qIt)
+					!= lc->serviceQueuesServed.end())
 				return true;
 
 	}
@@ -446,18 +448,18 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 	return false;
 }
 
-void ExecEnv::fillQueue2s(std::string first, std::string last, LoopCondition *lc) {
+void ExecEnv::fillQueues(std::string first, std::string last, LoopCondition *lc) {
 	// Assume first and last queues are of the same type
-	if (!lc->serviceQueue2s && !lc->stateQueue2s) {
-		auto firstQueue2 = queues[first];
-		auto lastQueue2 = queues[last];
+	if (!lc->serviceQueues && !lc->stateQueues) {
+		auto firstQueue = queues[first];
+		auto lastQueue = queues[last];
 
 		/* Iterate queues in the queue order, and
 		 * insert each queue between and including
-		 * firstQueue2 and lastQueue2 in lc->queues.
+		 * firstQueue and lastQueue in lc->queues.
 		 */
-		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue2);
-		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue2);
+		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue);
+		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue);
 
 		// Push all _except_ the last one
 		for (; qIt != qItLast; qIt++)
@@ -466,39 +468,39 @@ void ExecEnv::fillQueue2s(std::string first, std::string last, LoopCondition *lc
 		// Push the last one if we actually had any
 		if (qIt != queueOrder.end())
 			lc->queuesServed.push_back(*qIt);
-	} else if (lc->stateQueue2s) {
+	} else if (lc->stateQueues) {
 		/* Iterate queues in the queue order, and
 		 * insert each queue between and including
-		 * firstQueue2 and lastQueue2 in lc->queues.
+		 * firstQueue and lastQueue in lc->queues.
 		 */
-		auto qIt = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), first);
-		auto qItLast = std::find(stateQueue2Order.begin(), stateQueue2Order.end(), last);
+		auto qIt = std::find(stateQueueOrder.begin(), stateQueueOrder.end(), first);
+		auto qItLast = std::find(stateQueueOrder.begin(), stateQueueOrder.end(), last);
 
 		// Push all _except_ the last one
 		for (; qIt != qItLast; qIt++)
-			lc->stateQueue2sServed.push_back(stateQueue2s[*qIt]);
+			lc->stateQueuesServed.push_back(stateQueues[*qIt]);
 
 		// Push the last one if we actually had any
-		if (qIt != stateQueue2Order.end())
-			lc->stateQueue2sServed.push_back(stateQueue2s[*qIt]);
+		if (qIt != stateQueueOrder.end())
+			lc->stateQueuesServed.push_back(stateQueues[*qIt]);
 	} else {
-		auto firstQueue2 = serviceQueue2s[first];
-		auto lastQueue2 = serviceQueue2s[last];
+		auto firstQueue = serviceQueues[first];
+		auto lastQueue = serviceQueues[last];
 
 		/* Iterate queues in the queue order, and
 		 * insert each queue between and including
-		 * firstQueue2 and lastQueue2 in lc->queues.
+		 * firstQueue and lastQueue in lc->queues.
 		 */
-		auto qIt = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), firstQueue2);
-		auto qItLast = std::find(serviceQueue2Order.begin(), serviceQueue2Order.end(), lastQueue2);
+		auto qIt = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), firstQueue);
+		auto qItLast = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), lastQueue);
 
 		// Push all _except_ the last one
 		for (; qIt != qItLast; qIt++)
-			lc->serviceQueue2sServed.push_back(*qIt);
+			lc->serviceQueuesServed.push_back(*qIt);
 
 		// Push the last one if we actually had any
-		if (qIt != serviceQueue2Order.end())
-			lc->serviceQueue2sServed.push_back(*qIt);
+		if (qIt != serviceQueueOrder.end())
+			lc->serviceQueuesServed.push_back(*qIt);
 	}
 }
 
@@ -729,7 +731,7 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			break;
 		}
 		case QUEUE: {
-			std::cout << *((Queue2ExecutionEvent *) curEvt) << std::endl;
+			std::cout << *((QueueExecutionEvent *) curEvt) << std::endl;
 			break;
 		}
 		case CONDITION: {
@@ -901,11 +903,11 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 			// Fill queues only if the loop is based on that
 			if (tokens[3] != "noloc") {
-				currentlyHandled->lc->serviceQueue2s = !(serviceQueue2s.find(tokens[3]) == serviceQueue2s.end());
-				currentlyHandled->lc->stateQueue2s = !(std::find(stateQueue2Order.begin(),
-				                                       stateQueue2Order.end(),
-						                               tokens[3]) == stateQueue2Order.end());
-				fillQueue2s(tokens[3], tokens[4], currentlyHandled->lc);
+				currentlyHandled->lc->serviceQueues = !(serviceQueues.find(tokens[3]) == serviceQueues.end());
+				currentlyHandled->lc->stateQueues = !(std::find(stateQueueOrder.begin(),
+				                                       stateQueueOrder.end(),
+						                               tokens[3]) == stateQueueOrder.end());
+				fillQueues(tokens[3], tokens[4], currentlyHandled->lc);
 			}
 
 			// Check if we have specified an additional condition for this queue
@@ -933,17 +935,17 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// Get the program pointer of the current SEM
 		Program **existingProgram;
 		if (currentlyHandled->lc != nullptr) {
-			uint64_t numQueue2s = currentlyHandled->lc->serviceQueue2s ?
-							      currentlyHandled->lc->serviceQueue2sServed.size() :
-							      (currentlyHandled->lc->stateQueue2s ?
-									currentlyHandled->lc->stateQueue2sServed.size() :
+			uint64_t numQueues = currentlyHandled->lc->serviceQueues ?
+							      currentlyHandled->lc->serviceQueuesServed.size() :
+							      (currentlyHandled->lc->stateQueues ?
+									currentlyHandled->lc->stateQueuesServed.size() :
 									currentlyHandled->lc->queuesServed.size());
 
-			if (numQueue2s > 0) {
+			if (numQueues > 0) {
 				if (dequeueOrLoopEncountered)
 					existingProgram = &(currentlyHandled->rootProgram);
 				else
-					existingProgram = &(currentlyHandled->lc->emptyQueue2s);
+					existingProgram = &(currentlyHandled->lc->emptyQueues);
 			} else
 				existingProgram = &(currentlyHandled->rootProgram);
 		} else
@@ -1073,12 +1075,12 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 	 */
 	if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
 		// Create an event, and insert the queue
-		auto q = new Queue2ExecutionEvent();
+		auto q = new QueueExecutionEvent();
 		execEvent = q;
 		q->enqueue = tokens[1] == "ENQUEUE";
 		// If we have a service queue, set the SEM
 		if (tokens[2] == "SRVQUEUE") {
-			q->serviceQueue2 = true;
+			q->isServiceQueue = true;
 			if (tokens[1] == "ENQUEUE") {
 				if (tokens.size() <= 2)
 					q->semToEnqueue = nullptr;
@@ -1093,7 +1095,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				}
 			}
 		} else if (tokens[2] == "STATEQUEUE") {
-			q->stateQueue2 = true;
+			q->isStateQueue = true;
 			if (tokens[1] == "ENQUEUE") {
 				q->valueToEnqueue = stringToUint32(tokens[3]);
 			}
@@ -1111,12 +1113,12 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 		// We specify the queue
 		if (tokens[4] != "0") {
-			if (q->stateQueue2)
+			if (q->isStateQueue)
 				q->queueName = tokens[4]; // Only local scope supported for now
-			else if (!q->serviceQueue2) {
+			else if (!q->isServiceQueue) {
 				q->queue = queues[tokens[4]];
 			} else // When specifying queue in a SRVQUEUE event
-				q->servQueue2 = serviceQueue2s[tokens[4]];
+				q->servQueue = serviceQueues[tokens[4]];
 		}
 
 		/* If we have a checkpoint specified for the queue,
@@ -1140,7 +1142,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		currentProgram->events.push_back(q);
 
 
-        if (q->serviceQueue2 && tokens[1] == "ENQUEUE" && tokens.size() > 5) {
+        if (q->isServiceQueue && tokens[1] == "ENQUEUE" && tokens.size() > 5) {
 		    std::vector<uint32_t> arguments;
 		    std::string threadName = tokens[5];
 
@@ -1149,6 +1151,26 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
             currentProgram->events.push_back(se);
 		}
 	}
+
+    if (tokens[1] == "COPYQUEUE") {
+        // Create an event, and insert the queue
+        auto cq = new CopyQueueExecutionEvent();
+        execEvent = cq;
+
+        if (tokens[2] == "CEPQUERYQUEUE") {
+            cq->isCepQueryQueue = true;
+        } else if (tokens[2] == "SRVQUEUE") {
+            cq->isServiceQueue = true;
+        } else if (tokens[2] == "STATEQUEUE") {
+            cq->isStateQueue = true;
+        } else if (tokens[2] == "PKTQUEUE") {
+            cq->isPacketQueue = true;
+        } else if (tokens[2] == "CEPEVENTQUEUE") {
+            cq->isCepEventQueue = true;
+        } else {
+			NS_ASSERT_MSG(0, "COPYQUEUE event on line " << cq->lineNr << " in the device file has unknown queue type");
+		}
+    }
 
 	// Handle conditions
 	if (tokens[1] == "QUEUECOND" || tokens[1] == "THREADCOND" || tokens[1] == "STATECOND" ||
@@ -1164,22 +1186,22 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		if (tokens[1] == "QUEUECOND") {
 			// Assume that the first and last queues are of the same type: packet or service queue
 			if (queues.find(tokens[2]) != queues.end()) {
-				auto q = new Queue2Condition();
+				auto q = new QueueCondition();
 				q->lineNr = lineNr;
-				q->firstQueue2 = queues[tokens[2]];
-				q->lastQueue2 = queues[tokens[3]];
+				q->firstQueue = queues[tokens[2]];
+				q->lastQueue = queues[tokens[3]];
 				c = (Condition *) q;
 				c->scope = CONDITIONGLOBAL;
 				c->insertEntry(tokens[4] == "empty" ? QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
-				c->getConditionQueue2s = ns3::MakeCallback(&ConditionFunctions::Queue2Condition, conditionFunctions);
+				c->getConditionQueues = ns3::MakeCallback(&ConditionFunctions::QueueCondition, conditionFunctions);
 			} else {
-				auto q = new ServiceQueue2Condition();
-				q->firstQueue2 = serviceQueue2s[tokens[2]];
-				q->lastQueue2 = serviceQueue2s[tokens[3]];
+				auto q = new ServiceQueueCondition();
+				q->firstQueue = serviceQueues[tokens[2]];
+				q->lastQueue = serviceQueues[tokens[3]];
 				q->lineNr = lineNr;
 				c = (Condition *) q;
 				c->insertEntry(tokens[4] == "empty" ? QUEUEEMPTY : QUEUENOTEMPTY, newProgram);
-				c->getServiceConditionQueue2s = ns3::MakeCallback(&ConditionFunctions::ServiceQueue2Condition, conditionFunctions);
+				c->getServiceConditionQueues = ns3::MakeCallback(&ConditionFunctions::ServiceQueueCondition, conditionFunctions);
 			}
 
 			// Assume local: insert c into current program
@@ -1277,28 +1299,28 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 					// Elsewise, assume that all queues in the loop use the same extractor.
 				} else {
 					// Differentiate between service and packet queues
-					if (currentlyHandled->lc->serviceQueue2s) {
-						auto firstQueue2 = currentlyHandled->lc->serviceQueue2sServed[0];
+					if (currentlyHandled->lc->serviceQueues) {
+						auto firstQueue = currentlyHandled->lc->serviceQueuesServed[0];
 
 						// First, find the queue name
-						auto name = serviceQueue2Names.find(firstQueue2);
-						if (name != serviceQueue2Names.end()) {
+						auto name = serviceQueueNames.find(firstQueue);
+						if (name != serviceQueueNames.end()) {
 							queueName = (*name).second;
 						}
-					} else if (currentlyHandled->lc->stateQueue2s) {
+					} else if (currentlyHandled->lc->stateQueues) {
 						// First, find the queue name
-						auto firstQueue2 = currentlyHandled->lc->stateQueue2sServed[0];
+						auto firstQueue = currentlyHandled->lc->stateQueuesServed[0];
 
 						// First, find the queue name
-						auto name = stateQueue2Names.find(firstQueue2);
-						if (name != stateQueue2Names.end()) {
+						auto name = stateQueueNames.find(firstQueue);
+						if (name != stateQueueNames.end()) {
 							queueName = (*name).second;
 						}
 					} else {
-						auto firstQueue2 = currentlyHandled->lc->queuesServed[0];
+						auto firstQueue = currentlyHandled->lc->queuesServed[0];
 
 						// First, find the queue name
-						auto name = queueNames.find(firstQueue2);
+						auto name = queueNames.find(firstQueue);
 						if (name != queueNames.end()) {
 							queueName = (*name).second;
 						}
@@ -1344,7 +1366,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				newProgram = new Program();
 				newProgram->sem = currentlyHandled;
 
-				auto sc = new StateQueue2Condition();
+				auto sc = new StateQueueCondition();
 				sc->lineNr = lineNr;
 				sc->queueName = queueName;
 				c = sc;
@@ -1399,7 +1421,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			 * though, as this is part of what defined the loop.
 			 */
 			e->lc->maxIterations = stringToUint32(tokens[6]);
-			e->lc->perQueue2 = tokens[3] == "1";
+			e->lc->perQueue = tokens[3] == "1";
 
 			/* If we have a nested loop then
 			 * if we have a loop that servers one or more of the
@@ -1570,7 +1592,7 @@ std::vector<std::string> split(const char *str, char c = ' ')
  * - SEMs
  * - LEUs
  * - PEUs
- * - Queue2s
+ * - Queues
  * - Snchronization primitives
  */
 void ExecEnv::Parse(std::string device) {
@@ -1604,7 +1626,7 @@ void ExecEnv::Parse(std::string device) {
 
 			// Parse the device header
 			if (mode == "QUEUES") {
-				HandleQueue2(tokens);
+				HandleQueue(tokens);
 			} else if (mode == "SYNCH") {
 				if (hwModel->cpus[0]->taskScheduler == nullptr) {
 					NS_FATAL_ERROR(

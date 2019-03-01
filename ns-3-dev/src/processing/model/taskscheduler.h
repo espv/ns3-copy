@@ -52,7 +52,7 @@ public:
 			int,
 			Ptr<Packet>,
 			std::map<std::string, Ptr<StateVariable> >,
-			std::map<std::string, Ptr<StateVariableQueue2> >,
+			std::map<std::string, Ptr<StateVariableQueue> >,
 			bool);
   virtual void Terminate(Ptr<PEU> peu, unsigned int pid); // Terminates the current running
   void PreEmpt(int cpu, int new_pid);
@@ -128,7 +128,7 @@ class ParallelThreadsScheduler : public TaskScheduler
 			int,
 			Ptr<Packet>,
 			std::map<std::string, Ptr<StateVariable> >,
-			std::map<std::string, Ptr<StateVariableQueue2> >,
+			std::map<std::string, Ptr<StateVariableQueue> >,
 			bool);
 
  private:

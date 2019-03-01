@@ -154,9 +154,9 @@ TaskScheduler::SetupIdleThreads()
   toe->program = idleProgram;
   toe->currentEvent = -1; // Will be incremented by Dispatch()
   toe->lc = new LoopCondition();
-  toe->lc->emptyQueue2s = idleProgram;
+  toe->lc->emptyQueues = idleProgram;
   toe->lc->maxIterations = 0;
-  toe->lc->perQueue2 = false;
+  toe->lc->perQueue = false;
 
     std::vector<int> idleThreadPids = DoCurrentRunning();
     for (unsigned int i = 0; i < this->peu->hwModel->cpus.size(); i++) {
@@ -258,7 +258,7 @@ TaskScheduler::Fork(
 		int priority,
 		Ptr<Packet> currentPacket,
 		std::map<std::string, Ptr<StateVariable> > localVars,
-		std::map<std::string, Ptr<StateVariableQueue2> > localStateQueue2s,
+		std::map<std::string, Ptr<StateVariableQueue> > localStateQueues,
 		bool infinite) {
   Ptr<Thread> t = CreateObject<Thread> ();
   t->peu = peu;
@@ -270,7 +270,7 @@ TaskScheduler::Fork(
   pl->program = program;
   pl->currentEvent = -1;
   pl->curPkt = currentPacket;
-  pl->localStateVariableQueue2s = std::move(localStateQueue2s);
+  pl->localStateVariableQueues = std::move(localStateQueues);
   pl->localStateVariables = std::move(localVars);
 
 
@@ -439,7 +439,7 @@ ParallelThreadsScheduler::Fork(
 		int priority,
 		Ptr<Packet> currentPacket,
 		std::map<std::string, Ptr<StateVariable> > localVars,
-		std::map<std::string, Ptr<StateVariableQueue2> > localStateQueue2s,
+		std::map<std::string, Ptr<StateVariableQueue> > localStateQueues,
 		bool infinite)
 {
   // If no more threads are free, return
@@ -460,7 +460,7 @@ ParallelThreadsScheduler::Fork(
   pl->curPkt = currentPacket;
   t->m_programStack.push(pl);
   pl->localStateVariables = localVars;
-  pl->localStateVariableQueue2s = localStateQueue2s;
+  pl->localStateVariableQueues = localStateQueues;
 
   // Dispatch thread
   t->Dispatch();

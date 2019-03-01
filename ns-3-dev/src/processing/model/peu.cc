@@ -191,18 +191,18 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		newProgramLocation->tempvar = ir.tempsynch;
 		newProgramLocation->curPkt = ir.current;
 		newProgramLocation->localStateVariables = ir.localStateVariables;
-		newProgramLocation->localStateVariableQueue2s = ir.localStateVariablesQueue2s;
+		newProgramLocation->localStateVariableQueues = ir.localStateVariablesQueues;
 
 		Ptr<ExecEnv> ee = this->hwModel->node->GetObject<ExecEnv>();
 
-        NS_ASSERT_MSG(ee->serviceQueue2s[this->hirqQueue2],
-                "Unable to find interrupt service queue named " << this->hirqQueue2);
+        NS_ASSERT_MSG(ee->serviceQueues[this->hirqQueue],
+                "Unable to find interrupt service queue named " << this->hirqQueue);
 
-		ee->serviceQueue2s[this->hirqQueue2]->push(
+		ee->serviceQueues[this->hirqQueue]->push(
 				std::pair<Ptr<SEM>, Ptr<ProgramLocation> >(ir.service,
 						newProgramLocation));
 
-        NS_ASSERT_MSG(ee->serviceQueue2s[this->hirqQueue2],
+        NS_ASSERT_MSG(ee->serviceQueues[this->hirqQueue],
                 "Unable to find interrupt handler named " << this->hirqHandler);
 
 		auto irqProgramLocation = Create<ProgramLocation>();
@@ -212,7 +212,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		irqProgramLocation->tempvar = ir.tempsynch;
 		irqProgramLocation->curPkt = ir.current;
 		irqProgramLocation->localStateVariables = ir.localStateVariables;
-		irqProgramLocation->localStateVariableQueue2s = ir.localStateVariablesQueue2s;
+		irqProgramLocation->localStateVariableQueues = ir.localStateVariablesQueues;
 
 		interruptThread->m_programStack.push(irqProgramLocation);
 

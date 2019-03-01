@@ -14,12 +14,12 @@
 
 namespace ns3 {
 
-class StateVariableQueue2 : public SimpleRefCount<StateVariableQueue2>{
+class StateVariableQueue : public SimpleRefCount<StateVariableQueue>{
 public:
-	StateVariableQueue2();
-	virtual ~StateVariableQueue2();
+	StateVariableQueue();
+	virtual ~StateVariableQueue();
 
-	std::queue<uint32_t> stateVariableQueue2;
+	std::queue<uint32_t> stateVariableQueue;
 	bool empty(void);
 };
 

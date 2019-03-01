@@ -248,6 +248,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             }
             cepOp->Configure(q, this);
             this->ops_queue.push_back(cepOp);
+            GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
         }
 
     }

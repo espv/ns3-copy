@@ -86,8 +86,8 @@ struct condition {
   void AckNICRx(Ptr<Thread> t, uint32_t value);
 
   // Conditions working on queues and threads
-  uint32_t Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last);
-  uint32_t ServiceQueue2Condition(std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *first, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last);
+  uint32_t QueueCondition(Ptr<Queue2> first, Ptr<Queue2> last);
+  uint32_t ServiceQueueCondition(std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *first, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last);
   uint32_t ThreadCondition(std::string threadId);
   
   // Used to model wl1251 NIC. Accessed from testprocmod, and thus is set to be global.

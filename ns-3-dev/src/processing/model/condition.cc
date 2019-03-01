@@ -18,7 +18,7 @@ uint32_t ConditionFunctions::PacketL4Protocol(Ptr<Thread> t) {
 }
 
 // Conditions working on queues and threads
-uint32_t ConditionFunctions::Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last)
+uint32_t ConditionFunctions::QueueCondition(Ptr<Queue2> first, Ptr<Queue2> last)
 {
 	if(first == last)
 		return first->IsEmpty() ? QUEUEEMPTY : QUEUENOTEMPTY;
@@ -36,19 +36,19 @@ uint32_t ConditionFunctions::Queue2Condition(Ptr<Queue2> first, Ptr<Queue2> last
 	return QUEUEEMPTY;
 }
 
-uint32_t ConditionFunctions::ServiceQueue2Condition(std::queue<std::pair<Ptr<SEM>,
+uint32_t ConditionFunctions::ServiceQueueCondition(std::queue<std::pair<Ptr<SEM>,
                                                     Ptr<ProgramLocation> > > *first,
                                                     std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last)
 {
 	if(first == last)
 		return first->empty() ? QUEUEEMPTY : QUEUENOTEMPTY;
 	else {
-		auto serviceQueue2Order = &node->GetObject<ExecEnv> ()->serviceQueue2Order;
-		auto firstFound = std::find(serviceQueue2Order->begin(), serviceQueue2Order->end(), first);
-		auto lastFound = std::find(serviceQueue2Order->begin(), serviceQueue2Order->end(), last);
+		auto serviceQueueOrder = &node->GetObject<ExecEnv> ()->serviceQueueOrder;
+		auto firstFound = std::find(serviceQueueOrder->begin(), serviceQueueOrder->end(), first);
+		auto lastFound = std::find(serviceQueueOrder->begin(), serviceQueueOrder->end(), last);
 
-		auto it = serviceQueue2Order->begin();
-		for(;firstFound != lastFound && it != serviceQueue2Order->end(); firstFound++)
+		auto it = serviceQueueOrder->begin();
+		for(;firstFound != lastFound && it != serviceQueueOrder->end(); firstFound++)
 		  if(!(*firstFound)->empty()) {
 				return QUEUENOTEMPTY;
 			}

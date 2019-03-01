@@ -6,6 +6,7 @@
 #include "ns3/timer.h"
 #include "ns3/traced-callback.h"
 #include "ns3/random-variable.h"
+#include "ns3/cep-engine.h"
 
 #include "program.h"
 
@@ -41,19 +42,21 @@ public:
 	Program *rootProgram;
 	int currentEvent;
 	Ptr<Packet> curPkt;
+	Ptr<CepOperator> curCepQuery;
+	Ptr<CepEvent> curCepEvent;
 	struct tempVar tempvar;
 
 	// To keep track of queues
 	LoopCondition *lc;
 	uint32_t curIteration;
-	int curServedQueue2;
+	int curServedQueue;
 
 	// To store local state variables
 	std::map<std::string, Ptr<StateVariable> > localStateVariables;
-	std::map<std::string, Ptr<StateVariableQueue2> > localStateVariableQueue2s;
+	std::map<std::string, Ptr<StateVariableQueue> > localStateVariableQueues;
 
 	// Methods
-	Ptr<StateVariableQueue2> getLocalStateVariableQueue2(std::string queueID);
+	Ptr<StateVariableQueue> getLocalStateVariableQueue(std::string queueID);
 	Ptr<StateVariable> getLocalStateVariable(std::string);
 
 	// For execution statistics
@@ -66,7 +69,7 @@ public:
 		currentEvent = 0;
 		curPkt = nullptr;
 		curIteration = 0;
-		curServedQueue2 = 0;
+		curServedQueue = 0;
 		wasBlocked = 0;
 	}
 };
@@ -103,7 +106,8 @@ public:
 	bool HandleEndEvent(ExecutionEvent* e);
 	bool HandleProcessingEvent(ExecutionEvent* e);
 	bool HandleExecuteEvent(ExecutionEvent* e);
-	bool HandleQueue2Event(ExecutionEvent* e);
+	bool HandleQueueEvent(ExecutionEvent* e);
+	bool HandleCopyQueueEvent(ExecutionEvent* e);
 	bool HandleSchedulerEvent(ExecutionEvent* e);
 	bool HandleSyncEvent(ExecutionEvent* e);
 	bool HandleCondition(ExecutionEvent* e);
