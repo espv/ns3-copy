@@ -209,7 +209,7 @@ void ExecEnv::HandleQueue2(std::vector<std::string> tokens) {
 				stateQueue2Names[stateQueue2s[tokens[0]]] = tokens[0];
 			}
 		} else if (tokens[3] == "cepqueries") {
-			//this->cepQueryQueues[tokens[0]] = new std::queue<Ptr<CepOperator> > ();
+			this->cepQueryQueues[tokens[0]] = new std::queue<Ptr<CepOperator> > ();
 		}
 
 		/* We have a packet queue.

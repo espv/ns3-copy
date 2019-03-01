@@ -80,9 +80,9 @@ namespace ns3 {
         std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> serviceQueue2Names;
         std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueue2Order;
 
-        //std::map<std::string, std::queue<Ptr<CepOperator> > *, std::string> cepQueryQueues;
-        //std::map<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::string> cepQueryQueueNames;
-        //std::vector<std::queue<Ptr<SEM>, Ptr<ProgramLocation> > *> cepQueryQueueOrder;
+        std::map<std::string, std::queue<Ptr<CepOperator> > *> cepQueryQueues;
+        std::map<std::queue<Ptr<CepOperator> > *, std::string> cepQueryQueueNames;
+        std::vector<std::queue<Ptr<CepOperator> > *> cepQueryQueueOrder;
 
         /* State queues only hold a set of values.
          *
