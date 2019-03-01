@@ -23,7 +23,7 @@
 #include "ns3/names.h"
 #include "ns3/log.h"
 #include "ns3/object.h"
-#include"dcep.h"
+#include "dcep.h"
 #include "ns3/ipv4.h"
 #include "ns3/string.h"
 #include "ns3/object.h"
@@ -37,7 +37,6 @@
 #include "ns3/ipv4-address.h"
 #include "dcep-state.h"
 #include "ns3/processing-module.h"
-#include "ns3/cep.h"
 
 namespace ns3 {
 

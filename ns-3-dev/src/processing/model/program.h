@@ -12,7 +12,6 @@
 #include "ns3/condition.h"
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
-#include "ns3/cep.h"
 
 #include <vector>
 #include <stack>
@@ -348,25 +347,6 @@ class ProcessingStage : public ExecutionEvent {
   bool perByte = false;
 
   friend std::ostream& operator<<(std::ostream& out, ProcessingStage& event);
-};
-
-class InsertEventIntoFSM : public ExecutionEvent {
-public:
-    //InsertEventIntoFSM(ProcessingStage *ps);
-    InsertEventIntoFSM();
-
-    ProcessingStage *ps;
-    CEPOp cepop;
-};
-
-class InsertEventIntoCEPOp : public ExecutionEvent {
-public:
-    //InsertEventIntoCEPOp(ProcessingStage *ps, InsertEventIntoFSM *ieifsm);
-    InsertEventIntoCEPOp();
-
-    ProcessingStage *ps;
-    Ptr<ProcessCEPEngine> pCEPEngine;
-    InsertEventIntoFSM *ieifsm;
 };
 
 class SchedulerExecutionEvent : public ExecutionEvent {

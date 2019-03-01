@@ -20,7 +20,7 @@
 #include "communication.h"
 #include "ns3/drop-tail-queue2.h"
 #include "ns3/type-id.h"
-#include "ns3/dcep.h"
+#include "dcep.h"
 #include "dcep-header.h"
 //#include "seq-ts-header.h"
 #include "ns3/inet-socket-address.h"

@@ -31,9 +31,8 @@
 #include "placement.h"
 #include "message-types.h"
 #include "ns3/abort.h"
-#include "ns3/placement.h"
-#include "ns3/dcep.h"
-#include "ns3/cep.h"
+#include "placement.h"
+#include "dcep.h"
 #include "ns3/processing-module.h"
 #include "ns3/event-impl.h"
 
@@ -251,8 +250,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             this->ops_queue.push_back(cepOp);
         }
 
-        std::cout << "Adding operator to CEPEngine" << std::endl;
-        GetObject<Dcep>()->node->GetObject<ProcessCEPEngine>()->AddOperator(q->op, {q->inevent1, q->inevent2});
     }
 
     void

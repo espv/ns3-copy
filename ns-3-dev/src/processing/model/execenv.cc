@@ -11,7 +11,6 @@
 #include "sem.h"
 #include "interrupt-controller.h"
 #include "condition.h"
-#include "cep.h"
 #include "ns3/rrscheduler.h"
 #include <ns3/drop-tail-queue2.h>
 #include "ns3/local-state-variable-queue.h"
@@ -1600,11 +1599,6 @@ void ExecEnv::Parse(std::string device) {
 			    tokens[0] == "SIGEND" || tokens[0] == "HARDWARE" || tokens[0] == "CONDITIONS" || tokens[0] == "TRIGGERS") {
 
 				mode = tokens[0];
-				continue;
-			}
-
-			if (tokens[0] == "CEPENABLED") {
-				GetObject<Node>()->AggregateObject( CreateObject<ProcessCEPEngine>() );
 				continue;
 			}
 

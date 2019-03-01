@@ -24,7 +24,7 @@
 #include "cep-engine.h"
 #include "ns3/boolean.h"
 #include "dcep-state.h"
-#include "ns3/communication.h"
+#include "communication.h"
 
 namespace ns3
 {
