@@ -265,6 +265,7 @@ private:
     public:
         static TypeId GetTypeId (void);
         void HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> >&, CepOperator *op);
+        void AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op);
         
     private:
         friend class Detector;
