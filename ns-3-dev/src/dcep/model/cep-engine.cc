@@ -99,8 +99,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             if (e->event_class != INTERMEDIATE_EVENT) {
                 e->pkt->m_executionInfo.executedByExecEnv = false;
                 ee->Proceed(e->pkt, "handle-cepops", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
-                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
-                        "constraints-done")->value = 1;
+                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             } else {
                 GetObject<Detector>()->ProcessCepEvent(e);
             }
