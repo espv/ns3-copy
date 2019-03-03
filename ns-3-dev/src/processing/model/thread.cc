@@ -192,12 +192,19 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		long maxIterations = m_currentLocation->lc->maxIterations;
         long curIteration = ++(m_currentLocation->curIteration);
         long queueServedIndex = m_currentLocation->curServedQueue;
-        long numQueues =
-			m_currentLocation->lc->serviceQueues ?
-			m_currentLocation->lc->serviceQueuesServed.size() :
-			(m_currentLocation->lc->stateQueues ?
-			 m_currentLocation->lc->stateQueuesServed.size() :
-			 m_currentLocation->lc->queuesServed.size());
+        long numQueues = 0;
+        if (m_currentLocation->lc->serviceQueues) {
+            numQueues = m_currentLocation->lc->serviceQueuesServed.size();
+        } else if (m_currentLocation->lc->stateQueues) {
+            numQueues = m_currentLocation->lc->stateQueuesServed.size();
+        } else if (m_currentLocation->lc->cepQueryQueues) {
+            numQueues = m_currentLocation->lc->cepQueryQueuesServed.size();
+        } else if (m_currentLocation->lc->cepEventQueues) {
+            numQueues = m_currentLocation->lc->cepEventQueuesServed.size();
+        } else {
+            numQueues = m_currentLocation->lc->queuesServed.size();
+        }
+
 		bool perQueue = m_currentLocation->lc->perQueue;
 		Ptr<Packet> curPacket = m_currentLocation->curPkt;
 		bool condPassed = !m_currentLocation->lc->hasAdditionalCondition ? true :
@@ -274,6 +281,26 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 					m_programStack.pop();
 					return true;
 				}
+			} else if (curLc->cepQueryQueues) {
+                auto it = curLc->cepQueryQueuesServed.begin();
+                for (; it != curLc->cepQueryQueuesServed.end() && (*it)->empty(); it++);
+
+                // If all queues were empty, pop program and return.
+                if (it == curLc->cepQueryQueuesServed.end()) {
+                    // We do not pop thread of execution, as we did not push it yet
+                    m_programStack.pop();
+                    return true;
+                }
+			} else if (curLc->cepEventQueues) {
+                auto it = curLc->cepEventQueuesServed.begin();
+                for (; it != curLc->cepEventQueuesServed.end() && (*it)->empty(); it++);
+
+                // If all queues were empty, pop program and return.
+                if (it == curLc->cepEventQueuesServed.end()) {
+                    // We do not pop thread of execution, as we did not push it yet
+                    m_programStack.pop();
+                    return true;
+                }
 			} else {
 				auto it = curLc->queuesServed.begin();
 				for (; it != curLc->queuesServed.end() && (*it)->IsEmpty();
@@ -324,12 +351,19 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		}
 
 		// If if THIS ONE queue is empty, set program to empty queues (should be called empty queue) program
-		bool queueEmpty =
-			m_currentLocation->lc->serviceQueues ?
-			m_currentLocation->lc->serviceQueuesServed[queueServedIndex]->empty() :
-			(m_currentLocation->lc->stateQueues ?
-			 m_currentLocation->lc->stateQueuesServed[queueServedIndex]->empty() :
-			 m_currentLocation->lc->queuesServed[queueServedIndex]->IsEmpty());
+		bool queueEmpty = false;
+		if (m_currentLocation->lc->serviceQueues) {
+		    queueEmpty = m_currentLocation->lc->serviceQueuesServed[queueServedIndex]->empty();
+		} else if (m_currentLocation->lc->stateQueues) {
+		    queueEmpty = m_currentLocation->lc->stateQueuesServed[queueServedIndex]->empty();
+		} else if (m_currentLocation->lc->cepQueryQueues) {
+		    queueEmpty = m_currentLocation->lc->cepQueryQueuesServed[queueServedIndex]->empty();
+		} else if (m_currentLocation->lc->cepEventQueues) {
+            queueEmpty = m_currentLocation->lc->cepEventQueuesServed[queueServedIndex]->empty();
+        } else {
+		    m_currentLocation->lc->queuesServed[queueServedIndex]->IsEmpty();
+		}
+
 		if (queueEmpty) {
 			if (curLc->emptyQueues != nullptr)
 				m_currentLocation->program = curLc->emptyQueues;
@@ -368,6 +402,34 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 							return true;
 						} else
 							m_currentLocation->curServedQueue = index;
+					} else if (curLc->cepQueryQueues) {
+                        auto it = curLc->cepQueryQueuesServed.begin();
+                        for (; it != curLc->cepQueryQueuesServed.end() && (*it)->empty(); it++) {
+                            index++;
+                        }
+
+                        // If all queues were empty, pop program and return.
+                        if (it == curLc->cepQueryQueuesServed.end()) {
+                            // We do not pop thread of execution, as we did not push it yet
+                            m_programStack.pop();
+                            return true;
+                        } else {
+                            m_currentLocation->curServedQueue = index;
+                        }
+					} else if (curLc->cepEventQueues) {
+                        auto it = curLc->cepEventQueuesServed.begin();
+                        for (; it != curLc->cepEventQueuesServed.end() && (*it)->empty(); it++) {
+                            index++;
+                        }
+
+                        // If all queues were empty, pop program and return.
+                        if (it == curLc->cepEventQueuesServed.end()) {
+                            // We do not pop thread of execution, as we did not push it yet
+                            m_programStack.pop();
+                            return true;
+                        } else {
+                            m_currentLocation->curServedQueue = index;
+                        }
 					} else {
 						auto it = curLc->queuesServed.begin();
 						for (;
@@ -385,8 +447,9 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 					}
 				}
 			}
-		} else
-			m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
+		} else {
+            m_currentLocation->program = m_currentLocation->program->sem->rootProgram;
+        }
 
 		/* At this point, we know we should continue from the beginning of the loop.
 		 * Set event index to -1 (incremented to 0 by dispatch) and return true.
@@ -550,9 +613,19 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				 * we don't have the "empty queues" program. This
 				 * means we should use the regular root program
 				 */
-				uint64_t queueSize = newLc->serviceQueues ? newLc->serviceQueuesServed.size() :
-					                 (newLc->stateQueues ? newLc->stateQueuesServed.size() :
-					                  newLc->queuesServed.size());
+				uint64_t queueSize = 0;
+
+				if (newLc->serviceQueues) {
+				    queueSize = newLc->serviceQueuesServed.size();
+				} else if (newLc->stateQueues) {
+				    queueSize = newLc->stateQueuesServed.size();
+				} else if (newLc->cepQueryQueues) {
+				    queueSize = newLc->cepQueryQueuesServed.size();
+				} else if (newLc->cepEventQueues) {
+				    queueSize = newLc->cepEventQueuesServed.size();
+				} else {
+				    queueSize = newLc->queuesServed.size();
+				}
 
 				if (queueSize == 0)
 					newProgramLocation->program = newSem->rootProgram;
@@ -622,6 +695,38 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 										return true;
 									else
 										m_currentLocation->curServedQueue = index;
+								} else if (newLc->cepEventQueues) {
+                                    uint32_t index = 0;
+                                    auto it = newLc->cepEventQueuesServed.begin();
+                                    for (;
+                                            it
+                                            != newLc->cepEventQueuesServed.end()
+                                            && (*it)->empty(); it++)
+                                        index++;
+
+                                    // If all queues were empty, pop program and return.
+                                    if (it == newLc->cepEventQueuesServed.end()) {
+                                        // We do not pop thread of execution, as we did not push it yet
+                                        return true;
+                                    } else {
+                                        m_currentLocation->curServedQueue = index;
+                                    }
+								} else if (newLc->cepQueryQueues) {
+                                    uint32_t index = 0;
+                                    auto it = newLc->cepQueryQueuesServed.begin();
+                                    for (;
+                                            it
+                                            != newLc->cepQueryQueuesServed.end()
+                                            && (*it)->empty(); it++)
+                                        index++;
+
+                                    // If all queues were empty, pop program and return.
+                                    if (it == newLc->cepQueryQueuesServed.end()) {
+                                        // We do not pop thread of execution, as we did not push it yet
+                                        return true;
+                                    } else {
+                                        m_currentLocation->curServedQueue = index;
+                                    }
 								} else {
 									uint32_t index = 0;
 									auto it = newLc->queuesServed.begin();
@@ -767,11 +872,28 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
 
 			return true;
 		} else if (qe->isCepQueryQueue) {
+            static int cnt = 0;
+            if (e == nullptr) {
+                std::cout << "qe is nullptr" << std::endl;
+            }
+            if (++cnt == 1065) {
+                std::cout << "Crashing" << std::endl;
+            } else if (cnt == 1064) {
+                std::cout << "One before the crash" << std::endl;
+            } else if (cnt == 1060) {
+                std::cout << "Five before the crash" << std::endl;
+            } else if (cnt == 1050) {
+                std::cout << "Fifteen before the crash" << std::endl;
+            } else if (cnt == 1001) {
+                std::cout << "Before the crash" << std::endl;
+            }
+
             auto queueToServe = (qe->cepQueryQueue == nullptr) ?
                                 m_currentLocation->lc->cepQueryQueuesServed[m_currentLocation->curServedQueue] :
                                 qe->cepQueryQueue;
 
-            m_currentLocation->curCepQuery = queueToServe->front();
+            auto newCurCepQuery = queueToServe->front();
+            m_currentLocation->curCepQuery = newCurCepQuery;
             queueToServe->pop();
         } else if (qe->isCepEventQueue) {
             auto queueToServe = (qe->cepEventQueue == nullptr) ?

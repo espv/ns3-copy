@@ -408,41 +408,64 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 			qIt++;
 		}
 	}
-	else if (!lc->serviceQueues) {
-		Ptr<Queue2> firstQueue = queues[first];
-		Ptr<Queue2> lastQueue = queues[last];
+	else if (lc->serviceQueues) {
+        auto firstQueue = serviceQueues[first];
+        auto lastQueue = serviceQueues[last];
 
-		/* Iterate queues in the queue order, and
-		 * search for each queue between and includingget
-		 * firstQueue and lastQueue in lc->queues.
-		 * Upon the first hit, set the
-		 * dequeueOrLoopEncountered boolean variable
-		 * to true.
-		 */
-		auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue);
-		auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue);
+        auto qIt = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), firstQueue);
+        auto qItLast = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), lastQueue);
 
-		// Iterate through all queues in between according to the queue order
-		while (true) {
-			if (std::find(lc->queuesServed.begin(), lc->queuesServed.end(), *qIt) != lc->queuesServed.end())
-				return true;
-			if (qIt == qItLast || qIt == queueOrder.end())
-				break;
-			qIt++;
-		}
+        for (; qIt != qItLast; qIt++)
+            if (std::find(lc->serviceQueuesServed.begin(),
+                          lc->serviceQueuesServed.end(), *qIt)
+                != lc->serviceQueuesServed.end())
+                return true;
+	} else if (lc->cepQueryQueues) {
+        auto firstQueue = cepQueryQueues[first];
+        auto lastQueue = cepQueryQueues[last];
+
+        auto qIt = std::find(cepQueryQueueOrder.begin(), cepQueryQueueOrder.end(), firstQueue);
+        auto qItLast = std::find(cepQueryQueueOrder.begin(), cepQueryQueueOrder.end(), lastQueue);
+
+        for (; qIt != qItLast; qIt++)
+            if (std::find(lc->cepQueryQueuesServed.begin(),
+                          lc->cepQueryQueuesServed.end(), *qIt)
+                != lc->cepQueryQueuesServed.end())
+                return true;
+	} else if (lc->cepEventQueues) {
+        auto firstQueue = cepEventQueues[first];
+        auto lastQueue = cepEventQueues[last];
+
+        auto qIt = std::find(cepEventQueueOrder.begin(), cepEventQueueOrder.end(), firstQueue);
+        auto qItLast = std::find(cepEventQueueOrder.begin(), cepEventQueueOrder.end(), lastQueue);
+
+        for (; qIt != qItLast; qIt++)
+            if (std::find(lc->cepEventQueuesServed.begin(),
+                          lc->cepEventQueuesServed.end(), *qIt)
+                != lc->cepEventQueuesServed.end())
+                return true;
 	} else {
-		auto firstQueue = serviceQueues[first];
-		auto lastQueue = serviceQueues[last];
+        Ptr<Queue2> firstQueue = queues[first];
+        Ptr<Queue2> lastQueue = queues[last];
 
-		auto qIt = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), firstQueue);
-		auto qItLast = std::find(serviceQueueOrder.begin(), serviceQueueOrder.end(), lastQueue);
+        /* Iterate queues in the queue order, and
+         * search for each queue between and includingget
+         * firstQueue and lastQueue in lc->queues.
+         * Upon the first hit, set the
+         * dequeueOrLoopEncountered boolean variable
+         * to true.
+         */
+        auto qIt = std::find(queueOrder.begin(), queueOrder.end(), firstQueue);
+        auto qItLast = std::find(queueOrder.begin(), queueOrder.end(), lastQueue);
 
-		for (; qIt != qItLast; qIt++)
-			if (std::find(lc->serviceQueuesServed.begin(),
-					lc->serviceQueuesServed.end(), *qIt)
-					!= lc->serviceQueuesServed.end())
-				return true;
-
+        // Iterate through all queues in between according to the queue order
+        while (true) {
+            if (std::find(lc->queuesServed.begin(), lc->queuesServed.end(), *qIt) != lc->queuesServed.end())
+                return true;
+            if (qIt == qItLast || qIt == queueOrder.end())
+                break;
+            qIt++;
+        }
 	}
 
 	return false;
@@ -977,11 +1000,18 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		// Get the program pointer of the current SEM
 		Program **existingProgram;
 		if (currentlyHandled->lc != nullptr) {
-			uint64_t numQueues = currentlyHandled->lc->serviceQueues ?
-							      currentlyHandled->lc->serviceQueuesServed.size() :
-							      (currentlyHandled->lc->stateQueues ?
-									currentlyHandled->lc->stateQueuesServed.size() :
-									currentlyHandled->lc->queuesServed.size());
+			uint64_t numQueues = 0;
+			if (currentlyHandled->lc->serviceQueues) {
+			    numQueues = currentlyHandled->lc->serviceQueuesServed.size();
+			} else if (currentlyHandled->lc->stateQueues) {
+			    numQueues = currentlyHandled->lc->stateQueuesServed.size();
+			} else if (currentlyHandled->lc->cepQueryQueues) {
+			    numQueues = currentlyHandled->lc->cepQueryQueuesServed.size();
+			} else if (currentlyHandled->lc->cepEventQueues) {
+                numQueues = currentlyHandled->lc->cepEventQueuesServed.size();
+			} else {
+			    numQueues = currentlyHandled->lc->queuesServed.size();
+			}
 
 			if (numQueues > 0) {
 				if (dequeueOrLoopEncountered)
@@ -1159,6 +1189,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			} else {
 				NS_ASSERT_MSG(0, "Invalid operation performed on CEPQUERYQUEUE in line " << q->lineNr << " in device file");
 			}
+            q->queueName = tokens[4]; // Only local scope supported for now
 		} else if (tokens[2] == "CEPEVENTQUEUE") {
 		    q->isCepEventQueue = true;
             NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPEVENTQUEUE at line " << q->lineNr << " in device file");
@@ -1167,16 +1198,22 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
             } else {
                 NS_ASSERT_MSG(0, "Invalid operation performed on CEPEVENTQUEUE in line " << q->lineNr << " in device file");
             }
+            q->queueName = tokens[4]; // Only local scope supported for now
 		}
 
 		// We specify the queue
 		if (tokens[4] != "0") {
 			if (q->isStateQueue)
 				q->queueName = tokens[4]; // Only local scope supported for now
-			else if (!q->isServiceQueue) {
-				q->queue = queues[tokens[4]];
-			} else // When specifying queue in a SRVQUEUE event
-				q->servQueue = serviceQueues[tokens[4]];
+			else if (q->isServiceQueue) {
+                q->servQueue = serviceQueues[tokens[4]];
+			} else if (q->isCepEventQueue) {
+			    q->cepEventQueue = cepEventQueues[tokens[4]];
+			} else if (q->isCepQueryQueue) {
+                q->cepQueryQueue = cepQueryQueues[tokens[4]];
+			} else {  // When specifying queue in a PKTQUEUE event
+                q->queue = queues[tokens[4]];
+            }
 		}
 
 		/* If we have a checkpoint specified for the queue,
