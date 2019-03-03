@@ -210,8 +210,24 @@ void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 			}
 		} else if (tokens[3] == "cepqueries") {
 			this->cepQueryQueues[tokens[0]] = new std::queue<Ptr<CepOperator> > ();
+            /* Add the queue to the end of queueOrder. This is used
+             * by conditions ("and" loops; they are really conditions
+             * as well).
+             */
+            cepQueryQueueOrder.push_back(cepQueryQueues[tokens[0]]);
+
+            // Add the queue to the reverse mapping
+            cepQueryQueueNames[cepQueryQueues[tokens[0]]] = tokens[0];
 		} else if (tokens[3] == "cepevents") {
 			this->cepEventQueues[tokens[0]] = new std::queue<Ptr<CepEvent> > ();
+            /* Add the queue to the end of queueOrder. This is used
+             * by conditions ("and" loops; they are really conditions
+             * as well).
+             */
+            cepEventQueueOrder.push_back(cepEventQueues[tokens[0]]);
+
+            // Add the queue to the reverse mapping
+            cepEventQueueNames[cepEventQueues[tokens[0]]] = tokens[0];
 		}
 
 		/* We have a packet queue.
@@ -428,9 +444,7 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
         auto qItLast = std::find(cepQueryQueueOrder.begin(), cepQueryQueueOrder.end(), lastQueue);
 
         for (; qIt != qItLast; qIt++)
-            if (std::find(lc->cepQueryQueuesServed.begin(),
-                          lc->cepQueryQueuesServed.end(), *qIt)
-                != lc->cepQueryQueuesServed.end())
+            if (std::find(lc->cepQueryQueuesServed.begin(), lc->cepQueryQueuesServed.end(), *qIt) != lc->cepQueryQueuesServed.end())
                 return true;
 	} else if (lc->cepEventQueues) {
         auto firstQueue = cepEventQueues[first];
@@ -440,9 +454,7 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
         auto qItLast = std::find(cepEventQueueOrder.begin(), cepEventQueueOrder.end(), lastQueue);
 
         for (; qIt != qItLast; qIt++)
-            if (std::find(lc->cepEventQueuesServed.begin(),
-                          lc->cepEventQueuesServed.end(), *qIt)
-                != lc->cepEventQueuesServed.end())
+            if (std::find(lc->cepEventQueuesServed.begin(), lc->cepEventQueuesServed.end(), *qIt) != lc->cepEventQueuesServed.end())
                 return true;
 	} else {
         Ptr<Queue2> firstQueue = queues[first];
