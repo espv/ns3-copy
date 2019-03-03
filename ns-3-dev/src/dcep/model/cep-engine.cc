@@ -113,15 +113,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
 
             e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
-            if (constraints[k])
-                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
-                        "constraint-processed")->value = 1;
-            else
-                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable(
-                        "constraint-processed")->value = 0;
+            if (constraints[k]) {
+                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
+            } else {
+                e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
+            }
             e->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(e->pkt, "check-constraints", &CEPEngine::DoCheckConstraints, this, e, constraints, cep,
-                        producer, values);
+            ee->Proceed(e->pkt, "check-constraints", &CEPEngine::DoCheckConstraints, this, e, constraints, cep, producer, values);
         } else {
             DoCheckConstraints(e, constraints, cep, producer, values);
         }

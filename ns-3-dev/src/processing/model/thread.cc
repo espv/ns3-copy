@@ -563,12 +563,19 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				 */
 				else {
 					newProgramLocation->curServedQueue = 0;
-					bool firstQueueEmpty =
-						newLc->serviceQueues ?
-						newLc->serviceQueuesServed[0]->empty() :
-						(newLc->stateQueues ?
-						 newLc->stateQueuesServed[0]->empty() :
-						 newLc->queuesServed[0]->IsEmpty());
+					bool firstQueueEmpty;
+
+					if (newLc->serviceQueues) {
+						firstQueueEmpty = newLc->serviceQueuesServed[0]->empty();
+					} else if (newLc->stateQueues) {
+						firstQueueEmpty = newLc->serviceQueuesServed[0]->empty();
+					} else if (newLc->cepEventQueues) {
+						firstQueueEmpty = newLc->cepEventQueuesServed[0]->empty();
+					} else if (newLc->cepQueryQueues) {
+						firstQueueEmpty = newLc->cepQueryQueuesServed[0]->empty();
+					} else {  // Packet queues left
+						firstQueueEmpty = newLc->queuesServed[0]->IsEmpty();
+					}
 
 					if (!firstQueueEmpty)
 						newProgramLocation->program = newSem->rootProgram;
@@ -759,7 +766,25 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
 			ee->stateQueues[qe->queueName]->stateVariableQueue.pop();
 
 			return true;
-		} else {
+		} else if (qe->isCepQueryQueue) {
+            auto queueToServe = (qe->cepQueryQueue == nullptr) ?
+                                m_currentLocation->lc->cepQueryQueuesServed[m_currentLocation->curServedQueue] :
+                                qe->cepQueryQueue;
+
+            m_currentLocation->curCepQuery = queueToServe->front();
+            queueToServe->pop();
+        } else if (qe->isCepEventQueue) {
+            auto queueToServe = (qe->cepEventQueue == nullptr) ?
+                                m_currentLocation->lc->cepEventQueuesServed[m_currentLocation->curServedQueue] :
+                                qe->cepEventQueue;
+
+            /* Here, we want to dequeue the service, then (below) execute it.
+             * Note that we resolved which sem to enqueue (which may be "0")
+             * in the insertion above, so we don't need to resolve this again.
+             */
+			m_currentLocation->curCepEvent = queueToServe->front();
+            queueToServe->pop();
+        } else {
 			// Obtain queue from encapsulated loop if not defined in the event
 			Ptr<Queue2> queueToServe = (qe->queue == nullptr) ?
 					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue] :
@@ -791,8 +816,8 @@ bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
 	auto cqe = dynamic_cast<CopyQueueExecutionEvent *>(e);
 	Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 	if (cqe->isCepQueryQueue) {
-		auto fromQueue = execEnv->cepQueryQueues[cqe->fromQueue];
-		*execEnv->cepQueryQueues[cqe->toQueue] = *fromQueue;
+		auto fromQueue = *execEnv->cepQueryQueues[cqe->fromQueue];
+		*execEnv->cepQueryQueues[cqe->toQueue] = fromQueue;
 	} else if (cqe->isCepEventQueue) {
 		auto fromQueue = execEnv->cepEventQueues[cqe->fromQueue];
 		*execEnv->cepEventQueues[cqe->toQueue] = *fromQueue;

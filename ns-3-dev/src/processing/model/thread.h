@@ -70,6 +70,8 @@ public:
 		curPkt = nullptr;
 		curIteration = 0;
 		curServedQueue = 0;
+		curCepEvent = nullptr;
+		curCepQuery = nullptr;
 		wasBlocked = 0;
 	}
 };

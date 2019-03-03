@@ -450,7 +450,7 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 
 void ExecEnv::fillQueues(std::string first, std::string last, LoopCondition *lc) {
 	// Assume first and last queues are of the same type
-	if (!lc->serviceQueues && !lc->stateQueues) {
+	if (!lc->serviceQueues && !lc->stateQueues && !lc->cepQueryQueues && !lc->cepEventQueues) {
 		auto firstQueue = queues[first];
 		auto lastQueue = queues[last];
 
@@ -483,7 +483,7 @@ void ExecEnv::fillQueues(std::string first, std::string last, LoopCondition *lc)
 		// Push the last one if we actually had any
 		if (qIt != stateQueueOrder.end())
 			lc->stateQueuesServed.push_back(stateQueues[*qIt]);
-	} else {
+	} else if (lc->serviceQueues) {
 		auto firstQueue = serviceQueues[first];
 		auto lastQueue = serviceQueues[last];
 
@@ -501,6 +501,42 @@ void ExecEnv::fillQueues(std::string first, std::string last, LoopCondition *lc)
 		// Push the last one if we actually had any
 		if (qIt != serviceQueueOrder.end())
 			lc->serviceQueuesServed.push_back(*qIt);
+	} else if (lc->cepQueryQueues) {
+        auto firstQueue = cepQueryQueues[first];
+        auto lastQueue = cepQueryQueues[last];
+		/* Iterate queues in the queue order, and
+		 * insert each queue between and including
+		 * firstQueue and lastQueue in lc->queues.
+		 */
+		auto qIt = std::find(cepQueryQueueOrder.begin(), cepQueryQueueOrder.end(), firstQueue);
+		auto qItLast = std::find(cepQueryQueueOrder.begin(), cepQueryQueueOrder.end(), lastQueue);
+
+		// Push all _except_ the last one
+		for (; qIt != qItLast; qIt++)
+			lc->cepQueryQueuesServed.push_back(*qIt);
+
+		// Push the last one if we actually had any
+		if (qIt != cepQueryQueueOrder.end())
+			lc->cepQueryQueuesServed.push_back(*qIt);
+	} else if (lc->cepEventQueues) {
+        auto firstQueue = cepEventQueues[first];
+        auto lastQueue = cepEventQueues[last];
+		/* Iterate queues in the queue order, and
+		 * insert each queue between and including
+		 * firstQueue and lastQueue in lc->queues.
+		 */
+		auto qIt = std::find(cepEventQueueOrder.begin(), cepEventQueueOrder.end(), firstQueue);
+		auto qItLast = std::find(cepEventQueueOrder.begin(), cepEventQueueOrder.end(), lastQueue);
+
+		// Push all _except_ the last one
+		for (; qIt != qItLast; qIt++)
+			lc->cepEventQueuesServed.push_back(*qIt);
+
+		// Push the last one if we actually had any
+		if (qIt != cepEventQueueOrder.end())
+			lc->cepEventQueuesServed.push_back(*qIt);
+	} else {
+		NS_ASSERT_MSG(0, "Error at line " << lc->lineNr);
 	}
 }
 
@@ -766,6 +802,10 @@ void ExecEnv::PrintProgram(Program *curPgm) {
 			std::cout << curEvt << std::endl;
 			break;
 		}
+		case COPYQUEUE: {
+		    std::cout << curEvt << std::endl;
+		    break;
+		}
 		}
 
 		i++;
@@ -907,6 +947,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				currentlyHandled->lc->stateQueues = !(std::find(stateQueueOrder.begin(),
 				                                       stateQueueOrder.end(),
 						                               tokens[3]) == stateQueueOrder.end());
+				currentlyHandled->lc->cepQueryQueues = !(cepQueryQueues.find(tokens[3]) == cepQueryQueues.end());
+				currentlyHandled->lc->cepEventQueues = !(cepEventQueues.find(tokens[3]) == cepEventQueues.end());
 				fillQueues(tokens[3], tokens[4], currentlyHandled->lc);
 			}
 
@@ -1109,6 +1151,22 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			 * queues for the spisizes queue on the N900).
 			 */
 			q->local = tokens[5] == "local";
+		} else if (tokens[2] == "CEPQUERYQUEUE") {
+			q->isCepQueryQueue = true;
+			NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPQUERYQUEUE at line " << q->lineNr << " in device file");
+			if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
+				q->cepQueryQueue = cepQueryQueues[tokens[4]];
+			} else {
+				NS_ASSERT_MSG(0, "Invalid operation performed on CEPQUERYQUEUE in line " << q->lineNr << " in device file");
+			}
+		} else if (tokens[2] == "CEPEVENTQUEUE") {
+		    q->isCepEventQueue = true;
+            NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPEVENTQUEUE at line " << q->lineNr << " in device file");
+            if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
+                q->cepEventQueue = cepEventQueues[tokens[4]];
+            } else {
+                NS_ASSERT_MSG(0, "Invalid operation performed on CEPEVENTQUEUE in line " << q->lineNr << " in device file");
+            }
 		}
 
 		// We specify the queue
@@ -1156,6 +1214,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
         // Create an event, and insert the queue
         auto cq = new CopyQueueExecutionEvent();
         execEvent = cq;
+        cq->fromQueue = tokens[3];
+        cq->toQueue = tokens[4];
 
         if (tokens[2] == "CEPQUERYQUEUE") {
             cq->isCepQueryQueue = true;
@@ -1170,6 +1230,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
         } else {
 			NS_ASSERT_MSG(0, "COPYQUEUE event on line " << cq->lineNr << " in the device file has unknown queue type");
 		}
+
+		currentProgram->events.push_back(cq);
     }
 
 	// Handle conditions
@@ -1316,6 +1378,22 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 						if (name != stateQueueNames.end()) {
 							queueName = (*name).second;
 						}
+					} else if (currentlyHandled->lc->cepQueryQueues) {
+                        auto firstQueue = currentlyHandled->lc->cepQueryQueuesServed[0];
+
+                        // First, find the queue name
+                        auto name = cepQueryQueueNames.find(firstQueue);
+                        if (name != cepQueryQueueNames.end()) {
+                            queueName = (*name).second;
+                        }
+					} else if (currentlyHandled->lc->cepEventQueues) {
+                        auto firstQueue = currentlyHandled->lc->cepEventQueuesServed[0];
+
+                        // First, find the queue name
+                        auto name = cepEventQueueNames.find(firstQueue);
+                        if (name != cepEventQueueNames.end()) {
+                            queueName = (*name).second;
+                        }
 					} else {
 						auto firstQueue = currentlyHandled->lc->queuesServed[0];
 

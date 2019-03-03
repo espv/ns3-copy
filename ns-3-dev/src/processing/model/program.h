@@ -298,9 +298,13 @@ class LoopCondition : public Condition {
   bool perQueue; // maxIterations in total, or per queue?
   bool serviceQueues;
   bool stateQueues;
+  bool cepQueryQueues;
+  bool cepEventQueues;
   std::vector<Ptr<Queue2> > queuesServed;
   std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueuesServed;
   std::vector<Ptr<StateVariableQueue> > stateQueuesServed;
+  std::vector<std::queue<Ptr<CepOperator> > *> cepQueryQueuesServed;
+  std::vector<std::queue<Ptr<CepEvent> > *> cepEventQueuesServed;
 
 
   // When the conditional for continuing iteration in a loop
