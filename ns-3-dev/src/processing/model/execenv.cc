@@ -1225,6 +1225,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
                 q->cepQueryQueue = cepQueryQueues[tokens[4]];
 			} else {  // When specifying queue in a PKTQUEUE event
                 q->queue = queues[tokens[4]];
+                q->isPacketQueue = true;
             }
 		}
 
@@ -1555,7 +1556,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			 * queues in currentlyHandled->lc, set
 			 * dequeueOrLoopEncountered to true.
 			 */
-			if (currentlyHandled->lc != nullptr && queuesIn(tokens[3], tokens[4], currentlyHandled->lc)) {
+			if (currentlyHandled->lc != nullptr && queuesIn(tokens[4], tokens[5], currentlyHandled->lc)) {
 				dequeueOrLoopEncountered = true;
 				currentProgram->hasInternalLoop = true; // Se comments in program.h on this member
 			}
