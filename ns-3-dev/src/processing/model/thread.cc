@@ -327,8 +327,7 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 			return true;
 		}
 
-		bool curEmptyProgram = (m_currentLocation->program
-				== m_currentLocation->lc->emptyQueues);
+		bool curEmptyProgram = (m_currentLocation->program == m_currentLocation->lc->emptyQueues);
 		bool goToNextQueue = curEmptyProgram || !iterationsToGo;
 
 		// If go to next queue, do that. If no more queues, break loop.
@@ -892,8 +891,8 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
                                 m_currentLocation->lc->cepQueryQueuesServed[m_currentLocation->curServedQueue] :
                                 qe->cepQueryQueue;
 
-            auto newCurCepQuery = queueToServe->front();
-            m_currentLocation->curCepQuery = newCurCepQuery;
+            auto nextCepQuery = queueToServe->front();
+            m_currentLocation->curCepQuery = nextCepQuery;
             queueToServe->pop();
         } else if (qe->isCepEventQueue) {
             auto queueToServe = (qe->cepEventQueue == nullptr) ?
