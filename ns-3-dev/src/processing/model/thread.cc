@@ -799,6 +799,8 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
             qe->cepEventQueue->push(m_currentLocation->curCepEvent);
         } else if (qe->isCepQueryQueue) {
 			qe->cepQueryQueue->push(m_currentLocation->curCepQuery);
+        } else {
+            NS_ASSERT_MSG(0, "Couldn't find queue to enqueue into");
         }
 	} else
 		// Check if we are dealing with a service queue

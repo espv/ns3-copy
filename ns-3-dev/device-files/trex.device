@@ -27,12 +27,17 @@ QUEUES
 HIRQ	            FIFO 	-1    services
 # Queue for posted tasks
 sq FIFO -1 services
-rcvd-pkts FIFO -1 packets
+rcvd-pkts-t1 FIFO -1 packets
+rcvd-pkts-t2 FIFO -1 packets
+rcvd-pkts-t3 FIFO -1 packets
+complex-pkts FIFO -1 packets
 all-cepops FIFO -1 cepqueries
 threads-cepops FIFO -1 cepqueries
 t1-cepops FIFO -1 cepqueries
 t2-cepops FIFO -1 cepqueries
 t3-cepops FIFO -1 cepqueries
+handle-cepops-queue FIFO -1 cepqueries
+populate-cepop-queue FIFO -1 cepqueries
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
@@ -194,9 +199,9 @@ x PROCESS 36000 0 # 2
 x CALL process_received_packet  # This ends with handle-cepops trigger being put into the packet.
 # Now we enqueue the packet as many times as there are threads to process the event.
 # Each packet will cause a trigger.
-x ENQUEUE PKTQUEUE 0 rcvd-pkts
-x ENQUEUE PKTQUEUE 0 rcvd-pkts
-x ENQUEUE PKTQUEUE 0 rcvd-pkts
+x ENQUEUE PKTQUEUE 0 rcvd-pkts-t1
+x ENQUEUE PKTQUEUE 0 rcvd-pkts-t2
+x ENQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x COPYQUEUE CEPQUERYQUEUE all-cepops threads-cepops
 x STATECOND thread-index write local 0
 x LOOP populate-cepop-queues 0 threads-cepops threads-cepops 0
@@ -254,19 +259,6 @@ SIGEND
 
 
 SIGSTART
-NAME process-packets
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 LOOPSTART		0 sq sq 0
-x                      DEQUEUE		SRVQUEUE 0 0
-0 RESTART
-
-SIGEND
-
-
-SIGSTART
 NAME packet_processing_thread  # Wake up when packet is received and to be sent
 PEU cpu
 RESOURCES cycles normal
@@ -288,7 +280,8 @@ FRACTION 100% 1 1
 
 0 START
 x QUEUECOND sq sq notempty
-x LOOP process-packets 0 sq sq 0
+x DEQUEUE SRVQUEUE 0 sq
+x CALL packet_processing_thread
 0 STOP
 
 SIGEND
@@ -551,66 +544,80 @@ x STATECOND CreatedComplexEvent read local 0
 SIGEND
 
 
+#SIGSTART
+#NAME handle-cepops
+#PEU cpu
+#RESOURCES cycles normal
+#FRACTION 100% 1 1
+#
+#0 START
+#x STATECOND AllCepOpsDoneYet read local 0
+#x STATECOND AllCepOpsDoneYet write local 1
+#x STATECOND CepOpType read local 0
+#x CALL handle-or-cepop
+#x CALL handle-cepops
+#0 STOP
+#
+#SIGEND
+#
+#
+#SIGSTART
+#NAME handle-cepops
+#PEU cpu
+#RESOURCES cycles normal
+#FRACTION 100% 1 1
+#
+#0 START
+#x STATECOND AllCepOpsDoneYet read local 0
+#x STATECOND AllCepOpsDoneYet write local 1
+#x STATECOND CepOpType read local 1
+#x CALL handle-and-cepop
+#x CALL handle-cepops
+#0 STOP
+#
+#SIGEND
+#
+#
+#SIGSTART
+#NAME handle-cepops
+#PEU cpu
+#RESOURCES cycles normal
+#FRACTION 100% 1 1
+#
+#0 START
+#x STATECOND AllCepOpsDoneYet read local 0
+#x STATECOND AllCepOpsDoneYet write local 1
+#x STATECOND CepOpType read local 2
+#x CALL handle-then-cepop
+#x CALL handle-cepops
+#0 STOP
+#
+#SIGEND
+#
+#
+#SIGSTART
+#NAME handle-cepops
+#PEU cpu
+#RESOURCES cycles normal
+#FRACTION 100% 1 1
+#
+#0 START
+#x STATECOND AllCepOpsDoneYet read local 1
+#0 STOP
+#
+#SIGEND
+
+
 SIGSTART
 NAME handle-cepops
 PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 START
-x STATECOND AllCepOpsDoneYet read local 0
-x STATECOND AllCepOpsDoneYet write local 1
-x STATECOND CepOpType read local 0
-x CALL handle-or-cepop
-x CALL handle-cepops
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME handle-cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND AllCepOpsDoneYet read local 0
-x STATECOND AllCepOpsDoneYet write local 1
-x STATECOND CepOpType read local 1
-x CALL handle-and-cepop
-x CALL handle-cepops
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME handle-cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND AllCepOpsDoneYet read local 0
-x STATECOND AllCepOpsDoneYet write local 1
-x STATECOND CepOpType read local 2
-x CALL handle-then-cepop
-x CALL handle-cepops
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME handle-cepops
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x STATECOND AllCepOpsDoneYet read local 1
-0 STOP
+0 LOOPSTART     0 t1-cepops t1-cepops 0
+#x STATECOND AllCepOpsDoneYet read local 1
+x DEQUEUE CEPQUERYQUEUE 0 0
+0 RESTART
 
 SIGEND
 
@@ -621,11 +628,11 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 START
+0 LOOPSTART 0 complex-pkts complex-pkts 0
 x                      DEQUEUE		PKTQUEUE 0 complex-pkts
 # Perhaps we need to process a certain amount for each attribute in the complex event?
 x PROCESS 20000 0
-0 STOP
+0 RESTART
 
 SIGEND
 
@@ -637,7 +644,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND rcvd-pkts rcvd-pkts empty
+x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 empty
 x SLEEPTHREAD
 x PROCESS 6000 0
 0 STOP
@@ -652,8 +659,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND rcvd-pkts rcvd-pkts notempty
-x DEQUEUE PKTQUEUE 0 rcvd-pkts
+x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts-t1
 x PROCESS 36000 0  # 4
 x LOOP handle-cepops 0 t1-cepops t1-cepops 0
 x CALL handle-created-complex-events
@@ -669,7 +676,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND rcvd-pkts rcvd-pkts empty
+x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 empty
 x SLEEPTHREAD
 x PROCESS 6000 0
 0 STOP
@@ -684,8 +691,8 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND rcvd-pkts rcvd-pkts notempty
-x DEQUEUE PKTQUEUE 0 rcvd-pkts
+x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts-t2
 x PROCESS 36000 0  # 4
 x LOOP handle-cepops 0 t2-cepops t2-cepops 0
 x CALL handle-created-complex-events
@@ -701,7 +708,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND rcvd-pkts rcvd-pkts empty
+x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 empty
 x SLEEPTHREAD
 x PROCESS 6000 0
 0 STOP
@@ -716,11 +723,11 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x QUEUECOND rcvd-pkts rcvd-pkts notempty
-x DEQUEUE PKTQUEUE 0 rcvd-pkts
+x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x PROCESS 36000 0  # 4
 x LOOP handle-cepops 0 t3-cepops t3-cepops 0
-x CALL handle-created-complex-events
+x LOOP handle-created-complex-events 0 complex-pkts complex-pkts 0
 0 STOP
 
 SIGEND
@@ -728,8 +735,8 @@ SIGEND
 
 THREADS
 packet_thread1 packet_processing_thread infinite 0
-#packet_thread2 packet_processing_thread infinite 0
-#packet_thread3 packet_processing_thread infinite 0
+packet_thread2 packet_processing_thread infinite 0
+packet_thread3 packet_processing_thread infinite 0
 event_thread1 event_processing_thread1 infinite 0
 event_thread2 event_processing_thread2 infinite 0
 event_thread3 event_processing_thread3 infinite 0
