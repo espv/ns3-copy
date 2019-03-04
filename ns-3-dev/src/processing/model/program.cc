@@ -175,6 +175,8 @@ LoopCondition::LoopCondition()
   perQueue = false;
   serviceQueues = false;
   stateQueues = false;
+  cepQueryQueues = false;
+  cepEventQueues = false;
 }
 LoopCondition::~LoopCondition() = default;
 
