@@ -871,22 +871,6 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
 
 			return true;
 		} else if (qe->isCepQueryQueue) {
-            static int cnt = 0;
-            if (e == nullptr) {
-                std::cout << "qe is nullptr" << std::endl;
-            }
-            if (++cnt == 1065) {
-                std::cout << "Crashing" << std::endl;
-            } else if (cnt == 1064) {
-                std::cout << "One before the crash" << std::endl;
-            } else if (cnt == 1060) {
-                std::cout << "Five before the crash" << std::endl;
-            } else if (cnt == 1050) {
-                std::cout << "Fifteen before the crash" << std::endl;
-            } else if (cnt == 1001) {
-                std::cout << "Before the crash" << std::endl;
-            }
-
             auto queueToServe = (qe->cepQueryQueue == nullptr) ?
                                 m_currentLocation->lc->cepQueryQueuesServed[m_currentLocation->curServedQueue] :
                                 qe->cepQueryQueue;
