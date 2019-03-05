@@ -545,7 +545,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				pktEI->curThread = this;
 				EventImpl *toInvoke = pktEI->targetFPM;
 				toInvoke->Invoke();
-				toInvoke->Unref();
+				//toInvoke->Unref();
 			}
 		}
 	} else {

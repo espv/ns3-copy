@@ -555,12 +555,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             returned.push_back(curEvent1);
             returned.push_back(newEvent2);
 
-            Consume(returned);
-
             p->HandleNewCepEvent(q, returned, this);
             if (newEvent2->event_class != INTERMEDIATE_EVENT) {
                 newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
                 newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 1;
+                newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
             }
         } else if (newEvent2->event_class != INTERMEDIATE_EVENT) {
             newEvent2->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
@@ -854,6 +853,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             AddAttributesToNewEvent(q, events, complex_event, op);
         } else {
             Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+            complex_event->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(complex_event->pkt, "assign-attributes-to-complex-event", &Producer::AddAttributesToNewEvent, this, q, events, complex_event, op);
         }
     }
@@ -901,6 +901,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             if (new_event->event_class == INTERMEDIATE_EVENT) {
                 AddAttributesToNewEvent(q, events, new_event, op);
             } else {
+                if (!events.empty()) {
+                    new_event->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
+                }
+                new_event->pkt->m_executionInfo.executedByExecEnv = false;
                 ee->Proceed(new_event->pkt, "assign-attributes-to-complex-event",
                             &Producer::AddAttributesToNewEvent, this, q, events, new_event, op);
             }
