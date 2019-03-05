@@ -940,6 +940,8 @@ bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
 	} else {
 		NS_ASSERT_MSG(0, "Error processing COPYQUEUE event at line " << e->lineNr << " in the device file");
 	}
+
+	return true;
 }
 
 bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {

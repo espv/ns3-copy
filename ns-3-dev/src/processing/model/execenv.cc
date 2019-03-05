@@ -1196,12 +1196,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		} else if (tokens[2] == "CEPQUERYQUEUE") {
 			q->isCepQueryQueue = true;
 			NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPQUERYQUEUE at line " << q->lineNr << " in device file");
-			if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
-				q->cepQueryQueue = cepQueryQueues[tokens[4]];
-			} else {
-				NS_ASSERT_MSG(0, "Invalid operation performed on CEPQUERYQUEUE in line " << q->lineNr << " in device file");
-			}
-            q->queueName = tokens[4]; // Only local scope supported for now
+			NS_ASSERT_MSG(tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE", "Invalid operation performed on CEPQUERYQUEUE in line " << q->lineNr << " in device file");
+			q->cepQueryQueue = cepQueryQueues[tokens[4]];
+            q->queueName = tokens[4];
 		} else if (tokens[2] == "CEPEVENTQUEUE") {
 		    q->isCepEventQueue = true;
             NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPEVENTQUEUE at line " << q->lineNr << " in device file");

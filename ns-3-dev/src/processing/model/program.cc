@@ -408,6 +408,10 @@ std::ostream& operator<<(std::ostream& out, ExecutionEvent& event)
 		out << "QUEUE";
 		break;
 	}
+    case COPYQUEUE: {
+        out << "COPYQUEUE";
+        break;
+    }
 	case CONDITION: {
 		out << "COND";
 		break;
