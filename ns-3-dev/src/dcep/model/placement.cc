@@ -119,8 +119,9 @@ namespace ns3 {
         remoteCepEventReceived (e);
         
         if (e->event_class == FINAL_EVENT) {
-            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("AllCepOpsDoneYet")->value = 1;
-            e->pkt->m_executionInfo.curThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("AllCepOpsDoneYet")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
             SendCepEventToSink(e);
         }
         else
@@ -167,7 +168,12 @@ namespace ns3 {
             {
                 if(!dest.IsAny())
                 {
-                    SendCepEvent (e, dest);
+                    if (e->event_class == INTERMEDIATE_EVENT) {
+                        SendCepEvent (e, dest);
+                    } else {
+                        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+                        ee->Proceed(1, e->pkt, "send-packet", &Placement::SendCepEvent, this, e, dest);
+                    }
                 }
                 else
                 {

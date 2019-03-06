@@ -8,6 +8,7 @@
 #include "ns3/event-impl.h"
 #include "ns3/nstime.h"
 #include <vector>
+#include <map>
 
 namespace ns3 {
     class Thread;
@@ -27,6 +28,7 @@ namespace ns3 {
         // Name and arguments for target service
         std::string target;
         EventImpl *targetFPM;
+        std::map<std::string, std::vector<EventImpl*> > targets;
 
         // Used for temporary synchronization primitives
         void *tempSynch;
@@ -39,6 +41,16 @@ namespace ns3 {
         // EXPERIMENTATION:
         std::vector <Time> timestamps;
         int seqNr;
+
+        void ExecuteTrigger(const std::string checkpoint) {
+            if (!targets[checkpoint].empty()) {
+                executedByExecEnv = true;
+                auto toInvoke = targets[checkpoint].front();
+                toInvoke->Invoke();
+                toInvoke->Unref();
+                targets[checkpoint].erase(targets[checkpoint].begin());
+            }
+        }
     };
 }
 

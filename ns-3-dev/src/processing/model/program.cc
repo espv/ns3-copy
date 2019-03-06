@@ -167,6 +167,12 @@ CopyQueueExecutionEvent::CopyQueueExecutionEvent()
 }
 
 
+DuplicatePacketExecutionEvent::DuplicatePacketExecutionEvent()
+{
+	ExecutionEvent::type = DUPLICATEPKT;
+}
+
+
 LoopCondition::LoopCondition()
 {
   Condition::condType = LOOPCONDITION;

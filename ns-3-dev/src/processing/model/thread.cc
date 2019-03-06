@@ -134,6 +134,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 			return HandleQueueEvent(e);
 	    case COPYQUEUE:
 	        return HandleCopyQueueEvent(e);
+	    case DUPLICATEPKT:
+	        return HandleDuplicatePacketEvent(e);
 		case SCHEDULER: 
 			return HandleSchedulerEvent(e);
 		case SYNCHRONIZATION: 
@@ -540,13 +542,14 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 
 		if (m_currentLocation->curPkt != nullptr) {
 			ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-			if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
+			pktEI->ExecuteTrigger(newSem->trigger);
+			/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 				pktEI->executedByExecEnv = true;
 				pktEI->curThread = this;
 				EventImpl *toInvoke = pktEI->targetFPM;
 				toInvoke->Invoke();
 				//toInvoke->Unref();
-			}
+			}*/
 		}
 	} else {
 		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
@@ -563,13 +566,14 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 
 		// Here, we know the target is that of this packet
 		auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-		if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
+		pktEI->ExecuteTrigger(newSem->trigger);
+		/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 			pktEI->executedByExecEnv = true;
 			pktEI->curThread = this;
 			EventImpl *toInvoke = pktEI->targetFPM;
 			toInvoke->Invoke();
 			toInvoke->Unref();
-		}
+		}*/
 	}
 
 
@@ -902,14 +906,17 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
 			// We need call activate any prospective triggers on the queue
 			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 			std::string queueTarget = execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
-			if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo.target == queueTarget) {
+
+			ExecutionInfo *pktEI = &m_currentLocation->curPkt->m_executionInfo;
+			pktEI->ExecuteTrigger(queueTarget);
+			/*if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo.target == queueTarget) {
 				Ptr<Packet> curPkt = m_currentLocation->curPkt;
 				curPkt->m_executionInfo.executedByExecEnv = true;
 				curPkt->m_executionInfo.curThread = this;
 				EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
 				toInvoke->Invoke();
-				toInvoke->Unref();
-			}
+				//toInvoke->Unref();
+			}*/
 		}
 
 	return true;
@@ -942,6 +949,11 @@ bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
 	}
 
 	return true;
+}
+
+bool Thread::HandleDuplicatePacketEvent(ExecutionEvent* e) {
+	auto dupPkt = Create<Packet>(*m_currentLocation->curPkt);
+	m_currentLocation->curPkt = dupPkt;
 }
 
 bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {
@@ -1178,15 +1190,22 @@ void Thread::Dispatch() {
             ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
 			proceed = HandleExecutionEvent(e);
 
+            Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+            execEnv->currentlyExecutingThread = this;
+
 			if (m_currentLocation->curPkt != nullptr) {
 				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+				pktEI->ExecuteTrigger(e->checkpoint);
+				/*
 				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {
+                    Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+                    execEnv->currentlyExecutingThread = this;
 					pktEI->executedByExecEnv = true;
 					pktEI->curThread = this;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
-                    toInvoke->Unref();
-				}
+                    //toInvoke->Unref();
+				}*/
 			}
 
 			/* Must check if there are any more statements to execute. If not,

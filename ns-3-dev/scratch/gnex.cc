@@ -71,7 +71,7 @@ void GnexProtocolStack::IPReceive(Ptr<Packet> packet, Ptr<Node> node) {
         std::cout << Simulator::Now() << ": " << "IP receives packet " << packet->m_executionInfo.seqNr << std::endl;
 
     // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    execenv->Proceed(packet, "nicdriver::transmit", &GnexProtocolStack::DriverTransmit, this, packet, node);
+    execenv->Proceed(1, packet, "nicdriver::transmit", &GnexProtocolStack::DriverTransmit, this, packet, node);
 }
 
 void GnexProtocolStack::DriverReceive(Ptr<Packet> packet, Ptr<Node> node) {
@@ -82,7 +82,7 @@ void GnexProtocolStack::DriverReceive(Ptr<Packet> packet, Ptr<Node> node) {
         std::cout << Simulator::Now() << ": " << "Driver receives packet " << packet->m_executionInfo.seqNr << std::endl;
 
     // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    execenv->Proceed(packet, "ip::receive", &GnexProtocolStack::IPReceive, this, packet, node);
+    execenv->Proceed(1, packet, "ip::receive", &GnexProtocolStack::IPReceive, this, packet, node);
 }
 
 void GnexProtocolStack::MeasureStart(Ptr<Packet> packet, Ptr<Node> node) {
@@ -95,7 +95,7 @@ void GnexProtocolStack::MeasureStart(Ptr<Packet> packet, Ptr<Node> node) {
     // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
     // execenv->Proceed(packet, "ip::receive", &GnexProtocolStack::IPReceive, this, packet, node);
     packet->m_executionInfo.executedByExecEnv = false;
-    execenv->Proceed(packet, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
+    execenv->Proceed(1, packet, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
 }
 
 void GnexProtocolStack::DriverTransmit(Ptr<Packet> packet, Ptr<Node> node) {
@@ -108,7 +108,7 @@ void GnexProtocolStack::DriverTransmit(Ptr<Packet> packet, Ptr<Node> node) {
     // std::cout << "DELTA: " << packet->m_executionInfo.timestamps[1] - packet->m_executionInfo.timestamps[0] << std::endl;
     // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
 
-    execenv->Proceed(packet, "nic::transmit", &GnexProtocolStack::NICSend, this, packet, node);
+    execenv->Proceed(1, packet, "nic::transmit", &GnexProtocolStack::NICSend, this, packet, node);
 }
 
 Gnuplot *ppsPlot = NULL;
@@ -178,7 +178,7 @@ void GnexProtocolStack::NICReceive(Ptr<Packet> packet, Ptr<Node> node) {
     Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
 
     packet->m_executionInfo.executedByExecEnv = false;
-    execenv->Proceed(packet, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
+    execenv->Proceed(1, packet, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
     // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
 
     // If the queue was empty before, that means the driver was

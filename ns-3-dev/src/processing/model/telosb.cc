@@ -69,7 +69,7 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
     radio.rxfifo_overflow = true;
   }
 
-  execenv->Proceed(packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
+  execenv->Proceed(1, packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
   if (receivingPacket) {
     execenv->queues["rxfifo"]->Enqueue(packet);
     NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: "
@@ -113,7 +113,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
   } else {
     execenv->globalStateVariables["packet-collided"] = 0;
     NS_LOG_INFO ("readDone_payload seqno: " << packet->m_executionInfo.seqNr);
-    execenv->Proceed(packet, "receivedone", &TelosB::receiveDone_task, this, packet);
+    execenv->Proceed(1, packet, "receivedone", &TelosB::receiveDone_task, this, packet);
   }
 
   NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload " << packet->m_executionInfo.seqNr
@@ -134,11 +134,11 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);
     execenv->globalStateVariables["ipaq-full"] = 0;
-    execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
+    execenv->Proceed(1, packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
   } else if (execenv->queues["ipaq"]->GetNPackets() < 3) {
     execenv->globalStateVariables["ipaq-full"] = 0;
-    execenv->Proceed(packet, "sendtask", &TelosB::sendTask, this, packet);
+    execenv->Proceed(1, packet, "sendtask", &TelosB::sendTask, this, packet);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
   } else {
     ++ps->nr_packets_dropped_ip_layer;
@@ -161,7 +161,7 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
 void TelosB::sendTask(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   packet->m_executionInfo.executedByExecEnv = false;
-  execenv->Proceed(packet, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
+  execenv->Proceed(1, packet, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
   execenv->globalStateVariables["ip-radio-busy"] = 1;
 
   NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);

@@ -110,6 +110,7 @@ public:
 	bool HandleExecuteEvent(ExecutionEvent* e);
 	bool HandleQueueEvent(ExecutionEvent* e);
 	bool HandleCopyQueueEvent(ExecutionEvent* e);
+	bool HandleDuplicatePacketEvent(ExecutionEvent* e);
 	bool HandleSchedulerEvent(ExecutionEvent* e);
 	bool HandleSyncEvent(ExecutionEvent* e);
 	bool HandleCondition(ExecutionEvent* e);

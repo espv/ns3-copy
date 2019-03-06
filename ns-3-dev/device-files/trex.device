@@ -51,15 +51,16 @@ SYNCH
 # type 0 is a semaphore
 threads-cepops-SEM 0 1
 packet-threads-SEM 0 0
+complex-pkts-SEM 0 1
 
 CONDITIONS
 
 TRIGGERS
-SERVICE handle-cepops handle-cepops
 SERVICE handle-then-cepop handle-then-cepop
 SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
 LOC within-send-packet send-packet
+LOC call-to-handle-then-cepop handle-cepops
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -148,7 +149,9 @@ x CALL process_received_packet  # This ends with handle-cepops trigger being put
 # Now we enqueue the packet as many times as there are threads to process the event.
 # Each packet will cause a trigger.
 x ENQUEUE PKTQUEUE 0 rcvd-pkts-t1
+#x DUPLICATEPKT
 x ENQUEUE PKTQUEUE 0 rcvd-pkts-t2
+#x DUPLICATEPKT
 x ENQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x COPYQUEUE CEPQUERYQUEUE all-cepops threads-cepops
 x TTWAKEUP event_thread1
@@ -296,9 +299,27 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 LOOPSTART 0 complex-pkts complex-pkts 0
+x SEMDOWN complex-pkts-SEM global
+x QUEUECOND complex-pkts complex-pkts notempty
 x                      DEQUEUE		PKTQUEUE 0 complex-pkts
+x SEMUP complex-pkts-SEM global
 # Perhaps we need to process a certain amount for each attribute in the complex event?
 x PROCESS 20000 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME handle-created-complex-events
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART 0 complex-pkts complex-pkts 0
+x SEMDOWN complex-pkts-SEM global
+x QUEUECOND complex-pkts complex-pkts empty
+x SEMUP complex-pkts-SEM global
 0 RESTART
 
 SIGEND
@@ -313,8 +334,8 @@ FRACTION 100% 1 1
 0 START
 x STATECOND CepOpDoneYet read local 0
 x STATECOND InsertedSequence read local 1
-#x PROCESS 36000 0  # 9
-#x PROCESS 36000 0  # 10
+x PROCESS 36000 0  # 9
+x PROCESS 36000 0  # 10
 x CALL handle-then-cepop
 0 STOP
 
@@ -375,10 +396,10 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 LOOPSTART     0 threads-cepops threads-cepops 0
-x SEMDOWN threads-cepops-SEM global
-x DEQUEUE CEPQUERYQUEUE 0 0
+call-to-handle-then-cepop DEQUEUE CEPQUERYQUEUE 0 0
 x SEMUP threads-cepops-SEM global
 x CALL handle-then-cepop
+x SEMDOWN threads-cepops-SEM global
 0 RESTART
 
 SIGEND
@@ -409,8 +430,10 @@ FRACTION 100% 1 1
 x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t1
 x PROCESS 36000 0  # 4
+x SEMDOWN threads-cepops-SEM global
 x LOOP handle-cepops 0 threads-cepops threads-cepops 0
-x CALL handle-created-complex-events
+x SEMUP threads-cepops-SEM global
+x LOOP handle-created-complex-events 0 complex-pkts complex-pkts 0
 x SEMUP packet-threads-SEM global
 0 STOP
 
@@ -442,8 +465,10 @@ FRACTION 100% 1 1
 x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t2
 x PROCESS 36000 0  # 4
+x SEMDOWN threads-cepops-SEM global
 x LOOP handle-cepops 0 threads-cepops threads-cepops 0
-x CALL handle-created-complex-events
+x SEMUP threads-cepops-SEM global
+x LOOP handle-created-complex-events 0 complex-pkts complex-pkts 0
 x SEMUP packet-threads-SEM global
 0 STOP
 
@@ -475,7 +500,9 @@ FRACTION 100% 1 1
 x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x PROCESS 36000 0  # 4
+x SEMDOWN threads-cepops-SEM global
 x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x SEMUP threads-cepops-SEM global
 x LOOP handle-created-complex-events 0 complex-pkts complex-pkts 0
 x SEMUP packet-threads-SEM global
 0 STOP
@@ -489,4 +516,4 @@ packet_thread2 packet_processing_thread infinite 0
 packet_thread3 packet_processing_thread infinite 0
 event_thread1 event_processing_thread1 infinite 0
 event_thread2 event_processing_thread2 infinite 0
-event_thread3 event_processing_thread3 infinite 0
+#event_thread3 event_processing_thread3 infinite 0

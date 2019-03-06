@@ -91,6 +91,7 @@ enum ExecutionEventType {
   SYNCHRONIZATION,
   QUEUE,
   COPYQUEUE,
+  DUPLICATEPKT,
   CONDITION,
   TEMPSYNCH,
   END,
@@ -421,6 +422,11 @@ public:
 
     std::string fromQueue;
     std::string toQueue;
+};
+
+class DuplicatePacketExecutionEvent : public ExecutionEvent {
+public:
+    DuplicatePacketExecutionEvent();
 };
 
 class SEM;

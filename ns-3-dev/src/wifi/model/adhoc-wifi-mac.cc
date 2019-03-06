@@ -208,7 +208,7 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
 //        // Create packet, and specify ReceivePacketTest to be
 //        // triggered upon hitting "bcm4329::nic::enqueueonnic"
 //        if(ee) {
-//                if(ee->Proceed(packet, "ENQUEUEnic::tx", &AdhocWifiMac::Receive, this, packet, hdrCopy)) {
+//                if(ee->Proceed(1, packet, "ENQUEUEnic::tx", &AdhocWifiMac::Receive, this, packet, hdrCopy)) {
 //                              ee->queues["nic::rx"]->Enqueue(packet);
 //
 //                              // Set intr-register to correct value
