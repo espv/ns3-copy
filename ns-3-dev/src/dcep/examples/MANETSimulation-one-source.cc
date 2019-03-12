@@ -140,7 +140,7 @@ int main(int argc, char** argv) {
     staticMobility.SetPositionAllocator (positionAlloc2);
     staticMobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
 
-    for (uint32_t i = 0; i < numStationary; i++) 
+    for (uint32_t i = 0; i < numStationary; i++)
     {
 	staticMobility.Install (allNodesContainer.Get(i));
     }
@@ -221,7 +221,22 @@ int main(int argc, char** argv) {
     dcepApps.Stop (Seconds (1000));
 
     Simulator::Stop (Seconds (1300.0));
-     
+
+    AnimationInterface anim("netanim-output.xml");
+    anim.EnablePacketMetadata (true);
+    uint32_t house_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/house-icon.png");
+    AnimationInterface::SetConstantPosition (allNodesContainer.Get(0), 150.0, 150.0);
+    uint32_t raspberry_pi_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/raspberry-pi.png");
+    AnimationInterface::SetConstantPosition (allNodesContainer.Get(1), 350.0, 350.0);
+    uint32_t fire_station_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/fire-station.png");
+    AnimationInterface::SetConstantPosition (allNodesContainer.Get(2), 550.0, 550.0);
+    anim.UpdateNodeImage (0, house_icon_resource);
+    anim.UpdateNodeImage (1, raspberry_pi_icon_resource);
+    anim.UpdateNodeImage (2, fire_station_icon_resource);
+    anim.SetBackgroundImage ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/plain-white-background.jpg", -413, -275, 1, 1, 1);
+    anim.UpdateNodeSize (0, 50, 50);
+    anim.UpdateNodeSize (1, 50, 50);
+    anim.UpdateNodeSize (2, 50, 50);
     Simulator::Run ();
     Simulator::Destroy ();
     
