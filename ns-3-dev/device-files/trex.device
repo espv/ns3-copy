@@ -37,8 +37,8 @@ threads-cepops FIFO -1 cepqueries
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 128 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 256 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 3 cpu3 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
@@ -158,8 +158,8 @@ x TTWAKEUP event_thread1
 x TTWAKEUP event_thread2
 x TTWAKEUP event_thread3
 x SEMDOWN packet-threads-SEM global
-x SEMDOWN packet-threads-SEM global
-x SEMDOWN packet-threads-SEM global
+#x SEMDOWN packet-threads-SEM global
+#x SEMDOWN packet-threads-SEM global
 # Now, the results have been collected and we send them to any subscribers
 x PROCESS 10000 0
 0 STOP
@@ -512,8 +512,8 @@ SIGEND
 
 THREADS
 packet_thread1 packet_processing_thread infinite 0
-packet_thread2 packet_processing_thread infinite 0
-packet_thread3 packet_processing_thread infinite 0
+#packet_thread2 packet_processing_thread infinite 0
+#packet_thread3 packet_processing_thread infinite 0
 event_thread1 event_processing_thread1 infinite 0
-event_thread2 event_processing_thread2 infinite 0
+#event_thread2 event_processing_thread2 infinite 0
 #event_thread3 event_processing_thread3 infinite 0
