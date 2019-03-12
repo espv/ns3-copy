@@ -168,12 +168,13 @@ namespace ns3 {
             {
                 if(!dest.IsAny())
                 {
-                    if (e->event_class == INTERMEDIATE_EVENT) {
+                    /*if (e->event_class == INTERMEDIATE_EVENT) {
                         SendCepEvent (e, dest);
                     } else {
                         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
                         ee->Proceed(1, e->pkt, "send-packet", &Placement::SendCepEvent, this, e, dest);
-                    }
+                    }*/
+                    SendCepEvent(e, dest);
                 }
                 else
                 {
@@ -450,7 +451,7 @@ namespace ns3 {
                 placed = true;
             }*/
 
-            dstate->SetNextHop(q->eventType, cm->GetLocalAddress());
+            dstate->SetNextHop(q->eventType, "10.0.0.1");
             placed = true;
 
         }
