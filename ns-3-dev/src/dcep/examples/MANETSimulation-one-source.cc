@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     std::string placementPolicy ("centralized");
     std::string adaptationMechanism ("FastAdaptationMechanism");
     uint32_t numberOfCepEvents = 100;
-    uint32_t numStationary = 3;  // Two stationaries where one is data source and the other sink
+    uint32_t numStationary = 5;  // Two stationaries where one is data source and the other sink
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
@@ -128,8 +128,10 @@ int main(int argc, char** argv) {
     Ptr<ListPositionAllocator> positionAlloc2 = CreateObject<ListPositionAllocator> ();
 
     positionAlloc2->Add (Vector (150.0, 150.0, 0.0));
-    positionAlloc2->Add (Vector (350.0, 350.0, 0.0));//sink
-    positionAlloc2->Add (Vector (550.0, 550.0, 0.0));
+    positionAlloc2->Add (Vector (150.0, 250.0, 0.0));
+    positionAlloc2->Add (Vector (350.0, 200.0, 0.0));//sink
+    positionAlloc2->Add (Vector (550.0, 150.0, 0.0));
+    positionAlloc2->Add (Vector (550.0, 250.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 310.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 510.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 710.0, 0.0));
@@ -184,7 +186,7 @@ int main(int argc, char** argv) {
     // Espen
 
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
-    Ipv4Address sinkAddress = wifiInterfaces.GetAddress (1);
+    Ipv4Address sinkAddress = wifiInterfaces.GetAddress (2);
 
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
     uint32_t random_number = x->GetInteger (1,99999);
@@ -192,19 +194,18 @@ int main(int argc, char** argv) {
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement_policy", StringValue(placementPolicy));
-        if(i == 1)
+        if(i == 2)
         {
             NS_LOG_INFO("sink...");
             dcepApps.Get(i)->SetAttribute("IsSink", BooleanValue(true));
         }
-        else if (i == 0)//data generator
+        else if (i < 2)//data generator
         {
             NS_LOG_INFO("generator...");
             dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
             dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (random_number % 20 + 2));
             dcepApps.Get(i)->SetAttribute("number_of_events", UintegerValue (numberOfCepEvents));
             dcepApps.Get(i)->SetAttribute("event_interval", UintegerValue (eventInterval));
-
         }
     }
     

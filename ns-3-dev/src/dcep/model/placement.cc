@@ -413,18 +413,20 @@ namespace ns3 {
                 placed = true;
                 
             }
-            else if(q->eventType == "B")
+            else*/
+            if(q->eventType == "B")
+            {
+                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
+                placed = true;
+                
+            }
+            else if (q->eventType == "C")
             {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.2"));
                 placed = true;
                 
             }
-            else if (q->eventType == "C") 
-            {
-                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.4"));
-                placed = true;
-                
-            } else if (q->eventType == "D") 
+            /*else if (q->eventType == "D")
             {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.5"));
                 placed = true;
@@ -451,8 +453,8 @@ namespace ns3 {
                 placed = true;
             }*/
 
-            dstate->SetNextHop(q->eventType, "10.0.0.1");
-            placed = true;
+            //dstate->SetNextHop(q->eventType, "10.0.0.1");
+            //placed = true;
 
         }
 

@@ -312,7 +312,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Sink::BuildTRexQueries(Ptr<Dcep> dcep)
     {
-        std::list<std::string> eventTypes {"BC", "DE", "FG", "HI", "JK", "LM", "NO", "PQ", "RS", "TU"};
+        std::list<std::string> eventTypes {"BC"}; //, "DE", "FG", "HI", "JK", "LM", "NO", "PQ", "RS", "TU"};
         int complex_event_cnt = 0;
         uint32_t query_counter = 1;
         double in_seconds = 0;
@@ -321,7 +321,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "then" + event2;
-            for (int temp = 1; temp <= 100; temp++)
+            for (int temp = 1; temp <= 10; temp++)
             {
                 Ptr<Query> q1 = CreateObject<Query> ();
                 q1->actionType = NOTIFICATION;
@@ -570,7 +570,16 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         NS_LOG_INFO ("Starting to generate events of type " << eventCode );
 
-        do {
+        uint32_t random_number = x->GetInteger (1,99999);
+        if (eventType == "B") {
+            m_eventType = eventType;
+            m_eventValues["value"] = random_number % 10;
+        } else if (eventType == "C") {
+            m_eventType = eventType;
+            m_eventValues["percentage"] = 25;
+        }
+
+        /*do {
             m_eventValues.clear();
             uint32_t random_number = x->GetInteger (1,99999);
             eventCode = (random_number%20)+2;  // Want to select Temperature and Humidity
@@ -664,7 +673,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     m_eventType = " ";
 
             }
-        } while (dcep->GetObject<DcepState>()->lookUpCepEventRoutingTable(m_eventType)->source_query == nullptr);
+        } while (dcep->GetObject<DcepState>()->lookUpCepEventRoutingTable(m_eventType)->source_query == nullptr);*/
 
         if(m_eventType != " ")
         {
