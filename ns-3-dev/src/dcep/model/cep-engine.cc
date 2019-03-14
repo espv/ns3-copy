@@ -579,7 +579,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
-            if (e->values[c->var_name] && e->values[c->var_name] != c->var_value)
+            if (e->values[c->var_name] || e->values[c->var_name] != c->var_value)
                 constraintsFulfilled = false;
         }
 
