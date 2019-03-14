@@ -105,7 +105,7 @@
 <nu p="s" t="0" id="3" w="1" h="1" />
 <nu p="s" t="0" id="4" w="1" h="1" />
 <ncs ncId="0" n="RemainingEnergy" t="DOUBLE" />
-<res rid="0" p="/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/temperature.png" />
+<res rid="0" p="/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/thermometer.png" />
 <res rid="1" p="/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/humidity.png" />
 <nu p="p" t="0" id="0" x="150" y="150" />
 <res rid="2" p="/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/raspberry-pi.png" />
