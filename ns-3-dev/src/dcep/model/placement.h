@@ -141,6 +141,8 @@ class Placement : public Object
         void SendQueryToCepEngine (Ptr<Query> q);
         
         void RecvQuery(Ptr<Query> q);
+
+        Ipv4Address SinkAddressForEvent(Ptr<CepEvent> e);
         
         
         

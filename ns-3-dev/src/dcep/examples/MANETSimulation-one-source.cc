@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
     std::string placementPolicy ("centralized");
     std::string adaptationMechanism ("FastAdaptationMechanism");
     uint32_t numberOfCepEvents = 100;
-    uint32_t numStationary = 5;  // Two stationaries where one is data source and the other sink
+    uint32_t numStationary = 4;  // Four stationaries where two are data source, one is a T-Rex server and the last is a subscriber
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
@@ -130,8 +130,7 @@ int main(int argc, char** argv) {
     positionAlloc2->Add (Vector (150.0, 150.0, 0.0));
     positionAlloc2->Add (Vector (150.0, 250.0, 0.0));
     positionAlloc2->Add (Vector (350.0, 200.0, 0.0));//sink
-    positionAlloc2->Add (Vector (550.0, 150.0, 0.0));
-    positionAlloc2->Add (Vector (550.0, 250.0, 0.0));
+    positionAlloc2->Add (Vector (550.0, 200.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 310.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 510.0, 0.0));
 //    positionAlloc2->Add (Vector (925.0, 710.0, 0.0));
@@ -225,19 +224,22 @@ int main(int argc, char** argv) {
 
     AnimationInterface anim("netanim-output.xml");
     anim.EnablePacketMetadata (true);
-    uint32_t house_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/house-icon.png");
-    AnimationInterface::SetConstantPosition (allNodesContainer.Get(0), 150.0, 150.0);
+    uint32_t temperature_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/thermometer.png");
+    uint32_t humidity_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/humidity.png");
+    //AnimationInterface::SetConstantPosition (allNodesContainer.Get(0), 150.0, 150.0);
     uint32_t raspberry_pi_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/raspberry-pi.png");
-    AnimationInterface::SetConstantPosition (allNodesContainer.Get(1), 350.0, 350.0);
-    uint32_t fire_station_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/fire-station.png");
-    AnimationInterface::SetConstantPosition (allNodesContainer.Get(2), 550.0, 550.0);
-    anim.UpdateNodeImage (0, house_icon_resource);
-    anim.UpdateNodeImage (1, raspberry_pi_icon_resource);
-    anim.UpdateNodeImage (2, fire_station_icon_resource);
+    //AnimationInterface::SetConstantPosition (allNodesContainer.Get(1), 350.0, 350.0);
+    uint32_t control_center_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/control-center.png");
+    //AnimationInterface::SetConstantPosition (allNodesContainer.Get(2), 550.0, 550.0);
+    anim.UpdateNodeImage (0, temperature_icon_resource);
+    anim.UpdateNodeImage (1, humidity_icon_resource);
+    anim.UpdateNodeImage (2, raspberry_pi_icon_resource);
+    anim.UpdateNodeImage (3, control_center_icon_resource);
     anim.SetBackgroundImage ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/plain-white-background.jpg", -413, -275, 1, 1, 1);
     anim.UpdateNodeSize (0, 50, 50);
     anim.UpdateNodeSize (1, 50, 50);
     anim.UpdateNodeSize (2, 50, 50);
+    anim.UpdateNodeSize (3, 50, 50);
     Simulator::Run ();
     Simulator::Destroy ();
     

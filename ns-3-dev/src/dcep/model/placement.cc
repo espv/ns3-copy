@@ -192,11 +192,20 @@ namespace ns3 {
         GetObject<CEPEngine>()->ProcessCepEvent(e);
     }
 
+
+    Ipv4Address
+    Placement::SinkAddressForEvent(Ptr<CepEvent> e)
+    {
+        return Ipv4Address("10.0.0.4");
+    }
+
     
     void
     Placement::SendCepEventToSink(Ptr<CepEvent> e)
     {
-        GetObject<Dcep>()->SendFinalCepEventToSink(e);
+        //GetObject<Dcep>()->SendFinalCepEventToSink(e);
+        auto dest = SinkAddressForEvent(e);
+        SendCepEvent(e, dest);
     }
 
 
