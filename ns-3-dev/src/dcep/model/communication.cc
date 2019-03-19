@@ -150,7 +150,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
                 
                 if (InetSocketAddress::IsMatchingType (from))
                 {
-                       NS_LOG_INFO ("At time " << Simulator::Now ().GetMilliSeconds()
+                       NS_LOG_INFO (Simulator::Now() << " At time " << Simulator::Now ().GetMilliSeconds()
                        << " ms packet of type " << dcepHeader.GetContentType()
                        << " from "
                        << InetSocketAddress::ConvertFrom(from).GetIpv4 ()
@@ -210,7 +210,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
     {
         if(m_sendQueue2->GetNPackets() > 0)
         {
-            Ptr<Packet> p = (Ptr<Packet>)m_sendQueue2->Dequeue();
+            Ptr<Packet> p = m_sendQueue2->Dequeue();
             DcepHeader dcepHeader;
             Ipv4Header ipv4;
             p->RemoveHeader(ipv4);
@@ -230,7 +230,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             if ((m_socket->Send (pp)) >= 0)
             {
 
-                NS_LOG_INFO ("SUCCESSFUL TX from : " << host_address
+                NS_LOG_INFO (Simulator::Now() << " SUCCESSFUL TX from : " << host_address
                         << " to : " << ipv4.GetDestination()
                         << " packet size "
                         << pp->GetSize());
@@ -239,7 +239,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             }
             else
             {
-              NS_LOG_INFO ("Error " << m_socket->GetErrno());
+              NS_LOG_INFO (Simulator::Now() << " Error " << m_socket->GetErrno());
 
             }
 
@@ -247,7 +247,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
             if (!itemSent) //we push it back at the rear of the queue
             {
-                NS_LOG_INFO ("COMMUNICATION: Rescheduling item!");
+                NS_LOG_INFO (Simulator::Now() << " COMMUNICATION: Rescheduling item!");
                 m_sendQueue2->Enqueue(item);
             }
 

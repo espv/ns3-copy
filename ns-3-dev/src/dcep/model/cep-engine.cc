@@ -719,7 +719,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 break;
                 
             default:
-                NS_LOG_INFO("Not applying any selection policy");
+                NS_LOG_INFO(Simulator::Now() << " Not applying any selection policy");
         }
         
     }
@@ -735,7 +735,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             events2.push_back(e);
         } else
         {
-            NS_LOG_INFO("BufferManager::put_event: Unknown event type");
+            NS_LOG_INFO(Simulator::Now() << " BufferManager::put_event: Unknown event type");
         }
 
         /*
@@ -778,7 +778,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         switch(consumption_policy)
         {
             case SELECTED_CONSUMPTION:
-                NS_LOG_INFO("Applying consumption policy " << SELECTED_CONSUMPTION);
+                NS_LOG_INFO(Simulator::Now() << " Applying consumption policy " << SELECTED_CONSUMPTION);
                 // Consuming event 1
                 for (auto event : events) {
                     for (auto it     = events1.begin(); it != events1.end(); it++) {
@@ -805,7 +805,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 break;
                 
             default:
-                NS_LOG_INFO("Not applying any consumption policy");
+                NS_LOG_INFO(Simulator::Now() << " Not applying any consumption policy");
                 
         }
         
@@ -1027,7 +1027,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         message->prevHopsCount = this->prevHopsCount;
         message->m_seq = this->m_seq;
         message->values = this->values;
-        NS_LOG_INFO("serialized type " << message->type);
+        NS_LOG_INFO(Simulator::Now() << " serialized type " << message->type);
         
         return message;
        
@@ -1125,34 +1125,34 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Query::deserialize(uint8_t *buffer, uint32_t size)
     {
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         SerializedQuery *message = new SerializedQuery();
         memcpy(message, buffer, size);
         NS_LOG_INFO("DESERIALIZED MESSAGE " << message->eventType);
         this->actionType = message->actionType;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         this->id = message->q_id;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         this->isFinal = message->isFinal;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         this->isAtomic = message->isAtomic;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         this->eventType = message->eventType;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         
         this->output_dest = Ipv4Address::Deserialize(message->output_dest);
         this->inputStream1_address = Ipv4Address::Deserialize(message->inputStream1_address);
         this->inputStream2_address = Ipv4Address::Deserialize(message->inputStream2_address);
         this->currentHost = Ipv4Address::Deserialize(message->currentHost);
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         this->inevent1 = message->inevent1;
         this->inevent2 = message->inevent2;
         this->parent_output = message->parent_output;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
         this->op = message->op;
         this->assigned = message->assigned;
         this->constraints = message->constraints;
-        NS_LOG_INFO ("1");
+        //NS_LOG_INFO ("1");
     }
     
 }

@@ -79,7 +79,7 @@ namespace ns3 {
             
             if (s1.Get() == "centralized")// the default
             {
-                NS_LOG_INFO("Centralized placement mechanism");
+                NS_LOG_INFO(Simulator::Now() << " Centralized placement mechanism");
 
                 p_policy = CreateObject<CentralizedPlacementPolicy>();
 
@@ -280,11 +280,11 @@ namespace ns3 {
     void 
     Placement::ForwardRemoteQuery(std::string eType)
     {
-        NS_LOG_INFO ("PLACEMENT: SENDING QUERY TO REMOTE NODE");
+        NS_LOG_INFO (Simulator::Now() << " PLACEMENT: SENDING QUERY TO REMOTE NODE");
         
         Ptr<DcepState> dstate = GetObject<DcepState>();
         SerializedQuery *message= dstate->GetQuery(eType)->serialize();
-        NS_LOG_INFO ("QUERY BEING SENT " << message->eventType);
+        NS_LOG_INFO (Simulator::Now() << " QUERY BEING SENT " << message->eventType);
         uint8_t *buffer = new uint8_t[message->size];
         memcpy(buffer, message, message->size);
 
@@ -312,7 +312,7 @@ namespace ns3 {
     void Placement::ForwardQuery(std::string eType) 
     {
 
-        NS_LOG_INFO("Forwarding partial query to its destination");
+        NS_LOG_INFO(Simulator::Now() << " Forwarding partial query to its destination");
         Ptr<DcepState> dstate = GetObject<DcepState>();
         
         if (dstate->GetNextHop(eType).IsAny())
@@ -374,7 +374,7 @@ namespace ns3 {
     void
     CentralizedPlacementPolicy::DoPlacement() 
     {
-        NS_LOG_INFO ("Doing centralized placement");
+        NS_LOG_INFO (Simulator::Now() << " Doing centralized placement");
         Ptr<Placement> p = GetObject<Placement>();
 
         std::vector<Ptr < Query>>::iterator it;
@@ -469,11 +469,11 @@ namespace ns3 {
 
         if (placed) 
         {
-            NS_LOG_INFO ("QUERY WILL BE PLACED");
+            NS_LOG_INFO (Simulator::Now() << " QUERY WILL BE PLACED");
             newLocalPlacement(q->eventType);
             if(dstate->GetNextHop(q->eventType).IsEqual(cm->GetLocalAddress()))
             {
-                NS_LOG_INFO ("QUERY PLACED ON LOCAL NODE");
+                NS_LOG_INFO (Simulator::Now() << " QUERY PLACED ON LOCAL NODE");
                 if (!q->isAtomic)
                     dstate->SetOutDest(q->eventType, cm->GetLocalAddress());
                 else
