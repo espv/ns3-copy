@@ -364,25 +364,21 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     NumberConstraint::Evaluate(Ptr<CepEvent> e)
     {
+        if (e->numberValues.find(var_name) == e->numberValues.end())
+            return true;
         switch (type) {
             case EQCONSTRAINT:
                 return e->numberValues[var_name] == numberValue;
-                break;
             case INEQCONSTRAINT:
                 return e->numberValues[var_name] != numberValue;
-                break;
             case LTCONSTRAINT:
                 return e->numberValues[var_name] < numberValue;
-                break;
             case LTECONSTRAINT:
                 return e->numberValues[var_name] <= numberValue;
-                break;
             case GTCONSTRAINT:
                 return e->numberValues[var_name] > numberValue;
-                break;
             case GTECONSTRAINT:
                 return e->numberValues[var_name] >= numberValue;
-                break;
             default:
                 NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
         }
@@ -394,10 +390,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         switch (type) {
             case EQCONSTRAINT:
                 return e->stringValues[var_name] == stringValue;
-                break;
             case INEQCONSTRAINT:
                 return e->stringValues[var_name] != stringValue;
-                break;
             default:
                 NS_FATAL_ERROR("String constraints can only have equality or inequality constraints");
         }

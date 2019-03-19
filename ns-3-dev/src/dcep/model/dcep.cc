@@ -321,7 +321,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "then" + event2;
-            for (int temp = 0; temp <= 10; temp++)
+            for (int temp = 0; temp <= 0; temp++)
             {
                 Ptr<Query> q1 = CreateObject<Query> ();
                 q1->actionType = NOTIFICATION;
@@ -376,10 +376,17 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q3->inevent2 = event2;
                 q3->window = Seconds(15);
                 q3->isFinalWithinNode = true;
-                Ptr<NumberConstraint> c = CreateObject<NumberConstraint> ();
-                c->var_name = "value";
-                c->numberValue = 0;
-                q3->constraints.push_back(c);
+                Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+                c1->var_name = "value";
+                c1->numberValue = 45;
+                c1->type = GTCONSTRAINT;
+                q3->constraints.emplace_back(c1);
+
+                Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+                c2->var_name = "percentage";
+                c2->numberValue = 25;
+                c2->type = LTCONSTRAINT;
+                q3->constraints.emplace_back(c2);
                 /*c = CreateObject<Constraint> ();
                 c->var_name = "percentage";
                 c->var_value = temp % 10;
@@ -573,107 +580,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         uint32_t random_number = x->GetInteger (1,99999);
         if (eventType == "B") {
             m_eventType = eventType;
-            m_eventNumberValues["value"] = random_number % 10;
+            m_eventNumberValues["value"] = 46;
         } else if (eventType == "C") {
             m_eventType = eventType;
-            m_eventNumberValues["percentage"] = 25;
+            m_eventNumberValues["percentage"] = 21;
         }
-
-        /*do {
-            m_eventValues.clear();
-            uint32_t random_number = x->GetInteger (1,99999);
-            eventCode = (random_number%20)+2;  // Want to select Temperature and Humidity
-            //eventCode = (random_number%10)*2+2;  // We only want to select Temperature
-            random_number = x->GetInteger (1,99999);
-            switch (eventCode) {
-                case 1:  // Fire
-                    m_eventType = "A";
-                    break;
-                case 2:  // Temperature
-                    m_eventType = "B";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 3:  // Humidity
-                    m_eventType = "C";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 4:  // Temperature
-                    m_eventType = "D";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 5:  // Humidity
-                    m_eventType = "E";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 6:  // Temperature
-                    m_eventType = "F";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 7:  // Humidity
-                    m_eventType = "G";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 8:  // Temperature
-                    m_eventType = "H";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 9:  // Humidity
-                    m_eventType = "I";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 10:  // Temperature
-                    m_eventType = "J";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 11:  // Humidity
-                    m_eventType = "K";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 12:  // Temperature
-                    m_eventType = "L";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 13:  // Humidity
-                    m_eventType = "M";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 14:  // Temperature
-                    m_eventType = "N";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 15:  // Humidity
-                    m_eventType = "O";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 16:  // Temperature
-                    m_eventType = "P";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 17:  // Humidity
-                    m_eventType = "Q";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 18:  // Temperature
-                    m_eventType = "R";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 19:  // Humidity
-                    m_eventType = "S";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                case 20:  // Temperature
-                    m_eventType = "T";
-                    m_eventValues["value"] = random_number % 10;
-                    break;
-                case 21:  // Humidity
-                    m_eventType = "U";
-                    m_eventValues["percentage"] = 25;
-                    break;
-                default:
-                    m_eventType = " ";
-
-            }
-        } while (dcep->GetObject<DcepState>()->lookUpCepEventRoutingTable(m_eventType)->source_query == nullptr);*/
 
         if(m_eventType != " ")
         {
