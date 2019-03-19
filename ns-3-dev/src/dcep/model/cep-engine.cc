@@ -196,6 +196,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
     {
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        auto node = GetObject<Dcep>()->GetNode();
 
         if (e->event_class != INTERMEDIATE_EVENT) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
@@ -261,6 +262,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(q->isAtomic)
         {
             /* instantiate atomic event */
+            Ptr<CepOperator> cepOp = CreateObject<AtomicOperator>();
+            cepOp->Configure(q, this);
+            this->ops_queue.push_back(cepOp);
+            GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
             GetObject<Dcep>()->ActivateDatasource(q);
         }
         else
@@ -429,6 +434,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         return tid;
     }
+
+    TypeId
+    AtomicOperator::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::AtomicOperator")
+                .SetParent<CepOperator> ()
+        ;
+
+        return tid;
+    }
     
     TypeId
     AndOperator::GetTypeId(void)
@@ -458,6 +473,17 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         ;
         
         return tid;
+    }
+
+    void
+    AtomicOperator::Configure(Ptr<Query> q, Ptr<CEPEngine> cep)
+    {
+        this->queryId = q->id;
+        this->event1 = q->inevent1;
+        this->event2 = q->inevent2;
+        this->constraints = q->constraints;
+
+        cepEngine = cep;
     }
     
     void
@@ -515,6 +541,32 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bufman->Configure(this);
         this->bufman = bufman;
         cepEngine = cep;
+    }
+
+    bool
+    AtomicOperator::Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
+    {
+        bool constraintsFulfilled = true;
+        for (auto c : constraints)
+        {
+            // All constraints must be fulfilled for constraintsFulfilled to be true
+            constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
+        }
+
+        Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
+        if (!constraintsFulfilled) {
+            if (e->event_class != INTERMEDIATE_EVENT) {
+                Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
+                auto ee = node->GetObject<ExecEnv>();
+            }
+            return false;
+        }
+
+        p->GetObject<Forwarder>()->ForwardNewCepEvent(e);
+        return true;
     }
 
     bool
@@ -744,23 +796,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
     
     bool
-    AndOperator::ExpectingCepEvent(std::string eType)
+    CepOperator::ExpectingCepEvent(std::string eType)
     {
        return event1 == eType || event2 == eType;
     }
-    
-    bool
-    OrOperator::ExpectingCepEvent(std::string eType)
-    {
-        return event1 == eType || event2 == eType;
-    }
-
-    bool
-    ThenOperator::ExpectingCepEvent(std::string eType)
-    {
-        return event1 == eType || event2 == eType;
-    }
-
 
     void
     CepOperator::Consume(std::vector<Ptr<CepEvent> > &events)

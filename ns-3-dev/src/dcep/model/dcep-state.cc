@@ -119,18 +119,12 @@ namespace ns3
         Ptr<CepEventRoutingTableEntry> ee = CreateObject<CepEventRoutingTableEntry>();
         ee->source_query = q;
         ee->state = ACTIVE;
-        if(ee->source_query->isFinal)
-        {
+        if(ee->source_query->isFinal) {
+            ee->source_query->output_dest = Ipv4Address("10.0.0.4");
+        } else {
             ee->source_query->output_dest = GetObject<Communication>()->GetSinkAddress();
-            //ee->dataSources.push_back("10.0.0.1");
-            //ee->dataSources.push_back("10.0.0.3");
         }
-        
-        /*if ((q->eventType == "AorB") || (q->eventType == "AandB"))
-        {
-            ee->dataSources.push_back("10.0.0.2");
-            ee->dataSources.push_back("10.0.0.3");
-        }*/
+
         this->eventRoutingTable.push_back(ee);
     }
     

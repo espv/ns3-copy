@@ -213,7 +213,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         //Simulator::Schedule(Seconds(10), &DataSource::GenerateAtomicCepEvents, GetObject<DataSource>());
         if (!ds->IsActive()) {
             ds->Activate();
-            ds->GenerateAtomicCepEvents(q->eventType);
+            ds->GenerateAtomicCepEvents(q);
         }
     }
     
@@ -573,8 +573,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     }
 
     void
-    DataSource::GenerateAtomicCepEvents(std::string eventType){
-        
+    DataSource::GenerateAtomicCepEvents(Ptr<Query> q){
+
+        std::string eventType = q->eventType;
         Ptr<Dcep> dcep = GetObject<Dcep>();
         Ptr<Node> node = dcep->GetNode();
 
@@ -609,11 +610,12 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             e->timestamp = Simulator::Now();
             e->pkt = Create<Packet>();  // Dummy packet for processing delay
             NS_LOG_INFO(Simulator::Now() << " CepEvent number  " << e->m_seq << " timestamp: " << e->timestamp);
-            dcep->DispatchAtomicCepEvent(e);
+            //dcep->DispatchAtomicCepEvent(e);
+            GetObject<CEPEngine>()->ProcessCepEvent(e);
 
             if(counter < numCepEvents)
             {
-                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, m_eventType);
+                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, q);
             }
         }
             

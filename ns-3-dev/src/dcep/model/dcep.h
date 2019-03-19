@@ -119,7 +119,7 @@ class DataSource : public Object
       virtual ~DataSource ();
       
       void Configure();
-      void GenerateAtomicCepEvents(std::string eventType);
+      void GenerateAtomicCepEvents(Ptr<Query> q);
       bool IsActive();
       void Activate();
       

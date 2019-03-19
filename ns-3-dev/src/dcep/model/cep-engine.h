@@ -201,9 +201,9 @@ private:
         static TypeId GetTypeId (void);
         Forwarder();
         void Configure();
+        virtual void ForwardNewCepEvent(Ptr<CepEvent> new_event);
     private:
         friend class Producer;
-        virtual void ForwardNewCepEvent(Ptr<CepEvent> new_event);
         TracedCallback< Ptr<CepEvent> > new_event;
         
     };
@@ -242,7 +242,7 @@ private:
         
         virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
         virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
-        virtual bool ExpectingCepEvent (std::string) = 0;
+        bool ExpectingCepEvent (std::string);
         void Consume(std::vector<Ptr<CepEvent> > &events);
         uint32_t queryId;
         Ptr<CEPEngine> cepEngine;
@@ -254,13 +254,19 @@ private:
     protected:
         Ptr<BufferManager> bufman;
     };
+
+    class AtomicOperator: public CepOperator {
+    public:
+        static TypeId GetTypeId ();
+        void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
+        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+    };
     
     class AndOperator: public CepOperator {
     public:
         static TypeId GetTypeId ();
         void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-        bool ExpectingCepEvent (std::string) override;
+        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
 
         bool DoEvaluate(Ptr<CepEvent> newEvent2, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *events1, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
         
@@ -271,7 +277,6 @@ private:
         static TypeId GetTypeId ();
         void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
         bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-        bool ExpectingCepEvent (std::string) override;
     };
 
     class ThenOperator: public CepOperator {
@@ -279,7 +284,6 @@ private:
         static TypeId GetTypeId ();
         void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
         bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-        bool ExpectingCepEvent (std::string) override;
 
         bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
     };

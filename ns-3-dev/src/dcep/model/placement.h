@@ -137,7 +137,7 @@ class Placement : public Object
         /* Called when the Placement Policy has determined where a 
          * given query should be sent
          */
-        void ForwardQuery(std::string eType);
+        void ForwardQuery(Ptr<Query> q);
         void SendQueryToCepEngine (Ptr<Query> q);
         
         void RecvQuery(Ptr<Query> q);

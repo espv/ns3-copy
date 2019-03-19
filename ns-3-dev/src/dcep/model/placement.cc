@@ -102,6 +102,8 @@ namespace ns3 {
             Ptr<DcepState> dstate = CreateObject<DcepState>();
             AggregateObject(dstate);
             dstate->Configure();
+
+            dstate->SetNextHop("0", Ipv4Address("10.0.0.4"));
             
         }
 
@@ -146,40 +148,33 @@ namespace ns3 {
         Ipv4Address dest = dstate->GetOuputDest(e->type);
         
         m_newCepEventProduced (e);
-        
-        if (e->event_class == FINAL_EVENT)
+
+        if (dest.IsEqual(GetObject<Communication>()->GetLocalAddress()))
         {
-            SendCepEventToSink (e);
+            //if (dstate->IsActive(e->type))
+            //{
+                SendCepEventToCepEngine(e);
+            //}
+            //else
+            //{
+                //NS_ABORT_MSG ("PLACEMENT MECHANISM: CORRESPONDING OPERATOR NOT ACTIVE");
+            //}
         }
         else
         {
-            if (dest.IsEqual(GetObject<Communication>()->GetLocalAddress()))
+            if(!dest.IsAny())
             {
-                //if (dstate->IsActive(e->type))
-                //{
-                    SendCepEventToCepEngine(e);
-                //}
-                //else
-                {
-                    //NS_ABORT_MSG ("PLACEMENT MECHANISM: CORRESPONDING OPERATOR NOT ACTIVE");
-                }
+                /*if (e->event_class == INTERMEDIATE_EVENT) {
+                    SendCepEvent (e, dest);
+                } else {
+                    Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+                    ee->Proceed(1, e->pkt, "send-packet", &Placement::SendCepEvent, this, e, dest);
+                }*/
+                SendCepEvent(e, dest);
             }
             else
             {
-                if(!dest.IsAny())
-                {
-                    /*if (e->event_class == INTERMEDIATE_EVENT) {
-                        SendCepEvent (e, dest);
-                    } else {
-                        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-                        ee->Proceed(1, e->pkt, "send-packet", &Placement::SendCepEvent, this, e, dest);
-                    }*/
-                    SendCepEvent(e, dest);
-                }
-                else
-                {
-                    NS_ABORT_MSG ("PLACEMENT MECHANISM: NO DESTINATION PROVIDED FOR CURRENT EVENT");
-                }
+                NS_ABORT_MSG ("PLACEMENT MECHANISM: NO DESTINATION PROVIDED FOR CURRENT EVENT");
             }
         }
          
@@ -298,6 +293,8 @@ namespace ns3 {
         p->AddHeader (dcepHeader);
         static float seconds_to_send = 0;
         Simulator::Schedule(Seconds(seconds_to_send), &Dcep::SendPacket, GetObject<Dcep> (), p, dstate->GetNextHop(eType));
+        // seconds_to_send is incremented to delay the transmission of queries.
+        // Otherwise, some buffer will be overflowed and queries will be dropped.
         seconds_to_send += 0.01;
         //GetObject<Dcep>()->SendPacket(p, dstate->GetNextHop(eType));
 
@@ -309,8 +306,9 @@ namespace ns3 {
         GetObject<CEPEngine>()->RecvQuery(q);
     }
 
-    void Placement::ForwardQuery(std::string eType) 
+    void Placement::ForwardQuery(Ptr<Query> q)
     {
+        auto eType = q->eventType;
 
         NS_LOG_INFO(Simulator::Now() << " Forwarding partial query to its destination");
         Ptr<DcepState> dstate = GetObject<DcepState>();
@@ -324,7 +322,7 @@ namespace ns3 {
             
             if(dstate->GetQuery(eType)->isAtomic)
             {
-                 GetObject<Dcep>()->ActivateDatasource(dstate->GetQuery(eType));
+                GetObject<CEPEngine>()->RecvQuery(q);
             }
             else/* Send to local CEP engine*/
                 SendQueryToCepEngine (dstate->GetQuery(eType));
@@ -471,16 +469,8 @@ namespace ns3 {
         {
             NS_LOG_INFO (Simulator::Now() << " QUERY WILL BE PLACED");
             newLocalPlacement(q->eventType);
-            if(dstate->GetNextHop(q->eventType).IsEqual(cm->GetLocalAddress()))
-            {
-                NS_LOG_INFO (Simulator::Now() << " QUERY PLACED ON LOCAL NODE");
-                if (!q->isAtomic)
-                    dstate->SetOutDest(q->eventType, cm->GetLocalAddress());
-                else
-                    dstate->SetOutDest(q->eventType, cm->GetSinkAddress());
-            }
-            
-            p->ForwardQuery(q->eventType);
+
+            p->ForwardQuery(q);
         }
 
         return placed;
