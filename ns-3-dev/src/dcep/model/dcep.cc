@@ -386,7 +386,12 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 c2->var_name = "percentage";
                 c2->numberValue = 25;
                 c2->type = LTCONSTRAINT;
-                q3->constraints.emplace_back(c2);
+
+                Ptr<StringConstraint> c3 = CreateObject<StringConstraint> ();
+                c3->var_name = "area";
+                c3->stringValue = "office";
+                c3->type = EQCONSTRAINT;
+                q3->constraints.emplace_back(c3);
                 /*c = CreateObject<Constraint> ();
                 c->var_name = "percentage";
                 c->var_value = temp % 10;
@@ -581,9 +586,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         if (eventType == "B") {
             m_eventType = eventType;
             m_eventNumberValues["value"] = 46;
+            m_eventStringValues["area"] = "office";
         } else if (eventType == "C") {
             m_eventType = eventType;
             m_eventNumberValues["percentage"] = 21;
+            m_eventStringValues["area"] = "office";
         }
 
         if(m_eventType != " ")
