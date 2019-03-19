@@ -126,7 +126,8 @@ class DataSource : public Object
     private:
 
       std::string m_eventType;
-      std::map<std::string, int> m_eventValues;
+      std::map<std::string, double> m_eventNumberValues;
+      std::map<std::string, std::string> m_eventStringValues;
       uint32_t numCepEvents;
       uint32_t cepEventsInterval;
       uint32_t eventRate;

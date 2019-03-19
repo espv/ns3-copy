@@ -84,6 +84,39 @@ FRACTION 100% 1 1
 
 0 START
 x STATECOND constraints-done read local 0
+x STATECOND constraint-type read local 1
+x STATECOND constraint-processed read local 1
+#x PROCESS 0 0  # 5
+x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 0
+x STATECOND constraint-type read local 1
+x STATECOND constraint-processed read local 0
+x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 1
 #x PROCESS 36000 0  # 5

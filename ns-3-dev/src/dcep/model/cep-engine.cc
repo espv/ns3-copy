@@ -91,7 +91,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     void
-    CEPEngine::DoCheckConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, int> values)
+    CEPEngine::DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, string> values)
     {
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
@@ -109,7 +109,41 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         values.erase(values.begin());
 
         if (e->event_class != INTERMEDIATE_EVENT) {
-            // We assume the constraints type is always integers
+            // Constraint type is 1 (string)
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 1;
+
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+            if (constraints[k]) {
+                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
+            } else {
+                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
+            }
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, values);
+        } else {
+            DoCheckStringConstraints(e, constraints, cep, producer, values);
+        }
+    }
+
+    void
+    CEPEngine::DoCheckNumberConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, double> values, std::map<std::string, string> stringValues)
+    {
+        Ptr<Placement> p = GetObject<Placement>();
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        if (values.begin() == values.end()) {
+            if (e->event_class != INTERMEDIATE_EVENT) {
+                e->pkt->m_executionInfo.executedByExecEnv = false;
+                ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, stringValues);
+            } else {
+                GetObject<Detector>()->ProcessCepEvent(e);
+            }
+            return;
+        }
+        auto k = values.begin()->first;
+        values.erase(values.begin());
+
+        if (e->event_class != INTERMEDIATE_EVENT) {
+            // Constraint type is 0 (number)
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
 
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
@@ -119,9 +153,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
             }
             e->pkt->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::DoCheckConstraints, this, e, constraints, cep, producer, values);
+            ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::DoCheckNumberConstraints, this, e, constraints, cep, producer, values, stringValues);
         } else {
-            DoCheckConstraints(e, constraints, cep, producer, values);
+            DoCheckNumberConstraints(e, constraints, cep, producer, values, stringValues);
         }
     }
 
@@ -145,12 +179,17 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto node = GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
 
-        std::map<std::string, int> values;
-        for (auto const& x : e->values)
+        std::map<std::string, double> numberValues;
+        for (auto const& x : e->numberValues)
         {
-            values[x.first] = x.second;
+            numberValues[x.first] = x.second;
         }
-        DoCheckConstraints(e, constraints, cep, producer, values);
+        std::map<std::string, std::string> stringValues;
+        for (auto const& x : e->stringValues)
+        {
+            stringValues[x.first] = x.second;
+        }
+        DoCheckNumberConstraints(e, constraints, cep, producer, numberValues, stringValues);
     }
     
     void
@@ -322,10 +361,64 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
 
-    TypeId
-    Constraint::GetTypeId(void)
+    bool
+    NumberConstraint::Evaluate(Ptr<CepEvent> e)
     {
-        static TypeId tid = TypeId("ns3::Constraint")
+        switch (type) {
+            case EQCONSTRAINT:
+                return e->numberValues[var_name] == numberValue;
+                break;
+            case INEQCONSTRAINT:
+                return e->numberValues[var_name] != numberValue;
+                break;
+            case LTCONSTRAINT:
+                return e->numberValues[var_name] < numberValue;
+                break;
+            case LTECONSTRAINT:
+                return e->numberValues[var_name] <= numberValue;
+                break;
+            case GTCONSTRAINT:
+                return e->numberValues[var_name] > numberValue;
+                break;
+            case GTECONSTRAINT:
+                return e->numberValues[var_name] >= numberValue;
+                break;
+            default:
+                NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
+        }
+    }
+
+    bool
+    StringConstraint::Evaluate(Ptr<CepEvent> e)
+    {
+        switch (type) {
+            case EQCONSTRAINT:
+                return e->stringValues[var_name] == stringValue;
+                break;
+            case INEQCONSTRAINT:
+                return e->stringValues[var_name] != stringValue;
+                break;
+            default:
+                NS_FATAL_ERROR("String constraints can only have equality or inequality constraints");
+        }
+    }
+
+
+    TypeId
+    NumberConstraint::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::NumberConstraint")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
+
+
+    TypeId
+    StringConstraint::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::StringConstraint")
                 .SetParent<Object> ()
         ;
 
@@ -579,8 +672,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
-            if (e->values[c->var_name] || e->values[c->var_name] != c->var_value)
-                constraintsFulfilled = false;
+            // All constraints must be fulfilled for constraintsFulfilled to be true
+            constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
         }
 
         if (!constraintsFulfilled) {
@@ -635,8 +728,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bool constraintsFulfilled = true;
         for (auto c : q->constraints)
         {
-            if (e->values[c->var_name] != c->var_value)
-                constraintsFulfilled = false;
+            // All constraints must be fulfilled for constraintsFulfilled to be true
+            constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
         }
         if (constraintsFulfilled) {
             p->HandleNewCepEvent(q, returned, this);
@@ -847,9 +940,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
         auto e = events.front();
-        for( auto const& [key, val] : e->values )
+        for( auto const& [key, val] : e->stringValues )
         {
-            complex_event->values[key] = val;
+            complex_event->stringValues[key] = val;
+        }
+        for( auto const& [key, val] : e->numberValues )
+        {
+            complex_event->numberValues[key] = val;
         }
         events.erase(events.begin());
         if (complex_event->event_class == INTERMEDIATE_EVENT) {
@@ -868,12 +965,14 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             new_event->timestamp = Simulator::Now();
             uint64_t delay = 0;
             uint32_t hops = 0;
+            new_event->timestamp = Seconds(0);
             for(auto e : events)
             {
                 delay = std::max(delay, e->delay);
                 hops = hops + e->hopsCount;
                 new_event->prevEvents.push_back(e);
                 new_event->pkt = e->pkt;  // Last event is the most recently received event, with the relevant packet
+                new_event->timestamp = std::max(e->timestamp, new_event->timestamp);
             }
             
             new_event->type = q->eventType;
@@ -996,7 +1095,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         delay = e->delay;
         hopsCount = e->hopsCount;
         m_seq = e->m_seq;
-        values = e->values;
+        stringValues = e->stringValues;
+        numberValues = e->numberValues;
     }
     
     CepEvent::CepEvent()
@@ -1026,7 +1126,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         message->hopsCount = this->hopsCount;
         message->prevHopsCount = this->prevHopsCount;
         message->m_seq = this->m_seq;
-        message->values = this->values;
+        message->stringValues = this->stringValues;
+        message->numberValues = this->numberValues;
+        message->timestamp = this->timestamp;
         NS_LOG_INFO(Simulator::Now() << " serialized type " << message->type);
         
         return message;
@@ -1045,12 +1147,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->hopsCount = message->hopsCount;
         this->prevHopsCount = message->prevHopsCount;
         this->event_class = message->event_class;
-        this->values = message->values;
-
-        for (auto it : this->values)
-        {
-            std::cout << it.first  << ':' << it.second << std::endl ;
-        }
+        this->stringValues = message->stringValues;
+        this->numberValues = message->numberValues;
+        this->timestamp = message->timestamp;
     }
     
     void

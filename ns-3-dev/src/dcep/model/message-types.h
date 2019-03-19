@@ -67,7 +67,9 @@ namespace ns3
         uint64_t m_seq;
         uint32_t hopsCount;
         uint32_t prevHopsCount;
-        std::map<std::string,int> values;
+        Time timestamp;
+        std::map<std::string,double> numberValues;
+        std::map<std::string,std::string> stringValues;
     };
     
     

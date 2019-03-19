@@ -63,7 +63,8 @@ namespace ns3 {
         uint32_t prevHopsCount;
         Time timestamp;
         Ptr<Packet> pkt;
-        std::map<std::string, int> values;
+        std::map<std::string, double> numberValues;
+        std::map<std::string, std::string> stringValues;
 
         // Complex event only start
         CepOperator *generatedByOp;
@@ -86,16 +87,38 @@ namespace ns3 {
       
     };
 
-    /* This simple Constraint class assumes two things: that the
-     * value is of type int and that it is an equality constraint. */
+    enum ConstraintType {
+        EQCONSTRAINT,
+        INEQCONSTRAINT,
+        LTCONSTRAINT,
+        LTECONSTRAINT,
+        GTCONSTRAINT,
+        GTECONSTRAINT
+    };
+
     class Constraint: public Object {
     public:
-        static TypeId GetTypeId ();
-
-        uint32_t type;
+        ConstraintType type;
         Ptr<CEPEngine> cepEngine;
         std::string var_name;
-        int var_value;
+
+        virtual bool Evaluate(Ptr<CepEvent> e) = 0;
+    };
+
+    class NumberConstraint: public Constraint {
+    public:
+        static TypeId GetTypeId ();
+        double numberValue;
+
+        bool Evaluate(Ptr<CepEvent> e) override;
+    };
+
+    class StringConstraint: public Constraint {
+    public:
+        static TypeId GetTypeId ();
+        std::string stringValue;
+
+        bool Evaluate(Ptr<CepEvent> e) override;
     };
 
     class Query : public Object
@@ -145,7 +168,8 @@ class CEPEngine : public Object
         void ProcessCepEvent(Ptr<CepEvent> e);
         void GetOpsByInputCepEventType(std::string eventType, std::vector<Ptr<CepOperator> >& ops);
         void CheckConstraints(Ptr<CepEvent> e);
-        void DoCheckConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, int> values);
+        void DoCheckNumberConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, double> values, std::map<std::string, std::string> stringValues);
+        void DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, std::string> values);
 
         Ptr<CepOperator> GetOperator(uint32_t queryId);
         Ptr<Query> GetQuery(uint32_t id);
