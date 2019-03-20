@@ -191,22 +191,27 @@ NS_LOG_COMPONENT_DEFINE("Communication");
     
     void Communication::ScheduleSend(Ptr<Packet> p, Ipv4Address addr)
     {
+        DcepHeader dcepHeader;
+        p->PeekHeader(dcepHeader);
         Ipv4Header ipv4;
         ipv4.SetDestination(addr);
         ipv4.SetProtocol(123);
         p->AddHeader(ipv4);
-        DcepHeader dcepHeader;
-        p->PeekHeader(dcepHeader);
 
         m_sendQueue2->Enqueue(p);
 
-        if (dcepHeader.GetContentType() == EVENT) {
+        auto contentType = dcepHeader.GetContentType();
+        if (contentType == EVENT) {
             Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
             p->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(1, p, "send-packet", &Communication::send, this);
             ee->queues["packets-to-be-sent"]->Enqueue(p);
-        } else {
+            p->m_executionInfo.timestamps.emplace_back(Simulator::Now());
+            NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << p->m_executionInfo.timestamps[1] - p->m_executionInfo.timestamps[0]);
+        } else if (contentType == QUERY) {
             send();
+        } else {
+            NS_FATAL_ERROR("Wrong content type of packet being sent.");
         }
     }
     

@@ -43,12 +43,13 @@ namespace ns3 {
         int seqNr;
 
         void ExecuteTrigger(const std::string checkpoint) {
-            if (!targets[checkpoint].empty()) {
+            auto it = targets.find(checkpoint);
+            if (it != targets.end() && !it->second.empty()) {
                 executedByExecEnv = true;
-                auto toInvoke = targets[checkpoint].front();
+                auto toInvoke = it->second.front();
                 toInvoke->Invoke();
                 toInvoke->Unref();
-                targets[checkpoint].erase(targets[checkpoint].begin());
+                it->second.erase(it->second.begin());
             }
         }
     };
