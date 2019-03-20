@@ -31,6 +31,7 @@ rcvd-pkts-t1 FIFO -1 packets
 rcvd-pkts-t2 FIFO -1 packets
 rcvd-pkts-t3 FIFO -1 packets
 complex-pkts FIFO -1 packets
+packets-to-be-sent FIFO -1 packets
 all-cepops FIFO -1 cepqueries
 threads-cepops FIFO -1 cepqueries
 
@@ -170,6 +171,20 @@ SIGEND
 
 
 SIGSTART
+NAME send-packets
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART 0 packets-to-be-sent packets-to-be-sent 0
+x DEQUEUE PKTQUEUE 0 0
+within-send-packet PROCESS 5400 0
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
 NAME receive-packet  # Wake up when packet is received
 PEU cpu
 RESOURCES cycles normal
@@ -195,6 +210,7 @@ x SEMDOWN packet-threads-SEM global
 #x SEMDOWN packet-threads-SEM global
 # Now, the results have been collected and we send them to any subscribers
 x PROCESS 10000 0
+x LOOP send-packets 0 packets-to-be-sent packets-to-be-sent 0
 0 STOP
 
 SIGEND
@@ -208,35 +224,6 @@ FRACTION 100% 1 1
 
 0 START
 x                  ENQUEUE		SRVQUEUE receive-packet sq
-x TTWAKEUP packet_thread1
-x TTWAKEUP packet_thread2
-x TTWAKEUP packet_thread3
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME send-packet
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-within-send-packet PROCESS 5400 0 #54000 0
-0 STOP
-
-SIGEND
-
-
-SIGSTART
-NAME HIRQ-2 # Sending part
-PEU cpu
-RESOURCES cycles normal
-FRACTION 100% 1 1
-
-0 START
-x                  ENQUEUE		SRVQUEUE send-packet sq
 x TTWAKEUP packet_thread1
 x TTWAKEUP packet_thread2
 x TTWAKEUP packet_thread3

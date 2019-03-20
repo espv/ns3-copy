@@ -342,6 +342,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->parent_output = parent_output;
                 q1->window = Seconds(15);
                 q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
+                Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+                c1->var_name = "value";
+                c1->numberValue = 45;
+                c1->type = GTCONSTRAINT;
+                q1->constraints.emplace_back(c1);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
                 //in_seconds += 0.01;
                 //dcep->DispatchQuery(q1);
@@ -361,6 +366,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->parent_output = parent_output;
                 q2->window = Seconds(15);
                 q2->isFinalWithinNode = true;
+                Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+                c2->var_name = "percentage";
+                c2->numberValue = 25;
+                c2->type = LTCONSTRAINT;
+                q2->constraints.emplace_back(c2);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
                 //in_seconds += 0.01;
                 //dcep->DispatchQuery(q2);
@@ -376,26 +386,23 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q3->inevent2 = event2;
                 q3->window = Seconds(15);
                 q3->isFinalWithinNode = true;
-                Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+                /*Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
                 c1->var_name = "value";
                 c1->numberValue = 45;
                 c1->type = GTCONSTRAINT;
-                q3->constraints.emplace_back(c1);
+                q3->constraints.emplace_back(c1);*/
 
-                Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+                /*Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
                 c2->var_name = "percentage";
                 c2->numberValue = 25;
                 c2->type = LTCONSTRAINT;
+                q3->constraints.emplace_back(c2);*/
 
                 Ptr<StringConstraint> c3 = CreateObject<StringConstraint> ();
                 c3->var_name = "area";
                 c3->stringValue = "office";
                 c3->type = EQCONSTRAINT;
                 q3->constraints.emplace_back(c3);
-                /*c = CreateObject<Constraint> ();
-                c->var_name = "percentage";
-                c->var_value = temp % 10;
-                q3->constraints.push_back(c);*/
                 q3->op = "then";
                 q3->assigned = false;
                 q3->currentHost.Set("0.0.0.0");

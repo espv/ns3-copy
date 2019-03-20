@@ -195,14 +195,19 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         ipv4.SetDestination(addr);
         ipv4.SetProtocol(123);
         p->AddHeader(ipv4);
+        DcepHeader dcepHeader;
+        p->PeekHeader(dcepHeader);
 
         m_sendQueue2->Enqueue(p);
 
-        Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
-        p->m_executionInfo.executedByExecEnv = false;
-        ee->Proceed(1, p, "send-packet", &Communication::send, this);
-        ee->ScheduleInterrupt (p, "HIRQ-2", Seconds(0));
-        
+        if (dcepHeader.GetContentType() == EVENT) {
+            Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
+            p->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(1, p, "send-packet", &Communication::send, this);
+            ee->queues["packets-to-be-sent"]->Enqueue(p);
+        } else {
+            send();
+        }
     }
     
     void
