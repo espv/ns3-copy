@@ -200,7 +200,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         if (e->event_class != INTERMEDIATE_EVENT) {
             e->pkt->m_executionInfo.executedByExecEnv = false;
-            e->pkt->m_executionInfo.timestamps.push_back(Simulator::Now());
+            e->pkt->m_executionInfo.timestamps.emplace_back(Simulator::Now());
+            e->timestamp = Simulator::Now();
             ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::CheckConstraints, this, e);
 
             ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));

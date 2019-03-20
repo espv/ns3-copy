@@ -375,41 +375,43 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 //in_seconds += 0.01;
                 //dcep->DispatchQuery(q2);
 
-                Ptr<Query> q3 = CreateObject<Query> ();  // q3 = complex event
-                q3->actionType = NOTIFICATION;
-                q3->id = query_counter++;
-                q3->isFinal = true;
-                q3->isAtomic = false;
-                q3->eventType = std::to_string(complex_event_cnt++);
-                q3->output_dest = Ipv4Address::GetAny();
-                q3->inevent1 = event1;
-                q3->inevent2 = event2;
-                q3->window = Seconds(15);
-                q3->isFinalWithinNode = true;
-                /*Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
-                c1->var_name = "value";
-                c1->numberValue = 45;
-                c1->type = GTCONSTRAINT;
-                q3->constraints.emplace_back(c1);*/
+                for (int j = 0; j <= 4; j++) {
+                    Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
+                    q3->actionType = NOTIFICATION;
+                    q3->id = query_counter++;
+                    q3->isFinal = true;
+                    q3->isAtomic = false;
+                    q3->eventType = std::to_string(complex_event_cnt++);
+                    q3->output_dest = Ipv4Address::GetAny();
+                    q3->inevent1 = event1;
+                    q3->inevent2 = event2;
+                    q3->window = Seconds(15);
+                    q3->isFinalWithinNode = true;
+                    /*Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+                    c1->var_name = "value";
+                    c1->numberValue = 45;
+                    c1->type = GTCONSTRAINT;
+                    q3->constraints.emplace_back(c1);*/
 
-                /*Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
-                c2->var_name = "percentage";
-                c2->numberValue = 25;
-                c2->type = LTCONSTRAINT;
-                q3->constraints.emplace_back(c2);*/
+                    /*Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+                    c2->var_name = "percentage";
+                    c2->numberValue = 25;
+                    c2->type = LTCONSTRAINT;
+                    q3->constraints.emplace_back(c2);*/
 
-                Ptr<StringConstraint> c3 = CreateObject<StringConstraint> ();
-                c3->var_name = "area";
-                c3->stringValue = "office";
-                c3->type = EQCONSTRAINT;
-                q3->constraints.emplace_back(c3);
-                q3->op = "then";
-                q3->assigned = false;
-                q3->currentHost.Set("0.0.0.0");
-                q3->parent_output = parent_output;
-                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
-                //in_seconds += 0.01;
-                //dcep->DispatchQuery(q3);
+                    Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();
+                    c3->var_name = "area";
+                    c3->stringValue = "office";
+                    c3->type = EQCONSTRAINT;
+                    q3->constraints.emplace_back(c3);
+                    q3->op = "then";
+                    q3->assigned = false;
+                    q3->currentHost.Set("0.0.0.0");
+                    q3->parent_output = parent_output;
+                    Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
+                    //in_seconds += 0.01;
+                    //dcep->DispatchQuery(q3);
+                }
             }
         }
     }

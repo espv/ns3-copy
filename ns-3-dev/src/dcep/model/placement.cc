@@ -227,6 +227,7 @@ namespace ns3 {
             dcepHeader.setContentSize(message->size);
 
             Ptr<Packet> p = Create<Packet> (buffer, message->size);
+            p->m_executionInfo.timestamps.emplace_back(e->timestamp);
 
             p->AddHeader (dcepHeader);
             

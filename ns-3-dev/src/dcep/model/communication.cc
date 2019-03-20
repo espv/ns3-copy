@@ -172,23 +172,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
                }   
           }
     }
-//    
-//    void 
-//    Communication::ScheduleSend(Ipv4Address peerAddress, const uint8_t *data,
-//            uint32_t size, uint16_t msg_type)
-//    {
-//        DcepHeader dcepHeader;
-//        dcepHeader.SetContentType(msg_type);
-//        dcepHeader.setContentSize(size);
-//        
-//        Ptr<Packet> p = Create<Packet> (data, size);
-//        
-//        p->AddHeader (dcepHeader);
-//        ScheduleSend(p, peerAddress);
-//        
-//    }
-//    
-    
+
     void Communication::ScheduleSend(Ptr<Packet> p, Ipv4Address addr)
     {
         DcepHeader dcepHeader;
@@ -200,14 +184,13 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
         m_sendQueue2->Enqueue(p);
 
+        p->m_executionInfo.timestamps.emplace_back(Simulator::Now());
         auto contentType = dcepHeader.GetContentType();
         if (contentType == EVENT) {
             Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
             p->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(1, p, "send-packet", &Communication::send, this);
             ee->queues["packets-to-be-sent"]->Enqueue(p);
-            p->m_executionInfo.timestamps.emplace_back(Simulator::Now());
-            NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << p->m_executionInfo.timestamps[1] - p->m_executionInfo.timestamps[0]);
         } else if (contentType == QUERY) {
             send();
         } else {
@@ -221,6 +204,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         if(m_sendQueue2->GetNPackets() > 0)
         {
             Ptr<Packet> p = m_sendQueue2->Dequeue();
+            NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << (Simulator::Now() - p->m_executionInfo.timestamps[0]).GetMicroSeconds());
             DcepHeader dcepHeader;
             Ipv4Header ipv4;
             p->RemoveHeader(ipv4);

@@ -87,7 +87,7 @@ namespace ns3 {
     {
       m_type = data;
     }
-    uint16_t 
+    uint16_t
     DcepHeader::GetContentType (void) const
     {
       return m_type;
