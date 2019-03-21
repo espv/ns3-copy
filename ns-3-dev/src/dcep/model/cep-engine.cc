@@ -191,6 +191,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
         DoCheckNumberConstraints(e, constraints, cep, producer, numberValues, stringValues);
     }
+
+    void CEPEngine::FinishedProcessingEvent(Ptr<CepEvent> e)
+    {
+        NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo.timestamps[0]).GetMicroSeconds());
+    }
     
     void
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
@@ -199,10 +204,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto node = GetObject<Dcep>()->GetNode();
 
         if (e->event_class != INTERMEDIATE_EVENT) {
-            e->pkt->m_executionInfo.executedByExecEnv = false;
             e->pkt->m_executionInfo.timestamps.emplace_back(Simulator::Now());
             e->timestamp = Simulator::Now();
+            e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::CheckConstraints, this, e);
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(1, e->pkt, "finished-processing", &CEPEngine::FinishedProcessingEvent, this, e);
 
             ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
         } else {
@@ -709,10 +716,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
-        static uint64_t previous_seq_no = -1;
-        if (e->m_seq != previous_seq_no) {
-            previous_seq_no = e->m_seq;
-        }
         Ptr<ExecEnv> ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (e->event_class != INTERMEDIATE_EVENT)
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
@@ -739,7 +742,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             delete events2;  // Not going to use events2
             Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
-            auto ee = node->GetObject<ExecEnv>();
             if (e->event_class != INTERMEDIATE_EVENT) {
                 e->pkt->m_executionInfo.executedByExecEnv = false;
                 ee->Proceed(1, e->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);

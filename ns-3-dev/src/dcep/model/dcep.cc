@@ -329,13 +329,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->isFinal = false;
                 q1->isAtomic = true;
                 q1->eventType = event1;
-                q1->output_dest = Ipv4Address::GetAny();
+                q1->output_dest = Ipv4Address("10.0.0.1");
                 q1->inevent1 = event1;
                 q1->inevent2 = "";
-                /*Ptr<Constraint> c = CreateObject<Constraint> ();
-                c->var_name = "value";
-                c->var_value = temp;
-                q1->constraints.push_back(c);*/
                 q1->op = "true";
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
@@ -348,8 +344,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 c1->type = GTCONSTRAINT;
                 q1->constraints.emplace_back(c1);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
-                //in_seconds += 0.01;
-                //dcep->DispatchQuery(q1);
+                in_seconds += 0.01;
 
                 Ptr<Query> q2 = CreateObject<Query> ();
                 q2->actionType = NOTIFICATION;
@@ -357,7 +352,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->isFinal = false;
                 q2->isAtomic = true;
                 q2->eventType = event2;
-                q2->output_dest = Ipv4Address::GetAny();
+                q2->output_dest = Ipv4Address("10.0.0.2");
                 q2->inevent1 = event2;
                 q2->inevent2 = "";
                 q2->op = "true";
@@ -372,32 +367,20 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 c2->type = LTCONSTRAINT;
                 q2->constraints.emplace_back(c2);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
-                //in_seconds += 0.01;
-                //dcep->DispatchQuery(q2);
+                in_seconds += 0.01;
 
-                for (int j = 0; j <= 4; j++) {
+                for (int j = 0; j <= 0; j++) {
                     Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
                     q3->actionType = NOTIFICATION;
                     q3->id = query_counter++;
                     q3->isFinal = true;
                     q3->isAtomic = false;
                     q3->eventType = std::to_string(complex_event_cnt++);
-                    q3->output_dest = Ipv4Address::GetAny();
+                    q3->output_dest = Ipv4Address("10.0.0.3");
                     q3->inevent1 = event1;
                     q3->inevent2 = event2;
                     q3->window = Seconds(15);
                     q3->isFinalWithinNode = true;
-                    /*Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
-                    c1->var_name = "value";
-                    c1->numberValue = 45;
-                    c1->type = GTCONSTRAINT;
-                    q3->constraints.emplace_back(c1);*/
-
-                    /*Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
-                    c2->var_name = "percentage";
-                    c2->numberValue = 25;
-                    c2->type = LTCONSTRAINT;
-                    q3->constraints.emplace_back(c2);*/
 
                     Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();
                     c3->var_name = "area";
@@ -412,6 +395,28 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     //in_seconds += 0.01;
                     //dcep->DispatchQuery(q3);
                 }
+
+                /*for (int j = 0; j <= 0; j++) {
+                    Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
+                    q3->actionType = NOTIFICATION;
+                    q3->id = query_counter++;
+                    q3->isFinal = true;
+                    q3->isAtomic = true;
+                    q3->eventType = std::to_string(complex_event_cnt++);
+                    q3->output_dest = Ipv4Address("10.0.0.3");
+                    q3->inevent1 = event1;
+                    q3->inevent2 = "";
+                    q3->window = Seconds(15);
+                    q3->isFinalWithinNode = true;
+
+                    Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();
+                    q3->op = "true";
+                    q3->assigned = false;
+                    q3->currentHost.Set("0.0.0.0");
+                    q3->parent_output = parent_output;
+                    Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
+                    in_seconds += 0.01;
+                }*/
             }
         }
     }

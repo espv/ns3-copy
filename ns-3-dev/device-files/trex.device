@@ -62,6 +62,7 @@ SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
 LOC within-send-packet send-packet
 LOC call-to-handle-then-cepop handle-cepops
+LOC finished-processing-loc finished-processing
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -163,7 +164,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x PROCESS 27000 0  # 6
+x PROCESS 5000 0  # 6
 x CALL check-constraints
 0 STOP
 
@@ -206,8 +207,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x PROCESS 20000 0 # 1
-#x PROCESS 20000 0 # 2
+x PROCESS 5000 0 # 1
 x CALL process_received_packet  # This ends with handle-cepops trigger being put into the packet.
 # Now we enqueue the packet as many times as there are threads to process the event.
 # Each packet will cause a trigger.
@@ -224,8 +224,8 @@ x SEMDOWN packet-threads-SEM global
 #x SEMDOWN packet-threads-SEM global
 #x SEMDOWN packet-threads-SEM global
 # Now, the results have been collected and we send them to any subscribers
-x PROCESS 10000 0
-x CALL send-packets
+x PROCESS 5000 0
+finished-processing-loc CALL send-packets
 0 STOP
 
 SIGEND
@@ -321,7 +321,7 @@ FRACTION 100% 1 1
 
 0 START
 x STATECOND CreatedComplexEvent read local 1
-x PROCESS 8500 0
+x PROCESS 32000 0
 x CALL assign-attributes-to-complex-event
 0 STOP
 
@@ -465,7 +465,7 @@ FRACTION 100% 1 1
 0 START
 x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t1
-x PROCESS 20000 0  # 4
+x PROCESS 15000 0  # 4
 x SEMDOWN threads-cepops-SEM global
 x LOOP handle-cepops 0 threads-cepops threads-cepops 0
 x SEMUP threads-cepops-SEM global
@@ -500,7 +500,7 @@ FRACTION 100% 1 1
 0 START
 x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t2
-x PROCESS 20000 0  # 4
+x PROCESS 15000 0  # 4
 x SEMDOWN threads-cepops-SEM global
 x LOOP handle-cepops 0 threads-cepops threads-cepops 0
 x SEMUP threads-cepops-SEM global
@@ -535,7 +535,7 @@ FRACTION 100% 1 1
 0 START
 x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t3
-x PROCESS 20000 0  # 4
+x PROCESS 15000 0  # 4
 x SEMDOWN threads-cepops-SEM global
 x LOOP handle-cepops 0 threads-cepops threads-cepops 0
 x SEMUP threads-cepops-SEM global

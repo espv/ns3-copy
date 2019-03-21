@@ -204,7 +204,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         if(m_sendQueue2->GetNPackets() > 0)
         {
             Ptr<Packet> p = m_sendQueue2->Dequeue();
-            NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << (Simulator::Now() - p->m_executionInfo.timestamps[0]).GetMicroSeconds());
+            //NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << (Simulator::Now() - p->m_executionInfo.timestamps[0]).GetMicroSeconds());
             DcepHeader dcepHeader;
             Ipv4Header ipv4;
             p->RemoveHeader(ipv4);
