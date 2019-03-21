@@ -422,6 +422,10 @@ namespace ns3 {
                 
             }
             else*/
+
+            dstate->SetNextHop(q->eventType, q->output_dest);
+            placed = true;
+            /*
             if(q->eventType == "B")
             {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
@@ -433,7 +437,7 @@ namespace ns3 {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.2"));
                 placed = true;
                 
-            }
+            }*/
             /*else if (q->eventType == "D")
             {
                 dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.5"));
