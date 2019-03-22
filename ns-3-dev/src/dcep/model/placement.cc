@@ -408,6 +408,8 @@ namespace ns3 {
         Ptr<Communication> cm = GetObject<Communication>();
         bool placed = false;
 
+        //dstate->SetNextHop(q->eventType, q->output_dest);
+        //placed = true;
         if (!q->isAtomic) 
         {
             dstate->SetNextHop(q->eventType, cm->GetLocalAddress());

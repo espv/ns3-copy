@@ -191,6 +191,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
         DoCheckNumberConstraints(e, constraints, cep, producer, numberValues, stringValues);
     }
+
+    void CEPEngine::FinishedProcessingEvent(Ptr<CepEvent> e)
+    {
+        NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo.timestamps[0]).GetMicroSeconds());
+    }
     
     void
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
@@ -199,10 +204,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto node = GetObject<Dcep>()->GetNode();
 
         if (e->event_class != INTERMEDIATE_EVENT) {
-            e->pkt->m_executionInfo.executedByExecEnv = false;
             e->pkt->m_executionInfo.timestamps.emplace_back(Simulator::Now());
             e->timestamp = Simulator::Now();
+            e->pkt->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(1, e->pkt, "check-constraints", &CEPEngine::CheckConstraints, this, e);
+            e->pkt->m_executionInfo.executedByExecEnv = false;
+            ee->Proceed(1, e->pkt, "finished-processing", &CEPEngine::FinishedProcessingEvent, this, e);
 
             ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
         } else {
@@ -267,9 +274,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             cepOp->Configure(q, this);
             this->ops_queue.push_back(cepOp);
             GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
-            if (!q->isFinal) {
-                GetObject<Dcep>()->ActivateDatasource(q);
-            }
+            GetObject<Dcep>()->ActivateDatasource(q);
         }
         else
         {
@@ -559,19 +564,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
         ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
         if (!constraintsFulfilled) {
+            if (e->event_class != INTERMEDIATE_EVENT) {
+                Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
+                auto ee = node->GetObject<ExecEnv>();
+            }
             return false;
         }
 
-        if (q->isFinal) {
-            // This event triggers a new complex event
-            p->HandleNewCepEvent(q, returned, this);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 1;
-        } else {
-            // We simply forward this event to any subscribers
-            p->GetObject<Forwarder>()->ForwardNewCepEvent(e);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
-        }
+        p->GetObject<Forwarder>()->ForwardNewCepEvent(e);
         return true;
     }
 
@@ -715,9 +717,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
         Ptr<ExecEnv> ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        if (e->event_class != INTERMEDIATE_EVENT) {
+        if (e->event_class != INTERMEDIATE_EVENT)
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
-        }
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
@@ -740,6 +741,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if(!events1->empty() && !events2->empty() && e->type == event2)
         {
             delete events2;  // Not going to use events2
+            Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
             if (e->event_class != INTERMEDIATE_EVENT) {
                 e->pkt->m_executionInfo.executedByExecEnv = false;
                 ee->Proceed(1, e->pkt, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
@@ -747,13 +749,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 DoEvaluate(e, returned, events1, q, p, ops, cep);
             }
         } else {
+            // No sequences left
             if (e->event_class != INTERMEDIATE_EVENT) {
-                if (event2 == "") {
-                    // Only expecting one event for this operator
-                    returned.push_back(e);
-                    p->HandleNewCepEvent(q, returned, this);
-                    ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 1;
-                }
                 ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
                 ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
             }
@@ -766,6 +763,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
+        static int cnt = 0;
+        std::cout << "OrOperator::Evaluate cnt " << cnt++ << std::endl;
         /* everything is a match*/
         returned.push_back(e);
         // Here we insert the incoming event into the sequence
@@ -1036,7 +1035,17 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
             Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
 
-            AddAttributesToNewEvent(q, events, new_event, op);
+            if (new_event->event_class == INTERMEDIATE_EVENT) {
+                AddAttributesToNewEvent(q, events, new_event, op);
+            } else {
+                //if (!events.empty()) {
+                    //ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
+                //}
+                AddAttributesToNewEvent(q, events, new_event, op);
+                //new_event->pkt->m_executionInfo.executedByExecEnv = false;
+                //ee->Proceed(1, new_event->pkt, "assign-attributes-to-complex-event",
+                //            &Producer::AddAttributesToNewEvent, this, q, events, new_event, op);
+            }
         }
     }
 

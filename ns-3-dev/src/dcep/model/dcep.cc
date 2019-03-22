@@ -376,7 +376,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     q3->isFinal = true;
                     q3->isAtomic = false;
                     q3->eventType = std::to_string(complex_event_cnt++);
-                    q3->output_dest = Ipv4Address::GetAny();
+                    q3->output_dest = Ipv4Address("10.0.0.3");
                     q3->inevent1 = event1;
                     q3->inevent2 = event2;
                     q3->window = Seconds(15);
