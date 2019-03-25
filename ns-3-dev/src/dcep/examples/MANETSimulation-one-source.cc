@@ -62,7 +62,7 @@ int main(int argc, char** argv) {
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
-    uint64_t eventInterval = 1000000000;  // Interval in nanoseconds
+    uint64_t eventInterval = 50000000;  // Interval in nanoseconds
     
     std::string format ("OMNet++");
     std::string experiment ("dcep-performance-test"); //the current study
@@ -237,7 +237,7 @@ int main(int argc, char** argv) {
     anim.SetBackgroundImage ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/plain-white-background.jpg", -413, -275, 1, 1, 1);
     anim.UpdateNodeSize (0, 50, 50);
     anim.UpdateNodeSize (1, 50, 50);
-    anim.UpdateNodeSize (2, 50, 50);
+    anim.UpdateNodeSize (2, 35, 35);
     anim.UpdateNodeSize (3, 50, 50);
     Simulator::Run ();
     Simulator::Destroy ();
