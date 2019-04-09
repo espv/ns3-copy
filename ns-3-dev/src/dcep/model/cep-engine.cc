@@ -563,13 +563,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 0;
         ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
         ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
         if (!constraintsFulfilled) {
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
-                auto ee = node->GetObject<ExecEnv>();
-            }
             return false;
         }
 

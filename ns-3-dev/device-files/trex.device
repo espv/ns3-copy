@@ -171,6 +171,7 @@ x CALL check-constraints
 SIGEND
 
 
+# TODO: turn send-packets into a loop
 SIGSTART
 NAME send-packets
 PEU cpu
@@ -220,7 +221,7 @@ x COPYQUEUE CEPQUERYQUEUE all-cepops threads-cepops
 x TTWAKEUP event_thread1
 x TTWAKEUP event_thread2
 x TTWAKEUP event_thread3
-x SEMDOWN packet-threads-SEM global
+event-thread-semdown-loc SEMDOWN packet-threads-SEM global
 #x SEMDOWN packet-threads-SEM global
 #x SEMDOWN packet-threads-SEM global
 # Now, the results have been collected and we send them to any subscribers

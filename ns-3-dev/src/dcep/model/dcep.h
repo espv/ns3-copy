@@ -68,6 +68,7 @@ private:
         uint16_t m_cepPort; 
         uint16_t event_code;
         uint32_t events_load;
+        uint32_t query_load;
         uint32_t event_interval;
         uint16_t operators_load;
         std::string placementPolicy;
