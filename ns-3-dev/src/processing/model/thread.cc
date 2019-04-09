@@ -1192,12 +1192,6 @@ void Thread::Dispatch() {
 
             Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
             execEnv->currentlyExecutingThread = this;
-            if (e->tokens.size() > 0 && e->tokens[0] == "event-thread-semdown-loc") {
-                std::cout << "event-thread-semdown-loc" << std::endl;
-            }
-            if (e->tokens.size() > 0 && e->tokens[0] == "finished-processing-loc") {
-                std::cout << "finished-processing-loc" << std::endl;
-            }
 
 			if (m_currentLocation->curPkt != nullptr) {
 				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);

@@ -236,7 +236,7 @@ namespace ns3 {
         else
         {
             eventsList.push_back(e);
-            //Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
+            Simulator::Schedule(MilliSeconds(100.0), &Placement::SendCepEvent, this, e, dest);
         }
     }
     
