@@ -714,6 +714,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
+        static int cnt = 0;
+        std::cout << "Times that ThenOperator::Evaluate is called " << ++cnt << std::endl;
         Ptr<ExecEnv> ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (e->event_class != INTERMEDIATE_EVENT)
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
@@ -965,6 +967,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             } else {
                 // Here we consume the previous events
                 complex_event->pkt->m_executionInfo.target = "";
+                ee->queues["complex-pkts"]->Enqueue(complex_event->pkt);
                 Ptr<Forwarder> forwarder = GetObject<Forwarder>();
                 forwarder->ForwardNewCepEvent(complex_event);
                 op->Consume(events);

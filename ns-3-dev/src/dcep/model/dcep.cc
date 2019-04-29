@@ -216,7 +216,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         auto ds = GetObject<DataSource> ();
         if (!ds->IsActive()) {
             ds->Activate();
-            Simulator::Schedule(Seconds(10), &DataSource::GenerateAtomicCepEvents, ds, q);
+            Simulator::Schedule(Seconds(100), &DataSource::GenerateAtomicCepEvents, ds, q);
             //ds->GenerateAtomicCepEvents(q);
         }
     }
@@ -351,7 +351,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 c1->type = GTCONSTRAINT;
                 q1->constraints.emplace_back(c1);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
-                in_seconds += 0.01;
+                in_seconds += 5;
 
                 Ptr<Query> q2 = CreateObject<Query> ();
                 q2->actionType = NOTIFICATION;
@@ -374,7 +374,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 c2->type = LTCONSTRAINT;
                 q2->constraints.emplace_back(c2);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
-                in_seconds += 0.01;
+                in_seconds += 5;
 
                 for (int j = 0; j < numCepQueries; j++) {
                     Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
@@ -399,7 +399,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     q3->currentHost.Set("0.0.0.0");
                     q3->parent_output = parent_output;
                     Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
-                    //in_seconds += 0.01;
+                    in_seconds += 5;
                     //dcep->DispatchQuery(q3);
                 }
 

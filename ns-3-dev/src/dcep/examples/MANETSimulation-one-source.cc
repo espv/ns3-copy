@@ -240,7 +240,7 @@ int main(int argc, char** argv) {
     anim.SetBackgroundImage ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/plain-white-background.jpg", -413, -275, 1, 1, 1);
     anim.UpdateNodeSize (0, 50, 50);
     anim.UpdateNodeSize (1, 50, 50);
-    anim.UpdateNodeSize (2, 35, 35);
+    anim.UpdateNodeSize (2, 50, 50);
     anim.UpdateNodeSize (3, 50, 50);
     Simulator::Run ();
     Simulator::Destroy ();
