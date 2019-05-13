@@ -1,0 +1,583 @@
+#
+# Lines starting with "#" are regarded as comments, and disregarded during parsing.
+#
+# The order of sections matter - they must be in the following order:
+# QUEUES, HARDWARE, SYNCH, CONDITIONS, TRIGGERS,
+# {SIGSTART ... SIGEND},
+# THREADS
+#
+
+#############################################################################
+############################### HEADER ######################################
+#############################################################################
+
+QUEUES
+# Format: name
+#	  queuing policy (only currently supported: "FIFO")
+#	  size
+#	  type of queued entries ("packet" or "service")
+# order matters, since queue conditions work on sets of queues specified
+# by the name of the first and the last queue
+
+# BCM4430 TRS: http://linux-sunxi.org/images/0/05/4330-DS206-R.pdf
+# Page 84, figure 34
+# NIC Rx memory: 10kb
+# NIC Tx memory: 32kb
+
+HIRQ	            FIFO 	-1    services
+# Queue for posted tasks
+sq FIFO -1 services
+rcvd-pkts-t1 FIFO -1 packets
+rcvd-pkts-t2 FIFO -1 packets
+rcvd-pkts-t3 FIFO -1 packets
+complex-pkts FIFO -1 packets
+packets-to-be-sent FIFO -1 packets
+all-cepops FIFO -1 cepqueries
+threads-cepops FIFO -1 cepqueries
+
+HARDWARE
+# Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
+PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 128 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 256 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 3 cpu3 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 3 cpu4 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 3 cpu5 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 3 cpu6 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+
+SYNCH
+# name type arguments
+# type 0 is a semaphore
+threads-cepops-SEM 0 1
+packet-threads-SEM 0 0
+complex-pkts-SEM 0 1
+
+CONDITIONS
+
+TRIGGERS
+SERVICE handle-then-cepop handle-then-cepop
+SERVICE check-constraints check-constraints
+SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
+LOC within-send-packet send-packet
+LOC call-to-handle-then-cepop handle-cepops
+LOC finished-processing-loc finished-processing
+
+# Entrypoint function for the PEU defined above
+SIGSTART
+NAME irq_enter
+PEU cpu
+RESOURCES cycles normal
+FRACTION 50%  1940 3880
+
+0 START
+x                      DEQUEUE		SRVQUEUE 0 HIRQ
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 0
+x STATECOND constraint-type read local 1
+x STATECOND constraint-processed read local 1
+#x PROCESS 0 0  # 5
+x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 0
+x STATECOND constraint-type read local 1
+x STATECOND constraint-processed read local 0
+x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 0
+x STATECOND constraint-type read local 0
+x STATECOND constraint-processed read local 1
+x PROCESS 1000 0  # 5
+x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 0
+x STATECOND constraint-type read local 0
+x STATECOND constraint-processed read local 0
+x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME check-constraints
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND constraints-done read local 1
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME process_received_packet
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 5000 0  # 6
+#x CALL check-constraints
+0 STOP
+
+SIGEND
+
+
+# TODO: turn send-packets into a loop
+SIGSTART
+NAME send-packets
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND packets-to-be-sent packets-to-be-sent empty
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME send-packets
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND packets-to-be-sent packets-to-be-sent notempty
+x DEQUEUE PKTQUEUE 0 packets-to-be-sent
+within-send-packet PROCESS 5400 0
+x CALL send-packets
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME receive-packet  # Wake up when packet is received
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x PROCESS 11000 0 # 1
+x CALL process_received_packet  # This ends with handle-cepops trigger being put into the packet.
+# Now we enqueue the packet as many times as there are threads to process the event.
+# Each packet will cause a trigger.
+x ENQUEUE PKTQUEUE 0 rcvd-pkts-t1
+#x DUPLICATEPKT
+x ENQUEUE PKTQUEUE 0 rcvd-pkts-t2
+#x DUPLICATEPKT
+x ENQUEUE PKTQUEUE 0 rcvd-pkts-t3
+x COPYQUEUE CEPQUERYQUEUE all-cepops threads-cepops
+x TTWAKEUP event_thread1
+x TTWAKEUP event_thread2
+x TTWAKEUP event_thread3
+event-thread-semdown-loc SEMDOWN packet-threads-SEM global
+#x SEMDOWN packet-threads-SEM global
+#x SEMDOWN packet-threads-SEM global
+# Now, the results have been collected and we send them to any subscribers
+x PROCESS 5000 0
+finished-processing-loc CALL send-packets
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME HIRQ-1  # Receiving part
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x                  ENQUEUE		SRVQUEUE receive-packet sq
+x TTWAKEUP packet_thread1
+x TTWAKEUP packet_thread2
+x TTWAKEUP packet_thread3
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME packet_processing_thread  # Wake up when packet is received and to be sent
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND sq sq empty
+x SLEEPTHREAD
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME packet_processing_thread  # Wake up when packet is received and to be sent
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND sq sq notempty
+x DEQUEUE SRVQUEUE 0 sq
+x CALL packet_processing_thread
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME assign-attributes-to-complex-event
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND attributes-left read local 0
+0 STOP
+
+
+SIGSTART
+NAME assign-attributes-to-complex-event
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND attributes-left read local 1
+x PROCESS 100 0
+x CALL assign-attributes-to-complex-event
+0 STOP
+
+
+SIGSTART
+NAME create-potential-complex-event
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND CreatedComplexEvent read local 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME create-potential-complex-event
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND CreatedComplexEvent read local 1
+#x PROCESS 40500 0
+x PROCESS 22600 0
+x CALL assign-attributes-to-complex-event
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-complex-pkts-inner
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x SEMDOWN complex-pkts-SEM global
+x QUEUECOND complex-pkts complex-pkts notempty
+x                      DEQUEUE		PKTQUEUE 0 complex-pkts
+x SEMUP complex-pkts-SEM global
+x CALL handle-complex-pkts-inner
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-complex-pkts-inner
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x SEMDOWN complex-pkts-SEM global
+x QUEUECOND complex-pkts complex-pkts empty
+x SEMUP complex-pkts-SEM global
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-created-complex-events
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND complex-pkts complex-pkts notempty
+x PROCESS 18000 0
+x CALL handle-complex-pkts-inner
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-created-complex-events
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND complex-pkts complex-pkts empty
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-then-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND CepOpDoneYet read local 0
+x STATECOND InsertedSequence read local 1
+x PROCESS 4000 0
+x CALL handle-then-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-then-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND CepOpDoneYet read local 0
+x STATECOND InsertedSequence read local 0
+x CALL handle-then-cepop
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-then-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND CepOpDoneYet read local 1
+x STATECOND InsertedSequence read local 1
+x PROCESS 5300 0
+x CALL create-potential-complex-event
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-then-cepop
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x STATECOND CepOpDoneYet read local 1
+x STATECOND InsertedSequence read local 0
+x CALL create-potential-complex-event
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME handle-cepops
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 LOOPSTART     0 threads-cepops threads-cepops 0
+x CALL check-constraints
+call-to-handle-then-cepop DEQUEUE CEPQUERYQUEUE 0 0
+x SEMUP threads-cepops-SEM global
+x CALL handle-then-cepop
+x SEMDOWN threads-cepops-SEM global
+0 RESTART
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread1
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 empty
+x SLEEPTHREAD
+x PROCESS 6000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread1
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts-t1
+x PROCESS 4000 0  # 4
+x SEMDOWN threads-cepops-SEM global
+x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x SEMUP threads-cepops-SEM global
+x CALL handle-created-complex-events
+x SEMUP packet-threads-SEM global
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread2
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 empty
+x SLEEPTHREAD
+x PROCESS 6000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread2
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts-t2
+x PROCESS 4000 0  # 4
+x SEMDOWN threads-cepops-SEM global
+x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x SEMUP threads-cepops-SEM global
+x CALL handle-created-complex-events
+x SEMUP packet-threads-SEM global
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread3
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 empty
+x SLEEPTHREAD
+x PROCESS 6000 0
+0 STOP
+
+SIGEND
+
+
+SIGSTART
+NAME event_processing_thread3
+PEU cpu
+RESOURCES cycles normal
+FRACTION 100% 1 1
+
+0 START
+x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 notempty
+x DEQUEUE PKTQUEUE 0 rcvd-pkts-t3
+x PROCESS 4000 0  # 4
+x SEMDOWN threads-cepops-SEM global
+x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x SEMUP threads-cepops-SEM global
+x CALL handle-created-complex-events
+x SEMUP packet-threads-SEM global
+0 STOP
+
+SIGEND
+
+
+THREADS
+packet_thread1 packet_processing_thread infinite 0
+#packet_thread2 packet_processing_thread infinite 0
+#packet_thread3 packet_processing_thread infinite 0
+event_thread1 event_processing_thread1 infinite 0
+#event_thread2 event_processing_thread2 infinite 0
+#event_thread3 event_processing_thread3 infinite 0

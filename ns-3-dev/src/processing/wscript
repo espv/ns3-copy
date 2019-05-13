@@ -52,6 +52,7 @@ def build(bld):
         'model/telosb.h',
         'model/executioninfo.h',
         'model/trex.h',
+        'model/siddhi.h',
 
     ]
 

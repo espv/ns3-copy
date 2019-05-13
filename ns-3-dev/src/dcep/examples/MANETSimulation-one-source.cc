@@ -30,14 +30,14 @@
 #include "ns3/stats-module.h"
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
-#include "ns3/trex.h"
+#include "ns3/siddhi.h"
 #include "ns3/execenv.h"
 
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("MANETSimulation");
 
-static TRexProtocolStack ps;
+static SiddhiProtocolStack ps;
 
 int main(int argc, char** argv) {
 
