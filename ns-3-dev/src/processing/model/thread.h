@@ -99,6 +99,8 @@ public:
 	// To keep track of location of thread of execution
 	std::stack<Ptr<ProgramLocation> > m_programStack;
 
+	ExecutionInfo m_executionInfo;
+
 	void DoneProcessing();
 
 	void ResumeProcessing(); // Called by Dispatch() when re-activated

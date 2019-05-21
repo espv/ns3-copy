@@ -171,7 +171,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
             {
                 // OYSTEDAL: Used to measure time at specific points in the signature
                 if (m_currentLocation->curPkt != nullptr)
-                    m_currentLocation->curPkt->m_executionInfo.timestamps.push_back(Simulator::Now());
+                    //m_currentLocation->curPkt->m_executionInfo.timestamps.push_back(Simulator::Now());
+                    m_executionInfo.timestamps.push_back(Simulator::Now());
 
                 return true;
             }
@@ -541,7 +542,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newSem = ee->sem;
 
 		if (m_currentLocation->curPkt != nullptr) {
-			ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+			//ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+			ExecutionInfo *pktEI = &m_executionInfo;
 			pktEI->ExecuteTrigger(newSem->trigger);
 			/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 				pktEI->executedByExecEnv = true;
@@ -554,7 +556,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	} else {
 		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 		// Here, we assume there is an active packet specifying the target
-		auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo.target);
+    //auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo.target);
+    auto it = execEnv->serviceTriggerMap.find(m_executionInfo.target);
 		newSem = it->second;
 
 
@@ -565,7 +568,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
         }
 
 		// Here, we know the target is that of this packet
-		auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+		//auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+		auto pktEI = &m_executionInfo;
 		pktEI->ExecuteTrigger(newSem->trigger);
 		/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 			pktEI->executedByExecEnv = true;
@@ -788,7 +792,8 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
              */
 			Ptr<SEM> semToEnqueue = nullptr;
 			if (qe->semToEnqueue == nullptr) {
-				semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
+        //semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
+        semToEnqueue = ee->serviceTriggerMap[m_executionInfo.target];
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
@@ -907,13 +912,14 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
 			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 			std::string queueTarget = execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
 
-			ExecutionInfo *pktEI = &m_currentLocation->curPkt->m_executionInfo;
+			//ExecutionInfo *pktEI = &m_currentLocation->curPkt->m_executionInfo;
+			ExecutionInfo *pktEI = &m_executionInfo;
 			pktEI->ExecuteTrigger(queueTarget);
 			/*if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo.target == queueTarget) {
 				Ptr<Packet> curPkt = m_currentLocation->curPkt;
 				curPkt->m_executionInfo.executedByExecEnv = true;
 				curPkt->m_executionInfo.curThread = this;
-				EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
+				//EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
 				toInvoke->Invoke();
 				//toInvoke->Unref();
 			}*/
@@ -963,7 +969,7 @@ bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {
 	if (se->schedType == AWAKE)
 		arguments.push_back((uint32_t)this->m_scheduler->threadPids[se->threadName]);
 	else
-	    arguments.push_back((uint32_t)m_pid);
+    arguments.push_back((uint32_t)m_pid);
 
 	const int cpu = peu->GetObject<CPU>()->GetId();
 	bool reqReturn = m_scheduler->Request(cpu, se->schedType, arguments);
@@ -1194,7 +1200,8 @@ void Thread::Dispatch() {
             execEnv->currentlyExecutingThread = this;
 
 			if (m_currentLocation->curPkt != nullptr) {
-				ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+				//ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
+				ExecutionInfo *pktEI = &m_executionInfo;
 				pktEI->ExecuteTrigger(e->checkpoint);
 				/*
 				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {

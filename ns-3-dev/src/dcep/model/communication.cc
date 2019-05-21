@@ -184,11 +184,13 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
         m_sendQueue2->Enqueue(p);
 
-        p->m_executionInfo.timestamps.emplace_back(Simulator::Now());
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        //p->m_executionInfo.timestamps.emplace_back(Simulator::Now());
+        ee->currentlyExecutingThread->m_executionInfo.timestamps.emplace_back(Simulator::Now());
         auto contentType = dcepHeader.GetContentType();
         if (contentType == EVENT) {
             Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
-            p->m_executionInfo.executedByExecEnv = false;
+            ee->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
             ee->Proceed(1, p, "send-packet", &Communication::send, this);
             ee->queues["packets-to-be-sent"]->Enqueue(p);
         } else if (contentType == QUERY) {
