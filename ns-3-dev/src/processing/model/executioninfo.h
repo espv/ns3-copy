@@ -42,16 +42,7 @@ namespace ns3 {
         std::vector <Time> timestamps;
         int seqNr;
 
-        void ExecuteTrigger(const std::string checkpoint) {
-            auto it = targets.find(checkpoint);
-            if (it != targets.end() && !it->second.empty()) {
-                executedByExecEnv = true;
-                auto toInvoke = it->second.front();
-                toInvoke->Invoke();
-                toInvoke->Unref();
-                it->second.erase(it->second.begin());
-            }
-        }
+        void ExecuteTrigger(std::string &checkpoint);
     };
 }
 
