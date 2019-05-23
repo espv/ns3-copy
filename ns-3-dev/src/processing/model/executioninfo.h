@@ -9,6 +9,7 @@
 #include "ns3/nstime.h"
 #include <vector>
 #include <map>
+#include "ns3/packet.h"
 
 namespace ns3 {
     class Thread;
@@ -18,25 +19,28 @@ namespace ns3 {
     public:
         ExecutionInfo();
 
+        explicit ExecutionInfo(ExecutionInfo *ei);
+
         /* Used to identify whether a service is allready
          * called by the ExecEnv. If this is the same as
          * the event executed by the scheduler, return false.
          */
         bool executedByExecEnv;
         Thread *curThread = nullptr;
+        Ptr<Packet> packet;
 
         // Name and arguments for target service
         std::string target;
-        EventImpl *targetFPM;
+        //EventImpl *targetFPM;
         std::map<std::string, std::vector<EventImpl*> > targets;
 
         // Used for temporary synchronization primitives
-        void *tempSynch;
+        //void *tempSynch;
 
         /* Used to indicate which service to execute when
          * the packet is within a service queue
          */
-        SEM *queuedService;
+        //SEM *queuedService;
 
         // EXPERIMENTATION:
         std::vector <Time> timestamps;

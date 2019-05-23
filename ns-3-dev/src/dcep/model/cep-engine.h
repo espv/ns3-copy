@@ -24,6 +24,7 @@
 #include "ns3/ipv4-address.h"
 #include "ns3/event-impl.h"
 #include "ns3/packet.h"
+#include "ns3/nstime.h"
 #include <map>
 
 namespace ns3 {

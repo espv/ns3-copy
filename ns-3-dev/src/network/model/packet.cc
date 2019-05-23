@@ -27,13 +27,13 @@
 namespace ns3 {
 
 /* STEIN */
-ExecutionInfo::ExecutionInfo() {
+/*ExecutionInfo::ExecutionInfo() {
   executedByExecEnv = false;
   target = "";
   targetFPM = NULL;
   queuedService = NULL;
   tempSynch = NULL;
-}
+}*/
 /* STEIN */
 
 NS_LOG_COMPONENT_DEFINE ("Packet");
@@ -154,7 +154,7 @@ Packet::Packet ()
 
 Packet::Packet (const Packet &o)
   : /* STEIN */
-    m_executionInfo(o.m_executionInfo),
+    //m_executionInfo(o.m_executionInfo),
     /* STEIN */
     m_buffer (o.m_buffer),
     m_byteTagList (o.m_byteTagList),
@@ -173,7 +173,7 @@ Packet::operator = (const Packet &o)
       return *this;
     }
   /* STEIN */
-  m_executionInfo = o.m_executionInfo;
+  //m_executionInfo = o.m_executionInfo;
   /* STEIN */
   m_buffer = o.m_buffer;
   m_byteTagList = o.m_byteTagList;

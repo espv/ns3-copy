@@ -8,6 +8,7 @@
 #include "ns3/packet.h"
 
 #include "thread.h"
+#include "rrscheduler.h"
 //#include "taskscheduler.h"
 //#include "hwmodel.h"
 //#include "interrupt-controller.h"

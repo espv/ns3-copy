@@ -563,7 +563,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 
         if (it == execEnv->serviceTriggerMap.end()) {
             // Check that the service you're trying to call is in the signature.
-			NS_LOG_ERROR("Failed to find signature " << m_currentLocation->curPkt->m_executionInfo.target);
+			NS_LOG_ERROR("Failed to find signature " << m_executionInfo.target);
             NS_ASSERT(0);
         }
 

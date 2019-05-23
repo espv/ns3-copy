@@ -1,6 +1,7 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+#include "ns3/executioninfo.h"
 #include "ns3/object.h"
 #include "ns3/event-garbage-collector.h"
 #include "ns3/timer.h"

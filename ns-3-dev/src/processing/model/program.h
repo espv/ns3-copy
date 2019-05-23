@@ -13,6 +13,7 @@
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/cep-engine.h"
+#include "executioninfo.h"
 
 #include <vector>
 #include <stack>

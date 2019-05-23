@@ -191,7 +191,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         if (contentType == EVENT) {
             Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
             ee->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
-            ee->Proceed(1, p, "send-packet", &Communication::send, this);
+            ee->Proceed(1, ee->currentlyExecutingThread, "send-packet", &Communication::send, this);
             ee->queues["packets-to-be-sent"]->Enqueue(p);
         } else if (contentType == QUERY) {
             send();

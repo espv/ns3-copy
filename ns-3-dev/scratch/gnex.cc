@@ -64,51 +64,51 @@ void ScheduleInterrupt(Ptr<Node> node, const char* interruptId) {
 
 void GnexProtocolStack::IPReceive(Ptr<Packet> packet, Ptr<Node> node) {
     Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-    packet->m_executionInfo.executedByExecEnv = false;
+    execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
     // std::cout << Simulator::Now() << ": " << "IP receives packet " << p->m_executionInfo.seqNr << std::endl;
     if (print)
-        std::cout << Simulator::Now() << ": " << "IP receives packet " << packet->m_executionInfo.seqNr << std::endl;
+        std::cout << Simulator::Now() << ": " << "IP receives packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr << std::endl;
 
-    // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    execenv->Proceed(1, packet, "nicdriver::transmit", &GnexProtocolStack::DriverTransmit, this, packet, node);
+    // execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "nicdriver::transmit", &GnexProtocolStack::DriverTransmit, this, packet, node);
 }
 
 void GnexProtocolStack::DriverReceive(Ptr<Packet> packet, Ptr<Node> node) {
     Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-    packet->m_executionInfo.executedByExecEnv = false;
+    execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
     if (print)
-        std::cout << Simulator::Now() << ": " << "Driver receives packet " << packet->m_executionInfo.seqNr << std::endl;
+        std::cout << Simulator::Now() << ": " << "Driver receives packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr << std::endl;
 
-    // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    execenv->Proceed(1, packet, "ip::receive", &GnexProtocolStack::IPReceive, this, packet, node);
+    // execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "ip::receive", &GnexProtocolStack::IPReceive, this, packet, node);
 }
 
 void GnexProtocolStack::MeasureStart(Ptr<Packet> packet, Ptr<Node> node) {
     Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-    // packet->m_executionInfo.executedByExecEnv = false;
+    // execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
     std::cout << "HERE" << std::endl;
 
     // NS_ASSERT_MSG(0, "TEST");
 
-    // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+    // execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
     // execenv->Proceed(packet, "ip::receive", &GnexProtocolStack::IPReceive, this, packet, node);
-    packet->m_executionInfo.executedByExecEnv = false;
-    execenv->Proceed(1, packet, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
+    execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
 }
 
 void GnexProtocolStack::DriverTransmit(Ptr<Packet> packet, Ptr<Node> node) {
     Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-    packet->m_executionInfo.executedByExecEnv = false;
+    execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
     if (print)
-        std::cout << Simulator::Now() << ": " << "Driver transmits packet " << packet->m_executionInfo.seqNr << std::endl;
+        std::cout << Simulator::Now() << ": " << "Driver transmits packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr << std::endl;
 
-    // std::cout << "DELTA: " << packet->m_executionInfo.timestamps[1] - packet->m_executionInfo.timestamps[0] << std::endl;
-    // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+    // std::cout << "DELTA: " << execenv->currentlyExecutingThread->m_executionInfo.timestamps[1] - execenv->currentlyExecutingThread->m_executionInfo.timestamps[0] << std::endl;
+    // execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
 
-    execenv->Proceed(1, packet, "nic::transmit", &GnexProtocolStack::NICSend, this, packet, node);
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "nic::transmit", &GnexProtocolStack::NICSend, this, packet, node);
 }
 
 Gnuplot *ppsPlot = NULL;
@@ -142,10 +142,11 @@ static double lastTime = 0;
 static int64_t packetsForwarded = 0;
 
 void GnexProtocolStack::NICSend(Ptr<Packet> packet, Ptr<Node> node) {
+    Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
     if (print)
-        std::cout << Simulator::Now() << ": " << "NIC transmits packet " << packet->m_executionInfo.seqNr << std::endl;
+        std::cout << Simulator::Now() << ": " << "NIC transmits packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr << std::endl;
 
-    // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+    // execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
 
     packetsForwarded += 1;
 
@@ -157,13 +158,13 @@ void GnexProtocolStack::NICSend(Ptr<Packet> packet, Ptr<Node> node) {
     }
 
     static int i = 0;
-    // delayDataSet->Add(i++, (packet->m_executionInfo.timestamps[4] - packet->m_executionInfo.timestamps[2]).GetNanoSeconds() );
-    // delayDataSet->Add(i++, (packet->m_executionInfo.timestamps[4] - packet->m_executionInfo.timestamps[3]).GetNanoSeconds() );
-    delayDataSet->Add(i++, (packet->m_executionInfo.timestamps[1] - packet->m_executionInfo.timestamps[0]).GetNanoSeconds() );
+    // delayDataSet->Add(i++, (execenv->currentlyExecutingThread->m_executionInfo.timestamps[4] - execenv->currentlyExecutingThread->m_executionInfo.timestamps[2]).GetNanoSeconds() );
+    // delayDataSet->Add(i++, (execenv->currentlyExecutingThread->m_executionInfo.timestamps[4] - execenv->currentlyExecutingThread->m_executionInfo.timestamps[3]).GetNanoSeconds() );
+    delayDataSet->Add(i++, (execenv->currentlyExecutingThread->m_executionInfo.timestamps[1] - execenv->currentlyExecutingThread->m_executionInfo.timestamps[0]).GetNanoSeconds() );
 
     if (print) {
         std::cout << "DELAYS: ";
-        for (std::vector<Time>::iterator it = packet->m_executionInfo.timestamps.begin(); it != packet->m_executionInfo.timestamps.end(); ++it ) {
+        for (std::vector<Time>::iterator it = execenv->currentlyExecutingThread->m_executionInfo.timestamps.begin(); it != execenv->currentlyExecutingThread->m_executionInfo.timestamps.end(); ++it ) {
             std::cout << *it << " ";
         }
         std::cout << std::endl;
@@ -177,9 +178,9 @@ void GnexProtocolStack::NICSend(Ptr<Packet> packet, Ptr<Node> node) {
 void GnexProtocolStack::NICReceive(Ptr<Packet> packet, Ptr<Node> node) {
     Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
 
-    packet->m_executionInfo.executedByExecEnv = false;
-    execenv->Proceed(1, packet, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
-    // packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+    execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "nicdriver::receive", &GnexProtocolStack::DriverReceive, this, packet, node);
+    // execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
 
     // If the queue was empty before, that means the driver was
     // waiting on a semaphore to be woken up by an interrupt.
@@ -209,12 +210,11 @@ void GnexProtocolStack::NICReceive(Ptr<Packet> packet, Ptr<Node> node) {
 
 // GeneratePacket creates a packet and passes it on to the NIC
 void GnexProtocolStack::GeneratePacket(Ptr<Node> n, uint32_t pktSize, uint32_t curSeqNr) {
+    Ptr<ExecEnv> execenv = n->GetObject<ExecEnv>();
 
     Ptr<Packet> toSend = Create<Packet>(pktSize);
-    toSend->m_executionInfo.seqNr = curSeqNr;
-    toSend->m_executionInfo.executedByExecEnv = false;
-
-    Ptr<ExecEnv> execenv = n->GetObject<ExecEnv>();
+    execenv->currentlyExecutingThread->m_executionInfo.seqNr = curSeqNr;
+    execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
     if (print)
         std::cout << "Generating packet " << curSeqNr << std::endl;

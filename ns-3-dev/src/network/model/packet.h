@@ -36,7 +36,7 @@
 #include "ns3/deprecated.h"
 
 // Espen
-#include "ns3/executioninfo.h"
+//#include "ns3/executioninfo.h"
 // Espen
 
 namespace ns3 {
@@ -695,7 +695,7 @@ public:
   Ptr<NixVector> GetNixVector (void) const;
 
   /* STEIN */
-  ExecutionInfo m_executionInfo;
+  //ExecutionInfo m_executionInfo;
   /* STEIN */
 
   /**

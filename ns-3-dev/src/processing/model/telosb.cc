@@ -43,17 +43,17 @@ TelosB::Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevic
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
   ps->firstNodeSending = false;
   --radio.nr_send_recv;
-  packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+  execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
   packet->collided = radio.collision;
   if (radio.collision && radio.nr_send_recv == 0)
     radio.collision = false;
 
   if (radio.rxfifo_overflow) {
-    NS_LOG_INFO ("Dropping packet " << packet->m_executionInfo.seqNr << " due to RXFIFO overflow");
+    NS_LOG_INFO ("Dropping packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr << " due to RXFIFO overflow");
     return;
   }
 
@@ -69,7 +69,7 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
     radio.rxfifo_overflow = true;
   }
 
-  execenv->Proceed(1, packet, "readdonepayload", &TelosB::readDone_payload, this, packet);
+  execenv->Proceed(1, execenv->currentlyExecutingThread, "readdonepayload", &TelosB::readDone_payload, this, packet);
   if (receivingPacket) {
     execenv->queues["rxfifo"]->Enqueue(packet);
     NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: "
@@ -77,7 +77,7 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
     return;
   }
 
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": CC2420ReceivePacket, packet nr " << packet->m_executionInfo.seqNr);
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": CC2420ReceivePacket, packet nr " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
 
   execenv->ScheduleInterrupt (packet, "HIRQ-1", NanoSeconds(10));
   receivingPacket = true;
@@ -85,7 +85,7 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
 
 void TelosB::readDone_payload(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
   radio.bytes_in_rxfifo -= packet->GetSize ();
   if (radio.rxfifo_overflow && radio.bytes_in_rxfifo <= 0) {
@@ -99,7 +99,7 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
   if (packet->collided) {
     execenv->globalStateVariables["packet-collided"] = 1;
     ps->nr_packets_dropped_bad_crc++;
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": collision caused packet nr " << packet->m_executionInfo.seqNr
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": collision caused packet nr " << execenv->currentlyExecutingThread->m_executionInfo.seqNr
                                   << "'s CRC check to fail, dropping it");
     if (execenv->queues["rxfifo"]->IsEmpty()) {
       receivingPacket = false;
@@ -112,18 +112,18 @@ void TelosB::readDone_payload(Ptr<Packet> packet) {
     }
   } else {
     execenv->globalStateVariables["packet-collided"] = 0;
-    NS_LOG_INFO ("readDone_payload seqno: " << packet->m_executionInfo.seqNr);
-    execenv->Proceed(1, packet, "receivedone", &TelosB::receiveDone_task, this, packet);
+    NS_LOG_INFO ("readDone_payload seqno: " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "receivedone", &TelosB::receiveDone_task, this, packet);
   }
 
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload " << packet->m_executionInfo.seqNr
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": readDone_payload " << execenv->currentlyExecutingThread->m_executionInfo.seqNr
                                 << ", receivingPacket: " << receivingPacket << ", packet collided: "
                                 << packet->collided);
 }
 
 void TelosB::receiveDone_task(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
   NS_LOG_INFO ("Packets in send queue: " << execenv->queues["ipaq"]->GetNPackets());
 
   if (jitterExperiment) {
@@ -134,17 +134,17 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
     execenv->queues["ipaq"]->Enqueue(packet);execenv->queues["ipaq"]->Enqueue(packet);
     execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);execenv->queues["rcvd-send"]->Enqueue(packet);
     execenv->globalStateVariables["ipaq-full"] = 0;
-    execenv->Proceed(1, packet, "sendtask", &TelosB::sendTask, this, packet);
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "sendtask", &TelosB::sendTask, this, packet);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
   } else if (execenv->queues["ipaq"]->GetNPackets() < 3) {
     execenv->globalStateVariables["ipaq-full"] = 0;
-    execenv->Proceed(1, packet, "sendtask", &TelosB::sendTask, this, packet);
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << packet->m_executionInfo.seqNr);
+    execenv->Proceed(1, execenv->currentlyExecutingThread, "sendtask", &TelosB::sendTask, this, packet);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
   } else {
     ++ps->nr_packets_dropped_ip_layer;
     execenv->globalStateVariables["ipaq-full"] = 1;
     NS_LOG_INFO (Simulator::Now() << " " << id << ": receiveDone_task, queue full, dropping packet "
-                                  << packet->m_executionInfo.seqNr);
+                                  << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
   }
 
   if (execenv->queues["rxfifo"]->IsEmpty()) {
@@ -160,32 +160,32 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
 
 void TelosB::sendTask(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
-  execenv->Proceed(1, packet, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
+  execenv->Proceed(1, execenv->currentlyExecutingThread, "writtentotxfifo", &TelosB::writtenToTxFifo, this, packet);
   execenv->globalStateVariables["ip-radio-busy"] = 1;
 
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << packet->m_executionInfo.seqNr);
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": sendTask " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
 }
 
 // Called when done writing packet into TXFIFO, and radio is ready to send
 void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
   if (!packet->attemptedSent) {
     packet->attemptedSent = true;
-    packet->m_executionInfo.timestamps.push_back(Simulator::Now());
-    int64_t intra_os_delay = packet->m_executionInfo.timestamps[2].GetMicroSeconds() -
-                             packet->m_executionInfo.timestamps[1].GetMicroSeconds();
-    ps->time_received_packets.push_back (packet->m_executionInfo.timestamps[1].GetMicroSeconds());
-    ps->forwarded_packets_seqnos.push_back (packet->m_executionInfo.seqNr);
+    execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
+    int64_t intra_os_delay = execenv->currentlyExecutingThread->m_executionInfo.timestamps[2].GetMicroSeconds() -
+                             execenv->currentlyExecutingThread->m_executionInfo.timestamps[1].GetMicroSeconds();
+    ps->time_received_packets.push_back (execenv->currentlyExecutingThread->m_executionInfo.timestamps[1].GetMicroSeconds());
+    ps->forwarded_packets_seqnos.push_back (execenv->currentlyExecutingThread->m_executionInfo.seqNr);
     ps->all_intra_os_delays.push_back(intra_os_delay);
     ps->total_intra_os_delay += intra_os_delay;
-    NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
     NS_LOG_INFO (id << " writtenToTxFifo: DELTA: " << intra_os_delay << ", UDP payload size (36+payload bytes): "
-                    << packet->GetSize () << ", seq no " << packet->m_executionInfo.seqNr);
+                    << packet->GetSize () << ", seq no " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
     NS_LOG_INFO (Simulator::Now() << " " << id << ": writtenToTxFifo, number forwarded: "
-                                  << ++number_forwarded_and_acked << ", seq no " << packet->m_executionInfo.seqNr);
+                                  << ++number_forwarded_and_acked << ", seq no " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
   }
 
   // TODO: Use only the CC2420 model to transmit packets
@@ -202,7 +202,7 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
       return;
     }
     radio.collision = true;
-    NS_LOG_INFO ("Forwarding packet " << packet->m_executionInfo.seqNr << " causes collision");
+    NS_LOG_INFO ("Forwarding packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr << " causes collision");
   }
 
   Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5) + MicroSeconds (192),
@@ -228,13 +228,13 @@ void TelosB::sendViaCC2420(Ptr<Packet> packet) {
  */
 void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  packet->m_executionInfo.executedByExecEnv = false;
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
   ++ps->nr_packets_forwarded;
-  packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+  execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
   NS_LOG_INFO (Simulator::Now() << " " << id << ": finishedTransmitting: DELTA: "
-                                << packet->m_executionInfo.timestamps[3] - packet->m_executionInfo.timestamps[0]
+                                << execenv->currentlyExecutingThread->m_executionInfo.timestamps[3] - execenv->currentlyExecutingThread->m_executionInfo.timestamps[0]
                                 << ", UDP payload size: " << packet->GetSize ()
-                                << ", seq no: " << packet->m_executionInfo.seqNr);
+                                << ", seq no: " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
   --radio.nr_send_recv;
 
   if (radio.collision) {
@@ -247,8 +247,8 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
   // In the jitter experiment, we send the same packet three times.
   if (jitterExperiment) {
     packet->attemptedSent = false;
-    packet->m_executionInfo.timestamps.pop_back ();
-    packet->m_executionInfo.timestamps.pop_back ();
+    execenv->currentlyExecutingThread->m_executionInfo.timestamps.pop_back ();
+    execenv->currentlyExecutingThread->m_executionInfo.timestamps.pop_back ();
   }
 
   // Re-scheduling sendTask in case there is a packet waiting to be sent
@@ -257,7 +257,7 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
 
 void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": SendPacket " << packet->m_executionInfo.seqNr);
+  NS_LOG_INFO (Simulator::Now() << " " << id << ": SendPacket " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
 
   // Finish this, also change ReceivePacket to also accept acks
   if (!to_mote->radio.rxfifo_overflow) {
@@ -279,9 +279,9 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
     ps->firstNodeSending = true;
     ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
-    packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+    execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back(Simulator::Now());
     Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5/* 5 is preamble + SFD */) + MicroSeconds (192) /* 12 symbol lengths before sending packet */, &TelosB::ReceivePacket, to_mote, packet);
-    NS_LOG_INFO ("SendPacket, sending packet " << packet->m_executionInfo.seqNr);
+    NS_LOG_INFO ("SendPacket, sending packet " << execenv->currentlyExecutingThread->m_executionInfo.seqNr);
   } else {
     NS_LOG_INFO ("SendPacket, failed to send because of RXFIFO overflow");
   }
@@ -309,8 +309,9 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
 
     Ptr<Packet> packet = Create<Packet>(ps->packet_size);
     ps->nr_packets_total++;
-    packet->m_executionInfo.timestamps.push_back (Simulator::Now());
-    packet->m_executionInfo.seqNr = seqNr++;
+      Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
+    execenv->currentlyExecutingThread->m_executionInfo.timestamps.push_back (Simulator::Now());
+    execenv->currentlyExecutingThread->m_executionInfo.seqNr = seqNr++;
     if (use_device_model)
       ReceivePacket (packet);
     else
@@ -379,13 +380,14 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
 
 // GeneratePacket creates a packet and passes it on to the NIC
 void ProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *m1, TelosB *m2, TelosB *m3) {
-  Ptr<Packet> toSend = Create<Packet>(pktSize);
-  toSend->m_executionInfo.seqNr = curSeqNr;
-  toSend->m_executionInfo.executedByExecEnv = false;
+  Ptr<ExecEnv> execenv = m1->GetNode()->GetObject<ExecEnv>();
+  Ptr<Packet> packet = Create<Packet>(pktSize);
+  execenv->currentlyExecutingThread->m_executionInfo.seqNr = curSeqNr;
+  execenv->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
 
   NS_LOG_INFO ("Generating packet " << curSeqNr);
 
-  m1->SendPacket(toSend, m2, m3);
+  m1->SendPacket(packet, m2, m3);
 }
 
 /* GenerateTraffic schedules the generation of packets according to the duration

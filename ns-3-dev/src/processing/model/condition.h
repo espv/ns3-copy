@@ -26,6 +26,7 @@ class Program;
 class Packet;
 class ExecEnv;
 class ProgramLocation;
+class SEM;
 
 /* Variables to hold data regarding manual conditions
  * and triggers. Three types of conditions: manual,
