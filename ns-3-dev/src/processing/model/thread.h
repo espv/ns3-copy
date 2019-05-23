@@ -100,7 +100,7 @@ public:
 	// To keep track of location of thread of execution
 	std::stack<Ptr<ProgramLocation> > m_programStack;
 
-	ExecutionInfo m_executionInfo;
+	Ptr<ExecutionInfo> m_executionInfo = Create<ExecutionInfo>();
 
 	void DoneProcessing();
 

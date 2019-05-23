@@ -171,8 +171,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
             {
                 // OYSTEDAL: Used to measure time at specific points in the signature
                 if (m_currentLocation->curPkt != nullptr)
-                    //m_currentLocation->curPkt->m_executionInfo.timestamps.push_back(Simulator::Now());
-                    m_executionInfo.timestamps.push_back(Simulator::Now());
+                    //m_currentLocation->curPkt->m_executionInfo->timestamps.push_back(Simulator::Now());
+                    m_executionInfo->timestamps.push_back(Simulator::Now());
 
                 return true;
             }
@@ -543,11 +543,9 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 
 		if (m_currentLocation->curPkt != nullptr) {
 			//ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-			ExecutionInfo *pktEI = &m_executionInfo;
-			pktEI->ExecuteTrigger(newSem->trigger);
+			m_executionInfo->ExecuteTrigger(newSem->trigger);
 			/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 				pktEI->executedByExecEnv = true;
-				pktEI->curThread = this;
 				EventImpl *toInvoke = pktEI->targetFPM;
 				toInvoke->Invoke();
 				//toInvoke->Unref();
@@ -556,24 +554,22 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	} else {
 		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 		// Here, we assume there is an active packet specifying the target
-    //auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo.target);
-    auto it = execEnv->serviceTriggerMap.find(m_executionInfo.target);
+    //auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo->target);
+    auto it = execEnv->serviceTriggerMap.find(m_executionInfo->target);
 		newSem = it->second;
 
 
         if (it == execEnv->serviceTriggerMap.end()) {
             // Check that the service you're trying to call is in the signature.
-			NS_LOG_ERROR("Failed to find signature " << m_executionInfo.target);
+			NS_LOG_ERROR("Failed to find signature " << m_executionInfo->target);
             NS_ASSERT(0);
         }
 
 		// Here, we know the target is that of this packet
 		//auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-		auto pktEI = &m_executionInfo;
-		pktEI->ExecuteTrigger(newSem->trigger);
+        m_executionInfo->ExecuteTrigger(newSem->trigger);
 		/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
 			pktEI->executedByExecEnv = true;
-			pktEI->curThread = this;
 			EventImpl *toInvoke = pktEI->targetFPM;
 			toInvoke->Invoke();
 			toInvoke->Unref();
@@ -792,8 +788,8 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
              */
 			Ptr<SEM> semToEnqueue = nullptr;
 			if (qe->semToEnqueue == nullptr) {
-        //semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo.target];
-        semToEnqueue = ee->serviceTriggerMap[m_executionInfo.target];
+        //semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo->target];
+        semToEnqueue = ee->serviceTriggerMap[m_executionInfo->target];
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
@@ -803,7 +799,8 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 		} else if (qe->isStateQueue) {
 			ee->stateQueues[qe->queueName]->stateVariableQueue.push(qe->valueToEnqueue);
 		} else if (qe->isPacketQueue) {
-            qe->queue->Enqueue(m_currentLocation->curPkt);
+            //qe->queue->Enqueue(m_currentLocation->curPkt);
+            qe->queue->Enqueue(m_executionInfo);
         } else if (qe->isCepEventQueue) {
             qe->cepEventQueue->push(m_currentLocation->curCepEvent);
         } else if (qe->isCepQueryQueue) {
@@ -902,24 +899,26 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
             queueToServe->pop();
         } else {
 			// Obtain queue from encapsulated loop if not defined in the event
-			Ptr<Queue2> queueToServe = (qe->queue == nullptr) ?
+			Ptr<DropTailQueue<ExecutionInfo>> queueToServe = (qe->queue == nullptr) ?
 					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue] :
 					qe->queue;
 
-            m_currentLocation->curPkt = queueToServe->Dequeue();
+            //m_currentLocation->curPkt = queueToServe->Dequeue();
+            //m_currentLocation->curPkt = queueToServe->Dequeue();
+            auto ei = queueToServe->Dequeue();
+            m_currentLocation->curPkt = ei->packet;
+            m_executionInfo = ei;
 
 			// We need call activate any prospective triggers on the queue
 			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 			std::string queueTarget = execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
 
 			//ExecutionInfo *pktEI = &m_currentLocation->curPkt->m_executionInfo;
-			ExecutionInfo *pktEI = &m_executionInfo;
-			pktEI->ExecuteTrigger(queueTarget);
-			/*if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo.target == queueTarget) {
+            m_executionInfo->ExecuteTrigger(queueTarget);
+			/*if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo->target == queueTarget) {
 				Ptr<Packet> curPkt = m_currentLocation->curPkt;
-				curPkt->m_executionInfo.executedByExecEnv = true;
-				curPkt->m_executionInfo.curThread = this;
-				//EventImpl *toInvoke = curPkt->m_executionInfo.targetFPM;
+				curPkt->m_executionInfo->executedByExecEnv = true;
+				//EventImpl *toInvoke = curPkt->m_executionInfo->targetFPM;
 				toInvoke->Invoke();
 				//toInvoke->Unref();
 			}*/
@@ -943,7 +942,7 @@ bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
 		*execEnv->cepEventQueues[cqe->toQueue] = *fromQueue;
 	} else if (cqe->isPacketQueue) {
 		auto fromQueue = execEnv->queues[cqe->fromQueue];
-		*execEnv->queues[cqe->toQueue] = *fromQueue;
+		execEnv->queues[cqe->toQueue] = fromQueue;
 	} else if (cqe->isServiceQueue) {
 		auto fromQueue = execEnv->serviceQueues[cqe->fromQueue];
 		*execEnv->serviceQueues[cqe->toQueue] = *fromQueue;
@@ -1201,14 +1200,12 @@ void Thread::Dispatch() {
 
 			if (m_currentLocation->curPkt != nullptr) {
 				//ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-				ExecutionInfo *pktEI = &m_executionInfo;
-				pktEI->ExecuteTrigger(e->checkpoint);
+				m_executionInfo->ExecuteTrigger(e->checkpoint);
 				/*
 				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {
                     Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
                     execEnv->currentlyExecutingThread = this;
 					pktEI->executedByExecEnv = true;
-					pktEI->curThread = this;
 					EventImpl *toInvoke = pktEI->targetFPM;
 					toInvoke->Invoke();
                     //toInvoke->Unref();

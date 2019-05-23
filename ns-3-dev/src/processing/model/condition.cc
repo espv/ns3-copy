@@ -18,7 +18,7 @@ uint32_t ConditionFunctions::PacketL4Protocol(Ptr<Thread> t) {
 }
 
 // Conditions working on queues and threads
-uint32_t ConditionFunctions::QueueCondition(Ptr<Queue2> first, Ptr<Queue2> last)
+uint32_t ConditionFunctions::QueueCondition(Ptr<DropTailQueue<ExecutionInfo>> first, Ptr<DropTailQueue<ExecutionInfo>> last)
 {
 	if(first == last)
 		return first->IsEmpty() ? QUEUEEMPTY : QUEUENOTEMPTY;
@@ -132,7 +132,7 @@ ConditionFunctions::Wl1251Intr(Ptr<Thread> t) {
 uint32_t
 ConditionFunctions::sizeofnextrxfromnic(Ptr<Thread> t) {
 	Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-	return ee->queues["nic::rx"]->Peek()->GetSize();
+	return ee->queues["nic::rx"]->Peek()->packet->GetSize();
 }
 
 void ConditionFunctions::WriteInterruptsEnabled(Ptr<Thread> t, uint32_t value) {

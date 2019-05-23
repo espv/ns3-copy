@@ -12,7 +12,9 @@
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/hwmodel.h"
-#include "ns3/queue2.h"
+#include "ns3/drop-tail-queue.h"
+
+#include "executioninfo.h"
 
 #include <vector>
 #include <stack>
@@ -87,7 +89,7 @@ struct condition {
   void AckNICRx(Ptr<Thread> t, uint32_t value);
 
   // Conditions working on queues and threads
-  uint32_t QueueCondition(Ptr<Queue2> first, Ptr<Queue2> last);
+  uint32_t QueueCondition(Ptr<DropTailQueue<ExecutionInfo> > first, Ptr<DropTailQueue<ExecutionInfo> > last);
   uint32_t ServiceQueueCondition(std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *first, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *last);
   uint32_t ThreadCondition(std::string threadId);
   

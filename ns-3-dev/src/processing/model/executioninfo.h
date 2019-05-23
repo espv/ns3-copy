@@ -7,15 +7,15 @@
 
 #include "ns3/event-impl.h"
 #include "ns3/nstime.h"
+#include "ns3/packet.h"
 #include <vector>
 #include <map>
-#include "ns3/packet.h"
 
 namespace ns3 {
     class Thread;
     class SEM;
 
-    class ExecutionInfo {
+    class ExecutionInfo : public SimpleRefCount<ExecutionInfo> {
     public:
         ExecutionInfo();
 
@@ -26,7 +26,6 @@ namespace ns3 {
          * the event executed by the scheduler, return false.
          */
         bool executedByExecEnv;
-        Thread *curThread = nullptr;
         Ptr<Packet> packet;
 
         // Name and arguments for target service
@@ -47,6 +46,14 @@ namespace ns3 {
         int seqNr;
 
         void ExecuteTrigger(std::string &checkpoint);
+
+        /**
+          * \brief Returns the the size in bytes of the packet (including the zero-filled
+          * initial payload).
+          *
+          * \returns the size in bytes of the packet
+          */
+        inline uint32_t GetSize () const;
     };
 }
 

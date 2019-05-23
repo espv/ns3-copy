@@ -18,7 +18,7 @@
  */
 
 #include "communication.h"
-#include "ns3/drop-tail-queue2.h"
+#include "ns3/drop-tail-queue.h"
 #include "ns3/type-id.h"
 #include "dcep.h"
 #include "dcep-header.h"
@@ -74,15 +74,16 @@ NS_LOG_COMPONENT_DEFINE("Communication");
     {
         numRetransmissions = 0;
         m_sent=0;
-        m_sendQueue2 = CreateObject<DropTailQueue2> ();
-        
+        m_sendQueue = CreateObject<DropTailQueue<Packet> > ();
     }
     
     
     Communication::~Communication()
     {
       //  m_lossCounter.~PacketLossCounter();
-        this->m_sendQueue2->DequeueAll();
+      for (int i = 0; i < this->m_sendQueue->GetNPackets(); i++) {
+          this->m_sendQueue->Remove();
+      }
     }
     
     void
@@ -182,17 +183,18 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         ipv4.SetProtocol(123);
         p->AddHeader(ipv4);
 
-        m_sendQueue2->Enqueue(p);
+        m_sendQueue->Enqueue(p);
 
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        //p->m_executionInfo.timestamps.emplace_back(Simulator::Now());
-        ee->currentlyExecutingThread->m_executionInfo.timestamps.emplace_back(Simulator::Now());
+        //p->m_executionInfo->timestamps.emplace_back(Simulator::Now());
+        ee->currentlyExecutingThread->m_executionInfo->timestamps.emplace_back(Simulator::Now());
         auto contentType = dcepHeader.GetContentType();
         if (contentType == EVENT) {
             Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
-            ee->currentlyExecutingThread->m_executionInfo.executedByExecEnv = false;
+            ee->currentlyExecutingThread->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "send-packet", &Communication::send, this);
-            ee->queues["packets-to-be-sent"]->Enqueue(p);
+            //ee->queues["packets-to-be-sent"]->Enqueue(p);
+            ee->queues["packets-to-be-sent"]->Enqueue(ee->currentlyExecutingThread->m_executionInfo);
         } else if (contentType == QUERY) {
             send();
         } else {
@@ -203,10 +205,10 @@ NS_LOG_COMPONENT_DEFINE("Communication");
     void
     Communication::send()
     {
-        if(m_sendQueue2->GetNPackets() > 0)
+        if(m_sendQueue->GetNPackets() > 0)
         {
-            Ptr<Packet> p = m_sendQueue2->Dequeue();
-            //NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << (Simulator::Now() - p->m_executionInfo.timestamps[0]).GetMicroSeconds());
+            Ptr<Packet> p = m_sendQueue->Dequeue();
+            //NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << (Simulator::Now() - p->m_executionInfo->timestamps[0]).GetMicroSeconds());
             DcepHeader dcepHeader;
             Ipv4Header ipv4;
             p->RemoveHeader(ipv4);
@@ -239,15 +241,15 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
             }
 
-            Ptr<Packet> item = p; //m_sendQueue2->Dequeue();
+            Ptr<Packet> item = p; //m_sendQueue->Dequeue();
 
             if (!itemSent) //we push it back at the rear of the queue
             {
                 NS_LOG_INFO (Simulator::Now() << " COMMUNICATION: Rescheduling item!");
-                m_sendQueue2->Enqueue(item);
+                m_sendQueue->Enqueue(item);
             }
 
-            if(m_sendQueue2->GetNPackets() != 0)//only schedule when there are more packet to send
+            if(m_sendQueue->GetNPackets() != 0)//only schedule when there are more packet to send
             {
                 NS_LOG_INFO (Simulator::Now() << ": SCHEDULING TRANSMISSION");
                 Simulator::Schedule (Seconds(1), &Communication::send, this);

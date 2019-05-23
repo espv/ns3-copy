@@ -12,7 +12,7 @@
 #include "interrupt-controller.h"
 #include "condition.h"
 #include "ns3/rrscheduler.h"
-#include <ns3/drop-tail-queue2.h>
+#include <ns3/drop-tail-queue.h>
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/adhoc-wifi-mac.h"
 #include "ns3/cep-engine.h"
@@ -117,7 +117,7 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
 				}
 			}
 
-			packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+			packet->m_executionInfo->timestamps.push_back(Simulator::Now());
 
 			Simulator::ScheduleNow(
 					&InterruptController::IssueInterruptWithService,
@@ -129,7 +129,7 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
 					std::map<std::string, Ptr<StateVariableQueue> >());
 			return;
 		} else
-			packet->m_executionInfo.timestamps.push_back(Simulator::Now());
+			packet->m_executionInfo->timestamps.push_back(Simulator::Now());
 	}*/
 
 
@@ -234,11 +234,12 @@ void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 		 *
 		 * No size = no upper bound on contents
 		 */
-		else if (tokens[2] == "-1")
-			queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxPackets", UintegerValue(4294967295));
+		else if (tokens[2] == "-1") {
+            queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue<ExecutionInfo> >("MaxPackets", UintegerValue(4294967295));
 
-		// We have a size
-		else {
+
+            // We have a size
+        } else {
 			// Get size
 			std::istringstream i(tokens[2]);
 			uint64_t size;
@@ -247,9 +248,9 @@ void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 						"Unable to convert queue size " << tokens[2] << " to integer" << std::endl);
 			// Act according to units
 			if (tokens[3] == "packets") {
-				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxPackets", UintegerValue(size));
+				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue<ExecutionInfo> >("MaxPackets", UintegerValue(size));
 			} else {
-				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue2>("MaxBytes", UintegerValue(size));
+				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue<ExecutionInfo> >("MaxBytes", UintegerValue(size));
 			}
 		}
 	} else {
@@ -457,8 +458,8 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
             if (std::find(lc->cepEventQueuesServed.begin(), lc->cepEventQueuesServed.end(), *qIt) != lc->cepEventQueuesServed.end())
                 return true;
 	} else {
-        Ptr<Queue2> firstQueue = queues[first];
-        Ptr<Queue2> lastQueue = queues[last];
+        Ptr<DropTailQueue<ExecutionInfo>> firstQueue = queues[first];
+        Ptr<DropTailQueue<ExecutionInfo>> lastQueue = queues[last];
 
         /* Iterate queues in the queue order, and
          * search for each queue between and includingget

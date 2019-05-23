@@ -23,6 +23,7 @@
 #define COMMUNICATION_H
 
 #include <stdint.h>
+#include <ns3/queue.h>
 #include "ns3/object.h"
 #include "ns3/node.h"
 #include "ns3/socket.h"
@@ -72,7 +73,7 @@ class Communication : public Object
     private:
         
         void send(void);
-        Ptr<Queue2> m_sendQueue2;
+        Ptr<Queue<Packet>> m_sendQueue;
         EventId m_packetSendCepEvent;
         uint32_t backoffTime;
         uint16_t m_port; 

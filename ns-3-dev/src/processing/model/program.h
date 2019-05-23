@@ -7,12 +7,13 @@
 #include "ns3/traced-callback.h"
 #include "ns3/random-variable.h"
 #include "ns3/event-id.h"
-#include "ns3/queue2.h"
+#include "ns3/drop-tail-queue.h"
 //#include "ns3/execenv.h"
 #include "ns3/condition.h"
 #include "ns3/local-state-variable.h"
 #include "ns3/local-state-variable-queue.h"
 #include "ns3/cep-engine.h"
+
 #include "executioninfo.h"
 
 #include <vector>
@@ -167,7 +168,7 @@ class Condition : public ExecutionEvent {
   std::list<std::pair<uint32_t, Program *> > programs;
   Callback<uint32_t, Ptr<Thread> > getConditionState;
   Callback<void, Ptr<Thread> , uint32_t> setConditionState;
-  Callback<uint32_t, Ptr<Queue2>, Ptr<Queue2> > getConditionQueues;
+  Callback<uint32_t, Ptr<DropTailQueue<ExecutionInfo>>, Ptr<DropTailQueue<ExecutionInfo>> > getConditionQueues;
   Callback<uint32_t, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *, std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> getServiceConditionQueues;
   Callback<uint32_t, std::string > getConditionThread;
 
@@ -196,8 +197,8 @@ class QueueCondition : public Condition {
   // processing->conditionFunctions->QueueCondition(queue)
   // on each queue between firstQueue and lastQueue according
   // to processing->queueOrder.
-  Ptr<Queue2> firstQueue;
-  Ptr<Queue2> lastQueue;
+  Ptr<DropTailQueue<ExecutionInfo>> firstQueue;
+  Ptr<DropTailQueue<ExecutionInfo>> lastQueue;
 
   friend std::ostream& operator<<(std::ostream& out, QueueCondition& event);
 };
@@ -302,7 +303,7 @@ class LoopCondition : public Condition {
   bool stateQueues;
   bool cepQueryQueues;
   bool cepEventQueues;
-  std::vector<Ptr<Queue2> > queuesServed;
+  std::vector<Ptr<DropTailQueue<ExecutionInfo>> > queuesServed;
   std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueuesServed;
   std::vector<Ptr<StateVariableQueue> > stateQueuesServed;
   std::vector<std::queue<Ptr<CepOperator> > *> cepQueryQueuesServed;
@@ -396,7 +397,7 @@ public:
 	bool isCepQueryQueue;
 	bool local;
 	std::string threadToWake;
-	Ptr<Queue2> queue;
+	Ptr<DropTailQueue<ExecutionInfo>> queue;
 	std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *servQueue;
 	std::queue<Ptr<CepEvent> > *cepEventQueue;
 	std::queue<Ptr<CepOperator> > *cepQueryQueue;
