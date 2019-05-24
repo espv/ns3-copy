@@ -108,7 +108,6 @@ class ExecutionEvent {
  public:
   static std::string typeStrings[LASTTYPE];
   ExecutionEventType type;
-  ExecutionInfo m_executionInfo;
   virtual ~ExecutionEvent();
 
   // We need access to the program via which the

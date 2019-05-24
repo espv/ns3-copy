@@ -1,13 +1,18 @@
 //
 // Created by espen on 21.05.19.
 //
-#include "ns3/executioninfo.h"
 #include "ns3/packet.h"
+#include "ns3/queue.h"
+#include "ns3/drop-tail-queue.h"
+#include "ns3/log.h"
+
+#include "executioninfo.h"
 
 
 namespace ns3 {
 
-    ns3::ExecutionInfo::ExecutionInfo() = default;
+    NS_OBJECT_TEMPLATE_CLASS_DEFINE(Queue, ExecutionInfo);
+    NS_OBJECT_TEMPLATE_CLASS_DEFINE(DropTailQueue, ExecutionInfo);
 
 
     ns3::ExecutionInfo::ExecutionInfo(ExecutionInfo *ei) {
@@ -19,7 +24,7 @@ namespace ns3 {
     }
 
 
-    void ns3::ExecutionInfo::ExecuteTrigger(std::string &checkpoint) {
+    void ExecutionInfo::ExecuteTrigger(std::string &checkpoint) {
         auto it = targets.find(checkpoint);
         if (it != targets.end() && !it->second.empty()) {
             executedByExecEnv = true;

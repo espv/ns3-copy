@@ -1,7 +1,6 @@
 #ifndef THREAD_H
 #define THREAD_H
 
-#include "ns3/executioninfo.h"
 #include "ns3/object.h"
 #include "ns3/event-garbage-collector.h"
 #include "ns3/timer.h"
@@ -10,7 +9,7 @@
 #include "ns3/cep-engine.h"
 
 #include "program.h"
-
+#include "executioninfo.h"
 #include "rrscheduler.h"
 
 #include <vector>
@@ -100,7 +99,7 @@ public:
 	// To keep track of location of thread of execution
 	std::stack<Ptr<ProgramLocation> > m_programStack;
 
-	Ptr<ExecutionInfo> m_executionInfo = Create<ExecutionInfo>();
+	Ptr<ExecutionInfo> m_executionInfo;// = Create<ExecutionInfo>(Create<Packet>());
 
 	void DoneProcessing();
 

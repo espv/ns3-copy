@@ -5,6 +5,7 @@
 #ifndef NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_EXECUTIONINFO_H
 #define NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_EXECUTIONINFO_H
 
+#include <ns3/queue-item.h>
 #include "ns3/event-impl.h"
 #include "ns3/nstime.h"
 #include "ns3/packet.h"

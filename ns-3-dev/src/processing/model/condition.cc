@@ -1,8 +1,9 @@
 #include <ns3/queue.h>
-#include "condition.h"
 #include "ns3/callback.h"
+
+#include "condition.h"
 #include "execenv.h"
-#include "ns3/interrupt-controller.h"
+#include "interrupt-controller.h"
 
 #include <queue>
 
