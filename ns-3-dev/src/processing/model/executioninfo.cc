@@ -14,6 +14,7 @@ namespace ns3 {
     NS_OBJECT_TEMPLATE_CLASS_DEFINE(Queue, ExecutionInfo);
     NS_OBJECT_TEMPLATE_CLASS_DEFINE(DropTailQueue, ExecutionInfo);
 
+    ns3::ExecutionInfo::ExecutionInfo() = default;
 
     ns3::ExecutionInfo::ExecutionInfo(ExecutionInfo *ei) {
         this->packet = ei->packet;

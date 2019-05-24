@@ -44,6 +44,7 @@ public:
 	Ptr<Packet> curPkt;
 	Ptr<CepOperator> curCepQuery;
 	Ptr<CepEvent> curCepEvent;
+  Ptr<ExecutionInfo> m_executionInfo = Create<ExecutionInfo>();
 	struct tempVar tempvar;
 
 	// To keep track of queues
@@ -98,8 +99,6 @@ public:
 
 	// To keep track of location of thread of execution
 	std::stack<Ptr<ProgramLocation> > m_programStack;
-
-	Ptr<ExecutionInfo> m_executionInfo;// = Create<ExecutionInfo>(Create<Packet>());
 
 	void DoneProcessing();
 

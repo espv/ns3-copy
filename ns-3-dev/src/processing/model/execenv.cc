@@ -61,6 +61,7 @@ ExecEnv::ExecEnv() :
         dummyProgramLoc->curPkt = packet;
         dummyProgramLoc->localStateVariables = std::map<std::string, Ptr<StateVariable> >();
         dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
+        dummyProgramLoc->m_executionInfo = currentlyExecutingThread->m_currentLocation->m_executionInfo;
 
         static int cpu = 0;
         Simulator::Schedule(time,

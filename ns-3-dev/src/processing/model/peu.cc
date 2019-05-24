@@ -192,6 +192,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		newProgramLocation->curPkt = ir.current;
 		newProgramLocation->localStateVariables = ir.localStateVariables;
 		newProgramLocation->localStateVariableQueues = ir.localStateVariablesQueues;
+		newProgramLocation->m_executionInfo = ir.m_executionInfo;
 
 		Ptr<ExecEnv> ee = this->hwModel->node->GetObject<ExecEnv>();
 
@@ -213,6 +214,7 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		irqProgramLocation->curPkt = ir.current;
 		irqProgramLocation->localStateVariables = ir.localStateVariables;
 		irqProgramLocation->localStateVariableQueues = ir.localStateVariablesQueues;
+		irqProgramLocation->m_executionInfo = ir.m_executionInfo;
 
 		interruptThread->m_programStack.push(irqProgramLocation);
 

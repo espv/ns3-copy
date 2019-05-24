@@ -124,23 +124,23 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 		 */
 		case END:
 			return HandleEndEvent(e);
-		case PROCESS: 
+		case PROCESS:
 			// PROCESS: Passed to the HWModels for handling.
 			return HandleProcessingEvent(e);
 		case EXECUTE:
 			return HandleExecuteEvent(e);
-		case QUEUE: 
+		case QUEUE:
 			// Used to enqueue or dequeue packets into/from queues.
 			return HandleQueueEvent(e);
 	    case COPYQUEUE:
 	        return HandleCopyQueueEvent(e);
 	    case DUPLICATEPKT:
 	        return HandleDuplicatePacketEvent(e);
-		case SCHEDULER: 
+		case SCHEDULER:
 			return HandleSchedulerEvent(e);
-		case SYNCHRONIZATION: 
+		case SYNCHRONIZATION:
 			return HandleSyncEvent(e);
-		case CONDITION: 
+		case CONDITION:
 			return HandleCondition(e);
 		case TEMPSYNCH:
 			{
@@ -161,7 +161,7 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 				return true;
 			}
 
-		case DEBUG: 
+		case DEBUG:
 			{
 				std::cout << " Executing debug statement: "
 					<< *((DebugExecutionEvent *) e) << std::endl;
@@ -170,9 +170,9 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
         case MEASURE:
             {
                 // OYSTEDAL: Used to measure time at specific points in the signature
-                if (m_currentLocation->curPkt != nullptr)
+                if (m_currentLocation != nullptr)
                     //m_currentLocation->curPkt->m_executionInfo->timestamps.push_back(Simulator::Now());
-                    m_executionInfo->timestamps.push_back(Simulator::Now());
+                    m_currentLocation->m_executionInfo->timestamps.push_back(Simulator::Now());
 
                 return true;
             }
@@ -180,7 +180,7 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 			/* Here, we have encountered an unrecognized statement type.
 			 * Complain.
 			 */
-		default: 
+		default:
 			{
 				NS_LOG_INFO("Encountered unhandled statement of type" << e->type << "\n");
 				return true;
@@ -487,7 +487,7 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 		if(withBlockingIO) {
 			Simulator::Schedule(NanoSeconds((uint64_t) nanoseconds),
 					&InterruptController::IssueInterruptWithServiceOnCPU,
-					peu->hwModel->m_interruptController, 
+					peu->hwModel->m_interruptController,
 					cpu,
 					ps->interrupt,
 					m_currentLocation);
@@ -495,7 +495,7 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 		else
 			Simulator::ScheduleNow(
 					&InterruptController::IssueInterruptWithServiceOnCPU,
-					peu->hwModel->m_interruptController, 
+					peu->hwModel->m_interruptController,
 					cpu,
 					ps->interrupt,
 					m_currentLocation);
@@ -541,39 +541,22 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	if (ee->sem != nullptr) {
 		newSem = ee->sem;
 
-		if (m_currentLocation->curPkt != nullptr) {
-			//ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-			m_executionInfo->ExecuteTrigger(newSem->trigger);
-			/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
-				pktEI->executedByExecEnv = true;
-				EventImpl *toInvoke = pktEI->targetFPM;
-				toInvoke->Invoke();
-				//toInvoke->Unref();
-			}*/
-		}
+    m_currentLocation->m_executionInfo->ExecuteTrigger(newSem->trigger);
 	} else {
 		auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
 		// Here, we assume there is an active packet specifying the target
     //auto it = execEnv->serviceTriggerMap.find(m_currentLocation->curPkt->m_executionInfo->target);
-    auto it = execEnv->serviceTriggerMap.find(m_executionInfo->target);
+    auto it = execEnv->serviceTriggerMap.find(m_currentLocation->m_executionInfo->target);
 		newSem = it->second;
 
 
         if (it == execEnv->serviceTriggerMap.end()) {
             // Check that the service you're trying to call is in the signature.
-			NS_LOG_ERROR("Failed to find signature " << m_executionInfo->target);
+			NS_LOG_ERROR("Failed to find signature " << m_currentLocation->m_executionInfo->target);
             NS_ASSERT(0);
         }
 
-		// Here, we know the target is that of this packet
-		//auto pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-        m_executionInfo->ExecuteTrigger(newSem->trigger);
-		/*if (newSem->trigger.length() != 0 && pktEI->target == newSem->trigger && pktEI->targetFPM != nullptr) {
-			pktEI->executedByExecEnv = true;
-			EventImpl *toInvoke = pktEI->targetFPM;
-			toInvoke->Invoke();
-			toInvoke->Unref();
-		}*/
+    m_currentLocation->m_executionInfo->ExecuteTrigger(newSem->trigger);
 	}
 
 
@@ -598,6 +581,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newProgramLocation->localStateVariables = m_programStack.top()->localStateVariables;
 		newProgramLocation->localStateVariableQueues = m_programStack.top()->localStateVariableQueues;
 		newProgramLocation->tempvar = m_programStack.top()->tempvar;
+		newProgramLocation->m_executionInfo = m_programStack.top()->m_executionInfo;
 
 		// Set up loop state if this is a loop statement
 		LoopCondition *lcPtr = ee->lc;
@@ -789,7 +773,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 			Ptr<SEM> semToEnqueue = nullptr;
 			if (qe->semToEnqueue == nullptr) {
         //semToEnqueue = ee->serviceTriggerMap[m_currentLocation->curPkt->m_executionInfo->target];
-        semToEnqueue = ee->serviceTriggerMap[m_executionInfo->target];
+        semToEnqueue = ee->serviceTriggerMap[m_currentLocation->m_executionInfo->target];
 			} else
 				semToEnqueue = qe->semToEnqueue;
 
@@ -800,7 +784,8 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 			ee->stateQueues[qe->queueName]->stateVariableQueue.push(qe->valueToEnqueue);
 		} else if (qe->isPacketQueue) {
             //qe->queue->Enqueue(m_currentLocation->curPkt);
-            qe->queue->Enqueue(m_executionInfo);
+            m_currentLocation->m_executionInfo->packet = m_currentLocation->curPkt;
+            qe->queue->Enqueue(m_currentLocation->m_executionInfo);
         } else if (qe->isCepEventQueue) {
             qe->cepEventQueue->push(m_currentLocation->curCepEvent);
         } else if (qe->isCepQueryQueue) {
@@ -808,9 +793,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
         } else {
             NS_ASSERT_MSG(0, "Couldn't find queue to enqueue into");
         }
-	} else
-		// Check if we are dealing with a service queue
-        if (qe->isServiceQueue) {
+	} else if (qe->isServiceQueue) { // Check if we are dealing with a service queue
 			// Obtain queue from encapsulated loop if not defined in the event
 			auto queueToServe = (qe->servQueue == nullptr) ?
 					m_currentLocation->lc->serviceQueuesServed[m_currentLocation->curServedQueue] :
@@ -820,11 +803,11 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 			 * Note that we resolved which sem to enqueue (which may be "0")
 			 * in the insertion above, so we don't need to resolve this again.
 			 */
-            Ptr<SEM> toExecute = queueToServe->front().first;
+      Ptr<SEM> toExecute = queueToServe->front().first;
 			Ptr<ProgramLocation> newPl = queueToServe->front().second;
-            queueToServe->pop();
+      queueToServe->pop();
 
-            NS_LOG_INFO("Dequeueing service " << toExecute->name);
+      NS_LOG_INFO("Dequeueing service " << toExecute->name);
 
 			/* Now, its time to execute the de-queued service
 			 * Note that it is not possible to en-queue loop services
@@ -833,11 +816,12 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 			 * COMMENTS ON THIS is in the EXECUTE events above - we do
 			 * almost the same here.
 			 */
-            if (toExecute->peu->IsCPU()) {
+      if (toExecute->peu->IsCPU()) {
 				Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
 				newProgramLocation->program = toExecute->rootProgram;
 				newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
 				newProgramLocation->curPkt = newPl->curPkt;  // Added by Espen
+				newProgramLocation->m_executionInfo = newPl->m_executionInfo;  // Added by Espen
 				newProgramLocation->lc = newPl->lc;
 				newProgramLocation->localStateVariables = newPl->localStateVariables;
 				newProgramLocation->localStateVariableQueues = newPl->localStateVariableQueues;
@@ -878,51 +862,43 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
 			ee->stateQueues[qe->queueName]->stateVariableQueue.pop();
 
 			return true;
-		} else if (qe->isCepQueryQueue) {
-            auto queueToServe = (qe->cepQueryQueue == nullptr) ?
-                                m_currentLocation->lc->cepQueryQueuesServed[m_currentLocation->curServedQueue] :
-                                qe->cepQueryQueue;
+  } else if (qe->isCepQueryQueue) {
+    auto queueToServe = (qe->cepQueryQueue == nullptr) ?
+                        m_currentLocation->lc->cepQueryQueuesServed[m_currentLocation->curServedQueue] :
+                        qe->cepQueryQueue;
 
-            auto nextCepQuery = queueToServe->front();
-            m_currentLocation->curCepQuery = nextCepQuery;
-            queueToServe->pop();
-        } else if (qe->isCepEventQueue) {
-            auto queueToServe = (qe->cepEventQueue == nullptr) ?
-                                m_currentLocation->lc->cepEventQueuesServed[m_currentLocation->curServedQueue] :
-                                qe->cepEventQueue;
+    auto nextCepQuery = queueToServe->front();
+    m_currentLocation->curCepQuery = nextCepQuery;
+    queueToServe->pop();
+  } else if (qe->isCepEventQueue) {
+    auto queueToServe = (qe->cepEventQueue == nullptr) ?
+                        m_currentLocation->lc->cepEventQueuesServed[m_currentLocation->curServedQueue] :
+                        qe->cepEventQueue;
 
-            /* Here, we want to dequeue the service, then (below) execute it.
-             * Note that we resolved which sem to enqueue (which may be "0")
-             * in the insertion above, so we don't need to resolve this again.
-             */
-			m_currentLocation->curCepEvent = queueToServe->front();
-            queueToServe->pop();
-        } else {
-			// Obtain queue from encapsulated loop if not defined in the event
-			Ptr<DropTailQueue<ExecutionInfo>> queueToServe = (qe->queue == nullptr) ?
-					m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue] :
-					qe->queue;
+    /* Here, we want to dequeue the service, then (below) execute it.
+     * Note that we resolved which sem to enqueue (which may be "0")
+     * in the insertion above, so we don't need to resolve this again.
+     */
+    m_currentLocation->curCepEvent = queueToServe->front();
+    queueToServe->pop();
+  } else {
+    // Obtain queue from encapsulated loop if not defined in the event
+    Ptr<DropTailQueue<ExecutionInfo>> queueToServe = (qe->queue == nullptr) ?
+    m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue] :
+    qe->queue;
 
-            //m_currentLocation->curPkt = queueToServe->Dequeue();
-            //m_currentLocation->curPkt = queueToServe->Dequeue();
-            auto ei = queueToServe->Dequeue();
-            m_currentLocation->curPkt = ei->packet;
-            m_executionInfo = ei;
+    //m_currentLocation->curPkt = queueToServe->Dequeue();
+    //m_currentLocation->curPkt = queueToServe->Dequeue();
+    auto ei = queueToServe->Dequeue();
+    m_currentLocation->curPkt = ei->packet;
+    m_currentLocation->m_executionInfo = ei;
 
-			// We need call activate any prospective triggers on the queue
-			Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-			std::string queueTarget = execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
+    // We need call activate any prospective triggers on the queue
+    Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+    std::string queueTarget = execEnv->dequeueTriggers[execEnv->queueNames[queueToServe]];
 
-			//ExecutionInfo *pktEI = &m_currentLocation->curPkt->m_executionInfo;
-            m_executionInfo->ExecuteTrigger(queueTarget);
-			/*if (queueTarget.length() != 0 && m_currentLocation->curPkt->m_executionInfo->target == queueTarget) {
-				Ptr<Packet> curPkt = m_currentLocation->curPkt;
-				curPkt->m_executionInfo->executedByExecEnv = true;
-				//EventImpl *toInvoke = curPkt->m_executionInfo->targetFPM;
-				toInvoke->Invoke();
-				//toInvoke->Unref();
-			}*/
-		}
+    m_currentLocation->m_executionInfo->ExecuteTrigger(queueTarget);
+  }
 
 	return true;
 
@@ -1198,19 +1174,7 @@ void Thread::Dispatch() {
             Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
             execEnv->currentlyExecutingThread = this;
 
-			if (m_currentLocation->curPkt != nullptr) {
-				//ExecutionInfo *pktEI = &(m_currentLocation->curPkt->m_executionInfo);
-				m_executionInfo->ExecuteTrigger(e->checkpoint);
-				/*
-				if (e->checkpoint.length() != 0 && pktEI->target == e->checkpoint && pktEI->targetFPM != nullptr) {
-                    Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-                    execEnv->currentlyExecutingThread = this;
-					pktEI->executedByExecEnv = true;
-					EventImpl *toInvoke = pktEI->targetFPM;
-					toInvoke->Invoke();
-                    //toInvoke->Unref();
-				}*/
-			}
+			m_currentLocation->m_executionInfo->ExecuteTrigger(e->checkpoint);
 
 			/* Must check if there are any more statements to execute. If not,
 			 * terminate the thread. Note that this should never occur for

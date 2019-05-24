@@ -198,126 +198,126 @@ namespace ns3 {
        introduced. */
 
     template<class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false; return false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false; return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class T3, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class T3, class T4, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;}
         else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class T3, class T4, class T5, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class T3, class T4, class T5, class T6, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class T3, class T4, class T5, class T6, class T7, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }
 
     template<class T1,class T2, class T3, class T4, class T5, class T6, class T7, class T8, class MEM, class OBJ> bool ExecEnv::Proceed(unsigned long numberProceeds, Thread *thread, const std::string &target, MEM func, OBJ object, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6, T7 arg7, T8 arg8) {
-        if(thread->m_executionInfo->executedByExecEnv) {
-            thread->m_executionInfo->executedByExecEnv = false;
+        if(thread->m_currentLocation->m_executionInfo->executedByExecEnv) {
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
             }
 
-            thread->m_executionInfo->executedByExecEnv = true;
+            thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
             return true;
         }
     }

@@ -229,7 +229,7 @@ namespace ns3 {
             Ptr<Packet> p = Create<Packet> (buffer, message->size);
             //p->m_executionInfo->timestamps.emplace_back(e->timestamp);
             Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-            ee->currentlyExecutingThread->m_executionInfo->timestamps.emplace_back(e->timestamp);
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(e->timestamp);
 
             p->AddHeader (dcepHeader);
             
