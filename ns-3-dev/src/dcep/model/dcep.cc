@@ -216,7 +216,9 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         auto ds = GetObject<DataSource> ();
         if (!ds->IsActive()) {
             ds->Activate();
-            Simulator::Schedule(Seconds(10000), &DataSource::GenerateAtomicCepEvents, ds, q);
+            static int cnt = 0;
+            int generate_events_in = 10000+((cnt++)*1000);
+            Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
             //ds->GenerateAtomicCepEvents(q);
         }
     }
@@ -343,7 +345,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->assigned = false;
                 q1->currentHost.Set("0.0.0.0");
                 q1->parent_output = parent_output;
-                q1->window = Seconds(15);
+                q1->window = Seconds(150000000000000000);
                 q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
                 Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
                 c1->var_name = "value";
@@ -366,7 +368,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->assigned = false;
                 q2->currentHost.Set("0.0.0.0");
                 q2->parent_output = parent_output;
-                q2->window = Seconds(15);
+                q2->window = Seconds(150000000000000000);
                 q2->isFinalWithinNode = true;
                 Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
                 c2->var_name = "percentage";
@@ -386,7 +388,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     q3->output_dest = Ipv4Address("10.0.0.3");
                     q3->inevent1 = event1;
                     q3->inevent2 = event2;
-                    q3->window = Seconds(15);
+                    q3->window = Seconds(150000000000000000);
                     q3->isFinalWithinNode = true;
 
                     Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();

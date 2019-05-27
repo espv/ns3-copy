@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
-    uint64_t eventInterval = 50000000;  // Interval in nanoseconds
+    uint64_t eventInterval = 1000000000;  // Interval in nanoseconds
     
     std::string format ("OMNet++");
     std::string experiment ("dcep-performance-test"); //the current study
@@ -220,9 +220,9 @@ int main(int argc, char** argv) {
     
     NS_LOG_INFO ("Starting applications .....");
     dcepApps.Start (Seconds (50.0));//make some time for olsr to stabilise
-    dcepApps.Stop (Seconds (100000000));
+    dcepApps.Stop (Seconds (10000000000));
 
-    Simulator::Stop (Seconds (130000000.0));
+    Simulator::Stop (Seconds (13000000000.0));
 
     AnimationInterface anim("netanim-output.xml");
     anim.EnablePacketMetadata (true);

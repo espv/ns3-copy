@@ -223,6 +223,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "finished-processing", &CEPEngine::FinishedProcessingEvent, this, e);
 
+            static int cnt = 0;
+            if (node->GetId() == 2) {
+                std::cout << "HIRQ-1 number " << ++cnt << std::endl;
+            }
             ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
         } else {
             CheckConstraints(e);
@@ -731,8 +735,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
-        static int cnt = 0;
-        std::cout << "Times that ThenOperator::Evaluate is called " << ++cnt << std::endl;
         Ptr<ExecEnv> ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (e->event_class != INTERMEDIATE_EVENT)
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
@@ -975,9 +977,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     void
-    Producer::AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op) {
+    Producer::AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op, int index) {
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        if (events.empty()) {
+        if (index >= events.size()) {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
             std::cout << "Node " << GetObject<Dcep>()->GetNode()->GetId() << ", Thread " << ee->currentlyExecutingThread->name << "-" << ee->currentlyExecutingThread->m_pid << ": AddAttributesToNewEvent 2/2" << std::endl;
             if (complex_event->event_class == INTERMEDIATE_EVENT) {
@@ -996,7 +998,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
 
         ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
-        auto e = events.front();
+        auto e = events[index];
         for( auto const& [key, val] : e->stringValues )
         {
             complex_event->stringValues[key] = val;
@@ -1005,14 +1007,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             complex_event->numberValues[key] = val;
         }
-        events.erase(events.begin());
         std::cout << "Node " << GetObject<Dcep>()->GetNode()->GetId() << ", Thread " << ee->currentlyExecutingThread->name << "-" << ee->currentlyExecutingThread->m_pid << ": AddAttributesToNewEvent 1/2" << std::endl;
         if (complex_event->event_class == INTERMEDIATE_EVENT) {
-            AddAttributesToNewEvent(q, events, complex_event, op);
+            AddAttributesToNewEvent(q, events, complex_event, op, index+1);
         } else {
             //complex_event->pkt->m_executionInfo->executedByExecEnv = false;
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "assign-attributes-to-complex-event", &Producer::AddAttributesToNewEvent, this, q, events, complex_event, op);
+            ee->Proceed(1, ee->currentlyExecutingThread, "assign-attributes-to-complex-event", &Producer::AddAttributesToNewEvent, this, q, events, complex_event, op, index+1);
         }
     }
     
@@ -1059,12 +1060,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
 
             if (new_event->event_class == INTERMEDIATE_EVENT) {
-                AddAttributesToNewEvent(q, events, new_event, op);
+                AddAttributesToNewEvent(q, events, new_event, op, 0);
             } else {
                 //if (!events.empty()) {
                     //ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
                 //}
-                AddAttributesToNewEvent(q, events, new_event, op);
+                AddAttributesToNewEvent(q, events, new_event, op, 0);
                 //new_event->pkt->m_executionInfo->executedByExecEnv = false;
                 //ee->Proceed(1, new_event->pkt, "assign-attributes-to-complex-event",
                 //            &Producer::AddAttributesToNewEvent, this, q, events, new_event, op);
