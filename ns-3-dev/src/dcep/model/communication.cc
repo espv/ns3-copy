@@ -126,7 +126,6 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         m_socket->SetRecvCallback (MakeCallback (&Communication::HandleRead, this));
     }
     
-    
     void
     Communication::HandleRead(Ptr<Socket> socket)
     {
@@ -185,12 +184,11 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
         m_sendQueue->Enqueue(p);
 
-        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
         //p->m_executionInfo->timestamps.emplace_back(Simulator::Now());
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
         auto contentType = dcepHeader.GetContentType();
         if (contentType == EVENT) {
-            Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "send-packet", &Communication::send, this);
             //ee->queues["packets-to-be-sent"]->Enqueue(p);
@@ -205,10 +203,10 @@ NS_LOG_COMPONENT_DEFINE("Communication");
     void
     Communication::send()
     {
-        if(m_sendQueue->GetNPackets() > 0)
+        if(m_sendQueue->GetNPackets() > 0 && !sending)
         {
+            sending = true;
             Ptr<Packet> p = m_sendQueue->Dequeue();
-            //NS_LOG_INFO(Simulator::Now() << " Time to process packet " << p->GetUid() << ": " << (Simulator::Now() - p->m_executionInfo->timestamps[0]).GetMicroSeconds());
             DcepHeader dcepHeader;
             Ipv4Header ipv4;
             p->RemoveHeader(ipv4);
@@ -227,7 +225,6 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             m_socket->Connect (InetSocketAddress (Ipv4Address::ConvertFrom(ipv4.GetDestination()), m_port));
             if ((m_socket->Send (pp)) >= 0)
             {
-
                 NS_LOG_INFO (Simulator::Now() << " SUCCESSFUL TX from : " << host_address
                         << " to : " << ipv4.GetDestination()
                         << " packet size "
@@ -238,10 +235,9 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             else
             {
               NS_LOG_INFO (Simulator::Now() << " Error " << m_socket->GetErrno());
-
             }
 
-            Ptr<Packet> item = p; //m_sendQueue->Dequeue();
+            Ptr<Packet> item = p;
 
             if (!itemSent) //we push it back at the rear of the queue
             {
@@ -252,11 +248,18 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             if(m_sendQueue->GetNPackets() != 0)//only schedule when there are more packet to send
             {
                 NS_LOG_INFO (Simulator::Now() << ": SCHEDULING TRANSMISSION");
-                Simulator::Schedule (Seconds(1), &Communication::send, this);
+                Simulator::Schedule (Seconds(0.1), &Communication::AfterSending, this);
+            } else {
+                sending = false;
             }
         }
     }
-    
+
+    void Communication::AfterSending()
+    {
+      sending = false;
+      send();
+    }
     
     Ipv4Address
     Communication::GetSinkAddress()

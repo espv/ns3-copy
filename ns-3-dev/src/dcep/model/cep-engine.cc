@@ -344,7 +344,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         // the else part must happen afterward. Therefore, they are detached.
         // Before the evaluation
         if (e->event_class != INTERMEDIATE_EVENT) {
-            //e->pkt->m_executionInfo->executedByExecEnv = false;
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
@@ -977,6 +976,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (events.empty()) {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
+            std::cout << "Node " << GetObject<Dcep>()->GetNode()->GetId() << ", Thread " << ee->currentlyExecutingThread->name << "-" << ee->currentlyExecutingThread->m_pid << ": AddAttributesToNewEvent 2/2" << std::endl;
             if (complex_event->event_class == INTERMEDIATE_EVENT) {
                 complex_event->pkt = Create<Packet>();
                 Ptr<CEPEngine> cepEngine = GetObject<CEPEngine>();
@@ -1004,6 +1004,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             complex_event->numberValues[key] = val;
         }
         events.erase(events.begin());
+        std::cout << "Node " << GetObject<Dcep>()->GetNode()->GetId() << ", Thread " << ee->currentlyExecutingThread->name << "-" << ee->currentlyExecutingThread->m_pid << ": AddAttributesToNewEvent 1/2" << std::endl;
         if (complex_event->event_class == INTERMEDIATE_EVENT) {
             AddAttributesToNewEvent(q, events, complex_event, op);
         } else {

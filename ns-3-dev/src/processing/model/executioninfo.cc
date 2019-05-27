@@ -6,7 +6,7 @@
 #include "ns3/drop-tail-queue.h"
 #include "ns3/log.h"
 
-#include "executioninfo.h"
+#include "execenv.h"
 
 
 namespace ns3 {
@@ -16,7 +16,7 @@ namespace ns3 {
 
     ns3::ExecutionInfo::ExecutionInfo() = default;
 
-    ns3::ExecutionInfo::ExecutionInfo(ExecutionInfo *ei) {
+    ns3::ExecutionInfo::ExecutionInfo(Ptr<ExecutionInfo> ei) {
         this->packet = ei->packet;
         this->executedByExecEnv = ei->executedByExecEnv;
         this->targets = ei->targets;
@@ -24,14 +24,15 @@ namespace ns3 {
         this->seqNr = ei->seqNr;
     }
 
-
     void ExecutionInfo::ExecuteTrigger(std::string &checkpoint) {
+        if (!checkpoint.empty()) {
+          //std::cout << checkpoint << std::endl;
+        }
         auto it = targets.find(checkpoint);
         if (it != targets.end() && !it->second.empty()) {
             executedByExecEnv = true;
             auto toInvoke = it->second.front();
-            toInvoke->Invoke();
-            toInvoke->Unref();
+            toInvoke->event->Invoke();
             it->second.erase(it->second.begin());
         }
     }

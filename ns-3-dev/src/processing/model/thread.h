@@ -84,7 +84,7 @@ public:
 	static TypeId GetTypeId ();
 
 	void SetPid(int pid);
-    void SetScheduler(Ptr<RoundRobinScheduler> scheduler);
+  void SetScheduler(Ptr<RoundRobinScheduler> scheduler);
 	void Dispatch();
 
 	void PreEmpt();
@@ -125,7 +125,7 @@ public:
 	void Terminate();
 
 	// Pointer to scheduler object
-    Ptr<RoundRobinScheduler> m_scheduler;
+  Ptr<RoundRobinScheduler> m_scheduler;
 
 	// Program ID obtained from SchedSim
 	int m_pid;
@@ -139,6 +139,7 @@ public:
 
 	// The program and event currently running
 	Ptr<ProgramLocation> m_currentLocation;
+	std::string name;
 };
 
 

@@ -261,6 +261,7 @@ TaskScheduler::Fork(
 		std::map<std::string, Ptr<StateVariableQueue> > localStateQueues,
 		bool infinite) {
   Ptr<Thread> t = CreateObject<Thread> ();
+  t->name = threadName;
   t->peu = peu;
   t->SetScheduler(peu->taskScheduler);
 

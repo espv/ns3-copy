@@ -28,6 +28,7 @@ bool traceOn;
 bool withBlockingIO;
 
 std::map<int, int> m_fifo_debugfiles;
+std::vector<Thread*> all_threads;
 
 NS_LOG_COMPONENT_DEFINE("Thread");
 NS_OBJECT_ENSURE_REGISTERED(Thread);
@@ -41,6 +42,7 @@ Thread::~Thread() = default;
 
 Thread::Thread() {
 	m_currentProcessing.done = true;
+	all_threads.emplace_back(this);
 }
 
 void Thread::SetPid(int pid) {
@@ -891,7 +893,7 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
     //m_currentLocation->curPkt = queueToServe->Dequeue();
     auto ei = queueToServe->Dequeue();
     m_currentLocation->curPkt = ei->packet;
-    m_currentLocation->m_executionInfo = ei;
+    m_currentLocation->m_executionInfo = Create<ExecutionInfo>(ei);
 
     // We need call activate any prospective triggers on the queue
     Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
@@ -1168,12 +1170,15 @@ void Thread::Dispatch() {
 			m_currentLocation->currentEvent++;
 			int currentEvent = m_currentLocation->currentEvent;
 
-            ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
+      Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+      execEnv->currentlyExecutingThread = this;
+
+      ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
 			proceed = HandleExecutionEvent(e);
 
-            Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-            execEnv->currentlyExecutingThread = this;
-
+      if (e->tokens.size() > 0 && e->tokens[1] == "SLEEPTHREAD") {
+        std::cout << "Node " << peu->hwModel->node->GetId() << ", Thread " << name << "-"  << this->m_pid << " SLEEPTHREAD" << std::endl;
+      }
 			m_currentLocation->m_executionInfo->ExecuteTrigger(e->checkpoint);
 
 			/* Must check if there are any more statements to execute. If not,
@@ -1181,12 +1186,12 @@ void Thread::Dispatch() {
 			 * single-threaded PEUs, as they should simply run one PEU in an
 			 * infinite loop.
 			 */
-            if (m_programStack.empty()) {
-                if (m_scheduler->need_scheduling) {
-                    m_scheduler->need_scheduling = false;
-                    m_scheduler->Schedule();
-                }
-                m_scheduler->Terminate(this->peu, (uint32_t)m_pid);
+      if (m_programStack.empty()) {
+        if (m_scheduler->need_scheduling) {
+          m_scheduler->need_scheduling = false;
+          m_scheduler->Schedule();
+        }
+        m_scheduler->Terminate(this->peu, (uint32_t)m_pid);
 				break;
 			}
 		}

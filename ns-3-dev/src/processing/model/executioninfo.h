@@ -9,6 +9,7 @@
 #include "ns3/event-impl.h"
 #include "ns3/nstime.h"
 #include "ns3/packet.h"
+
 #include <vector>
 #include <map>
 
@@ -16,11 +17,20 @@ namespace ns3 {
     class Thread;
     class SEM;
 
+    class EventWrapper : public SimpleRefCount<EventWrapper> {
+    public:
+        explicit EventWrapper(EventImpl *event) {
+          this->event = event;
+        }
+
+        EventImpl *event;
+    };
+
     class ExecutionInfo : public SimpleRefCount<ExecutionInfo> {
     public:
         ExecutionInfo();
 
-        explicit ExecutionInfo(ExecutionInfo *ei);
+        explicit ExecutionInfo(Ptr<ExecutionInfo> ei);
 
         /* Used to identify whether a service is allready
          * called by the ExecEnv. If this is the same as
@@ -32,7 +42,7 @@ namespace ns3 {
         // Name and arguments for target service
         std::string target;
         //EventImpl *targetFPM;
-        std::map<std::string, std::vector<EventImpl*> > targets;
+        std::map<std::string, std::vector<Ptr<EventWrapper> > > targets;
 
         // Used for temporary synchronization primitives
         //void *tempSynch;

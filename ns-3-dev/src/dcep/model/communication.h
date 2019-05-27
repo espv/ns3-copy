@@ -64,10 +64,11 @@ class Communication : public Object
    * \param socket the socket the packet was received to.
    */
         void HandleRead (Ptr<Socket> socket);
+        void AfterSending ();
 
        // void ScheduleSend(Ipv4Address peerAddress, const uint8_t *, uint32_t size, uint16_t msg_type);
         void ScheduleSend(Ptr<Packet> p, Ipv4Address addr);
-        Ipv4Address GetLocalAddress();  
+        Ipv4Address GetLocalAddress();
         Ipv4Address GetSinkAddress();
     
     private:
@@ -76,13 +77,14 @@ class Communication : public Object
         Ptr<Queue<Packet>> m_sendQueue;
         EventId m_packetSendCepEvent;
         uint32_t backoffTime;
-        uint16_t m_port; 
+        uint16_t m_port;
         uint32_t numRetransmissions;
         Ipv4Address m_sinkAddress;
         Ipv4Address host_address;
-        Ptr<Socket> m_socket; 
+        Ptr<Socket> m_socket;
         Ptr<Node> disnode;
-        uint32_t m_sent; 
+        uint32_t m_sent;
+        bool sending = false;
      
     };
    

@@ -202,7 +202,7 @@ namespace ns3 {
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = false; return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -216,7 +216,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -230,7 +230,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -244,7 +244,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2, arg3)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -258,7 +258,7 @@ namespace ns3 {
             return false;}
         else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2, arg3, arg4)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -272,7 +272,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -286,7 +286,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -300,7 +300,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
@@ -314,7 +314,7 @@ namespace ns3 {
             return false;
         } else {
             for (int i = 0; i < numberProceeds; i++) {
-                thread->m_currentLocation->m_executionInfo->targets[target].push_back(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
+                thread->m_currentLocation->m_executionInfo->targets[target].push_back(Create<EventWrapper>(MakeEvent(func, object, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8)));
             }
 
             thread->m_currentLocation->m_executionInfo->executedByExecEnv = true;
