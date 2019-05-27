@@ -42,7 +42,7 @@ namespace ns3 {
         // Name and arguments for target service
         std::string target;
         //EventImpl *targetFPM;
-        std::map<std::string, std::vector<Ptr<EventWrapper> > > targets;
+        std::map<std::string, Ptr<EventWrapper> > targets;
 
         // Used for temporary synchronization primitives
         //void *tempSynch;

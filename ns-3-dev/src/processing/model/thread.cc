@@ -1170,29 +1170,29 @@ void Thread::Dispatch() {
 			m_currentLocation->currentEvent++;
 			int currentEvent = m_currentLocation->currentEvent;
 
-      Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
-      execEnv->currentlyExecutingThread = this;
+            Ptr<ExecEnv> execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+            execEnv->currentlyExecutingThread = this;
 
-      ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
-			proceed = HandleExecutionEvent(e);
+            ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
+            proceed = HandleExecutionEvent(e);
 
-			m_currentLocation->m_executionInfo->ExecuteTrigger(e->checkpoint);
+            m_currentLocation->m_executionInfo->ExecuteTrigger(e->checkpoint);
 
 			/* Must check if there are any more statements to execute. If not,
 			 * terminate the thread. Note that this should never occur for
 			 * single-threaded PEUs, as they should simply run one PEU in an
 			 * infinite loop.
 			 */
-      if (m_programStack.empty()) {
-        if (m_scheduler->need_scheduling) {
-          m_scheduler->need_scheduling = false;
-          m_scheduler->Schedule();
+          if (m_programStack.empty()) {
+            if (m_scheduler->need_scheduling) {
+              m_scheduler->need_scheduling = false;
+              m_scheduler->Schedule();
+            }
+            m_scheduler->Terminate(this->peu, (uint32_t)m_pid);
+                    break;
+                }
+            }
         }
-        m_scheduler->Terminate(this->peu, (uint32_t)m_pid);
-				break;
-			}
-		}
-	}
 }
 
 } // namespace ns3

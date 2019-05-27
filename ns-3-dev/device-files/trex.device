@@ -62,6 +62,7 @@ SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
 LOC within-send-packet send-packet
 LOC call-to-handle-then-cepop handle-cepops
+LOC call-to-handle-then-cepop handle-cepops-first
 LOC finished-processing-loc finished-processing
 
 # Entrypoint function for the PEU defined above

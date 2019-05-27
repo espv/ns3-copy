@@ -26,11 +26,11 @@ namespace ns3 {
 
     void ExecutionInfo::ExecuteTrigger(std::string &checkpoint) {
         auto it = targets.find(checkpoint);
-        if (it != targets.end() && !it->second.empty()) {
-            executedByExecEnv = true;
-            auto toInvoke = it->second.front();
+        if (it != targets.end()) {
+            auto toInvoke = it->second;
             toInvoke->event->Invoke();
-            it->second.erase(it->second.begin());
+            if (toInvoke == it->second)
+                targets.erase(checkpoint);
         }
     }
 

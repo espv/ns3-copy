@@ -97,9 +97,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (values.begin() == values.end()) {
             if (e->event_class != INTERMEDIATE_EVENT) {
-                //e->pkt->m_executionInfo->executedByExecEnv = false;
                 ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-                ee->Proceed(ee->hwModel->cpus.size(), ee->currentlyExecutingThread, "handle-cepops", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
+                Ptr<Node> node = GetObject<Dcep>()->GetNode();
+                if (node->GetId() == 2 && e->type == "C") {
+                    std::cout << std::endl;
+                }
+                ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops-first", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
                 ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             } else {
                 GetObject<Detector>()->ProcessCepEvent(e);
