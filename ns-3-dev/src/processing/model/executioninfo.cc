@@ -25,9 +25,6 @@ namespace ns3 {
     }
 
     void ExecutionInfo::ExecuteTrigger(std::string &checkpoint) {
-        if (!checkpoint.empty()) {
-          //std::cout << checkpoint << std::endl;
-        }
         auto it = targets.find(checkpoint);
         if (it != targets.end() && !it->second.empty()) {
             executedByExecEnv = true;

@@ -1176,9 +1176,6 @@ void Thread::Dispatch() {
       ExecutionEvent *e = m_currentLocation->program->events[currentEvent];
 			proceed = HandleExecutionEvent(e);
 
-      if (e->tokens.size() > 0 && e->tokens[1] == "SLEEPTHREAD") {
-        std::cout << "Node " << peu->hwModel->node->GetId() << ", Thread " << name << "-"  << this->m_pid << " SLEEPTHREAD" << std::endl;
-      }
 			m_currentLocation->m_executionInfo->ExecuteTrigger(e->checkpoint);
 
 			/* Must check if there are any more statements to execute. If not,
