@@ -182,7 +182,13 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         ipv4.SetProtocol(123);
         p->AddHeader(ipv4);
 
+        if (disnode->GetId() == 2) {
+            std::cout << "m_sendQueue->GetNPackets(): " << m_sendQueue->GetNPackets() << std::endl;
+        }
         m_sendQueue->Enqueue(p);
+        if (disnode->GetId() == 2) {
+            std::cout << "m_sendQueue->GetNPackets(): " << m_sendQueue->GetNPackets() << std::endl;
+        }
 
         Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
         //p->m_executionInfo->timestamps.emplace_back(Simulator::Now());

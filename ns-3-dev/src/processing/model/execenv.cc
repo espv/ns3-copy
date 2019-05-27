@@ -236,8 +236,7 @@ void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 		 * No size = no upper bound on contents
 		 */
 		else if (tokens[2] == "-1") {
-            queues[tokens[0]] = CreateObject<DropTailQueue<ExecutionInfo> >();
-
+            queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue<ExecutionInfo> >("MaxSize", StringValue ("4294967295p"));
 
             // We have a size
         } else {
@@ -249,9 +248,9 @@ void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 						"Unable to convert queue size " << tokens[2] << " to integer" << std::endl);
 			// Act according to units
 			if (tokens[3] == "packets") {
-				queues[tokens[0]] = CreateObject<DropTailQueue<ExecutionInfo> >();
+				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue<ExecutionInfo> >("MaxSize", StringValue (std::to_string(size) + "p"));
 			} else {
-				queues[tokens[0]] = CreateObject<DropTailQueue<ExecutionInfo> >();
+				queues[tokens[0]] = CreateObjectWithAttributes<DropTailQueue<ExecutionInfo> >("MaxSize", StringValue (std::to_string(size) + "p"));
 			}
 		}
 	} else {
