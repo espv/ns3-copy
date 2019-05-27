@@ -220,9 +220,9 @@ int main(int argc, char** argv) {
     
     NS_LOG_INFO ("Starting applications .....");
     dcepApps.Start (Seconds (50.0));//make some time for olsr to stabilise
-    dcepApps.Stop (Seconds (10000));
+    dcepApps.Stop (Seconds (100000000));
 
-    Simulator::Stop (Seconds (13000.0));
+    Simulator::Stop (Seconds (130000000.0));
 
     AnimationInterface anim("netanim-output.xml");
     anim.EnablePacketMetadata (true);

@@ -216,7 +216,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         auto ds = GetObject<DataSource> ();
         if (!ds->IsActive()) {
             ds->Activate();
-            Simulator::Schedule(Seconds(100), &DataSource::GenerateAtomicCepEvents, ds, q);
+            Simulator::Schedule(Seconds(10000), &DataSource::GenerateAtomicCepEvents, ds, q);
             //ds->GenerateAtomicCepEvents(q);
         }
     }
