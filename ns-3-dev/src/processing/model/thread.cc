@@ -1183,16 +1183,16 @@ void Thread::Dispatch() {
 			 * single-threaded PEUs, as they should simply run one PEU in an
 			 * infinite loop.
 			 */
-          if (m_programStack.empty()) {
-            if (m_scheduler->need_scheduling) {
-              m_scheduler->need_scheduling = false;
-              m_scheduler->Schedule();
-            }
-            m_scheduler->Terminate(this->peu, (uint32_t)m_pid);
-                    break;
+            if (m_programStack.empty()) {
+                if (m_scheduler->need_scheduling) {
+                    m_scheduler->need_scheduling = false;
+                    m_scheduler->Schedule();
                 }
+                m_scheduler->Terminate(this->peu, (uint32_t)m_pid);
+                break;
             }
         }
+    }
 }
 
 } // namespace ns3

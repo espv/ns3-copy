@@ -102,7 +102,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 if (node->GetId() == 2 && e->type == "C") {
                     std::cout << std::endl;
                 }
-                ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops-first", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
+                ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
                 ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             } else {
                 GetObject<Detector>()->ProcessCepEvent(e);
@@ -986,7 +986,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 cepEngine->ProcessCepEvent(complex_event);
             } else {
                 // Here we consume the previous events
-                //complex_event->pkt->m_executionInfo->target = "";
                 ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->target = "";
                 ee->queues["complex-pkts"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);
                 Ptr<Forwarder> forwarder = GetObject<Forwarder>();

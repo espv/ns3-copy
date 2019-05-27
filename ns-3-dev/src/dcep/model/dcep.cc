@@ -399,7 +399,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     q3->currentHost.Set("0.0.0.0");
                     q3->parent_output = parent_output;
                     Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
-                    in_seconds += 5;
+                    in_seconds += 0.5;
                     //dcep->DispatchQuery(q3);
                 }
 
