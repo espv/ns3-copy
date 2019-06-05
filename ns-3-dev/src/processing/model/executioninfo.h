@@ -14,8 +14,6 @@
 #include <map>
 
 namespace ns3 {
-    class Thread;
-    class SEM;
 
     class EventWrapper : public SimpleRefCount<EventWrapper> {
     public:
@@ -41,16 +39,7 @@ namespace ns3 {
 
         // Name and arguments for target service
         std::string target;
-        //EventImpl *targetFPM;
         std::map<std::string, Ptr<EventWrapper> > targets;
-
-        // Used for temporary synchronization primitives
-        //void *tempSynch;
-
-        /* Used to indicate which service to execute when
-         * the packet is within a service queue
-         */
-        //SEM *queuedService;
 
         // EXPERIMENTATION:
         std::vector <Time> timestamps;

@@ -222,11 +222,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             //e->pkt->m_executionInfo->executedByExecEnv = false;
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "finished-processing", &CEPEngine::FinishedProcessingEvent, this, e);
-
-            static int cnt = 0;
-            if (node->GetId() == 2) {
-                std::cout << "HIRQ-1 number " << ++cnt << std::endl;
-            }
             ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
         } else {
             CheckConstraints(e);
@@ -344,7 +339,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        e->pkt = ee->currentlyExecutingThread->m_currentLocation->curPkt;
+        e->pkt = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet;
         auto op = ee->currentlyExecutingThread->m_currentLocation->curCepQuery;
 
         // The 'e->event_class != INTERMEDIATE_EVENT' part must happen before the evaluation of the operator, and
@@ -988,7 +983,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 cepEngine->ProcessCepEvent(complex_event);
             } else {
                 // Here we consume the previous events
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->target = "";
                 ee->queues["complex-pkts"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);
                 Ptr<Forwarder> forwarder = GetObject<Forwarder>();
                 forwarder->ForwardNewCepEvent(complex_event);

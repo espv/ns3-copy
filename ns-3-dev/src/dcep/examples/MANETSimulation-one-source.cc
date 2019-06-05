@@ -42,7 +42,7 @@ static TRexProtocolStack ps;
 int main(int argc, char** argv) {
 
     // Real-world experiment limits bandwidth to 6mpbs by running "sudo wondershaper eth0 6000 6000" where 6000 kbps for up and download
-    std::string phyMode ("OfdmRate54Mbps");
+    std::string phyMode ("OfdmRate36Mbps");
     double rss = 0;  // -dBm
     std::string mobilityTraceFile ("bonn-motion/bonnmotion-3.0.1/bin/mobility4adaptation.ns_movements");
     
@@ -220,9 +220,9 @@ int main(int argc, char** argv) {
     
     NS_LOG_INFO ("Starting applications .....");
     dcepApps.Start (Seconds (50.0));//make some time for olsr to stabilise
-    dcepApps.Stop (Seconds (10000000000));
+    dcepApps.Stop (Seconds (1000000000));
 
-    Simulator::Stop (Seconds (13000000000.0));
+    Simulator::Stop (Seconds (1300000000.0));
 
     AnimationInterface anim("netanim-output.xml");
     anim.EnablePacketMetadata (true);

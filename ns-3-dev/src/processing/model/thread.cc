@@ -211,7 +211,8 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
         }
 
 		bool perQueue = m_currentLocation->lc->perQueue;
-		Ptr<Packet> curPacket = m_currentLocation->curPkt;
+		//Ptr<Packet> curPacket = m_currentLocation->curPkt;
+		Ptr<Packet> curPacket = m_currentLocation->m_executionInfo->packet;
 		bool condPassed = !m_currentLocation->lc->hasAdditionalCondition ? true :
                           (bool)m_currentLocation->lc->additionalCondition(this);
 
@@ -478,7 +479,8 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 		/* TODO: consume from a PEU. For now, use CPU.
 		 * Dirty hack for now: sample cycles, and calculate based on CPU frequency
 		 */
-		auto pi = ps->Instantiate(m_currentLocation->curPkt);
+		//auto pi = ps->Instantiate(m_currentLocation->curPkt);
+		auto pi = ps->Instantiate(m_currentLocation->m_executionInfo->packet);
 		int cpu = peu->GetObject<CPU>()->GetId();
 
 		long m_freq = peu->hwModel->cpus[cpu]->m_freq;
@@ -510,7 +512,8 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 		/* First, obtain a processing instance with all sample
 		 * values for all resources consumed filled in.
 		 */
-		m_currentProcessing = ps->Instantiate(m_currentLocation->curPkt);
+		//m_currentProcessing = ps->Instantiate(m_currentLocation->curPkt);
+		m_currentProcessing = ps->Instantiate(m_currentLocation->m_executionInfo->packet);
 		m_currentProcessing.thread = this;
 
 		/* Pass this instance to the PEU responsible of
@@ -579,11 +582,12 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
 		newProgramLocation->program = newSem->rootProgram;
 		newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
-		newProgramLocation->curPkt = m_programStack.top()->curPkt;
+		//newProgramLocation->curPkt = m_programStack.top()->curPkt;
 		newProgramLocation->localStateVariables = m_programStack.top()->localStateVariables;
 		newProgramLocation->localStateVariableQueues = m_programStack.top()->localStateVariableQueues;
 		newProgramLocation->tempvar = m_programStack.top()->tempvar;
 		newProgramLocation->m_executionInfo = m_programStack.top()->m_executionInfo;
+		newProgramLocation->m_executionInfo->packet = m_programStack.top()->m_executionInfo->packet;
 
 		// Set up loop state if this is a loop statement
 		LoopCondition *lcPtr = ee->lc;
@@ -745,7 +749,8 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		m_programStack.push(newProgramLocation);
 	} else {
 		newSem->peu->taskScheduler->Fork("", newSem->rootProgram, 0,
-				m_programStack.top()->curPkt,
+				//m_programStack.top()->curPkt,
+				m_programStack.top()->m_executionInfo->packet,
 				m_programStack.top()->localStateVariables,
 				m_programStack.top()->localStateVariableQueues, false);
 	}
@@ -786,7 +791,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 			ee->stateQueues[qe->queueName]->stateVariableQueue.push(qe->valueToEnqueue);
 		} else if (qe->isPacketQueue) {
             //qe->queue->Enqueue(m_currentLocation->curPkt);
-            m_currentLocation->m_executionInfo->packet = m_currentLocation->curPkt;
+            //m_currentLocation->m_executionInfo->packet = m_currentLocation->curPkt;
             qe->queue->Enqueue(m_currentLocation->m_executionInfo);
         } else if (qe->isCepEventQueue) {
             qe->cepEventQueue->push(m_currentLocation->curCepEvent);
@@ -822,8 +827,9 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 				Ptr<ProgramLocation> newProgramLocation = Create<ProgramLocation>();
 				newProgramLocation->program = toExecute->rootProgram;
 				newProgramLocation->currentEvent = -1; // incremented to 0 in Dispatch()
-				newProgramLocation->curPkt = newPl->curPkt;  // Added by Espen
+				//newProgramLocation->curPkt = newPl->curPkt;  // Added by Espen
 				newProgramLocation->m_executionInfo = newPl->m_executionInfo;  // Added by Espen
+				newProgramLocation->m_executionInfo->packet = newPl->m_executionInfo->packet;
 				newProgramLocation->lc = newPl->lc;
 				newProgramLocation->localStateVariables = newPl->localStateVariables;
 				newProgramLocation->localStateVariableQueues = newPl->localStateVariableQueues;
@@ -831,7 +837,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 				m_programStack.push(newProgramLocation);
 			} else
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,
-						0, newPl->curPkt, newPl->localStateVariables,
+						0, /*newPl->curPkt*/ newPl->m_executionInfo->packet, newPl->localStateVariables,
 						newPl->localStateVariableQueues, false);
 
 			// We should immediately continue with the next event in the called program
@@ -892,7 +898,8 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
     //m_currentLocation->curPkt = queueToServe->Dequeue();
     //m_currentLocation->curPkt = queueToServe->Dequeue();
     auto ei = queueToServe->Dequeue();
-    m_currentLocation->curPkt = ei->packet;
+    //m_currentLocation->curPkt = ei->packet;
+    m_currentLocation->m_executionInfo->packet = ei->packet;
     m_currentLocation->m_executionInfo = Create<ExecutionInfo>(ei);
 
     // We need call activate any prospective triggers on the queue
@@ -935,8 +942,8 @@ bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
 }
 
 bool Thread::HandleDuplicatePacketEvent(ExecutionEvent* e) {
-	auto dupPkt = Create<Packet>(*m_currentLocation->curPkt);
-	m_currentLocation->curPkt = dupPkt;
+    auto dupPkt = Create<Packet>(*m_currentLocation->m_executionInfo->packet);
+    m_currentLocation->m_executionInfo->packet = dupPkt;
 }
 
 bool Thread::HandleSchedulerEvent(ExecutionEvent* e) {

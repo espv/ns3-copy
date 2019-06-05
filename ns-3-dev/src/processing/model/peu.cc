@@ -189,7 +189,8 @@ bool CPU::Interrupt(InterruptRequest ir) {
 		newProgramLocation->program = newProgram;
 		newProgramLocation->currentEvent = -1;
 		newProgramLocation->tempvar = ir.tempsynch;
-		newProgramLocation->curPkt = ir.current;
+		//newProgramLocation->curPkt = ir.current;
+		newProgramLocation->m_executionInfo->packet = ir.current;
 		newProgramLocation->localStateVariables = ir.localStateVariables;
 		newProgramLocation->localStateVariableQueues = ir.localStateVariablesQueues;
 		newProgramLocation->m_executionInfo = ir.m_executionInfo;
@@ -211,7 +212,8 @@ bool CPU::Interrupt(InterruptRequest ir) {
 				ee->m_serviceMap[this->hirqHandler]->rootProgram;
 		irqProgramLocation->currentEvent = -1;
 		irqProgramLocation->tempvar = ir.tempsynch;
-		irqProgramLocation->curPkt = ir.current;
+		//irqProgramLocation->curPkt = ir.current;
+		irqProgramLocation->m_executionInfo->packet = ir.current;
 		irqProgramLocation->localStateVariables = ir.localStateVariables;
 		irqProgramLocation->localStateVariableQueues = ir.localStateVariablesQueues;
 		irqProgramLocation->m_executionInfo = ir.m_executionInfo;

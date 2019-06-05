@@ -10,7 +10,8 @@
 namespace ns3 {
 
 uint32_t ConditionFunctions::PacketSize(Ptr<Thread> t) {
-  return t->m_currentLocation->curPkt->GetSize();
+  //return t->m_currentLocation->curPkt->GetSize();
+  return t->m_currentLocation->m_executionInfo->packet->GetSize();
 }
 
 uint32_t ConditionFunctions::PacketL4Protocol(Ptr<Thread> t) {

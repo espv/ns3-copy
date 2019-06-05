@@ -217,7 +217,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         if (!ds->IsActive()) {
             ds->Activate();
             static int cnt = 0;
-            int generate_events_in = 10000+((cnt++)*1000);
+            int generate_events_in = 10+((cnt++)*1);
             Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
             //ds->GenerateAtomicCepEvents(q);
         }

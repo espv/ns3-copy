@@ -481,7 +481,7 @@ Queue<Item>::DoDequeue (ConstIterator pos)
 
   if (item != 0)
     {
-      NS_ASSERT (m_nBytes.Get () >= item->GetSize ());
+      //NS_ASSERT (m_nBytes.Get () >= item->GetSize ());  // Espen
       NS_ASSERT (m_nPackets.Get () > 0);
 
       m_nBytes -= item->GetSize ();
@@ -510,7 +510,7 @@ Queue<Item>::DoRemove (ConstIterator pos)
 
   if (item != 0)
     {
-      NS_ASSERT (m_nBytes.Get () >= item->GetSize ());
+      //NS_ASSERT (m_nBytes.Get () >= item->GetSize ());  // Espen
       NS_ASSERT (m_nPackets.Get () > 0);
 
       m_nBytes -= item->GetSize ();

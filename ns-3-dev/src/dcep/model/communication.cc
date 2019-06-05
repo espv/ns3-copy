@@ -198,6 +198,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "send-packet", &Communication::send, this);
             //ee->queues["packets-to-be-sent"]->Enqueue(p);
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet = p;
             ee->queues["packets-to-be-sent"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);
         } else if (contentType == QUERY) {
             send();

@@ -270,7 +270,8 @@ TaskScheduler::Fork(
   Ptr<ProgramLocation> pl = Create<ProgramLocation>();
   pl->program = program;
   pl->currentEvent = -1;
-  pl->curPkt = currentPacket;
+  //pl->curPkt = currentPacket;
+  pl->m_executionInfo->packet = currentPacket;
   pl->localStateVariableQueues = std::move(localStateQueues);
   pl->localStateVariables = std::move(localVars);
 
@@ -458,7 +459,8 @@ ParallelThreadsScheduler::Fork(
   Ptr<ProgramLocation> pl;
   pl->program = program;
   pl->currentEvent = 0;
-  pl->curPkt = currentPacket;
+  //pl->curPkt = currentPacket;
+  pl->m_executionInfo->packet = currentPacket;
   t->m_programStack.push(pl);
   pl->localStateVariables = localVars;
   pl->localStateVariableQueues = localStateQueues;

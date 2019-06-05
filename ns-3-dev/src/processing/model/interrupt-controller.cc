@@ -58,7 +58,8 @@ InterruptController::IssueInterruptWithService(const Ptr<SEM> &intSem, struct te
     static int cpu = 0;
     auto p = new ProgramLocation;
     p->tempvar = std::move(tempsynch);
-    p->curPkt = current;
+   // p->curPkt = current;
+    p->m_executionInfo->packet = current;
     p->localStateVariables = std::move(localStateVariables);
     p->localStateVariableQueues = std::move(localStateVariablesQueues);
 
@@ -87,7 +88,8 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
     NS_LOG_INFO("Interrupt " << interruptNumber << " on CPU" << cpu);
 
     InterruptRequest ir;
-    ir.current = programLoc->curPkt;
+    //ir.current = programLoc->curPkt;
+    ir.current = programLoc->m_executionInfo->packet;
     ir.service = intSem;
     ir.interruptNr = interruptNumber;
     ir.toCall = nullptr;
