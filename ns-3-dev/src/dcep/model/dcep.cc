@@ -132,7 +132,6 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
         uint32_t mrand = x->GetInteger (1,30);
         mrand = mrand;
-        std::cout << "generated number: " << mrand << std::endl;
 
         Ptr<Sink> sink = CreateObject<Sink>();
         Ptr<DataSource> datasource = CreateObject<DataSource>();
@@ -216,8 +215,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         auto ds = GetObject<DataSource> ();
         if (!ds->IsActive()) {
             ds->Activate();
+            UintegerValue nqueries;
+            GetAttribute("number_of_queries", nqueries);
             static int cnt = 0;
-            int generate_events_in = 10+((cnt++)*1);
+            int generate_events_in = cnt++;
             Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
             //ds->GenerateAtomicCepEvents(q);
         }
@@ -232,7 +233,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         GetObject<Sink>()->receiveFinalCepEvent(event);
     }
-    
+
     void
     Dcep::rcvRemoteMsg(uint8_t* data, uint32_t size, uint16_t msg_type, uint64_t delay)
     {
@@ -248,9 +249,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 event->deserialize(data, size);
                 /* setting link delay from source to this node*/
                 event->delay = delay;
-
-                static int cnt = 0;
-                NS_LOG_INFO (Simulator::Now() << " DCEP: RECEIVED EVENT MESSAGE OF TYPE " << event->type << ", SEQ NO " << event->m_seq << ", RCVD EVENT NUMBER " << ++cnt);
+                NS_LOG_INFO (Simulator::Now() << " DCEP: RECEIVED EVENT MESSAGE OF TYPE " << event->type << ", SEQ NO " << event->m_seq);
 
                 Ptr<Packet> pkt = Create<Packet>(data, size);
                 event->pkt = pkt;
@@ -312,7 +311,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     Sink::receiveFinalCepEvent(Ptr<CepEvent> e)
     {
         NS_LOG_INFO(Simulator::Now() << " COMPLEX EVENT RECEIVED " << ++number_received << " EVENTS, NOTIFIED HOPSCOUNT " << e->hopsCount << " e->timestamp " << e->timestamp << " DELAY " << Simulator::Now() - e->timestamp);
-        NS_LOG_INFO(Simulator::Now() << " $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ COMPLEX EVENT $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$, temperature: " << e->numberValues["value"]);
+        NS_LOG_INFO(Simulator::Now() << " $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Complex event received by sink $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     }
 
     void
@@ -325,59 +324,12 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         int complex_event_cnt = 0;
         uint32_t query_counter = 1;
         double in_seconds = 0;
-        for (auto eventType : eventTypes)
-        {
+        // The complex queries are dispatched before the atomic queries
+        for (auto eventType : eventTypes) {
             auto event1 = eventType.substr(0, 1);
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "then" + event2;
-            for (int temp = 0; temp <= 0; temp++)
-            {
-                Ptr<Query> q1 = CreateObject<Query> ();
-                q1->actionType = NOTIFICATION;
-                q1->id = query_counter++;
-                q1->isFinal = false;
-                q1->isAtomic = true;
-                q1->eventType = event1;
-                q1->output_dest = Ipv4Address("10.0.0.1");
-                q1->inevent1 = event1;
-                q1->inevent2 = "";
-                q1->op = "true";
-                q1->assigned = false;
-                q1->currentHost.Set("0.0.0.0");
-                q1->parent_output = parent_output;
-                q1->window = Seconds(150000000000000000);
-                q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
-                Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
-                c1->var_name = "value";
-                c1->numberValue = 45;
-                c1->type = GTCONSTRAINT;
-                q1->constraints.emplace_back(c1);
-                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
-                in_seconds += 5;
-
-                Ptr<Query> q2 = CreateObject<Query> ();
-                q2->actionType = NOTIFICATION;
-                q2->id = query_counter++;
-                q2->isFinal = false;
-                q2->isAtomic = true;
-                q2->eventType = event2;
-                q2->output_dest = Ipv4Address("10.0.0.2");
-                q2->inevent1 = event2;
-                q2->inevent2 = "";
-                q2->op = "true";
-                q2->assigned = false;
-                q2->currentHost.Set("0.0.0.0");
-                q2->parent_output = parent_output;
-                q2->window = Seconds(150000000000000000);
-                q2->isFinalWithinNode = true;
-                Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
-                c2->var_name = "percentage";
-                c2->numberValue = 25;
-                c2->type = LTCONSTRAINT;
-                q2->constraints.emplace_back(c2);
-                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
-                in_seconds += 5;
-
+            for (int temp = 0; temp <= 0; temp++) {
                 for (int j = 0; j < numCepQueries; j++) {
                     Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
                     q3->actionType = NOTIFICATION;
@@ -401,31 +353,62 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     q3->currentHost.Set("0.0.0.0");
                     q3->parent_output = parent_output;
                     Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
-                    in_seconds += 0.5;
+                    in_seconds += 1;
                     //dcep->DispatchQuery(q3);
                 }
+            }
+        }
 
-                /*for (int j = 0; j <= 0; j++) {
-                    Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
-                    q3->actionType = NOTIFICATION;
-                    q3->id = query_counter++;
-                    q3->isFinal = true;
-                    q3->isAtomic = true;
-                    q3->eventType = std::to_string(complex_event_cnt++);
-                    q3->output_dest = Ipv4Address("10.0.0.3");
-                    q3->inevent1 = event1;
-                    q3->inevent2 = "";
-                    q3->window = Seconds(15);
-                    q3->isFinalWithinNode = true;
+        for (auto eventType : eventTypes) {
+            auto event1 = eventType.substr(0, 1);
+            auto event2 = eventType.substr(1, 1);
+            auto parent_output = event1 + "then" + event2;
+            for (int temp = 0; temp <= 0; temp++) {
+                Ptr<Query> q1 = CreateObject<Query> ();
+                q1->actionType = NOTIFICATION;
+                q1->id = query_counter++;
+                q1->isFinal = false;
+                q1->isAtomic = true;
+                q1->eventType = event1;
+                q1->output_dest = Ipv4Address("10.0.0.1");
+                q1->inevent1 = event1;
+                q1->inevent2 = "";
+                q1->op = "true";
+                q1->assigned = false;
+                q1->currentHost.Set("0.0.0.0");
+                q1->parent_output = parent_output;
+                q1->window = Seconds(150000000000000000);
+                q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
+                Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+                c1->var_name = "value";
+                c1->numberValue = 45;
+                c1->type = GTCONSTRAINT;
+                q1->constraints.emplace_back(c1);
+                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
+                in_seconds += 1;
 
-                    Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();
-                    q3->op = "true";
-                    q3->assigned = false;
-                    q3->currentHost.Set("0.0.0.0");
-                    q3->parent_output = parent_output;
-                    Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q3);
-                    in_seconds += 0.01;
-                }*/
+                Ptr<Query> q2 = CreateObject<Query> ();
+                q2->actionType = NOTIFICATION;
+                q2->id = query_counter++;
+                q2->isFinal = false;
+                q2->isAtomic = true;
+                q2->eventType = event2;
+                q2->output_dest = Ipv4Address("10.0.0.2");
+                q2->inevent1 = event2;
+                q2->inevent2 = "";
+                q2->op = "true";
+                q2->assigned = false;
+                q2->currentHost.Set("0.0.0.0");
+                q2->parent_output = parent_output;
+                q2->window = Seconds(150000000000000000);
+                q2->isFinalWithinNode = true;
+                Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+                c2->var_name = "percentage";
+                c2->numberValue = 25;
+                c2->type = LTCONSTRAINT;
+                q2->constraints.emplace_back(c2);
+                Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
+                in_seconds += 1;
             }
         }
     }
@@ -638,7 +621,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
             if(counter < numCepEvents)
             {
-                Simulator::Schedule (NanoSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, q);
+                Simulator::Schedule (MilliSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, q);
             }
         }
             

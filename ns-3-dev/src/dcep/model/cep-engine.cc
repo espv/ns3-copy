@@ -99,9 +99,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             if (e->event_class != INTERMEDIATE_EVENT) {
                 ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
                 Ptr<Node> node = GetObject<Dcep>()->GetNode();
-                if (node->GetId() == 2 && e->type == "C") {
-                    std::cout << std::endl;
-                }
                 ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
                 ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             } else {
@@ -203,7 +200,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo->timestamps[0]).GetMicroSeconds());
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds());
+        NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
     }
     
     void
@@ -370,7 +367,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
     {
-        //std::cout << "Received event of type " << e->type << std::endl;
         auto cep = GetObject<CEPEngine>();
 
         std::vector<Ptr<CepOperator>> ops;
@@ -380,7 +376,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto node = GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
 
-        //ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
         CepOperatorProcessCepEvent(e, ops, cep, producer);
     }
 
@@ -778,8 +773,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
-        static int cnt = 0;
-        std::cout << "OrOperator::Evaluate cnt " << cnt++ << std::endl;
         /* everything is a match*/
         returned.push_back(e);
         // Here we insert the incoming event into the sequence
@@ -976,7 +969,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (index >= events.size()) {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
-            std::cout << "Node " << GetObject<Dcep>()->GetNode()->GetId() << ", Thread " << ee->currentlyExecutingThread->name << "-" << ee->currentlyExecutingThread->m_pid << ": AddAttributesToNewEvent 2/2" << std::endl;
             if (complex_event->event_class == INTERMEDIATE_EVENT) {
                 complex_event->pkt = Create<Packet>();
                 Ptr<CEPEngine> cepEngine = GetObject<CEPEngine>();
@@ -1001,7 +993,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             complex_event->numberValues[key] = val;
         }
-        std::cout << "Node " << GetObject<Dcep>()->GetNode()->GetId() << ", Thread " << ee->currentlyExecutingThread->name << "-" << ee->currentlyExecutingThread->m_pid << ": AddAttributesToNewEvent 1/2" << std::endl;
         if (complex_event->event_class == INTERMEDIATE_EVENT) {
             AddAttributesToNewEvent(q, events, complex_event, op, index+1);
         } else {
@@ -1183,7 +1174,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         message->stringValues = this->stringValues;
         message->numberValues = this->numberValues;
         message->timestamp = this->timestamp;
-        NS_LOG_INFO(Simulator::Now() << " serialized type " << message->type);
         
         return message;
        

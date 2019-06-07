@@ -74,7 +74,8 @@ namespace ns3
         //NS_LOG_INFO("checking entry " << rentry.destAddr);
 
         if (rentry.destAddr == GetObject<Communication>()->GetLocalAddress()) {
-            NS_LOG_INFO("DESTINATION IS LOCAL NODE, SOMEONE IS SCRUING UP! ABORTING...");
+            //NS_LOG_INFO("DESTINATION IS LOCAL NODE, SOMEONE IS SCRUING UP! ABORTING...");
+            NS_LOG_INFO(Simulator::Now() << " Destination is local node");
             //NS_FATAL_ERROR_NO_MSG ();
             rentry.nextAddr = GetObject<Communication>()->GetLocalAddress();
             return -1;

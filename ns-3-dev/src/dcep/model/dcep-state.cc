@@ -76,7 +76,6 @@ namespace ns3
     DcepState::HandlerLocalPlacement(std::string eType)
     {
         OperatorState ostate = GetState(eType);
-        std::cout << "HandlerLocalPlacement" << std::endl;
         if (ostate == ACTIVE)
             return;
         if(ostate == UNDEFINED)
