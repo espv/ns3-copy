@@ -38,8 +38,8 @@ threads-cepops FIFO -1 cepqueries
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 128 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 256 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 3 cpu3 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
@@ -164,7 +164,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x PROCESS 5000 0  # 6
+x PROCESS 1500 0  # 6
 x CALL check-constraints
 0 STOP
 
@@ -208,7 +208,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
-x PROCESS 11000 0 # 1
+#x PROCESS 5000 0 # 1
 x CALL process_received_packet  # This ends with handle-cepops trigger being put into the packet.
 # Now we enqueue the packet as many times as there are threads to process the event.
 # Each packet will cause a trigger.
@@ -225,7 +225,7 @@ event-thread-semdown-loc SEMDOWN packet-threads-SEM global
 x SEMDOWN packet-threads-SEM global
 x SEMDOWN packet-threads-SEM global
 # Now, the results have been collected and we send them to any subscribers
-x PROCESS 5000 0
+#x PROCESS 5000 0
 finished-processing-loc CALL send-packets
 0 STOP
 

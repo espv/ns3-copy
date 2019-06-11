@@ -185,7 +185,7 @@ NS_LOG_COMPONENT_DEFINE("Communication");
 
         Ptr<ExecEnv> ee = disnode->GetObject<ExecEnv>();
         //p->m_executionInfo->timestamps.emplace_back(Simulator::Now());
-        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
+        //ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
         auto contentType = dcepHeader.GetContentType();
         if (contentType == EVENT) {
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;

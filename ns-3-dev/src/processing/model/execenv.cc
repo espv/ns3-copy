@@ -119,7 +119,7 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
 				}
 			}
 
-			packet->m_executionInfo->timestamps.push_back(Simulator::Now());
+			//packet->m_executionInfo->timestamps.push_back(Simulator::Now());
 
 			Simulator::ScheduleNow(
 					&InterruptController::IssueInterruptWithService,
@@ -131,7 +131,7 @@ AdhocWifiMac::Receive (Ptr<Packet> packet, const WifiMacHeader *hdr)
 					std::map<std::string, Ptr<StateVariableQueue> >());
 			return;
 		} else
-			packet->m_executionInfo->timestamps.push_back(Simulator::Now());
+			//packet->m_executionInfo->timestamps.push_back(Simulator::Now());
 	}*/
 
 

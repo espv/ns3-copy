@@ -201,6 +201,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo->timestamps[0]).GetMicroSeconds());
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo = Create<ExecutionInfo>();
     }
     
     void
