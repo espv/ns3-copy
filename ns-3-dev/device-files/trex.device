@@ -38,14 +38,7 @@ threads-cepops FIFO -1 cepqueries
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 128 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 256 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 3 cpu3 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 3 cpu4 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 3 cpu5 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-#PEU 3 cpu6 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
 SYNCH
 # name type arguments
