@@ -108,6 +108,7 @@ public:
 
 	bool HandleEndEvent(ExecutionEvent* e);
 	bool HandleProcessingEvent(ExecutionEvent* e);
+    bool HandleFsmEvent(ExecutionEvent* e);
 	bool HandleExecuteEvent(ExecutionEvent* e);
 	bool HandleQueueEvent(ExecutionEvent* e);
 	bool HandleCopyQueueEvent(ExecutionEvent* e);

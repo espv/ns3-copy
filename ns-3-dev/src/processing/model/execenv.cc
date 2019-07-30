@@ -1514,6 +1514,12 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 		}
 	}
 
+	if (tokens[1] == "EXECUTEFSM") {
+	    auto e = new ExecuteFsmEvent(tokens[2]);
+        // Insert the event into the current program
+        currentProgram->events.push_back(e);
+	}
+
 	if (tokens[1] == "CALL" || tokens[1] == "LOOP") {
 		/* Here, we have one service calling another. We create
 		 * an ExecutionEvent, where the service is inserted

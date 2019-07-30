@@ -40,6 +40,10 @@ HARDWARE
 PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
+# New format: MEMBUS||PEU [low frequency] [high frequency] [CPU freq scaling steps] [Low CPU cycles threshold] [High CPU cycles threshold] [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
+#PEU 600 1200 2 100 500 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 1200 2 100 500 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+
 SYNCH
 # name type arguments
 # type 0 is a semaphore
@@ -50,6 +54,7 @@ complex-pkts-SEM 0 1
 CONDITIONS
 
 TRIGGERS
+# These triggers can be replaced by a handler that calls
 SERVICE handle-then-cepop handle-then-cepop
 SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
@@ -78,6 +83,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x EXECUTEFSM check-constraints
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x STATECOND constraint-processed read local 1
@@ -95,6 +101,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x EXECUTEFSM check-constraints
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x STATECOND constraint-processed read local 0
@@ -111,6 +118,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x EXECUTEFSM check-constraints
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 1
@@ -128,6 +136,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x EXECUTEFSM check-constraints
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 0
@@ -144,6 +153,7 @@ RESOURCES cycles normal
 FRACTION 100% 1 1
 
 0 START
+x EXECUTEFSM check-constraints
 x STATECOND constraints-done read local 1
 0 STOP
 

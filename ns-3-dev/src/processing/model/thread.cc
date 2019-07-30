@@ -129,6 +129,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 		case PROCESS:
 			// PROCESS: Passed to the HWModels for handling.
 			return HandleProcessingEvent(e);
+	    case FSM:
+	        return HandleFsmEvent(e);
 		case EXECUTE:
 			return HandleExecuteEvent(e);
 		case QUEUE:
@@ -534,6 +536,13 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 
 		return false;
 	}
+}
+
+bool Thread::HandleFsmEvent(ExecutionEvent* e) {
+    auto fe = dynamic_cast<ExecuteFsmEvent *>(e);
+
+
+    return true;
 }
 
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
