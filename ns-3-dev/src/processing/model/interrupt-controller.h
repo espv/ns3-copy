@@ -34,6 +34,7 @@ class InterruptRequest {
   std::map<std::string, Ptr<StateVariable> > localStateVariables;
   std::map<std::string, Ptr<StateVariableQueue> > localStateVariablesQueues;
   Ptr<ExecutionInfo> m_executionInfo;
+  Ptr<CepEvent> curCepEvent;
 
   // For interrupts without processing
   EventImpl *toCall;

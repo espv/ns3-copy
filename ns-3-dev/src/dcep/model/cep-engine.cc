@@ -200,7 +200,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo->timestamps[0]).GetMicroSeconds());
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
+        //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo = Create<ExecutionInfo>();
     }
     
@@ -211,6 +211,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto node = GetObject<Dcep>()->GetNode();
 
         if (e->event_class != INTERMEDIATE_EVENT) {
+            ee->currentlyExecutingThread->m_currentLocation->curCepEvent = e;
             //e->pkt->m_executionInfo->timestamps.emplace_back(Simulator::Now());
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
             e->timestamp = Simulator::Now();

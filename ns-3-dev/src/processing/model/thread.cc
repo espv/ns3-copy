@@ -844,6 +844,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 				newProgramLocation->localStateVariables = newPl->localStateVariables;
 				newProgramLocation->localStateVariableQueues = newPl->localStateVariableQueues;
 				newProgramLocation->tempvar = m_currentLocation->tempvar;
+				//newProgramLocation->curCepEvent = newPl->curCepEvent;
 				m_programStack.push(newProgramLocation);
 			} else
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,

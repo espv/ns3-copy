@@ -38,7 +38,7 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
             break;
         } case CHECKCONSTRAINTS: {
             std::cout << "CHECKCONSTRAINTS" << std::endl;
-            //dcep->GetObject<CEPEngine>()->CheckConstraints(ee->currentlyExecutingThread->m_currentLocation->curCepEvent);
+            dcep->GetObject<CEPEngine>()->CheckConstraints(ee->currentlyExecutingThread->m_currentLocation->curCepEvent);
             //auto c = ee->GetObject<Node>()->GetObject<Dcep>()->GetObject<CEPEngine>();
             //std::cout << c << std::endl;
             break;
@@ -47,10 +47,11 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
             break;
         } case SENDPACKET: {
             std::cout << "SENDPACKET" << std::endl;
-            //dcep->GetObject<Communication>()->send();
+            dcep->GetObject<Communication>()->send();
             break;
         } case FINISHEDPROCESSING: {
             std::cout << "FINISHEDPROCESSING" << std::endl;
+            dcep->GetObject<CEPEngine>()->FinishedProcessingEvent(ee->currentlyExecutingThread->m_currentLocation->curCepEvent);
             break;
         } default: {
             break;
