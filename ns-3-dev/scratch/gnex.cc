@@ -1,4 +1,4 @@
-#include "ns3/core-module.h"
+/*#include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/processing-module.h"
 
@@ -191,7 +191,7 @@ void GnexProtocolStack::NICReceive(Ptr<Packet> packet, Ptr<Node> node) {
 
         // Simulate interrupt instead?
         // execenv->hwModel->cpus[0]->taskScheduler->SynchRequest(0, 0, "dhd_dpc_sem", std::vector<uint32_t> ());
-    }
+    }*/
 
     /*
     Simulator::ScheduleNow(
@@ -200,7 +200,7 @@ void GnexProtocolStack::NICReceive(Ptr<Packet> packet, Ptr<Node> node) {
             "HIRQ-162");
             */
 
-    if (print)
+    /*if (print)
         std::cout << "NICReceive" << std::endl;
 
     // TODO: GetQueue(str) function
@@ -278,4 +278,6 @@ int main(int argc, char *argv[])
 
     Simulator::Destroy();
     return 0;
-}
+}*/
+
+int main() {}

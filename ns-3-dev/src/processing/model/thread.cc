@@ -129,7 +129,7 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 		case PROCESS:
 			// PROCESS: Passed to the HWModels for handling.
 			return HandleProcessingEvent(e);
-	    case FSM:
+	    case EXECUTEFSM:
 	        return HandleFsmEvent(e);
 		case EXECUTE:
 			return HandleExecuteEvent(e);
@@ -540,7 +540,8 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 
 bool Thread::HandleFsmEvent(ExecutionEvent* e) {
     auto fe = dynamic_cast<ExecuteFsmEvent *>(e);
-
+    auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+    execEnv->softwareExecutionModel->FsmTriggerCallback(execEnv, fe->fsm);
 
     return true;
 }

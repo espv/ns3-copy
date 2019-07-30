@@ -13,6 +13,7 @@
 
 #include <cstdlib>
 #include <ns3/point-to-point-module.h>
+#include "ns3/dcep.h"
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
@@ -37,7 +38,6 @@ using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("MANETSimulation");
 
-static TRexProtocolStack ps;
 
 int main(int argc, char** argv) {
 
@@ -63,6 +63,8 @@ int main(int argc, char** argv) {
     uint32_t numMobile = 0;
     uint32_t allNodes = numMobile+numStationary;
     uint64_t stateSize = 100;
+
+    Ptr<TRexProtocolStack> pss[allNodes];
 
     std::string format ("OMNet++");
     std::string experiment ("dcep-performance-test"); //the current study
@@ -185,12 +187,20 @@ int main(int argc, char** argv) {
     for (auto i = allNodesContainer.Begin (); i != allNodesContainer.End (); ++i)
     {
         Ptr<Node> node = *i;
-        eeh->Install(ps.deviceFile, node);
+        pss[node->GetId()] = CreateObject<TRexProtocolStack>();
+        eeh->Install(pss[node->GetId()], node);
     }
     // Espen
 
     ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
     Ipv4Address sinkAddress = wifiInterfaces.GetAddress (2);
+
+    // Espen
+    for (uint32_t i = 0; i < numStationary; i++)
+    {
+        pss[i]->AggregateObject(dcepApps.Get(i));
+    }
+    // Espen
 
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
     uint32_t random_number = x->GetInteger (1,99999);

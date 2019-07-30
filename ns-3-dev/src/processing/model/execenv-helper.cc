@@ -48,13 +48,13 @@ ExecEnvHelper::GetTypeId ()
 ExecEnvHelper::ExecEnvHelper() = default;
 
 void
-ExecEnvHelper::Install(std::string device, Ptr<Node> n)
+ExecEnvHelper::Install(Ptr<SoftwareExecutionModel> softwareExecutionModel, Ptr<Node> n)
 {
-  Install(std::move(device), NodeContainer(n));
+  Install(std::move(softwareExecutionModel), NodeContainer(n));
 }
 
 void
-ExecEnvHelper::Install(std::string device, NodeContainer nc)
+ExecEnvHelper::Install(Ptr<SoftwareExecutionModel> softwareExecutionModel, NodeContainer nc)
 {
   // Traverse all nodes in the container
   uint32_t nNodes = nc.GetN ();
@@ -66,9 +66,10 @@ ExecEnvHelper::Install(std::string device, NodeContainer nc)
       Ptr<ExecEnv> newEE = CreateObject<ExecEnv> ();
 
       // Aggregate execenv to the node
-      p->AggregateObject(newEE);
+      newEE->AggregateObject(p);
+      newEE->softwareExecutionModel = softwareExecutionModel;
 
-      newEE->Initialize(device);
+      newEE->Initialize(softwareExecutionModel->deviceFile);
     }
 }
 

@@ -99,7 +99,7 @@ enum ExecutionEventType {
   END,
   DEBUG,
   MEASURE,
-  FSM,
+  EXECUTEFSM,
   LASTTYPE,
 };
 

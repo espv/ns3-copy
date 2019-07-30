@@ -25,6 +25,8 @@ def build(bld):
         # Espen
         'model/telosb.cc',
         'model/executioninfo.cc',
+        'model/trex.cc',
+        'model/software-execution-model.cc',
 
         ]
 
@@ -54,6 +56,7 @@ def build(bld):
         'model/executioninfo.h',
         'model/trex.h',
         'model/siddhi.h',
+        'model/software-execution-model.h',
 
     ]
 

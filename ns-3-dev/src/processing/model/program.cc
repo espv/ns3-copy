@@ -344,7 +344,7 @@ SchedulerExecutionEvent::~SchedulerExecutionEvent() = default;
 
 ExecuteFsmEvent::ExecuteFsmEvent(std::string fsm)
 {
-    ExecutionEvent::type = FSM;
+    ExecutionEvent::type = EXECUTEFSM;
     this->fsm = fsm;
 }
 ExecuteFsmEvent::~ExecuteFsmEvent() = default;
