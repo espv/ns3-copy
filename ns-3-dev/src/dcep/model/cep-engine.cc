@@ -111,7 +111,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         } else {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
         }
-        //e->pkt->m_executionInfo->executedByExecEnv = false;
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, values);
     }
@@ -138,7 +137,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         } else {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
         }
-        //e->pkt->m_executionInfo->executedByExecEnv = false;
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckNumberConstraints, this, e, constraints, cep, producer, values, stringValues);
     }
@@ -588,7 +586,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
         }
 
-        //newEvent2->pkt->m_executionInfo->executedByExecEnv = false;
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "handle-and-cepop", &AndOperator::DoEvaluate, this, newEvent2, returned, events1, q, p, ops, cep);
     }
@@ -870,7 +867,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             complex_event->numberValues[key] = val;
         }
-        //complex_event->pkt->m_executionInfo->executedByExecEnv = false;
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "assign-attributes-to-complex-event", &Producer::AddAttributesToNewEvent, this, q, events, complex_event, op, index+1);
     }
