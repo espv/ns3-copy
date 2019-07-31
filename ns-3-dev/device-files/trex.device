@@ -59,7 +59,6 @@ SERVICE handle-then-cepop handle-then-cepop
 #SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
 LOC within-send-packet send-packet
-LOC call-to-handle-then-cepop handle-cepops
 LOC finished-processing-loc finished-processing
 LOC check-constraints-loc check-constraints
 

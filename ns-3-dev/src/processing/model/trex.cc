@@ -38,11 +38,22 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
             std::cout << "HANDLETHENCEPOP" << std::endl;
             break;
         } case HANDLECEPOP: {
-            dcep->GetObject<CEPEngine>()->
+            auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
+            if (evs == ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.end()) {
+                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables["DCEP-Sim"] = new DcepSimExecutionVariables();
+                evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
+            }
+            auto devs = (DcepSimExecutionVariables *)evs->second;
+
+            dcep->GetObject<CEPEngine>()->GetObject<Detector>()->CepOperatorProcessCepEvent(
+                    ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent,
+                    devs->cepOperatorProcessCepEvent_ops,
+                    devs->cepOperatorProcessCepEvent_cep,
+                    devs->cepOperatorProcessCepEvent_producer);
             break;
         } case CHECKCONSTRAINTS: {
             std::cout << "CHECKCONSTRAINTS" << std::endl;
-            dcep->GetObject<CEPEngine>()->CheckConstraints(ee->currentlyExecutingThread->m_currentLocation->curCepEvent);
+            dcep->GetObject<CEPEngine>()->CheckConstraints(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent);
             //auto c = ee->GetObject<Node>()->GetObject<Dcep>()->GetObject<CEPEngine>();
             //std::cout << c << std::endl;
             break;
@@ -55,7 +66,7 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
             break;
         } case FINISHEDPROCESSING: {
             std::cout << "FINISHEDPROCESSING" << std::endl;
-            dcep->GetObject<CEPEngine>()->FinishedProcessingEvent(ee->currentlyExecutingThread->m_currentLocation->curCepEvent);
+            dcep->GetObject<CEPEngine>()->FinishedProcessingEvent(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent);
             break;
         } default: {
             break;
