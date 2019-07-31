@@ -97,7 +97,7 @@ InterruptController::IssueInterruptWithServiceOnCPU(int cpu, Ptr<SEM> intSem, Pt
     ir.localStateVariables = programLoc->localStateVariables;
     ir.localStateVariablesQueues = programLoc->localStateVariableQueues;
     ir.m_executionInfo = programLoc->m_executionInfo;
-    //ir.curCepEvent = programLoc->curCepEvent;
+    ir.curCepEvent = programLoc->curCepEvent;
 
     /* If no interrupt is currently handled,
      * we issue an interrupt to the CPU.

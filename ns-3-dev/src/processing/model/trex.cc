@@ -23,6 +23,7 @@ TRexProtocolStack::TRexProtocolStack() {
     deviceFile = "device-files/trex.device";  // Required if we use gdb
 
     fsms["handle-then-cepop"] = HANDLETHENCEPOP;
+    fsms["handle-cepop"] = HANDLECEPOP;
     fsms["check-constraints"] = CHECKCONSTRAINTS;
     fsms["assign-attributes"] = ASSIGNATTRIBUTES;
     fsms["send-packet"] = SENDPACKET;
@@ -35,6 +36,9 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
     switch (enum_fsm) {
         case HANDLETHENCEPOP: {
             std::cout << "HANDLETHENCEPOP" << std::endl;
+            break;
+        } case HANDLECEPOP: {
+            dcep->GetObject<CEPEngine>()->
             break;
         } case CHECKCONSTRAINTS: {
             std::cout << "CHECKCONSTRAINTS" << std::endl;

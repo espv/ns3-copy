@@ -56,11 +56,12 @@ CONDITIONS
 TRIGGERS
 # These triggers can be replaced by a handler that calls
 SERVICE handle-then-cepop handle-then-cepop
-SERVICE check-constraints check-constraints
+#SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
 LOC within-send-packet send-packet
 LOC call-to-handle-then-cepop handle-cepops
 LOC finished-processing-loc finished-processing
+LOC check-constraints-loc check-constraints
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -87,8 +88,7 @@ x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x STATECOND constraint-processed read local 1
 #x PROCESS 0 0  # 5
-#x EXECUTEFSM check-constraints
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -104,8 +104,7 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x STATECOND constraint-processed read local 0
-#x EXECUTEFSM check-constraints
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -122,8 +121,7 @@ x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 1
 x PROCESS 1000 0  # 5
-#x EXECUTEFSM check-constraints
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -139,8 +137,7 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 0
-#x EXECUTEFSM check-constraints
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -167,7 +164,7 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1500 0  # 6
-#x EXECUTEFSM check-constraints
+x EXECUTEFSM check-constraints
 x CALL check-constraints
 0 STOP
 
@@ -468,6 +465,7 @@ FRACTION 100% 1 1
 
 0 LOOPSTART     0 threads-cepops threads-cepops 0
 call-to-handle-then-cepop DEQUEUE CEPQUERYQUEUE 0 0
+x EXECUTEFSM handle-cepop
 x SEMUP threads-cepops-SEM global
 x CALL handle-then-cepop
 x SEMDOWN threads-cepops-SEM global

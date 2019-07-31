@@ -598,6 +598,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newProgramLocation->tempvar = m_programStack.top()->tempvar;
 		newProgramLocation->m_executionInfo = m_programStack.top()->m_executionInfo;
 		newProgramLocation->m_executionInfo->packet = m_programStack.top()->m_executionInfo->packet;
+		newProgramLocation->curCepEvent = m_programStack.top()->curCepEvent;
 
 		// Set up loop state if this is a loop statement
 		LoopCondition *lcPtr = ee->lc;
@@ -844,7 +845,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 				newProgramLocation->localStateVariables = newPl->localStateVariables;
 				newProgramLocation->localStateVariableQueues = newPl->localStateVariableQueues;
 				newProgramLocation->tempvar = m_currentLocation->tempvar;
-				//newProgramLocation->curCepEvent = newPl->curCepEvent;
+				newProgramLocation->curCepEvent = newPl->curCepEvent;
 				m_programStack.push(newProgramLocation);
 			} else
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,
