@@ -35,7 +35,6 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
     auto enum_fsm = fsms[fsm];
     switch (enum_fsm) {
         case HANDLETHENCEPOP: {
-            std::cout << "HANDLETHENCEPOP" << std::endl;
             break;
         } case HANDLECEPOP: {
             auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
@@ -52,20 +51,14 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
                     devs->cepOperatorProcessCepEvent_producer);
             break;
         } case CHECKCONSTRAINTS: {
-            std::cout << "CHECKCONSTRAINTS" << std::endl;
             dcep->GetObject<CEPEngine>()->CheckConstraints(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent);
-            //auto c = ee->GetObject<Node>()->GetObject<Dcep>()->GetObject<CEPEngine>();
-            //std::cout << c << std::endl;
             break;
         } case ASSIGNATTRIBUTES: {
-            std::cout << "ASSIGNATTRIBUTES" << std::endl;
             break;
         } case SENDPACKET: {
-            std::cout << "SENDPACKET" << std::endl;
             dcep->GetObject<Communication>()->send();
             break;
         } case FINISHEDPROCESSING: {
-            std::cout << "FINISHEDPROCESSING" << std::endl;
             dcep->GetObject<CEPEngine>()->FinishedProcessingEvent(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent);
             break;
         } default: {

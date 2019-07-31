@@ -39,6 +39,7 @@ HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
 # New format: MEMBUS||PEU [low frequency] [high frequency] [CPU freq scaling steps] [Low CPU cycles threshold] [High CPU cycles threshold] [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 #PEU 600 1200 2 100 500 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
