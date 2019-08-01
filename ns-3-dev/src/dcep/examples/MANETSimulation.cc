@@ -36,9 +36,8 @@ using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("MANETSimulation");
 
-static TRexProtocolStack ps;
-
 int main(int argc, char** argv) {
+    Ptr<TRexProtocolStack> ps = CreateObject<TRexProtocolStack>();
 
     // Real-world experiment limits bandwidth to 6mpbs by running "sudo wondershaper eth0 6000 6000" where 6000 kbps for up and download
     std::string phyMode ("OfdmRate6Mbps");
@@ -159,7 +158,7 @@ int main(int argc, char** argv) {
     for (auto i = allNodesContainer.Begin (); i != allNodesContainer.End (); ++i)
     {
         Ptr<Node> node = *i;
-        eeh->Install(ps.deviceFile, node);
+        eeh->Install(ps, node);
     }
     // Espen
 

@@ -23,7 +23,7 @@ static int pps = 1;
 static bool print = 1;
 static std::string deviceFile = "device-files/gnex-min.device";
 
-class GnexProtocolStack {
+class GnexProtocolStack : public SoftwareExecutionModel {
 public:
     void DriverTransmit(Ptr<Packet> p, Ptr<Node> n);
     void DriverReceive(Ptr<Packet> p, Ptr<Node> n);
@@ -263,10 +263,10 @@ int main(int argc, char *argv[])
             "cacheLineSize", UintegerValue(64), "tracingOverhead",
             UintegerValue(289));
 
-    eeh->Install(deviceFile, c.Get(0));
-
     Ptr<ExecEnv> ee = c.Get(0)->GetObject<ExecEnv>();
     GnexProtocolStack *gnexProtocolStack = new GnexProtocolStack();
+    gnexProtocolStack->deviceFile = deviceFile;
+    eeh->Install(gnexProtocolStack, c.Get(0));
 
     gnexProtocolStack->GenerateTraffic(c.Get(0), 100);
 

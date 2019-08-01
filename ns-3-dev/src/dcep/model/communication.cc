@@ -188,8 +188,8 @@ NS_LOG_COMPONENT_DEFINE("Communication");
         //ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
         auto contentType = dcepHeader.GetContentType();
         if (contentType == EVENT) {
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "send-packet", &Communication::send, this);
+            //ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+            //ee->Proceed(1, ee->currentlyExecutingThread, "send-packet", &Communication::send, this);
             //ee->queues["packets-to-be-sent"]->Enqueue(p);
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet = p;
             ee->queues["packets-to-be-sent"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);

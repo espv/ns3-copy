@@ -27,8 +27,10 @@ using namespace ns3;
 
 class TelosB;
 
-class ProtocolStack {
+class ProtocolStack : public SoftwareExecutionModel {
 public:
+    ProtocolStack();
+
     void GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, TelosB *m2, TelosB *m3);
     void GenerateTraffic2(Ptr<Node> n, uint32_t pktSize, Time time, TelosB *m1, TelosB *m2, TelosB *m3);
     void GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *m1, TelosB *m2, TelosB *m3);
@@ -37,7 +39,6 @@ public:
     double duration = 10;
     int pps = 70;
     uint32_t packet_size = 125;
-    std::string deviceFile = "device-files/telosb-min.device";  // Required if we use gdb
     std::string trace_fn = "trace-inputs/packets-received.txt";
     std::string kbps = "65kbps";
 
@@ -91,7 +92,7 @@ private:
     int packets_in_send_queue = 0;
     bool receivingPacket = false;
     std::vector<Ptr<Packet> > receive_queue;
-    ProtocolStack *ps;
+    Ptr<ProtocolStack> ps;
 
     Address *src;
     Address *dst;
@@ -109,7 +110,7 @@ public:
 
     TelosB() = default;
 
-    void Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevice> netDevice);
+    void Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetDevice> netDevice);
 
     // Models the radio's behavior before the packets are processed by the microcontroller.
     void ReceivePacket(Ptr<Packet> packet);

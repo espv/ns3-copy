@@ -43,7 +43,6 @@ public:
 	int currentEvent;
 	Ptr<Packet> curPkt;
 	Ptr<CepOperator> curCepQuery;
-	Ptr<CepEvent> curCepEvent;
   Ptr<ExecutionInfo> m_executionInfo = Create<ExecutionInfo>();
 	struct tempVar tempvar;
 
@@ -71,7 +70,6 @@ public:
 		curPkt = nullptr;
 		curIteration = 0;
 		curServedQueue = 0;
-		curCepEvent = nullptr;
 		curCepQuery = nullptr;
 		wasBlocked = 0;
 	}
@@ -108,6 +106,7 @@ public:
 
 	bool HandleEndEvent(ExecutionEvent* e);
 	bool HandleProcessingEvent(ExecutionEvent* e);
+    bool HandleFsmEvent(ExecutionEvent* e);
 	bool HandleExecuteEvent(ExecutionEvent* e);
 	bool HandleQueueEvent(ExecutionEvent* e);
 	bool HandleCopyQueueEvent(ExecutionEvent* e);

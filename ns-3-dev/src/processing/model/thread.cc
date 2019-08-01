@@ -129,6 +129,8 @@ bool Thread::HandleExecutionEvent(ExecutionEvent *e) {
 		case PROCESS:
 			// PROCESS: Passed to the HWModels for handling.
 			return HandleProcessingEvent(e);
+	    case EXECUTEFSM:
+	        return HandleFsmEvent(e);
 		case EXECUTE:
 			return HandleExecuteEvent(e);
 		case QUEUE:
@@ -536,6 +538,14 @@ bool Thread::HandleProcessingEvent(ExecutionEvent* e) {
 	}
 }
 
+bool Thread::HandleFsmEvent(ExecutionEvent* e) {
+    auto fe = dynamic_cast<ExecuteFsmEvent *>(e);
+    auto execEnv = peu->hwModel->node->GetObject<ExecEnv>();
+    execEnv->softwareExecutionModel->FsmTriggerCallback(execEnv, fe->fsm);
+
+    return true;
+}
+
 bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 	auto ee = dynamic_cast<ExecuteExecutionEvent *>(e);
 
@@ -588,6 +598,7 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 		newProgramLocation->tempvar = m_programStack.top()->tempvar;
 		newProgramLocation->m_executionInfo = m_programStack.top()->m_executionInfo;
 		newProgramLocation->m_executionInfo->packet = m_programStack.top()->m_executionInfo->packet;
+		newProgramLocation->m_executionInfo->curCepEvent = m_programStack.top()->m_executionInfo->curCepEvent;
 
 		// Set up loop state if this is a loop statement
 		LoopCondition *lcPtr = ee->lc;
@@ -794,7 +805,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
             //m_currentLocation->m_executionInfo->packet = m_currentLocation->curPkt;
             qe->queue->Enqueue(m_currentLocation->m_executionInfo);
         } else if (qe->isCepEventQueue) {
-            qe->cepEventQueue->push(m_currentLocation->curCepEvent);
+            qe->cepEventQueue->push(m_currentLocation->m_executionInfo->curCepEvent);
         } else if (qe->isCepQueryQueue) {
 			qe->cepQueryQueue->push(m_currentLocation->curCepQuery);
         } else {
@@ -834,6 +845,7 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
 				newProgramLocation->localStateVariables = newPl->localStateVariables;
 				newProgramLocation->localStateVariableQueues = newPl->localStateVariableQueues;
 				newProgramLocation->tempvar = m_currentLocation->tempvar;
+				newProgramLocation->m_executionInfo->curCepEvent = newPl->m_executionInfo->curCepEvent;
 				m_programStack.push(newProgramLocation);
 			} else
 				toExecute->peu->taskScheduler->Fork("", toExecute->rootProgram,
@@ -887,7 +899,7 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
      * Note that we resolved which sem to enqueue (which may be "0")
      * in the insertion above, so we don't need to resolve this again.
      */
-    m_currentLocation->curCepEvent = queueToServe->front();
+    m_currentLocation->m_executionInfo->curCepEvent = queueToServe->front();
     queueToServe->pop();
   } else {
     // Obtain queue from encapsulated loop if not defined in the event
@@ -899,7 +911,8 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
     //m_currentLocation->curPkt = queueToServe->Dequeue();
     auto ei = queueToServe->Dequeue();
     //m_currentLocation->curPkt = ei->packet;
-    m_currentLocation->m_executionInfo->packet = ei->packet;
+    //m_currentLocation->m_executionInfo->packet = ei->packet;
+    //m_currentLocation->m_executionInfo->curCepEvent = ei->curCepEvent;
     m_currentLocation->m_executionInfo = Create<ExecutionInfo>(ei);
 
     // We need call activate any prospective triggers on the queue
