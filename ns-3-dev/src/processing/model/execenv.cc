@@ -1517,6 +1517,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
 	if (tokens[1] == "EXECUTEFSM") {
 	    auto e = new ExecuteFsmEvent(tokens[2]);
+	    e->tokens = tokens;
+	    e->line = line;
+	    e->lineNr = lineNr;
         // Insert the event into the current program
         currentProgram->events.push_back(e);
 	}

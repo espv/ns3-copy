@@ -31,7 +31,7 @@ namespace ns3 {
 }
 
 void
-TelosB::Configure(Ptr<Node> node, ProtocolStack *ps, Ptr<CC2420InterfaceNetDevice> netDevice) {
+TelosB::Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetDevice> netDevice) {
     node->GetObject<ExecEnv>()->cpuScheduler->allowNestedInterrupts = true;
     this->node = node;
     this->number_forwarded_and_acked = 0;
@@ -260,7 +260,7 @@ void TelosB::finishedTransmitting(Ptr<Packet> packet) {
 
 void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote) {
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-  NS_LOG_INFO (Simulator::Now() << " " << id << ": SendPacket " << execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr);
+  //NS_LOG_INFO (Simulator::Now() << " " << id << ": SendPacket " << execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr);
 
   // Finish this, also change ReceivePacket to also accept acks
   if (!to_mote->radio.rxfifo_overflow) {
@@ -282,9 +282,9 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
     ps->firstNodeSending = true;
     ++ps->nr_packets_total;
     ++to_mote->radio.nr_send_recv;
-    execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.push_back(Simulator::Now());
+    //execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.push_back(Simulator::Now());
     Simulator::Schedule(radio.datarate.CalculateBytesTxTime(packet->GetSize () + 5/* 5 is preamble + SFD */) + MicroSeconds (192) /* 12 symbol lengths before sending packet */, &TelosB::ReceivePacket, to_mote, packet);
-    NS_LOG_INFO ("SendPacket, sending packet " << execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr);
+    //NS_LOG_INFO ("SendPacket, sending packet " << execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr);
   } else {
     NS_LOG_INFO ("SendPacket, failed to send because of RXFIFO overflow");
   }
@@ -385,8 +385,8 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
 void ProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *m1, TelosB *m2, TelosB *m3) {
   Ptr<ExecEnv> execenv = m1->GetNode()->GetObject<ExecEnv>();
   Ptr<Packet> packet = Create<Packet>(pktSize);
-  execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr = curSeqNr;
-  execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+  //execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr = curSeqNr;
+  //execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
 
   NS_LOG_INFO ("Generating packet " << curSeqNr);
 
@@ -417,4 +417,8 @@ void ProtocolStack::GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, T
  */
 void ProtocolStack::GenerateTraffic2(Ptr<Node> n, uint32_t pktSize, Time time, TelosB *m1, TelosB *m2, TelosB *m3) {
   Simulator::Schedule(time, &ProtocolStack::GenerateTraffic, this, n, pktSize, m1, m2, m3);
+}
+
+ProtocolStack::ProtocolStack() {
+  deviceFile = "device-files/telosb-min.device";  // Required if we use gdb
 }
