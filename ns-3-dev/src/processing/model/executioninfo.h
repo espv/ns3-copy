@@ -37,6 +37,10 @@ namespace ns3 {
 
     class ExecutionVariables {
     public:
+        ExecutionVariables() {
+            userDefinedVariables = new UserDefinedVariables();
+        }
+
         Ptr<Packet> packet;
         UserDefinedVariables *userDefinedVariables;
     };
