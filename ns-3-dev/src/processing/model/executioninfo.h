@@ -24,6 +24,34 @@ namespace ns3 {
         EventImpl *event;
     };
 
+    class UserDefinedVariables {
+
+    };
+
+    class DcepSimUserDefinedVariables : public UserDefinedVariables {
+        std::map<std::string,Ptr<CepEvent>> cepEvents;
+        std::map<std::string,Ptr<CepOperator>> cepOperators;
+    };
+
+    class ExecutionVariables {
+    public:
+        Ptr<Packet> packet;
+        UserDefinedVariables *userDefinedVariables;
+    };
+
+    class DcepSimExecutionVariables : public ExecutionVariables {
+    public:
+        DcepSimExecutionVariables() {
+            userDefinedVariables = new DcepSimUserDefinedVariables();
+        }
+
+        Ptr<CepEvent> curCepEvent;
+
+        std::vector<Ptr<CepOperator>> cepOperatorProcessCepEvent_ops;
+        Ptr<CEPEngine> cepOperatorProcessCepEvent_cep;
+        Ptr<Producer> cepOperatorProcessCepEvent_producer;
+    };
+
     class ExecutionInfo : public SimpleRefCount<ExecutionInfo> {
     public:
         ExecutionInfo();
