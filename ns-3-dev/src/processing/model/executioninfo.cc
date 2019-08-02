@@ -18,6 +18,7 @@ namespace ns3 {
 
     ns3::ExecutionInfo::ExecutionInfo(Ptr<ExecutionInfo> ei) {
         this->packet = ei->packet;
+        this->curCepEvent = ei->curCepEvent;
         this->executedByExecEnv = ei->executedByExecEnv;
         this->targets = ei->targets;
         this->timestamps = ei->timestamps;

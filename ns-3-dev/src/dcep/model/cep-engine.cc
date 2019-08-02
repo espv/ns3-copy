@@ -96,35 +96,23 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (values.begin() == values.end()) {
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-                Ptr<Node> node = GetObject<Dcep>()->GetNode();
-                ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::ProcessCepEvent, GetObject<Detector>(), e);
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
-            } else {
-                GetObject<Detector>()->ProcessCepEvent(e);
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             return;
         }
         auto k = values.begin()->first;
         values.erase(values.begin());
 
-        if (e->event_class != INTERMEDIATE_EVENT) {
-            // Constraint type is 1 (string)
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 1;
+        // Constraint type is 1 (string)
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 1;
 
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
-            if (constraints[k]) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
-            } else {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
-            }
-            //e->pkt->m_executionInfo->executedByExecEnv = false;
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, values);
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+        if (constraints[k]) {
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
         } else {
-            DoCheckStringConstraints(e, constraints, cep, producer, values);
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
         }
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+        ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, values);
     }
 
     void
@@ -133,34 +121,24 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (values.begin() == values.end()) {
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                //e->pkt->m_executionInfo->executedByExecEnv = false;
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-                ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, stringValues);
-            } else {
-                GetObject<Detector>()->ProcessCepEvent(e);
-            }
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+            ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, stringValues);
             return;
         }
         auto k = values.begin()->first;
         values.erase(values.begin());
 
-        if (e->event_class != INTERMEDIATE_EVENT) {
-            // Constraint type is 0 (number)
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
+        // Constraint type is 0 (number)
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
 
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
-            if (constraints[k]) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
-            } else {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
-            }
-            //e->pkt->m_executionInfo->executedByExecEnv = false;
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckNumberConstraints, this, e, constraints, cep, producer, values, stringValues);
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+        if (constraints[k]) {
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
         } else {
-            DoCheckNumberConstraints(e, constraints, cep, producer, values, stringValues);
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
         }
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+        ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckNumberConstraints, this, e, constraints, cep, producer, values, stringValues);
     }
 
     void
@@ -200,7 +178,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo->timestamps[0]).GetMicroSeconds());
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
+        //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo = Create<ExecutionInfo>();
     }
     
@@ -210,20 +188,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         auto node = GetObject<Dcep>()->GetNode();
 
-        if (e->event_class != INTERMEDIATE_EVENT) {
-            //e->pkt->m_executionInfo->timestamps.emplace_back(Simulator::Now());
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
-            e->timestamp = Simulator::Now();
-            //e->pkt->m_executionInfo->executedByExecEnv = false;
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::CheckConstraints, this, e);
-            //e->pkt->m_executionInfo->executedByExecEnv = false;
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "finished-processing", &CEPEngine::FinishedProcessingEvent, this, e);
-            ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
-        } else {
-            CheckConstraints(e);
-        }
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent = e;
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
+        e->timestamp = Simulator::Now();
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+        ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::CheckConstraints, this, e);
+        ee->ScheduleInterrupt(e->pkt, "HIRQ-1", Seconds(0));
     }
     
     
@@ -337,32 +307,32 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     Detector::CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer)
     {
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        cep = GetObject<CEPEngine>();
+        producer = GetObject<Producer>();
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent = e;
         e->pkt = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet;
         auto op = ee->currentlyExecutingThread->m_currentLocation->curCepQuery;
 
-        // The 'e->event_class != INTERMEDIATE_EVENT' part must happen before the evaluation of the operator, and
-        // the else part must happen afterward. Therefore, they are detached.
-        // Before the evaluation
-        if (e->event_class != INTERMEDIATE_EVENT) {
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::CepOperatorProcessCepEvent, this, e, ops, cep, producer);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 0;
-        }
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 0;
         if (!op->ExpectingCepEvent(e->type)) {
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
             return;
         }
 
         std::vector<Ptr<CepEvent> > returned;
 
-        op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
-        // After the evaluation
-        if (e->event_class == INTERMEDIATE_EVENT) {
-            CepOperatorProcessCepEvent(e, ops, cep, producer);
+        auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
+        if (evs == ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.end()) {
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables["DCEP-Sim"] = new DcepSimExecutionVariables();
+            evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
         }
+        auto devs = (DcepSimExecutionVariables *)evs->second;
+        devs->cepOperatorProcessCepEvent_cep = cep;
+        devs->cepOperatorProcessCepEvent_ops = ops;
+        devs->cepOperatorProcessCepEvent_producer = producer;
+
+        op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
     }
     
     void
@@ -588,16 +558,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto ee = node->GetObject<ExecEnv>();
         if (events1->empty()) {
             // No sequences left
-            if (newEvent2->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-                //newEvent2->pkt->m_executionInfo->executedByExecEnv = false;
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-                ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::CepOperatorProcessCepEvent,
-                            cep->GetObject<Detector>(), newEvent2, ops, cep, p);
-            } else {
-                cep->GetObject<Detector>()->CepOperatorProcessCepEvent(newEvent2, ops, cep, p);
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
             delete events1;
             return false;
         }
@@ -624,7 +586,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
         }
 
-        //newEvent2->pkt->m_executionInfo->executedByExecEnv = false;
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "handle-and-cepop", &AndOperator::DoEvaluate, this, newEvent2, returned, events1, q, p, ops, cep);
     }
@@ -639,39 +600,28 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         auto ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
 
-        if (e->event_class != INTERMEDIATE_EVENT)
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 1;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 1;
 
         if (!events1->empty() && !events2->empty())
         {
             Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
             auto ee = node->GetObject<ExecEnv>();
-            if (e->event_class != INTERMEDIATE_EVENT)
-                //e->pkt->m_executionInfo->executedByExecEnv = false;
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             if (e->type == events1->front()->type)
             {
                 delete events1;  // Not going to use events1
-                if (e->event_class != INTERMEDIATE_EVENT)
-                    ee->Proceed(1, ee->currentlyExecutingThread, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, returned, events2, q, p, ops, cep);
-                else
-                    DoEvaluate(e, returned, events2, q, p, ops, cep);
+                ee->Proceed(1, ee->currentlyExecutingThread, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, returned, events2, q, p, ops, cep);
             }
             else
             {
                 delete events2;  // Not going to use events2
-                if (e->event_class != INTERMEDIATE_EVENT)
-                    ee->Proceed(1, ee->currentlyExecutingThread, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
-                else
-                    DoEvaluate(e, returned, events1, q, p, ops, cep);
+                ee->Proceed(1, ee->currentlyExecutingThread, "handle-and-cepop", &AndOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
             }
             
         } else {
             // No sequences left
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         }
         return false;
     }
@@ -682,15 +632,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto ee = node->GetObject<ExecEnv>();
         if (events1->empty()) {
             // No sequences left
-            if (newEvent2->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-                //newEvent2->pkt->m_executionInfo->executedByExecEnv = false;
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-                ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), newEvent2, ops, cep, p);
-            } else {
-                cep->GetObject<Detector>()->CepOperatorProcessCepEvent(newEvent2, ops, cep, p);
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
             delete events1;
             return false;
         }
@@ -708,18 +651,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             returned.push_back(newEvent2);
 
             p->HandleNewCepEvent(q, returned, this);
-            if (newEvent2->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 1;
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            }
-        } else if (newEvent2->event_class != INTERMEDIATE_EVENT) {
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+        } else {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-            //newEvent2->pkt->m_executionInfo->executedByExecEnv = false;
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "handle-then-cepop", &ThenOperator::DoEvaluate, this, newEvent2, returned, events1, q, p, ops, cep);
-        } else {
-            DoEvaluate(newEvent2, returned, events1, q, p, ops, cep);
         }
     }
 
@@ -727,8 +665,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
         Ptr<ExecEnv> ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-        if (e->event_class != INTERMEDIATE_EVENT)
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
@@ -737,9 +674,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
 
         if (!constraintsFulfilled) {
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
             return false;
         }
 
@@ -752,19 +687,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             delete events2;  // Not going to use events2
             Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                //e->pkt->m_executionInfo->executedByExecEnv = false;
-                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-                ee->Proceed(1, ee->currentlyExecutingThread, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
-            } else {
-                DoEvaluate(e, returned, events1, q, p, ops, cep);
-            }
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+            ee->Proceed(1, ee->currentlyExecutingThread, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
         } else {
             // No sequences left
-            if (e->event_class != INTERMEDIATE_EVENT) {
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
-            }
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
             delete events1;
             delete events2;
         }
@@ -779,10 +707,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         // Here we insert the incoming event into the sequence
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        if (e->event_class != INTERMEDIATE_EVENT) {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-        }
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
+        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
         bool constraintsFulfilled = true;
         for (auto c : q->constraints)
         {
@@ -791,19 +717,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
         if (constraintsFulfilled) {
             p->HandleNewCepEvent(q, returned, this);
-            if (e->event_class != INTERMEDIATE_EVENT)
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
         } else {
-            if (e->event_class != INTERMEDIATE_EVENT)
-                ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
-        }
-        if (e->event_class != INTERMEDIATE_EVENT) {
-            //e->pkt->m_executionInfo->executedByExecEnv = false;
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "handle-cepops", &Detector::CepOperatorProcessCepEvent, cep->GetObject<Detector>(), e,
-                        ops, cep, p);
-        } else {
-            cep->GetObject<Detector>()->CepOperatorProcessCepEvent(e, ops, cep, p);
+            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
         }
         return constraintsFulfilled;
     }
@@ -876,39 +792,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             NS_LOG_INFO(Simulator::Now() << " BufferManager::put_event: Unknown event type");
         }
-
-        /*
-        if(events1.empty() && events2.empty())
-        {
-            events1.push_back(e);
-        }
-        else if ((events1.empty()) && (!events2.empty()))
-        {
-            if(events2.front()->type == e->type)
-            {
-                events2.push_back(e);
-            }
-            else
-            {
-                events1.push_back(e);
-            }
-        }
-        else if ((!events1.empty()) && (events2.empty()))
-        {
-            if(events1.front()->type == e->type)
-            {
-                events1.push_back(e);
-            }
-            else
-            {
-                events2.push_back(e);
-            }
-        }
-        else
-        {
-            NS_LOG_INFO("unknown type");
-        }*/
-
     }
     
     void
@@ -935,10 +818,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                             events2.erase(it);
                             break;
                         }
-                    }
-
-                    if (event->event_class == INTERMEDIATE_EVENT) {
-                        event->generatedByOp->Consume(event->prevEvents);
                     }
                 }
                 break;
@@ -970,17 +849,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (index >= events.size()) {
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
-            if (complex_event->event_class == INTERMEDIATE_EVENT) {
-                complex_event->pkt = Create<Packet>();
-                Ptr<CEPEngine> cepEngine = GetObject<CEPEngine>();
-                cepEngine->ProcessCepEvent(complex_event);
-            } else {
-                // Here we consume the previous events
-                ee->queues["complex-pkts"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);
-                Ptr<Forwarder> forwarder = GetObject<Forwarder>();
-                forwarder->ForwardNewCepEvent(complex_event);
-                op->Consume(events);
-            }
+            // Here we consume the previous events
+            ee->queues["complex-pkts"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);
+            Ptr<Forwarder> forwarder = GetObject<Forwarder>();
+            forwarder->ForwardNewCepEvent(complex_event);
+            op->Consume(events);
             return;
         }
 
@@ -994,13 +867,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         {
             complex_event->numberValues[key] = val;
         }
-        if (complex_event->event_class == INTERMEDIATE_EVENT) {
-            AddAttributesToNewEvent(q, events, complex_event, op, index+1);
-        } else {
-            //complex_event->pkt->m_executionInfo->executedByExecEnv = false;
-            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
-            ee->Proceed(1, ee->currentlyExecutingThread, "assign-attributes-to-complex-event", &Producer::AddAttributesToNewEvent, this, q, events, complex_event, op, index+1);
-        }
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
+        ee->Proceed(1, ee->currentlyExecutingThread, "assign-attributes-to-complex-event", &Producer::AddAttributesToNewEvent, this, q, events, complex_event, op, index+1);
     }
     
     void
@@ -1033,10 +901,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             {
                 new_event->event_class = FINAL_EVENT;
             }
-            else if (q->isFinalWithinNode)
-            {
-                new_event->event_class = INTERMEDIATE_EVENT;
-            } else
+            else
             {
                 new_event->event_class = COMPOSITE_EVENT;
             }
@@ -1045,17 +910,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
             Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
 
-            if (new_event->event_class == INTERMEDIATE_EVENT) {
-                AddAttributesToNewEvent(q, events, new_event, op, 0);
-            } else {
-                //if (!events.empty()) {
-                    //ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
-                //}
-                AddAttributesToNewEvent(q, events, new_event, op, 0);
-                //new_event->pkt->m_executionInfo->executedByExecEnv = false;
-                //ee->Proceed(1, new_event->pkt, "assign-attributes-to-complex-event",
-                //            &Producer::AddAttributesToNewEvent, this, q, events, new_event, op);
-            }
+            AddAttributesToNewEvent(q, events, new_event, op, 0);
         }
     }
 

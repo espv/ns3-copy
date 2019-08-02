@@ -99,6 +99,7 @@ enum ExecutionEventType {
   END,
   DEBUG,
   MEASURE,
+  EXECUTEFSM,
   LASTTYPE,
 };
 
@@ -431,6 +432,16 @@ public:
 };
 
 class SEM;
+
+class ExecuteFsmEvent : public ExecutionEvent {
+public:
+    ExecuteFsmEvent(std::string fsm);
+    virtual ~ExecuteFsmEvent();
+
+    std::string fsm;
+
+    friend std::ostream& operator<<(std::ostream& out, ExecuteFsmEvent& event);
+};
 
 class ExecuteExecutionEvent : public ExecutionEvent {
 public:

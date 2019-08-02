@@ -63,6 +63,7 @@ ExecEnv::ExecEnv() :
         dummyProgramLoc->localStateVariableQueues = std::map<std::string, Ptr<StateVariableQueue> >();
         dummyProgramLoc->m_executionInfo = currentlyExecutingThread->m_currentLocation->m_executionInfo;
         dummyProgramLoc->m_executionInfo->packet = packet;
+        dummyProgramLoc->m_executionInfo->curCepEvent = currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent;
 
         static int cpu = 0;
         Simulator::Schedule(time,
@@ -1512,6 +1513,15 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				currentProgram = newProgram;
 			}
 		}
+	}
+
+	if (tokens[1] == "EXECUTEFSM") {
+	    auto e = new ExecuteFsmEvent(tokens[2]);
+	    e->tokens = tokens;
+	    e->line = line;
+	    e->lineNr = lineNr;
+        // Insert the event into the current program
+        currentProgram->events.push_back(e);
 	}
 
 	if (tokens[1] == "CALL" || tokens[1] == "LOOP") {

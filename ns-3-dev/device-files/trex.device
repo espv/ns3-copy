@@ -39,6 +39,11 @@ HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+
+# New format: MEMBUS||PEU [low frequency] [high frequency] [CPU freq scaling steps] [Low CPU cycles threshold] [High CPU cycles threshold] [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
+#PEU 600 1200 2 100 500 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 1200 2 100 500 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
 SYNCH
 # name type arguments
@@ -50,12 +55,10 @@ complex-pkts-SEM 0 1
 CONDITIONS
 
 TRIGGERS
+# These triggers can be replaced by a handler that calls
 SERVICE handle-then-cepop handle-then-cepop
-SERVICE check-constraints check-constraints
 SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
-LOC within-send-packet send-packet
-LOC call-to-handle-then-cepop handle-cepops
-LOC finished-processing-loc finished-processing
+LOC check-constraints-loc check-constraints
 
 # Entrypoint function for the PEU defined above
 SIGSTART
@@ -82,7 +85,7 @@ x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x STATECOND constraint-processed read local 1
 #x PROCESS 0 0  # 5
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -98,7 +101,7 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 1
 x STATECOND constraint-processed read local 0
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -115,7 +118,7 @@ x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 1
 x PROCESS 1000 0  # 5
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -131,7 +134,7 @@ FRACTION 100% 1 1
 x STATECOND constraints-done read local 0
 x STATECOND constraint-type read local 0
 x STATECOND constraint-processed read local 0
-x CALL check-constraints
+check-constraints-loc CALL check-constraints
 0 STOP
 
 SIGEND
@@ -158,6 +161,7 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1500 0  # 6
+x EXECUTEFSM check-constraints
 x CALL check-constraints
 0 STOP
 
@@ -186,6 +190,7 @@ FRACTION 100% 1 1
 
 0 START
 x QUEUECOND packets-to-be-sent packets-to-be-sent notempty
+x EXECUTEFSM send-packet
 x DEQUEUE PKTQUEUE 0 packets-to-be-sent
 within-send-packet PROCESS 5400 0
 x CALL send-packets
@@ -211,15 +216,19 @@ x ENQUEUE PKTQUEUE 0 rcvd-pkts-t2
 #x DUPLICATEPKT
 x ENQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x COPYQUEUE CEPQUERYQUEUE all-cepops threads-cepops
+
 x TTWAKEUP event_thread1
 x TTWAKEUP event_thread2
 x TTWAKEUP event_thread3
-event-thread-semdown-loc SEMDOWN packet-threads-SEM global
+
 x SEMDOWN packet-threads-SEM global
 x SEMDOWN packet-threads-SEM global
+x SEMDOWN packet-threads-SEM global
+
 # Now, the results have been collected and we send them to any subscribers
 #x PROCESS 5000 0
-finished-processing-loc CALL send-packets
+x EXECUTEFSM finished-processing
+x CALL send-packets
 0 STOP
 
 SIGEND
@@ -453,6 +462,7 @@ FRACTION 100% 1 1
 
 0 LOOPSTART     0 threads-cepops threads-cepops 0
 call-to-handle-then-cepop DEQUEUE CEPQUERYQUEUE 0 0
+x EXECUTEFSM handle-cepop
 x SEMUP threads-cepops-SEM global
 x CALL handle-then-cepop
 x SEMDOWN threads-cepops-SEM global

@@ -10,6 +10,8 @@
 #include "ns3/nstime.h"
 #include "ns3/packet.h"
 
+#include "ns3/cep-engine.h"
+
 #include <vector>
 #include <map>
 
@@ -64,10 +66,13 @@ namespace ns3 {
          */
         bool executedByExecEnv;
         Ptr<Packet> packet;
+        Ptr<CepEvent> curCepEvent;
 
         // Name and arguments for target service
         std::string target;
         std::map<std::string, Ptr<EventWrapper> > targets;
+
+        std::map<std::string, ExecutionVariables *> executionVariables;
 
         // EXPERIMENTATION:
         std::vector <Time> timestamps;

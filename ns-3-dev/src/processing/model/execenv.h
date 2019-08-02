@@ -19,6 +19,7 @@
 #include "ns3/packet.h"
 
 #include "executioninfo.h"
+#include "software-execution-model.h"
 
 #include "peu.h"
 #include "program.h"
@@ -37,6 +38,7 @@ namespace ns3 {
     class HWModel;
     class SEM;
     class ConditionFunctions;
+    class SoftwareExecutionModel;
 
     class ExecEnv : public Object
     {
@@ -73,6 +75,8 @@ namespace ns3 {
 
         // Holds global state variables
         std::map<std::string, uint32_t > globalStateVariables;
+
+        Ptr<SoftwareExecutionModel> softwareExecutionModel;
 
         // Holds all intra-node queues used during execution.
         std::map<std::string, Ptr<DropTailQueue<ExecutionInfo> > > queues;

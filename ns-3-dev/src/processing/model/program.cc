@@ -342,6 +342,14 @@ SchedulerExecutionEvent::SchedulerExecutionEvent(int t, std::vector<uint32_t> ar
 SchedulerExecutionEvent::~SchedulerExecutionEvent() = default;
 
 
+ExecuteFsmEvent::ExecuteFsmEvent(std::string fsm)
+{
+    ExecutionEvent::type = EXECUTEFSM;
+    this->fsm = fsm;
+}
+ExecuteFsmEvent::~ExecuteFsmEvent() = default;
+
+
 ExecuteExecutionEvent::ExecuteExecutionEvent()
 {
   ExecutionEvent::type = EXECUTE;

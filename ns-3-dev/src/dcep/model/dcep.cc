@@ -152,7 +152,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         c_placement->configure();
         c_cepengine->Configure();
         datasource->Configure();
-        
+
         c_communication->setNode(GetNode());
         c_communication->setPort(m_cepPort);
         c_communication->SetAttribute("SinkAddress", Ipv4AddressValue (m_sinkAddress));

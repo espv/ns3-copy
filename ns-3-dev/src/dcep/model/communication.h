@@ -70,10 +70,11 @@ class Communication : public Object
         void ScheduleSend(Ptr<Packet> p, Ipv4Address addr);
         Ipv4Address GetLocalAddress();
         Ipv4Address GetSinkAddress();
+
+        void send(void);
     
     private:
-        
-        void send(void);
+
         Ptr<Queue<Packet>> m_sendQueue;
         EventId m_packetSendCepEvent;
         uint32_t backoffTime;

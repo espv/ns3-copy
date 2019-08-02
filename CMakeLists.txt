@@ -125,7 +125,8 @@ include_directories(ns-3-dev/src/wimax/helper)
 include_directories(ns-3-dev/src/wimax/model)
 include_directories(ns-3-dev/utils)
 
-add_executable(ns_3_extended_with_execution_environment
+add_executable(
+        ns_3_extended_with_execution_environment
         ns-3-dev/configure-waf-scripts/configure_debug_waf.sh
         ns-3-dev/configure-waf-scripts/configure_optimized_waf.sh
         ns-3-dev/contrib/wscript
@@ -3477,7 +3478,10 @@ add_executable(ns_3_extended_with_execution_environment
         ns-3-dev/wscript
         ns-3-dev/wutils.py
         CMakeLists.txt
-        README.md)
+        README.md
+        ns-3-dev/src/processing/model/software-execution-model.cc
+        ns-3-dev/src/processing/model/software-execution-model.h
+        ns-3-dev/src/processing/model/trex.cc)
 
 add_custom_target(
         Debug-configuration COMMAND configure-waf-scripts/configure_debug_waf.sh

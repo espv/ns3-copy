@@ -5,6 +5,7 @@
 #include "ns3/object.h"
 #include "ns3/string.h"
 #include "ns3/uinteger.h"
+#include "software-execution-model.h"
 
 #include <string>
 
@@ -18,8 +19,8 @@ class ExecEnvHelper : public Object {
   ExecEnvHelper();
 
   // Install and configure processing models on a set of nodes with a given configuration script
-  void Install(std::string device, Ptr<Node> n);
-  void Install(std::string device, NodeContainer nc);
+  void Install(Ptr<SoftwareExecutionModel> softwareExecutionModel, Ptr<Node> n);
+  void Install(Ptr<SoftwareExecutionModel> softwareExecutionModel, NodeContainer nc);
 
  private:
   // Average overhead of one trace function execution
