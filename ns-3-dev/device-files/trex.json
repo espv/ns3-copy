@@ -1,0 +1,134 @@
+#
+# Lines starting with "#" are regarded as comments, and disregarded during parsing.
+#
+# The order of sections matter - they must be in the following order:
+# QUEUES, HARDWARE, SYNCH, CONDITIONS, TRIGGERS,
+# {SIGSTART ... SIGEND},
+# THREADS
+#
+
+#############################################################################
+############################### HEADER ######################################
+#############################################################################
+
+QUEUES
+# Format: name
+#	  queuing policy (only currently supported: "FIFO")
+#	  size
+#	  type of queued entries ("packet" or "service")
+# order matters, since queue conditions work on sets of queues specified
+# by the name of the first and the last queue
+
+# BCM4430 TRS: http://linux-sunxi.org/images/0/05/4330-DS206-R.pdf
+# Page 84, figure 34
+# NIC Rx memory: 10kb
+# NIC Tx memory: 32kb
+
+HIRQ	            FIFO 	-1    services
+# Queue for posted tasks
+sq FIFO -1 services
+rcvd-pkts-t1 FIFO -1 packets
+rcvd-pkts-t2 FIFO -1 packets
+rcvd-pkts-t3 FIFO -1 packets
+complex-pkts FIFO -1 packets
+packets-to-be-sent FIFO -1 packets
+all-cepops FIFO -1 cepqueries
+threads-cepops FIFO -1 cepqueries
+
+HARDWARE
+# Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
+PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+
+# New format: MEMBUS||PEU [low frequency] [high frequency] [CPU freq scaling steps] [Low CPU cycles threshold] [High CPU cycles threshold] [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
+#PEU 600 1200 2 100 500 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 600 1200 2 100 500 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+
+SYNCH
+# name type arguments
+# type 0 is a semaphore
+threads-cepops-SEM 0 1
+packet-threads-SEM 0 0
+complex-pkts-SEM 0 1
+
+CONDITIONS
+
+TRIGGERS
+# These triggers can be replaced by a handler that calls
+SERVICE handle-then-cepop handle-then-cepop
+SERVICE assign-attributes-to-complex-event assign-attributes-to-complex-event
+LOC check-constraints-loc check-constraints
+
+
+{
+  "QUEUES": [
+    {
+    "name": "rcvd-pkts-t1",
+    "policy": "FIFO",
+    "type": "packets",
+    "limit": "infinite"
+    },
+    {
+    "name": "rcvd-pkts-t2",
+    "policy": "FIFO",
+    "type": "packets",
+    "limit": "infinite"
+    },
+    {
+    "name": "rcvd-pkts-t3",
+    "policy": "FIFO",
+    "type": "packets",
+    "limit": "infinite"
+    },
+    {
+    "name": "complex-pkts",
+    "policy": "FIFO",
+    "type": "packets",
+    "limit": "infinite"
+    },
+    {
+    "name": "packets-to-be-sent",
+    "policy": "FIFO",
+    "type": "packets",
+    "limit": "infinite"
+    },
+    {
+    "name": "threads-cepops",
+    "policy": "FIFO",
+    "type": "cepqueries",
+    "limit": "infinite"
+    },
+    {
+    "name": "complex-pkts",
+    "policy": "FIFO",
+    "type": "packets",
+    "limit": "infinite"
+    }
+  ],
+  "HIRQ": [
+    {
+    "type": "PEU",
+    "name": "cpu0",
+    "frequency": {
+        "available-frequencies": ["600MHz", "1400MHz"],
+        "sample-rate": "100000µs",
+        "governor": "ondemand",
+        "transition-latency": "355000ns",
+        "sampling-down-factor": "50",
+    }
+    }
+  ],
+  "HARDWARE": [
+
+  ],
+  "SYNCH": [
+
+  ],
+  "CONDITIONS": [
+
+  ],
+  "TRIGGERS": [
+    {}, {}
+  ]
+}

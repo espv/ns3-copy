@@ -241,11 +241,8 @@ int main(int argc, char** argv) {
     anim.EnablePacketMetadata (true);
     uint32_t temperature_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/thermometer.png");
     uint32_t humidity_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/humidity.png");
-    //AnimationInterface::SetConstantPosition (allNodesContainer.Get(0), 150.0, 150.0);
     uint32_t raspberry_pi_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/raspberry-pi.png");
-    //AnimationInterface::SetConstantPosition (allNodesContainer.Get(1), 350.0, 350.0);
     uint32_t control_center_icon_resource = anim.AddResource ("/home/espen/Research/ns-3-extended-with-execution-environment/ns-3-dev/icons/control-center.png");
-    //AnimationInterface::SetConstantPosition (allNodesContainer.Get(2), 550.0, 550.0);
     anim.UpdateNodeImage (0, temperature_icon_resource);
     anim.UpdateNodeImage (1, humidity_icon_resource);
     anim.UpdateNodeImage (2, raspberry_pi_icon_resource);
