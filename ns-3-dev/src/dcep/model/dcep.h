@@ -52,6 +52,7 @@ class Dcep : public Application
         void DispatchQuery(Ptr<Query> q);
         
         void ActivateDatasource (Ptr<Query> q);
+        void ScheduleEventsFromTrace(Ptr<Query> q);
         void DispatchAtomicCepEvent (Ptr<CepEvent> e);
         void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
         void SendFinalCepEventToSink(Ptr<CepEvent>);
@@ -73,6 +74,7 @@ private:
         uint16_t operators_load;
         std::string placementPolicy;
         std::string routing_protocol;
+        std::string trace_fn;
         
         TracedCallback<uint32_t> RxFinalCepEvent;
         TracedCallback<uint32_t> RxFinalCepEventHops;
@@ -134,6 +136,7 @@ class DataSource : public Object
       uint32_t eventRate;
       uint32_t counter;
       uint32_t eventCode;
+      std::string trace_fn;
       TracedCallback<Ptr<CepEvent>> nevent;
       bool active;
 

@@ -917,6 +917,8 @@ add_executable(
         ns-3-dev/src/dcep/examples/dcep-example.cc
         ns-3-dev/src/dcep/examples/MANETSimulation.cc
         ns-3-dev/src/dcep/examples/MANETSimulation-one-source.cc
+        ns-3-dev/src/dcep/examples/Siddhi&T-Rex/throughput.cc
+        ns-3-dev/src/dcep/examples/Siddhi&T-Rex/execution-time.cc
         ns-3-dev/src/dcep/examples/wscript
         ns-3-dev/src/dcep/helper/dcep-app-helper.cc
         ns-3-dev/src/dcep/helper/dcep-app-helper.h

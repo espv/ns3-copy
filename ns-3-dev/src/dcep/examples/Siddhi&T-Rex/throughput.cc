@@ -36,7 +36,7 @@
 
 using namespace ns3;
 using namespace std;
-NS_LOG_COMPONENT_DEFINE ("MANETSimulation-one-source");
+NS_LOG_COMPONENT_DEFINE ("Siddhi/T-Rex throughput");
 
 
 int main(int argc, char** argv) {
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     
     CommandLine cmd;
 
-    LogComponentEnable ("MANETSimulation-one-source", LOG_LEVEL_INFO);
+    LogComponentEnable ("Siddhi/T-Rex throughput", LOG_LEVEL_INFO);
     LogComponentEnable ("Placement", LOG_LEVEL_INFO);
     LogComponentEnable ("Dcep", LOG_LEVEL_INFO);
     LogComponentEnable ("Communication", LOG_LEVEL_INFO);
@@ -219,8 +219,7 @@ int main(int argc, char** argv) {
             NS_LOG_INFO("generator...");
             dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
             dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (random_number % 20 + 2));
-            dcepApps.Get(i)->SetAttribute("number_of_events", UintegerValue (numberOfCepEvents));
-            dcepApps.Get(i)->SetAttribute("event_interval", UintegerValue (eventInterval));
+            dcepApps.Get(i)->SetAttribute("trace_fn", StringValue(/*"events.trace"*/""));
         }
     }
     
@@ -252,6 +251,7 @@ int main(int argc, char** argv) {
     anim.UpdateNodeSize (1, 50, 50);
     anim.UpdateNodeSize (2, 50, 50);
     anim.UpdateNodeSize (3, 50, 50);
+
     Simulator::Run ();
     Simulator::Destroy ();
     

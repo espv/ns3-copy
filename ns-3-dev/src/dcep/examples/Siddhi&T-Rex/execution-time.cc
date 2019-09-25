@@ -36,7 +36,7 @@
 
 using namespace ns3;
 using namespace std;
-NS_LOG_COMPONENT_DEFINE ("MANETSimulation-one-source");
+NS_LOG_COMPONENT_DEFINE ("Siddhi/T-Rex execution time");
 
 
 int main(int argc, char** argv) {
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     
     CommandLine cmd;
 
-    LogComponentEnable ("MANETSimulation-one-source", LOG_LEVEL_INFO);
+    LogComponentEnable ("Siddhi/T-Rex execution time", LOG_LEVEL_INFO);
     LogComponentEnable ("Placement", LOG_LEVEL_INFO);
     LogComponentEnable ("Dcep", LOG_LEVEL_INFO);
     LogComponentEnable ("Communication", LOG_LEVEL_INFO);
