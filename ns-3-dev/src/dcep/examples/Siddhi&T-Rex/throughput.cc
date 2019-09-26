@@ -219,7 +219,7 @@ int main(int argc, char** argv) {
             NS_LOG_INFO("generator...");
             dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
             dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (random_number % 20 + 2));
-            dcepApps.Get(i)->SetAttribute("trace_fn", StringValue(/*"events.trace"*/""));
+            dcepApps.Get(i)->SetAttribute("TraceFileName", StringValue("/home/espen/test.trace"));
         }
     }
     

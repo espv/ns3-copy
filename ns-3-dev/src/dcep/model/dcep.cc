@@ -77,7 +77,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                        UintegerValue (0),
                        MakeUintegerAccessor (&Dcep::event_code),
                        MakeUintegerChecker<uint16_t> ())
-        .AddAttribute("trace_fn", "Trace file that tells what kind of events are transmitted at which time",
+        .AddAttribute("TraceFileName", "Trace file that tells what kind of events are transmitted at which time",
                        StringValue (""),
                        MakeStringAccessor (&Dcep::trace_fn),
                        MakeStringChecker ())
@@ -221,11 +221,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         std::string line;
         std::ifstream trace_file;
         trace_file.open (trace_fn);
-
         Time next_time;
+
         while (!trace_file.eof()) {
           getline(trace_file, line);
-
           next_time = MicroSeconds(atoi(line.c_str()));
           Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
         }
@@ -235,16 +234,19 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void
     Dcep::ActivateDatasource(Ptr<Query> q)
     {
-        auto ds = GetObject<DataSource> ();
-        if (!ds->IsActive()) {
-            ds->Activate();
-            UintegerValue nqueries;
-            GetAttribute("number_of_queries", nqueries);
-            static int cnt = 0;
-            int generate_events_in = cnt++;
-            ScheduleEventsFromTrace(q);
-            Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
-            //ds->GenerateAtomicCepEvents(q);
+        if (isGenerator()) {
+            auto ds = GetObject<DataSource> ();
+            if (!ds->IsActive()) {
+                ds->Activate();
+                UintegerValue nqueries;
+                GetAttribute("number_of_queries", nqueries);
+                static int cnt = 0;
+                int generate_events_in = cnt++;
+                ScheduleEventsFromTrace(q);
+                if (trace_fn.empty())
+                    Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
+                //ds->GenerateAtomicCepEvents(q);
+            }
         }
     }
     
@@ -583,10 +585,11 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
       dcep->GetAttribute("event_code", ecode);
       dcep->GetAttribute("number_of_events", nevents);
       dcep->GetAttribute("event_interval", interval);
-      dcep->GetAttribute("trace_fn", trace);
+      dcep->GetAttribute("TraceFileName", trace);
       eventCode = ecode.Get();
       numCepEvents = nevents.Get();
       cepEventsInterval = interval.Get();
+      Ptr<Node> node = GetObject<Node>();
       trace_fn = trace.Get();
     }
 
@@ -646,8 +649,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             //dcep->DispatchAtomicCepEvent(e);
             GetObject<CEPEngine>()->ProcessCepEvent(e);
 
-            if(counter < numCepEvents)
+            // Will only schedule events using interval if we don't read from trace. One or the other.
+            if(trace_fn.empty() && counter < numCepEvents)
             {
+                Ptr<Node> node = dcep->GetNode();
                 Simulator::Schedule (MilliSeconds (cepEventsInterval), &DataSource::GenerateAtomicCepEvents, this, q);
             }
         }
