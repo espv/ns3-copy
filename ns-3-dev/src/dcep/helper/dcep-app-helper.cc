@@ -9,17 +9,13 @@
 #include "ns3/names.h"
 #include "ns3/dcep.h"
 #include "ns3/execenv.h"
+#include "ns3/siddhitrexthroughput.h"
 
 namespace ns3 {
 
-    
-    
-    
-    
-    DcepAppHelper::DcepAppHelper ()
-    {
-        m_factory.SetTypeId (Dcep::GetTypeId ());
-    }
+
+    DcepAppHelper::DcepAppHelper () = default;
+
     void
     DcepAppHelper::SetAttribute (std::string name, const AttributeValue &value)
     {
@@ -27,23 +23,36 @@ namespace ns3 {
     }
 
     ApplicationContainer
-    DcepAppHelper::Install (NodeContainer c) const
+    DcepAppHelper::Install (NodeContainer c, std::string app)
     {
       ApplicationContainer apps;
       for (auto i = c.Begin (); i != c.End (); ++i)
         {
           Ptr<Node> node = *i;
 
-          Ptr<Dcep> dcep = m_factory.Create<Dcep> ();
-          node->AddApplication (dcep);
-          dcep->node = node;
-          apps.Add (dcep);
+          if (app == "Regular") {
+              m_factory.SetTypeId (Dcep::GetTypeId ());
+              Ptr<Dcep> dcep = m_factory.Create<Dcep>();
+              node->AddApplication (dcep);
+              dcep->node = node;
+              apps.Add (dcep);
+          } else if (app == "SiddhiTRexThroughput") {
+              m_factory.SetTypeId (SiddhiTRexThroughputDcep::GetTypeId ());
+              Ptr<SiddhiTRexThroughputDcep> dcep = m_factory.Create<SiddhiTRexThroughputDcep>();
+              node->AddApplication (dcep);
+              dcep->node = node;
+              apps.Add (dcep);
+          } else if (app == "SiddhiTRexExecutionTime") {
+
+          } else {
+              NS_ABORT_MSG("Unknown app selected. Either specify a valid one or don't specify any to get the default app");
+          }
         }
       return apps;
     }
     
     Ptr<Application>
-    DcepAppHelper::InstallPriv (Ptr<Node> node) const
+    DcepAppHelper::InstallPriv (Ptr<Node> node)
     {
       Ptr<Application> app = m_factory.Create<Dcep> ();
       node->AddApplication (app);
@@ -52,7 +61,7 @@ namespace ns3 {
     }
     
     ApplicationContainer
-    DcepAppHelper::Install (Ptr<Node> node) const
+    DcepAppHelper::Install (Ptr<Node> node)
     {
       return ApplicationContainer (InstallPriv (node));
     }

@@ -17,7 +17,8 @@ def build(bld):
         'model/dcep-header.cc',
         'helper/dcep-app-helper.cc',
         'model/resource-manager.cc',
-        'model/dcep-state.cc'
+        'model/dcep-state.cc',
+        'model/dcep-apps/siddhitrexthroughput.cc'
         ]
 
     module_test = bld.create_ns3_module_test_library('dcep')
@@ -38,7 +39,8 @@ def build(bld):
         'model/dcep-header.h',
         'helper/dcep-app-helper.h',
         'model/resource-manager.h',
-        'model/dcep-state.h'
+        'model/dcep-state.h',
+        'model/dcep-apps/siddhitrexthroughput.h'
         ]
 
     if bld.env['ENABLE_EXAMPLES']:

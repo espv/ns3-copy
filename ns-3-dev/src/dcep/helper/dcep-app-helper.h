@@ -43,11 +43,11 @@ public:
   void SetAttribute (std::string name, const AttributeValue &value);
 
   
-  ApplicationContainer Install (NodeContainer c) const;
-  ApplicationContainer Install (Ptr<Node> node) const;
+  ApplicationContainer Install (NodeContainer c, std::string app = "Regular");
+  ApplicationContainer Install (Ptr<Node> node);
 
 private:
-    Ptr<Application> InstallPriv (Ptr<Node> node) const;
+    Ptr<Application> InstallPriv (Ptr<Node> node);
   ObjectFactory m_factory; //!< Object factory.
   
 };

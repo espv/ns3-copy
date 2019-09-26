@@ -11,9 +11,6 @@
  * Created on February 22, 2018, 11:43 AM
  */
 
-#include <cstdlib>
-#include <ns3/point-to-point-module.h>
-#include "ns3/dcep.h"
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
@@ -22,17 +19,13 @@
 #include "ns3/wifi-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
-#include "ns3/olsr-routing-protocol.h"
 #include "ns3/olsr-helper.h"
 #include "ns3/dcep-app-helper.h"
 #include "ns3/netanim-module.h"
-#include "ns3/cep-engine.h"
-#include "ns3/cep-engine.h"
 #include "ns3/stats-module.h"
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
 #include "ns3/trex.h"
-#include "ns3/execenv.h"
 
 using namespace ns3;
 using namespace std;
@@ -192,7 +185,7 @@ int main(int argc, char** argv) {
     }
     // Espen
 
-    ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
+    ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer, "SiddhiTRexThroughput");
     Ipv4Address sinkAddress = wifiInterfaces.GetAddress (2);
 
     // Espen

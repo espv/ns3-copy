@@ -52,15 +52,15 @@ class Dcep : public Application
         void SendPacket (Ptr<Packet> p, Ipv4Address addr);
         void DispatchQuery(Ptr<Query> q);
 
-        void CreateAtomicQueries();
-        void ActivateDatasource (Ptr<Query> q);
-        void ScheduleEventsFromTrace(Ptr<Query> q);
+        virtual void CreateAtomicQueries();
+        virtual void ActivateDatasource (Ptr<Query> q);
+        virtual void ScheduleEventsFromTrace(Ptr<Query> q);
         void DispatchAtomicCepEvent (Ptr<CepEvent> e);
         void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
         void SendFinalCepEventToSink(Ptr<CepEvent>);
 
         Ptr<Node> node;
-private:
+protected:
     
         virtual void StartApplication (void);
         virtual void StopApplication (void);
@@ -98,11 +98,11 @@ public:
   virtual ~Sink ();
  
     void BuildAndSendQuery(void);
-    void BuildTRexQueries(Ptr<Dcep> dcep);
+    virtual void BuildTRexQueries(Ptr<Dcep> dcep);
     void receiveFinalCepEvent(Ptr<CepEvent> e);
-    
-    
-private:
+
+
+protected:
 
   int number_received = 0;
   std::vector<Query> m_queries;
@@ -112,38 +112,38 @@ private:
 
 
 class DataSource : public Object
-    {
-    public:
-      /**
-       * \brief Get the type ID.
-       * \return the object TypeId
-       */
-      static TypeId GetTypeId (void);
+{
+public:
+    /**
+    * \brief Get the type ID.
+    * \return the object TypeId
+    */
+    static TypeId GetTypeId (void);
 
-      DataSource ();
+    DataSource ();
 
-      virtual ~DataSource ();
-      
-      void Configure();
-      void GenerateAtomicCepEvents(Ptr<Query> q);
-      bool IsActive();
-      void Activate();
-      
-    private:
+    virtual ~DataSource ();
 
-      std::string m_eventType;
-      std::map<std::string, double> m_eventNumberValues;
-      std::map<std::string, std::string> m_eventStringValues;
-      uint32_t numCepEvents;
-      uint32_t cepEventsInterval;
-      uint32_t eventRate;
-      uint32_t counter;
-      uint32_t eventCode;
-      std::string trace_fn;
-      TracedCallback<Ptr<CepEvent>> nevent;
-      bool active = false;
+    void Configure();
+    virtual void GenerateAtomicCepEvents(Ptr<Query> q);
+    bool IsActive();
+    void Activate();
 
-    };
+protected:
+
+    std::string m_eventType;
+    std::map<std::string, double> m_eventNumberValues;
+    std::map<std::string, std::string> m_eventStringValues;
+    uint32_t numCepEvents;
+    uint32_t cepEventsInterval;
+    uint32_t eventRate;
+    uint32_t counter;
+    uint32_t eventCode;
+    std::string trace_fn;
+    TracedCallback<Ptr<CepEvent>> nevent;
+    bool active = false;
+
+};
 
 }
 
