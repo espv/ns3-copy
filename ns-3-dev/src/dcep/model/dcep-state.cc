@@ -18,6 +18,7 @@
  */
 
 #include "dcep-state.h"
+#include "dcep.h"
 #include "ns3/log.h"
 #include "cep-engine.h"
 #include "ns3/abort.h"
@@ -119,7 +120,11 @@ namespace ns3
         ee->source_query = q;
         ee->state = ACTIVE;
         if(ee->source_query->isFinal) {
-            ee->source_query->output_dest = Ipv4Address("10.0.0.4");
+            Ptr<Dcep> dcep = GetObject<Dcep> ();
+            if (dcep->isDistributedExecution())
+                ee->source_query->output_dest = Ipv4Address("10.0.0.4");
+            else
+                ee->source_query->output_dest = Ipv4Address("10.0.0.3");
         } else {
             ee->source_query->output_dest = GetObject<Communication>()->GetSinkAddress();
         }

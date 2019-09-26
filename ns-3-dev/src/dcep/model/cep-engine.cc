@@ -245,19 +245,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     
     void
     CEPEngine::InstantiateQuery(Ptr<Query> q){
-        
+        Ptr<CepOperator> cepOp;
         if(q->isAtomic)
         {
             /* instantiate atomic event */
-            Ptr<CepOperator> cepOp = CreateObject<AtomicOperator>();
+            cepOp = CreateObject<AtomicOperator>();
             cepOp->Configure(q, this);
-            this->ops_queue.push_back(cepOp);
-            GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
             GetObject<Dcep>()->ActivateDatasource(q);
         }
         else
         {
-            Ptr<CepOperator> cepOp;
             if(q->op == "and")
             {
                 cepOp = CreateObject<AndOperator>();
@@ -275,10 +272,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 NS_ABORT_MSG ("UNKNOWN OPERATOR");
             }
             cepOp->Configure(q, this);
-            this->ops_queue.push_back(cepOp);
-            GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
         }
 
+        if (q->toBeProcessed) {
+            GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
+            this->ops_queue.push_back(cepOp);
+        }
     }
 
     void

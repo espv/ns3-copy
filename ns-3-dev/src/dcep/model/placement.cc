@@ -103,7 +103,10 @@ namespace ns3 {
             AggregateObject(dstate);
             dstate->Configure();
 
-            dstate->SetNextHop("0", Ipv4Address("10.0.0.4"));
+            if (dcep->isDistributedExecution())
+                dstate->SetNextHop("0", Ipv4Address("10.0.0.4"));
+            else
+                dstate->SetNextHop("0", Ipv4Address("10.0.0.3"));
             
         }
 
@@ -153,7 +156,8 @@ namespace ns3 {
         {
             //if (dstate->IsActive(e->type))
             //{
-                SendCepEventToCepEngine(e);
+                SendCepEvent(e, dest);
+                //SendCepEventToCepEngine(e);
             //}
             //else
             //{
@@ -401,6 +405,7 @@ namespace ns3 {
         
         Ptr<Placement> p = GetObject<Placement>();
         Ptr<DcepState> dstate = GetObject<DcepState>();
+        Ptr<Dcep> dcep = GetObject<Dcep>();
         Ptr<Node> node = GetObject<Dcep> ()->GetNode();
         dstate->CreateCepEventRoutingTableEntry(q);
         Ptr<Communication> cm = GetObject<Communication>();
@@ -424,13 +429,19 @@ namespace ns3 {
             else*/
             if(q->eventType == "B")
             {
-                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
+                if (dcep->isDistributedExecution())
+                    dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.1"));
+                else
+                    dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.3"));
                 placed = true;
                 
             }
             else if (q->eventType == "C")
             {
-                dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.2"));
+                if (dcep->isDistributedExecution())
+                    dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.2"));
+                else
+                    dstate->SetNextHop(q->eventType, Ipv4Address("10.0.0.3"));
                 placed = true;
                 
             }

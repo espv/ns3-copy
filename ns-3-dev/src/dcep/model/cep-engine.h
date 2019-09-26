@@ -134,6 +134,7 @@ namespace ns3 {
         uint32_t actionType;
         std::string eventType;
         bool isAtomic;
+        bool toBeProcessed;
         Ipv4Address output_dest;
         Ipv4Address inputStream1_address;
         Ipv4Address inputStream2_address;

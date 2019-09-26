@@ -46,11 +46,13 @@ class Dcep : public Application
         static TypeId GetTypeId (void);
         
         bool isGenerator();
+        bool isDistributedExecution();
         uint32_t getNumCepEvents();
         uint16_t getCepEventCode();
         void SendPacket (Ptr<Packet> p, Ipv4Address addr);
         void DispatchQuery(Ptr<Query> q);
-        
+
+        void CreateAtomicQueries();
         void ActivateDatasource (Ptr<Query> q);
         void ScheduleEventsFromTrace(Ptr<Query> q);
         void DispatchAtomicCepEvent (Ptr<CepEvent> e);
@@ -65,6 +67,7 @@ private:
 
         bool datasource_node;
         bool sink_node;
+        bool distributed_execution;
         Ipv4Address m_sinkAddress;
         uint16_t m_cepPort; 
         uint16_t event_code;

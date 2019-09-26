@@ -212,7 +212,11 @@ int main(int argc, char** argv) {
         {
             NS_LOG_INFO("sink...");
             dcepApps.Get(i)->SetAttribute("IsSink", BooleanValue(true));
+            // In this simulation, this node produces atomic events and processes queries.
+            dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
             dcepApps.Get(i)->SetAttribute("number_of_queries", UintegerValue (numberOfCepQueries));
+            dcepApps.Get(i)->SetAttribute("DistributedExecution", BooleanValue (false));
+            dcepApps.Get(i)->SetAttribute("TraceFileName", StringValue("/home/espen/test.trace"));
         }
         else if (i < 2)//data generator
         {
