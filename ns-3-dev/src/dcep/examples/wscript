@@ -3,11 +3,11 @@
 def build(bld):
     obj = bld.create_ns3_program('dcep-example', ['dcep', 'internet', 'olsr', 'network', 'core', 'applications', 'mobility', 'wifi'])
     obj.source = 'dcep-example.cc'
-    obj = bld.create_ns3_program('MANETSimulation', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr','point-to-point'])
+    obj = bld.create_ns3_program('MANETSimulation', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr', 'point-to-point'])
     obj.source = 'MANETSimulation.cc'
-    obj = bld.create_ns3_program('MANETSimulation-one-source', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr','point-to-point'])
+    obj = bld.create_ns3_program('MANETSimulation-one-source', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr', 'point-to-point'])
     obj.source = 'MANETSimulation-one-source.cc'
-    obj = bld.create_ns3_program('MANETSimulation-one-source', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr','point-to-point'])
+    obj = bld.create_ns3_program('Siddhi/T-Rex-execution-time', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr', 'point-to-point'])
     obj.source = 'Siddhi&T-Rex/execution-time.cc'
-    obj = bld.create_ns3_program('MANETSimulation-one-source', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr','point-to-point'])
+    obj = bld.create_ns3_program('Siddhi/T-Rex-throughput', ['dcep', 'netanim', 'mobility', 'wifi', 'stats', 'internet','network', 'olsr', 'point-to-point'])
     obj.source = 'Siddhi&T-Rex/throughput.cc'

@@ -3506,6 +3506,14 @@ add_custom_target(
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )
 add_custom_target(
+        Siddhi-T-Rex-throughput COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
+)
+add_custom_target(
+        Siddhi-T-Rex-execution-time COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
+)
+add_custom_target(
         gnex COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )

@@ -138,7 +138,7 @@ class DataSource : public Object
       uint32_t eventCode;
       std::string trace_fn;
       TracedCallback<Ptr<CepEvent>> nevent;
-      bool active;
+      bool active = false;
 
     };
 

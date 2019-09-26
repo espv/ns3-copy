@@ -225,6 +225,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
 
         while (!trace_file.eof()) {
           getline(trace_file, line);
+          if (line.empty())
+              continue;
           next_time = MicroSeconds(atoi(line.c_str()));
           Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
         }
@@ -356,7 +358,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
             auto event2 = eventType.substr(1, 1);
             auto parent_output = event1 + "then" + event2;
             for (int temp = 0; temp <= 0; temp++) {
-                for (int j = 0; j < numCepQueries; j++) {
+                for (unsigned int j = 0; j < numCepQueries; j++) {
                     Ptr<Query> q3 = CreateObject<Query>();  // q3 = complex event
                     q3->actionType = NOTIFICATION;
                     q3->id = query_counter++;
@@ -589,7 +591,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
       eventCode = ecode.Get();
       numCepEvents = nevents.Get();
       cepEventsInterval = interval.Get();
-      Ptr<Node> node = GetObject<Node>();
+      Ptr<Node> node = GetObject<Dcep>()->GetNode();
       trace_fn = trace.Get();
     }
 
@@ -608,9 +610,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         active = true;
     }
 
+    int cnt = 0;
     void
     DataSource::GenerateAtomicCepEvents(Ptr<Query> q){
-
+        std::cout << cnt++ << std::endl;
         std::string eventType = q->eventType;
         Ptr<Dcep> dcep = GetObject<Dcep>();
         Ptr<Node> node = dcep->GetNode();
