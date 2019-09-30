@@ -192,7 +192,7 @@ int main(int argc, char** argv) {
     }
     // Espen
 
-    ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer);
+    ApplicationContainer dcepApps = dcepApphelper.Install (allNodesContainer, "SiddhiTRexExecutionTime");
     Ipv4Address sinkAddress = wifiInterfaces.GetAddress (2);
 
     // Espen

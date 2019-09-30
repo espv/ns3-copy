@@ -2,8 +2,8 @@
 // Created by espen on 26.09.2019.
 //
 
-#ifndef NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXEXECUTIONTIME_H
-#define NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXEXECUTIONTIME_H
+#ifndef NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXTHROUGHPUT_H
+#define NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXTHROUGHPUT_H
 
 #include <cstdlib>
 #include <ns3/point-to-point-module.h>
@@ -31,19 +31,19 @@
 #include "ns3/application.h"
 
 
-class SiddhiTRexThroughputSink : public Sink {
+class SiddhiTRexExecutionTimeSink : public Sink {
 public:
     static TypeId GetTypeId (void);
     void BuildTRexQueries(Ptr<Dcep> dcep) final;
 };
 
-class SiddhiTRexThroughputDataSource : public DataSource {
+class SiddhiTRexExecutionTimeDataSource : public DataSource {
 public:
     static TypeId GetTypeId (void);
     void GenerateAtomicCepEvents(Ptr<Query> q) final;
 };
 
-class SiddhiTRexThroughputDcep : public Dcep {
+class SiddhiTRexExecutionTimeDcep : public Dcep {
 public:
     static TypeId GetTypeId (void);
 
@@ -52,4 +52,4 @@ public:
     void StartApplication() final;
 };
 
-#endif //NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXEXECUTIONTIME_H
+#endif //NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXTHROUGHPUT_H

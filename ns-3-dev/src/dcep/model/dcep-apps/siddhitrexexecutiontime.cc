@@ -20,27 +20,27 @@
 #include "ns3/communication.h"
 #include "ns3/application.h"
 
-#include "siddhitrexthroughput.h"
+#include "siddhitrexexecutiontime.h"
 
 
-NS_OBJECT_ENSURE_REGISTERED(SiddhiTRexThroughputDcep);
-NS_LOG_COMPONENT_DEFINE ("SiddhiTRexThroughputDcep");
+NS_OBJECT_ENSURE_REGISTERED(SiddhiTRexExecutionTimeDcep);
+NS_LOG_COMPONENT_DEFINE ("SiddhiTRexExecutionTimeDcep");
 
 
 TypeId
-SiddhiTRexThroughputDcep::GetTypeId(void)
+SiddhiTRexExecutionTimeDcep::GetTypeId(void)
 {
-    static TypeId tid = TypeId("ns3::SiddhiTRexThroughputDcep")
+    static TypeId tid = TypeId("ns3::SiddhiTRexExecutionTimeDcep")
             .SetParent<Dcep> ()
             .SetGroupName("Applications")
-            .AddConstructor<SiddhiTRexThroughputDcep> ()
+            .AddConstructor<SiddhiTRexExecutionTimeDcep> ()
     ;
 
     return tid;
 }
 
 void
-SiddhiTRexThroughputDcep::StartApplication (void)
+SiddhiTRexExecutionTimeDcep::StartApplication (void)
 {
 
 
@@ -52,8 +52,8 @@ SiddhiTRexThroughputDcep::StartApplication (void)
     uint32_t mrand = x->GetInteger (1,30);
     mrand = mrand;
 
-    auto sink = CreateObject<SiddhiTRexThroughputSink>();
-    auto datasource = CreateObject<SiddhiTRexThroughputDataSource>();
+    auto sink = CreateObject<SiddhiTRexExecutionTimeSink>();
+    auto datasource = CreateObject<SiddhiTRexExecutionTimeDataSource>();
 
     AggregateObject (sink);
     AggregateObject (datasource);
@@ -90,7 +90,7 @@ static Ptr<Query> q1, q2;
 static int q1orq2 = 0;
 
 void
-SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
+SiddhiTRexExecutionTimeDcep::ScheduleEventsFromTrace(Ptr<Query> q)
 {
     if (!trace_fn.empty()) {
         auto ds = GetObject<DataSource> ();
@@ -119,7 +119,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
 }
 
 void
-SiddhiTRexThroughputDcep::ActivateDatasource(Ptr<Query> q)
+SiddhiTRexExecutionTimeDcep::ActivateDatasource(Ptr<Query> q)
 {
     if (isGenerator()) {
         auto ds = GetObject<DataSource> ();
@@ -142,16 +142,16 @@ SiddhiTRexThroughputDcep::ActivateDatasource(Ptr<Query> q)
  */
 
 TypeId
-SiddhiTRexThroughputSink::GetTypeId (void)
+SiddhiTRexExecutionTimeSink::GetTypeId (void)
 {
-    static TypeId tid = TypeId ("ns3::SiddhiTRexThroughputSink")
+    static TypeId tid = TypeId ("ns3::SiddhiTRexExecutionTimeSink")
             .SetParent<Sink>()
     ;
     return tid;
 }
 
 void
-SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)
+SiddhiTRexExecutionTimeSink::BuildTRexQueries(Ptr<Dcep> dcep)
 {
     UintegerValue nqueries;
     dcep->GetAttribute("number_of_queries", nqueries);
@@ -266,18 +266,18 @@ SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)
 
 
 TypeId
-SiddhiTRexThroughputDataSource::GetTypeId (void)
+SiddhiTRexExecutionTimeDataSource::GetTypeId (void)
 {
-    static TypeId tid = TypeId ("ns3::SiddhiTRexThroughputDataSource")
+    static TypeId tid = TypeId ("ns3::SiddhiTRexExecutionTimeDataSource")
             .SetParent<DataSource> ()
-            .AddConstructor<SiddhiTRexThroughputDataSource> ()
+            .AddConstructor<SiddhiTRexExecutionTimeDataSource> ()
     ;
     return tid;
 }
 
 
 void
-SiddhiTRexThroughputDataSource::GenerateAtomicCepEvents(Ptr<Query> q) {
+SiddhiTRexExecutionTimeDataSource::GenerateAtomicCepEvents(Ptr<Query> q) {
     std::string eventType = q->eventType;
     Ptr<Dcep> dcep = GetObject<Dcep>();
     Ptr<Node> node = dcep->GetNode();
