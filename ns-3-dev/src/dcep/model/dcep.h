@@ -78,6 +78,7 @@ protected:
         std::string placementPolicy;
         std::string routing_protocol;
         std::string trace_fn;
+        std::string trace_metadata_fn;
         
         TracedCallback<uint32_t> RxFinalCepEvent;
         TracedCallback<uint32_t> RxFinalCepEventHops;

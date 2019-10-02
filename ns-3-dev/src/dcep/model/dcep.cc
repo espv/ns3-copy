@@ -102,6 +102,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                        UintegerValue (100),
                        MakeUintegerAccessor (&Dcep::query_load),
                        MakeUintegerChecker<uint64_t> ())
+        .AddAttribute ("TraceMetadataFileName", "Metadata for the trace file",
+                       StringValue(""),
+                       MakeStringAccessor (&Dcep::trace_metadata_fn),
+                       MakeStringChecker ())
         .AddTraceSource ("RxFinalCepEvent",
                          "a new final event has been detected.",
                          MakeTraceSourceAccessor (&Dcep::RxFinalCepEvent))
