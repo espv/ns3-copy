@@ -1,4 +1,6 @@
 #include <cstdlib>
+#include <iostream>
+#include <iomanip>
 
 #include "ns3/dcep.h"
 #include "ns3/core-module.h"
@@ -21,6 +23,10 @@
 #include "ns3/application.h"
 
 #include "siddhitrexthroughput.h"
+
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 
 NS_OBJECT_ENSURE_REGISTERED(SiddhiTRexThroughputDcep);
@@ -86,20 +92,103 @@ SiddhiTRexThroughputDcep::StartApplication (void)
 
 }
 
+std::vector<std::string> split(const std::string& s, char delimiter)
+{
+    std::vector<std::string> tokens;
+    std::string token;
+    std::istringstream tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter))
+    {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
 static Ptr<Query> q1, q2;
 static int q1orq2 = 0;
 
 void
 SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
 {
-    if (!trace_fn.empty()) {
+    if (!trace_metadata_fn.empty() && !trace_fn.empty()) {
+        std::ifstream file(trace_metadata_fn);
+        json j;
+        file >> j;
+        std::cout << std::setw(4) << j["tracepoints"] << std::endl;
+
         auto ds = GetObject<DataSource> ();
+        std::vector<int, json> metadata;
+        for (auto tracepoint : j["tracepoints"]) {
+            if (tracepoint["category"]["isSimulationEvent"]) {
+                // We now create handlers for all the simulation events.
+                // Each tracepoint will get tracepoint ID as key and a callback
+                // function as value, and the trace file will schedule a call
+                // to this function at the time that it actually happened in the
+                // real-world execution.
+                metadata[tracepoint["ID"]] = tracepoint;
+                std::string tracepointName = tracepoint["name"];
+                if (tracepointName == "receive_event") {
+                    // Schedule a CEP event to be produced
+                } else if (tracepointName == "increase_number_of_queries") {
+                    // Schedule a complex query to be produced and placed
+                } else if (tracepointName == "decrease_number_of_queries") {
+                    // Schedule a complex query to be removed
+                } else if (tracepointName == "increase_number_of_then_states") {
+                    // Schedule the queries' Then-operator states to be increased
+                } else if (tracepointName == "decrease_number_of_then_states") {
+                    // Schedule the queries' Then-operator states to be decreased
+                } else {
+                    NS_ABORT_MSG("Unrecognized simulation event in metadata");
+                }
+            }
+        }
+
         std::string line;
         std::ifstream trace_file;
         trace_file.open (trace_fn);
         Time next_time;
 
         while (!trace_file.eof()) {
+            getline(trace_file, line);
+            if (line.empty())
+                continue;
+
+            auto splitLine = split(line, ' ');
+            int tracepointID = std::stoi(splitLine[0]);
+
+            // Check if the tracepoint ID is relevant for simulation
+            if (!metadata[tracepointID])
+                continue;
+
+            next_time = MicroSeconds(stoi(splitLine[1]));
+
+            Ptr<Query> q;
+            if (q1orq2 == 1) {
+                q = q1;
+                q1orq2 = 2;
+            } else {
+                q = q2;
+                q1orq2 = 1;
+            }
+
+            std::string tracepointName = metadata["name"];
+            if (tracepointName == "receive_event") {
+                // Schedule a CEP event to be produced
+                Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
+            } else if (tracepointName == "increase_number_of_queries") {
+                // Schedule a complex query to be produced and placed
+            } else if (tracepointName == "decrease_number_of_queries") {
+                // Schedule a complex query to be removed
+            } else if (tracepointName == "increase_number_of_then_states") {
+                // Schedule the queries' Then-operator states to be increased
+            } else if (tracepointName == "decrease_number_of_then_states") {
+                // Schedule the queries' Then-operator states to be decreased
+            } else {
+                NS_ABORT_MSG("Unrecognized simulation event in metadata");
+            }
+        }
+
+        /*while (!trace_file.eof()) {
             getline(trace_file, line);
             if (line.empty())
                 continue;
@@ -114,7 +203,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 q1orq2 = 1;
             }
             Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
-        }
+        }*/
     }
 }
 
@@ -130,7 +219,7 @@ SiddhiTRexThroughputDcep::ActivateDatasource(Ptr<Query> q)
             static int cnt = 0;
             int generate_events_in = cnt++;
             ScheduleEventsFromTrace(q);
-            if (trace_fn.empty())
+            if (!trace_metadata_fn.empty() && !trace_fn.empty())
                 Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
         }
     }
