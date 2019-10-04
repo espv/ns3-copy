@@ -50,7 +50,6 @@ SiddhiTRexExecutionTimeDcep::StartApplication (void)
 
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
     uint32_t mrand = x->GetInteger (1,30);
-    mrand = mrand;
 
     auto sink = CreateObject<SiddhiTRexExecutionTimeSink>();
     auto datasource = CreateObject<SiddhiTRexExecutionTimeDataSource>();
