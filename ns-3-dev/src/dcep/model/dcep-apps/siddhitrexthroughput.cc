@@ -87,7 +87,8 @@ SiddhiTRexThroughputDcep::StartApplication (void)
 
     if(sink_node)
     {
-        Simulator::Schedule (Seconds (20.0), &Sink::BuildAndSendQuery, sink);
+      //Simulator::Schedule (Seconds (20.0), &Sink::BuildAndSendQuery, sink);
+      ActivateDatasource(CreateObject<Query>());
     }
 
 }
@@ -104,8 +105,6 @@ std::vector<std::string> split(const std::string& s, char delimiter)
     return tokens;
 }
 
-static Ptr<Query> q1, q2;
-static int q1orq2 = 0;
 
 void
 SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
@@ -120,7 +119,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
         std::map<int, json> metadata;
         for (auto tracepoint : j["tracepoints"]) {
             if (tracepoint["category"]["isSimulationEvent"]) {
-                metadata[(int)tracepoint["ID"]] = tracepoint;
+                metadata[(int)tracepoint["id"]] = tracepoint;
             }
         }
 
@@ -134,24 +133,19 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
             if (line.empty())
                 continue;
 
-            auto splitLine = split(line, ' ');
+            auto splitLine = split(line, '\t');
+            int argument = std::stoi(splitLine[3]);
             int tracepointID = std::stoi(splitLine[0]);
 
             json tracepoint = metadata[tracepointID];
             // Check if the tracepoint ID is relevant for simulation
-            if (!tracepoint)
+            if (tracepoint == nullptr)
                 continue;
 
-            next_time = MicroSeconds(stoi(splitLine[1]));
-
-            Ptr<Query> q;
-            if (q1orq2 == 1) {
-                q = q1;
-                q1orq2 = 2;
-            } else {
-                q = q2;
-                q1orq2 = 1;
-            }
+            static long long first_time = 0;
+            if (first_time == 0)
+                first_time = (NanoSeconds(stol(splitLine[4])) - Seconds(100)).GetNanoSeconds();
+            next_time = NanoSeconds(stol(splitLine[4])-first_time);
 
             std::string tracepointName = tracepoint["name"];
 
@@ -162,12 +156,84 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
             // real-world execution.
             if (tracepointName == "receiveEvent") {
                 // Schedule a CEP event to be produced
-                int eventID = tracepoint["id"];
+                int eventID = argument;
+                json event_to_add;
+                auto cepevents = j["cepevents"];
+                for (auto cepevent : cepevents) {
+                    if (cepevent["id"] == eventID) {
+                        // Found event
+                        event_to_add = cepevent;
+                        break;
+                    }
+                }
+
+                Ptr<CepEvent> e = CreateObject<CepEvent>();
+                e->type = std::to_string((int)event_to_add["stream-id"]);
+                e->event_class = ATOMIC_EVENT;
+                e->delay = 0; // initializing delay
+                static int cnt;
+                e->m_seq = cnt;
+                e->hopsCount = 0;
+                e->prevHopsCount = 0;
+                std::map<std::string, double> numberValues;
+                std::map<std::string, std::string> stringValues;
+                for (auto attribute : event_to_add["attributes"]) {
+                    if (attribute["value"].type() == json::value_t::number_unsigned) {
+                        e->numberValues[attribute["name"]] = attribute["value"];
+                    } else if (attribute["value"].type() == json::value_t::string) {
+                        e->stringValues[attribute["name"]] = attribute["value"];
+                    } else {
+                        NS_ABORT_MSG("CEP event has unsupported attribute type");
+                    }
+                }
+                e->timestamp = Simulator::Now();
+                e->pkt = Create<Packet>();  // Dummy packet for processing delay
+                NS_LOG_INFO(Simulator::Now() << " CepEvent number " << e->m_seq << " timestamp: " << e->timestamp);
                 // TODO: Find out how to create this event here and send it to GenerateAtomicCepEvents
-                Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
+                Simulator::Schedule (next_time, &CEPEngine::ProcessCepEvent, GetObject<CEPEngine>(), e);
+                //Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
             } else if (tracepointName == "addQuery") {
                 // Schedule a complex query to be produced and placed
-                int queryID = tracepoint["id"];
+                int queryID = argument;
+                json query_to_add;
+                auto cepqueries = j["cepqueries"];
+                for (auto cepquery : cepqueries) {
+                    if (cepquery["id"] == queryID) {
+                        // Found query
+                        query_to_add = cepquery;
+                        break;
+                    }
+                }
+
+                Ptr<Query> q = CreateObject<Query>();  // q3 = complex event
+                q->toBeProcessed = true;
+                q->actionType = NOTIFICATION;
+                static int query_cnt = 0;
+                static int complex_event_cnt = 0;
+                q->id = query_cnt++;
+                q->isFinal = true;
+                q->isAtomic = false;
+                q->eventType = std::to_string(complex_event_cnt++);
+                q->output_dest = Ipv4Address("10.0.0.3");
+                std::string event1 = query_to_add["inevents"][0];
+                std::string event2 = query_to_add["inevents"][1];
+                q->inevent1 = event1;
+                q->inevent2 = event2;
+                q->window = Seconds(150000000000000000);
+                q->isFinalWithinNode = true;
+
+                Ptr<NumberConstraint> c = CreateObject<NumberConstraint>();
+                c->var_name = "value";
+                c->numberValue = 45;
+                c->type = GTCONSTRAINT;
+
+                q->constraints.emplace_back(c);
+                q->op = "then";
+                q->assigned = false;
+                q->currentHost.Set("0.0.0.0");
+                auto parent_output = event1 + "then" + event2;
+                q->parent_output = parent_output;
+                Simulator::Schedule(next_time, &Dcep::DispatchQuery, this, q);
                 // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {
                 // Schedule all queries to be removed
@@ -175,25 +241,9 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 NS_ABORT_MSG("Unrecognized simulation event in metadata");
             }
         }
-
-        /*while (!trace_file.eof()) {
-            getline(trace_file, line);
-            if (line.empty())
-                continue;
-            next_time = MicroSeconds(atoi(line.c_str()));
-
-            Ptr<Query> q;
-            if (q1orq2 == 1) {
-                q = q1;
-                q1orq2 = 2;
-            } else {
-                q = q2;
-                q1orq2 = 1;
-            }
-            Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
-        }*/
     }
 }
+
 
 void
 SiddhiTRexThroughputDcep::ActivateDatasource(Ptr<Query> q)
@@ -226,6 +276,11 @@ SiddhiTRexThroughputSink::GetTypeId (void)
     ;
     return tid;
 }
+
+
+static Ptr<Query> q1, q2;
+static int q1orq2 = 0;
+
 
 void
 SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)

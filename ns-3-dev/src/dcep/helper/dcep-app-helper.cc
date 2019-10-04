@@ -30,18 +30,20 @@ namespace ns3 {
         {
             Ptr<Node> node = *i;
             TypeId typeId;
+            Ptr<Dcep> dcep;
             if (app == "Regular") {
-                typeId = Dcep::GetTypeId();
+              m_factory.SetTypeId (Dcep::GetTypeId());
+              dcep = m_factory.Create<Dcep>();
             } else if (app == "SiddhiTRexThroughput") {
-                typeId = SiddhiTRexThroughputDcep::GetTypeId ();
+                m_factory.SetTypeId (SiddhiTRexThroughputDcep::GetTypeId());
+                dcep = m_factory.Create<SiddhiTRexThroughputDcep>();
             } else if (app == "SiddhiTRexExecutionTime") {
-                typeId = SiddhiTRexExecutionTimeDcep::GetTypeId ();
+                m_factory.SetTypeId (SiddhiTRexExecutionTimeDcep::GetTypeId());
+                dcep = m_factory.Create<SiddhiTRexExecutionTimeDcep>();
             } else {
                 NS_ABORT_MSG("Unknown app selected. Either specify a valid one or don't specify any to get the default app");
             }
 
-            m_factory.SetTypeId (Dcep::GetTypeId ());
-            Ptr<Dcep> dcep = m_factory.Create<Dcep>();
             node->AddApplication (dcep);
             dcep->node = node;
             apps.Add (dcep);

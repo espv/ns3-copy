@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
 
     uint64_t eventInterval = numberOfCepQueries*1000;  // Interval in seconds
 
-    uint64_t simulationLength = 100+numberOfCepEvents*eventInterval/1000+numberOfCepQueries*3;  // Time to stop the simulation
+    uint64_t simulationLength = 100+numberOfCepEvents*eventInterval/1000+numberOfCepQueries*3*100000000;  // Time to stop the simulation
 
     NodeContainer allNodesContainer;
     allNodesContainer.Create (allNodes);
@@ -213,23 +213,24 @@ int main(int argc, char** argv) {
             dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
             dcepApps.Get(i)->SetAttribute("number_of_queries", UintegerValue (numberOfCepQueries));
             dcepApps.Get(i)->SetAttribute("DistributedExecution", BooleanValue (false));
-            dcepApps.Get(i)->SetAttribute("TraceFileName", StringValue("/home/espen/test.trace"));
-        }
-        else if (i < 2)//data generator
-        {
-            NS_LOG_INFO("generator...");
-            dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
-            dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (random_number % 20 + 2));
             dcepApps.Get(i)->SetAttribute("TraceFileName", StringValue(trace_fn));
             dcepApps.Get(i)->SetAttribute("ExperimentMetadataFileName", StringValue(experiment_metadata_fn));
         }
+        //else if (i < 2)//data generator
+        //{
+            /*NS_LOG_INFO("generator...");
+            dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
+            dcepApps.Get(i)->SetAttribute("event_code", UintegerValue (random_number % 20 + 2));
+            dcepApps.Get(i)->SetAttribute("TraceFileName", StringValue(trace_fn));
+            dcepApps.Get(i)->SetAttribute("ExperimentMetadataFileName", StringValue(experiment_metadata_fn));*/
+        //}
     }
     
-    for(uint32_t i = numStationary; i < allNodesContainer.GetN(); i++)
+    /*for(uint32_t i = numStationary; i < allNodesContainer.GetN(); i++)
     {
         dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
         dcepApps.Get(i)->SetAttribute("placement_policy", StringValue(placementPolicy));
-    }
+    }*/
     
     
     NS_LOG_INFO ("Starting applications .....");
