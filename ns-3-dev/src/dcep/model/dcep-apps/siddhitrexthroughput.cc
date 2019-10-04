@@ -162,9 +162,13 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
             // real-world execution.
             if (tracepointName == "receiveEvent") {
                 // Schedule a CEP event to be produced
+                int eventID = tracepoint["id"];
+                // TODO: Find out how to create this event here and send it to GenerateAtomicCepEvents
                 Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
             } else if (tracepointName == "addQuery") {
                 // Schedule a complex query to be produced and placed
+                int queryID = tracepoint["id"];
+                // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {
                 // Schedule all queries to be removed
             } else {
