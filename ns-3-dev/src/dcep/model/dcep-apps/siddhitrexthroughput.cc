@@ -160,17 +160,13 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
             // function as value, and the trace file will schedule a call
             // to this function at the time that it actually happened in the
             // real-world execution.
-            if (tracepointName == "receive_event") {
+            if (tracepointName == "receiveEvent") {
                 // Schedule a CEP event to be produced
                 Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
-            } else if (tracepointName == "increase_number_of_queries") {
+            } else if (tracepointName == "addQuery") {
                 // Schedule a complex query to be produced and placed
-            } else if (tracepointName == "decrease_number_of_queries") {
-                // Schedule a complex query to be removed
-            } else if (tracepointName == "increase_number_of_then_states") {
-                // Schedule the queries' Then-operator states to be increased
-            } else if (tracepointName == "decrease_number_of_then_states") {
-                // Schedule the queries' Then-operator states to be decreased
+            } else if (tracepointName == "clearQueries") {
+                // Schedule all queries to be removed
             } else {
                 NS_ABORT_MSG("Unrecognized simulation event in metadata");
             }
