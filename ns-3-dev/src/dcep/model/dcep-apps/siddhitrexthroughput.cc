@@ -215,8 +215,8 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 q->isAtomic = false;
                 q->eventType = std::to_string(complex_event_cnt++);
                 q->output_dest = Ipv4Address("10.0.0.3");
-                std::string event1 = query_to_add["inevents"][0];
-                std::string event2 = query_to_add["inevents"][1];
+                std::string event1 = std::to_string((int)query_to_add["inevents"][0]);
+                std::string event2 = std::to_string((int)query_to_add["inevents"][1]);
                 q->inevent1 = event1;
                 q->inevent2 = event2;
                 q->window = Seconds(150000000000000000);
