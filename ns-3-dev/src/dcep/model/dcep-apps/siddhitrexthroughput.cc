@@ -189,7 +189,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 e->timestamp = Simulator::Now();
                 e->pkt = Create<Packet>();  // Dummy packet for processing delay
                 NS_LOG_INFO(Simulator::Now() << " CepEvent number " << e->m_seq << " timestamp: " << e->timestamp);
-                // TODO: Find out how to create this event here and send it to GenerateAtomicCepEvents
+                // TODO: Find out how to create the events once instead of every "receive_event" event
                 Simulator::Schedule (next_time, &CEPEngine::ProcessCepEvent, GetObject<CEPEngine>(), e);
                 //Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
             } else if (tracepointName == "addQuery") {
@@ -231,8 +231,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 q->op = "then";
                 q->assigned = false;
                 q->currentHost.Set("0.0.0.0");
-                auto parent_output = event1 + "then" + event2;
-                q->parent_output = parent_output;
+                q->parent_output = event1 + "then" + event2;
                 Simulator::Schedule(next_time, &Dcep::DispatchQuery, this, q);
                 // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {
@@ -257,7 +256,7 @@ SiddhiTRexThroughputDcep::ActivateDatasource(Ptr<Query> q)
             static int cnt = 0;
             int generate_events_in = cnt++;
             ScheduleEventsFromTrace(q);
-            if (!experiment_metadata_fn.empty() && !trace_fn.empty())
+            if (experiment_metadata_fn.empty() || trace_fn.empty())
                 Simulator::Schedule(Seconds(generate_events_in), &DataSource::GenerateAtomicCepEvents, ds, q);
         }
     }

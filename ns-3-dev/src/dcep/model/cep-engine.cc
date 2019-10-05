@@ -188,6 +188,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         auto node = GetObject<Dcep>()->GetNode();
 
+        // I think it's an error to just set the curCepEvent for the entire thread to be e, since a function that
+        // was interrupted by HIRQ-1 might be using another curCepEvent. This leads to a race condition.
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent = e;
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.emplace_back(Simulator::Now());
         e->timestamp = Simulator::Now();
