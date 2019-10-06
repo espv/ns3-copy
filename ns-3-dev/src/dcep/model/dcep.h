@@ -41,49 +41,52 @@ namespace ns3 {
 /* ... */
 class Dcep : public Application
     {
-    public:
-        Dcep();
-        static TypeId GetTypeId (void);
-        
-        bool isGenerator();
-        bool isDistributedExecution();
-        uint32_t getNumCepEvents();
-        uint16_t getCepEventCode();
-        void SendPacket (Ptr<Packet> p, Ipv4Address addr);
-        void DispatchQuery(Ptr<Query> q);
+public:
+    Dcep();
+    static TypeId GetTypeId (void);
 
-        virtual void CreateAtomicQueries();
-        virtual void ActivateDatasource (Ptr<Query> q);
-        virtual void ScheduleEventsFromTrace(Ptr<Query> q);
-        void DispatchAtomicCepEvent (Ptr<CepEvent> e);
-        void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
-        void SendFinalCepEventToSink(Ptr<CepEvent>);
+    bool isGenerator();
+    bool isDistributedExecution();
+    uint32_t getNumCepEvents();
+    uint16_t getCepEventCode();
+    void SendPacket (Ptr<Packet> p, Ipv4Address addr);
+    void DispatchQuery(Ptr<Query> q);
 
-        Ptr<Node> node;
+    virtual void CreateAtomicQueries();
+    virtual void ActivateDatasource (Ptr<Query> q);
+    virtual void ScheduleEventsFromTrace(Ptr<Query> q);
+    void DispatchAtomicCepEvent (Ptr<CepEvent> e);
+    void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
+    void SendFinalCepEventToSink(Ptr<CepEvent>);
+
+    Ptr<Node> node;
+
+    TracedCallback<Ptr<CepEvent> > RxCepEvent;
+    TracedCallback<> ClearQueries;
+    TracedCallback<Ptr<Query> > TxQuery;
+    TracedCallback<uint32_t> RxFinalCepEvent;
+    TracedCallback<uint32_t> RxFinalCepEventHops;
+    TracedCallback<uint64_t> RxFinalCepEventDelay;
 protected:
     
-        virtual void StartApplication (void);
-        virtual void StopApplication (void);
+    virtual void StartApplication (void);
+    virtual void StopApplication (void);
 
-        bool datasource_node;
-        bool sink_node;
-        bool distributed_execution;
-        Ipv4Address m_sinkAddress;
-        uint16_t m_cepPort; 
-        uint16_t event_code;
-        uint32_t events_load;
-        uint32_t query_load;
-        uint32_t event_interval;
-        uint16_t operators_load;
-        std::string placementPolicy;
-        std::string routing_protocol;
-        std::string trace_fn;
-        std::string experiment_metadata_fn;
-        
-        TracedCallback<uint32_t> RxFinalCepEvent;
-        TracedCallback<uint32_t> RxFinalCepEventHops;
-        TracedCallback<uint64_t> RxFinalCepEventDelay;
-    };
+    bool datasource_node;
+    bool sink_node;
+    bool distributed_execution;
+    Ipv4Address m_sinkAddress;
+    uint16_t m_cepPort;
+    uint16_t event_code;
+    uint32_t events_load;
+    uint32_t query_load;
+    uint32_t event_interval;
+    uint16_t operators_load;
+    std::string placementPolicy;
+    std::string routing_protocol;
+    std::string trace_fn;
+    std::string experiment_metadata_fn;
+};
     
 class Sink : public Object
 {

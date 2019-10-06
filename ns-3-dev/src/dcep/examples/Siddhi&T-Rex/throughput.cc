@@ -11,6 +11,7 @@
  * Created on February 22, 2018, 11:43 AM
  */
 
+#include <ns3/dcep-module.h>
 #include "ns3/core-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/core-module.h"
@@ -30,6 +31,24 @@
 using namespace ns3;
 using namespace std;
 NS_LOG_COMPONENT_DEFINE ("Siddhi/T-Rex throughput");
+
+
+void RxCepEventTrace(Ptr<CepEvent> e)
+{
+    std::cout << Simulator::Now() << ": Received CEP event " << e << std::endl;
+}
+
+
+void ClearQueriesTrace()
+{
+    std::cout << Simulator::Now() << ": Cleared queries" << std::endl;
+}
+
+
+void TxQueryTrace(Ptr<Query> q)
+{
+    std::cout << Simulator::Now() << ": Transmitted query " << q << std::endl;
+}
 
 
 int main(int argc, char** argv) {
@@ -203,18 +222,22 @@ int main(int argc, char** argv) {
     uint32_t random_number = x->GetInteger (1,99999);
     for(uint32_t i = 0; i < numStationary; i++)
     {
-        dcepApps.Get(i)->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
-        dcepApps.Get(i)->SetAttribute("placement_policy", StringValue(placementPolicy));
+        auto dcep = dcepApps.Get(i);
+        dcep->SetAttribute("SinkAddress", Ipv4AddressValue (sinkAddress));
+        dcep->SetAttribute("placement_policy", StringValue(placementPolicy));
         if(i == 2)
         {
             NS_LOG_INFO("sink...");
-            dcepApps.Get(i)->SetAttribute("IsSink", BooleanValue(true));
+            dcep->SetAttribute("IsSink", BooleanValue(true));
             // In this simulation, this node produces atomic events and processes queries.
-            dcepApps.Get(i)->SetAttribute("IsGenerator", BooleanValue(true));
-            dcepApps.Get(i)->SetAttribute("number_of_queries", UintegerValue (numberOfCepQueries));
-            dcepApps.Get(i)->SetAttribute("DistributedExecution", BooleanValue (false));
-            dcepApps.Get(i)->SetAttribute("TraceFileName", StringValue(trace_fn));
-            dcepApps.Get(i)->SetAttribute("ExperimentMetadataFileName", StringValue(experiment_metadata_fn));
+            dcep->SetAttribute("IsGenerator", BooleanValue(true));
+            dcep->SetAttribute("number_of_queries", UintegerValue (numberOfCepQueries));
+            dcep->SetAttribute("DistributedExecution", BooleanValue (false));
+            dcep->SetAttribute("TraceFileName", StringValue(trace_fn));
+            dcep->SetAttribute("ExperimentMetadataFileName", StringValue(experiment_metadata_fn));
+            dcep->TraceConnectWithoutContext ("RxCepEvent", MakeCallback(&RxCepEventTrace));
+            dcep->TraceConnectWithoutContext ("TxQuery", MakeCallback(&TxQueryTrace));
+            dcep->TraceConnectWithoutContext ("ClearQueries", MakeCallback(&ClearQueriesTrace));
         }
         //else if (i < 2)//data generator
         //{

@@ -185,7 +185,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
     {
-        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        auto dcep = GetObject<Dcep>();
+        dcep->RxCepEvent(e);
+        Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         auto node = GetObject<Dcep>()->GetNode();
 
         // I think it's an error to just set the curCepEvent for the entire thread to be e, since a function that
@@ -280,6 +282,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"]->push(cepOp);
             this->ops_queue.push_back(cepOp);
         }
+    }
+
+    void
+    CEPEngine::ClearQueries() {
+        auto dcep = GetObject<Dcep>();
+        dcep->ClearQueries();
+        auto processing_ops_queue = dcep->GetNode()->GetObject<ExecEnv>()->cepQueryQueues["all-cepops"];
+        while(!processing_ops_queue->empty())
+            processing_ops_queue->pop();
+        this->ops_queue.clear();
     }
 
     void

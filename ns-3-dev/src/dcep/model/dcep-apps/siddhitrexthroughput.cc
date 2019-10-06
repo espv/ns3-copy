@@ -191,7 +191,6 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 NS_LOG_INFO(Simulator::Now() << " CepEvent number " << e->m_seq << " timestamp: " << e->timestamp);
                 // TODO: Find out how to create the events once instead of every "receive_event" event
                 Simulator::Schedule (next_time, &CEPEngine::ProcessCepEvent, GetObject<CEPEngine>(), e);
-                //Simulator::Schedule (next_time, &DataSource::GenerateAtomicCepEvents, ds, q);
             } else if (tracepointName == "addQuery") {
                 // Schedule a complex query to be produced and placed
                 int queryID = argument;
@@ -236,6 +235,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {
                 // Schedule all queries to be removed
+                Simulator::Schedule (next_time, &CEPEngine::ClearQueries, GetObject<CEPEngine>());
             } else {
                 NS_ABORT_MSG("Unrecognized simulation event in metadata");
             }

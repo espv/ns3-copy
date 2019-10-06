@@ -115,7 +115,15 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         .AddTraceSource ("RxFinalCepEventDelay",
                          "",
                          MakeTraceSourceAccessor (&Dcep::RxFinalCepEventDelay))
-        
+        .AddTraceSource ("RxCepEvent",
+                         "",
+                         MakeTraceSourceAccessor (&Dcep::RxCepEvent))
+        .AddTraceSource ("TxQuery",
+                         "",
+                          MakeTraceSourceAccessor (&Dcep::TxQuery))
+        .AddTraceSource ("ClearQueries",
+                         "",
+                         MakeTraceSourceAccessor (&Dcep::ClearQueries))
         ;
         
         return tid;
@@ -218,6 +226,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         NS_LOG_FUNCTION(this);
         NS_LOG_INFO(Simulator::Now() << " DCEP: received query to dispatch");
 
+        this->TxQuery(q);
         GetObject<Placement>()->RecvQuery(q);
     }
     

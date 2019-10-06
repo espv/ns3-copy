@@ -173,6 +173,7 @@ class CEPEngine : public Object
         void DoCheckNumberConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, double> values, std::map<std::string, std::string> stringValues);
         void DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, std::string> values);
         void FinishedProcessingEvent(Ptr<CepEvent> e);
+        void ClearQueries();
 
         Ptr<CepOperator> GetOperator(uint32_t queryId);
         Ptr<Query> GetQuery(uint32_t id);
