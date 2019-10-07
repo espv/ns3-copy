@@ -390,6 +390,14 @@ SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)
 }
 
 
+void
+SiddhiTRexThroughputSink::receiveFinalCepEvent(Ptr<CepEvent> e)
+{
+    NS_LOG_INFO(Simulator::Now() << " COMPLEX EVENT RECEIVED " << ++number_received << " EVENTS, NOTIFIED HOPSCOUNT " << e->hopsCount << " e->timestamp " << e->timestamp << " DELAY " << Simulator::Now() - e->timestamp);
+    NS_LOG_INFO(Simulator::Now() << " $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Complex event received by sink $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+}
+
+
 /*
  * ########################################################
  * ####################### DATASOURCE #########################

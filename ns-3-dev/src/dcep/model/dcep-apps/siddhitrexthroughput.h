@@ -35,6 +35,7 @@ class SiddhiTRexThroughputSink : public Sink {
 public:
     static TypeId GetTypeId (void);
     void BuildTRexQueries(Ptr<Dcep> dcep) final;
+    void receiveFinalCepEvent(Ptr<CepEvent> e) final;
 };
 
 class SiddhiTRexThroughputDataSource : public DataSource {

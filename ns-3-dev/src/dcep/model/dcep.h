@@ -64,9 +64,10 @@ public:
     TracedCallback<Ptr<CepEvent> > RxCepEvent;
     TracedCallback<> ClearQueries;
     TracedCallback<Ptr<Query> > TxQuery;
-    TracedCallback<uint32_t> RxFinalCepEvent;
-    TracedCallback<uint32_t> RxFinalCepEventHops;
-    TracedCallback<uint64_t> RxFinalCepEventDelay;
+    TracedCallback<Ptr<CepEvent> > CheckedConstraints;
+    TracedCallback<Ptr<CepEvent>, Ptr<Query> > PassedConstraints;
+    TracedCallback<Ptr<CepEvent> > RxFinalCepEvent;
+    TracedCallback<Ptr<CepEvent> > FinishedProcessingCepEvent;
 protected:
     
     virtual void StartApplication (void);
@@ -103,7 +104,7 @@ public:
  
     void BuildAndSendQuery(void);
     virtual void BuildTRexQueries(Ptr<Dcep> dcep);
-    void receiveFinalCepEvent(Ptr<CepEvent> e);
+    virtual void receiveFinalCepEvent(Ptr<CepEvent> e);
 
 
 protected:

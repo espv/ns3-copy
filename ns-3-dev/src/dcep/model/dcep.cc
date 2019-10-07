@@ -109,21 +109,24 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         .AddTraceSource ("RxFinalCepEvent",
                          "a new final event has been detected.",
                          MakeTraceSourceAccessor (&Dcep::RxFinalCepEvent))
-        .AddTraceSource ("RxFinalCepEventHops",
-                         "",
-                         MakeTraceSourceAccessor (&Dcep::RxFinalCepEventHops))
-        .AddTraceSource ("RxFinalCepEventDelay",
-                         "",
-                         MakeTraceSourceAccessor (&Dcep::RxFinalCepEventDelay))
         .AddTraceSource ("RxCepEvent",
                          "",
                          MakeTraceSourceAccessor (&Dcep::RxCepEvent))
         .AddTraceSource ("TxQuery",
                          "",
                           MakeTraceSourceAccessor (&Dcep::TxQuery))
+        .AddTraceSource ("CheckedConstraints",
+                         "",
+                         MakeTraceSourceAccessor (&Dcep::CheckedConstraints))
+        .AddTraceSource ("PassedConstraints",
+                         "",
+                         MakeTraceSourceAccessor (&Dcep::PassedConstraints))
         .AddTraceSource ("ClearQueries",
                          "",
                          MakeTraceSourceAccessor (&Dcep::ClearQueries))
+        .AddTraceSource ("FinishedProcessingCepEvent",
+                         "",
+                          MakeTraceSourceAccessor (&Dcep::FinishedProcessingCepEvent))
         ;
         
         return tid;
@@ -347,9 +350,7 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void 
     Dcep::SendFinalCepEventToSink(Ptr<CepEvent> event)
     {
-        this->RxFinalCepEvent(1);
-        this->RxFinalCepEventDelay(event->delay);
-        this->RxFinalCepEventHops(event->hopsCount);
+        this->RxFinalCepEvent(event);
 
         GetObject<Sink>()->receiveFinalCepEvent(event);
     }

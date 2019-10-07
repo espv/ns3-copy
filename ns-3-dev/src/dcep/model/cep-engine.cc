@@ -94,8 +94,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     CEPEngine::DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, string> values)
     {
         Ptr<Placement> p = GetObject<Placement>();
-        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        auto dcep = GetObject<Dcep>();
+        Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         if (values.begin() == values.end()) {
+            dcep->CheckedConstraints(e);
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             return;
         }
@@ -177,9 +179,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void CEPEngine::FinishedProcessingEvent(Ptr<CepEvent> e)
     {
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - e->pkt->m_executionInfo->timestamps[0]).GetMicroSeconds());
-        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        auto dcep = GetObject<Dcep>();
+        Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo = Create<ExecutionInfo>();
+        dcep->FinishedProcessingCepEvent(e);
     }
     
     void
@@ -677,7 +681,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     ThenOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
-        Ptr<ExecEnv> ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        auto dcep = cepEngine->GetObject<Dcep>();
+        Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
         bool constraintsFulfilled = true;
         for (auto c : constraints)
@@ -690,6 +695,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
             return false;
         }
+
+        dcep->PassedConstraints(e, q);
 
         auto *events1 = new std::vector<Ptr<CepEvent>>();
         auto *events2 = new std::vector<Ptr<CepEvent>>();
