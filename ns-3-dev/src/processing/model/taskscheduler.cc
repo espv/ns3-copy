@@ -248,7 +248,7 @@ TaskScheduler::PreEmpt(int cpu, int new_pid)
     new_cr->peu = this->peu->hwModel->cpus[cpu];
 
     if (!this->peu->hwModel->cpus[cpu]->inInterrupt)
-                  Simulator::ScheduleNow(&Thread::Dispatch, new_cr);
+        Simulator::ScheduleNow(&Thread::Dispatch, new_cr);
 }
 
 Ptr<Thread>
