@@ -34,12 +34,13 @@ complex-pkts FIFO -1 packets
 packets-to-be-sent FIFO -1 packets
 all-cepops FIFO -1 cepqueries
 threads-cepops FIFO -1 cepqueries
+check-constraints-cepevents FIFO -1 cepevents
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
-PEU 600 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 600 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
-PEU 600 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 1 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 1 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+#PEU 1 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 
 # New format: MEMBUS||PEU [low frequency] [high frequency] [CPU freq scaling steps] [Low CPU cycles threshold] [High CPU cycles threshold] [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
 #PEU 600 1200 2 100 500 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
@@ -161,6 +162,7 @@ FRACTION 100% 1 1
 
 0 START
 x PROCESS 1500 0  # 6
+x DEQUEUE CEPEVENTQUEUE -1 check-constraints-cepevents
 x EXECUTEFSM check-constraints
 x CALL check-constraints
 0 STOP
@@ -207,6 +209,7 @@ FRACTION 100% 1 1
 
 0 START
 #x PROCESS 5000 0 # 1
+#x PROCESS 5000000 0 # 1
 x CALL process_received_packet  # This ends with handle-cepops trigger being put into the packet.
 # Now we enqueue the packet as many times as there are threads to process the event.
 # Each packet will cause a trigger.
@@ -221,8 +224,8 @@ x TTWAKEUP event_thread1
 x TTWAKEUP event_thread2
 x TTWAKEUP event_thread3
 
-x SEMDOWN packet-threads-SEM global
-x SEMDOWN packet-threads-SEM global
+#x SEMDOWN packet-threads-SEM global
+#x SEMDOWN packet-threads-SEM global
 x SEMDOWN packet-threads-SEM global
 
 # Now, the results have been collected and we send them to any subscribers
@@ -242,6 +245,7 @@ FRACTION 100% 1 1
 
 0 START
 x                  ENQUEUE		SRVQUEUE receive-packet sq
+x ENQUEUE CEPEVENTQUEUE -1 check-constraints-cepevents
 x TTWAKEUP packet_thread1
 x TTWAKEUP packet_thread2
 x TTWAKEUP packet_thread3
@@ -577,9 +581,9 @@ SIGEND
 
 
 THREADS
-packet_thread1 packet_processing_thread infinite 0
-packet_thread2 packet_processing_thread infinite 0
+#packet_thread1 packet_processing_thread infinite 0
+#packet_thread2 packet_processing_thread infinite 0
 packet_thread3 packet_processing_thread infinite 0
-event_thread1 event_processing_thread1 infinite 0
-event_thread2 event_processing_thread2 infinite 0
+#event_thread1 event_processing_thread1 infinite 0
+#event_thread2 event_processing_thread2 infinite 0
 event_thread3 event_processing_thread3 infinite 0

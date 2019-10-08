@@ -51,8 +51,8 @@ SiddhiTRexThroughputDcep::StartApplication (void)
 
 
     NS_LOG_FUNCTION (this);
-
-
+    LogComponentEnable ("Dcep", LOG_LEVEL_ALL);
+    LogComponentEnable ("SiddhiTRexThroughputDcep", LOG_LEVEL_ALL);
 
     Ptr<UniformRandomVariable> x = CreateObject<UniformRandomVariable> ();
     uint32_t mrand = x->GetInteger (1,30);
