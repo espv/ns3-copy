@@ -907,12 +907,7 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
     m_currentLocation->lc->queuesServed[m_currentLocation->curServedQueue] :
     qe->queue;
 
-    //m_currentLocation->curPkt = queueToServe->Dequeue();
-    //m_currentLocation->curPkt = queueToServe->Dequeue();
     auto ei = queueToServe->Dequeue();
-    //m_currentLocation->curPkt = ei->packet;
-    //m_currentLocation->m_executionInfo->packet = ei->packet;
-    //m_currentLocation->m_executionInfo->curCepEvent = ei->curCepEvent;
     m_currentLocation->m_executionInfo = Create<ExecutionInfo>(ei);
 
     // We need call activate any prospective triggers on the queue
