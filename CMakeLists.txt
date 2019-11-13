@@ -3479,6 +3479,175 @@ add_executable(
         ns-3-dev/waf.bat
         ns-3-dev/wscript
         ns-3-dev/wutils.py
+        ns-3-dev/src/nr/model/bwp-manager-algorithm.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ue-info-pf.cc
+        ns-3-dev/src/nr/model/component-carrier-mmwave-ue.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-harq-rr.cc
+        ns-3-dev/src/nr/model/antenna-array-basic-model.cc
+        ns-3-dev/src/nr/model/mmwave-mac-pdu-header.cc
+        ns-3-dev/src/nr/model/nr-amc.cc
+        ns-3-dev/src/nr/model/mmwave-mac-sched-sap.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma-rr.cc
+        ns-3-dev/src/nr/model/nr-lte-mi-error-model.cc
+        ns-3-dev/src/nr/model/mmwave-propagation-loss-model.cc
+        ns-3-dev/src/nr/model/mmwave-spectrum-value-helper.cc
+        ns-3-dev/src/nr/model/antenna-array-3gpp-model.cc
+        ns-3-dev/src/nr/model/mmwave-control-messages.cc
+        ns-3-dev/src/nr/model/nr-error-model.cc
+        ns-3-dev/src/nr/model/mmwave-harq-phy.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma-pf.cc
+        ns-3-dev/src/nr/model/mmwave-ue-net-device.cc
+        ns-3-dev/src/nr/model/mmwave-spectrum-phy.cc
+        ns-3-dev/src/nr/model/mmwave-phy-mac-common.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-cqi-management.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma-rr.cc
+        ns-3-dev/src/nr/model/mmwave-3gpp-propagation-loss-model.cc
+        ns-3-dev/src/nr/model/mmwave-rrc-protocol-ideal.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma.cc
+        ns-3-dev/src/nr/model/mmwave-ue-phy.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ns3-base.cc
+        ns-3-dev/src/nr/model/mmwave.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler.cc
+        ns-3-dev/src/nr/model/mmwave-net-device.cc
+        ns-3-dev/src/nr/model/mmwave-mac-pdu-tag.cc
+        ns-3-dev/src/nr/model/mmwave-spectrum-signal-parameters.cc
+        ns-3-dev/src/nr/model/mmwave-phy.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-lcg.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma-pf.cc
+        ns-3-dev/src/nr/model/mmwave-enb-net-device.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ns3.cc
+        ns-3-dev/src/nr/model/nr-eesm-error-model.cc
+        ns-3-dev/src/nr/model/mmwave-mac-harq-vector.cc
+        ns-3-dev/src/nr/model/mmwave-ue-mac.cc
+        ns-3-dev/src/nr/model/nr-ch-access-manager.cc
+        ns-3-dev/src/nr/model/mmwave-3gpp-buildings-propagation-loss-model.cc
+        ns-3-dev/src/nr/model/mmwave-radio-bearer-tag.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma-mr.cc
+        ns-3-dev/src/nr/model/mmwave-interference.cc
+        ns-3-dev/src/nr/model/antenna-array-model.cc
+        ns-3-dev/src/nr/model/mmwave-chunk-processor.cc
+        ns-3-dev/src/nr/model/mmwave-enb-phy.cc
+        ns-3-dev/src/nr/model/buildings-obstacle-propagation-loss-model.cc
+        ns-3-dev/src/nr/model/mmwave-phy-sap.cc
+        ns-3-dev/src/nr/model/bwp-manager-ue.cc
+        ns-3-dev/src/nr/model/component-carrier-gnb.cc
+        ns-3-dev/src/nr/model/mmwave-3gpp-channel.cc
+        ns-3-dev/src/nr/model/mmwave-enb-mac.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma-mr.cc
+        ns-3-dev/src/nr/model/bwp-manager-gnb.cc
+        ns-3-dev/src/nr/examples/mmwave-tcp-multi-ue.cc
+        ns-3-dev/src/nr/examples/cttc-3gpp-channel-simple-fdm.cc
+        ns-3-dev/src/nr/examples/mmwave-epc-tdma.cc
+        ns-3-dev/src/nr/examples/mmwave-tcp-raytracing-example.cc
+        ns-3-dev/src/nr/examples/cttc-3gpp-channel-simple-ran.cc
+        ns-3-dev/src/nr/examples/cttc-error-model.cc
+        ns-3-dev/src/nr/examples/mmwave-example.cc
+        ns-3-dev/src/nr/examples/mmwave-tcp-multiflow.cc
+        ns-3-dev/src/nr/examples/mmwave-simple-building-obstacle.cc
+        ns-3-dev/src/nr/examples/cttc-3gpp-channel-nums-fdm.cc
+        ns-3-dev/src/nr/examples/mmwave-tcp-example.cc
+        ns-3-dev/src/nr/examples/mmwave-amc-test.cc
+        ns-3-dev/src/nr/examples/mmwave-simple-epc.cc
+        ns-3-dev/src/nr/examples/cttc-3gpp-channel-example.cc
+        ns-3-dev/src/nr/examples/mmwave-3gpp-channel-test.cc
+        ns-3-dev/src/nr/examples/mmwave-epc-amc-test.cc
+        ns-3-dev/src/nr/examples/cttc-error-model-amc.cc
+        ns-3-dev/src/nr/examples/mmwave-3gpp-channel-example.cc
+        ns-3-dev/src/nr/examples/cttc-3gpp-indoor-calibration.cc
+        ns-3-dev/src/nr/examples/cttc-nr-demo.cc
+        ns-3-dev/src/nr/examples/cttc-3gpp-channel-nums.cc
+        ns-3-dev/src/nr/examples/mmwave-amc-test2.cc
+        ns-3-dev/src/nr/examples/cttc-simple-interference-example.cc
+        ns-3-dev/src/nr/examples/cttc-error-model-comparison.cc
+        ns-3-dev/src/nr/examples/mmwave-tdma.cc
+        ns-3-dev/src/nr/examples/mmwave-tcp-building-example.cc
+        ns-3-dev/src/nr/test/mmwave-test-sched.cc
+        ns-3-dev/src/nr/test/mmwave-system-test-schedulers.cc
+        ns-3-dev/src/nr/test/mmwave-test-fdm-of-numerologies.cc
+        ns-3-dev/src/nr/test/test-antenna-3gpp-model-conf.cc
+        ns-3-dev/src/nr/test/nr-test-l2sm-eesm.cc
+        ns-3-dev/src/nr/test/mmwave-system-test-configurations.cc
+        ns-3-dev/src/nr/test/nr-test-3gpp-channel.cc
+        ns-3-dev/src/nr/test/mmwave-test-numerology-delay.cc
+        ns-3-dev/src/nr/helper/nr-point-to-point-epc-helper.cc
+        ns-3-dev/src/nr/helper/mmwave-helper.cc
+        ns-3-dev/src/nr/helper/mmwave-bearer-stats-calculator.cc
+        ns-3-dev/src/nr/helper/mmwave-bearer-stats-connector.cc
+        ns-3-dev/src/nr/helper/mmwave-mac-rx-trace.cc
+        ns-3-dev/src/nr/helper/mmwave-phy-rx-trace.cc
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-lcg.h
+        ns-3-dev/src/nr/model/mmwave-phy-sap.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ns3-base.h
+        ns-3-dev/src/nr/model/buildings-obstacle-propagation-loss-model.h
+        ns-3-dev/src/nr/model/nr-eesm-error-model.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler.h
+        ns-3-dev/src/nr/model/mmwave-mac-harq-process.h
+        ns-3-dev/src/nr/model/mmwave-3gpp-channel.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-cqi-management.h
+        ns-3-dev/src/nr/model/nr-error-model.h
+        ns-3-dev/src/nr/model/mmwave-mac-sched-sap.h
+        ns-3-dev/src/nr/model/mmwave-spectrum-value-helper.h
+        ns-3-dev/src/nr/model/mmwave-mac-pdu-tag.h
+        ns-3-dev/src/nr/model/mmwave-3gpp-buildings-propagation-loss-model.h
+        ns-3-dev/src/nr/model/nr-lte-mi-error-model.h
+        ns-3-dev/src/nr/model/mmwave-mac-harq-vector.h
+        ns-3-dev/src/nr/model/mmwave-radio-bearer-tag.h
+        ns-3-dev/src/nr/model/bwp-manager-ue.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma-rr.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma-pf.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma-pf.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma.h
+        ns-3-dev/src/nr/model/antenna-array-3gpp-model.h
+        ns-3-dev/src/nr/model/mmwave-phy.h
+        ns-3-dev/src/nr/model/mmwave-harq-phy.h
+        ns-3-dev/src/nr/model/mmwave-mac-pdu-header.h
+        ns-3-dev/src/nr/model/nr-ch-access-manager.h
+        ns-3-dev/src/nr/model/mmwave-3gpp-propagation-loss-model.h
+        ns-3-dev/src/nr/model/mmwave-propagation-loss-model.h
+        ns-3-dev/src/nr/model/mmwave-net-device.h
+        ns-3-dev/src/nr/model/mmwave-chunk-processor.h
+        ns-3-dev/src/nr/model/bwp-manager-gnb.h
+        ns-3-dev/src/nr/model/mmwave-enb-mac.h
+        ns-3-dev/src/nr/model/mmwave-phy-mac-common.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ue-info-rr.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma-rr.h
+        ns-3-dev/src/nr/model/mmwave-ue-phy.h
+        ns-3-dev/src/nr/model/mmwave-mac.h
+        ns-3-dev/src/nr/model/mmwave-spectrum-signal-parameters.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ns3.h
+        ns-3-dev/src/nr/model/mmwave-enb-net-device.h
+        ns-3-dev/src/nr/model/nr-amc.h
+        ns-3-dev/src/nr/model/mmwave-interference.h
+        ns-3-dev/src/nr/model/component-carrier-gnb.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-tdma-mr.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ue-info.h
+        ns-3-dev/src/nr/model/antenna-array-basic-model.h
+        ns-3-dev/src/nr/model/mmwave-control-messages.h
+        ns-3-dev/src/nr/model/mmwave-spectrum-phy.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ue-info-mr.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-harq-rr.h
+        ns-3-dev/src/nr/model/mmwave-ue-net-device.h
+        ns-3-dev/src/nr/model/mmwave.h
+        ns-3-dev/src/nr/model/mmwave-mac-csched-sap.h
+        ns-3-dev/src/nr/model/antenna-array-model.h
+        ns-3-dev/src/nr/model/component-carrier-mmwave-ue.h
+        ns-3-dev/src/nr/model/mmwave-rrc-protocol-ideal.h
+        ns-3-dev/src/nr/model/mmwave-enb-phy.h
+        ns-3-dev/src/nr/model/mmwave-ue-mac.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ofdma-mr.h
+        ns-3-dev/src/nr/model/mmwave-mac-scheduler-ue-info-pf.h
+        ns-3-dev/src/nr/model/bwp-manager-algorithm.h
+        ns-3-dev/src/nr/helper/mmwave-phy-rx-trace.h
+        ns-3-dev/src/nr/helper/mmwave-bearer-stats-connector.h
+        ns-3-dev/src/nr/helper/mmwave-helper.h
+        ns-3-dev/src/nr/helper/mmwave-bearer-stats-calculator.h
+        ns-3-dev/src/nr/helper/mmwave-mac-rx-trace.h
+        ns-3-dev/src/nr/helper/nr-point-to-point-epc-helper.h
+        ns-3-dev/src/nr/doc/main.h
+        ns-3-dev/src/nr/doc/getting-started.h
+        ns-3-dev/src/nr/doc/groups.h
         CMakeLists.txt
         README.md
         ns-3-dev/src/processing/model/software-execution-model.cc
@@ -3510,6 +3679,7 @@ add_custom_target(
         Siddhi-T-Rex-throughput COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )
+
 add_custom_target(
         Siddhi-T-Rex-execution-time COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
@@ -3520,5 +3690,10 @@ add_custom_target(
 )
 add_custom_target(
         tcp-example COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
+)
+
+add_custom_target(
+        nr-example COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )

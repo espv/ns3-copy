@@ -173,6 +173,22 @@ protected:
 };
 
 
+class ComponentCarrierBaseStation : public ComponentCarrier
+{
+public:
+    static TypeId GetTypeId (void);
+
+    ComponentCarrierBaseStation ();
+
+    virtual ~ComponentCarrierBaseStation (void);
+
+    uint16_t GetCellId ();
+
+    void SetCellId (uint16_t cellId);
+
+protected:
+    uint16_t m_cellId;
+};
 
 } // namespace ns3
 

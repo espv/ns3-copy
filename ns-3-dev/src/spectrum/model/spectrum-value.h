@@ -157,6 +157,8 @@ public:
    */
   Values::iterator ValuesEnd ();
 
+  int GetValuesN();
+
 
 
   /**

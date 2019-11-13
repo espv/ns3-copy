@@ -90,6 +90,12 @@ SpectrumValue::ValuesEnd ()
   return m_values.end ();
 }
 
+int
+SpectrumValue::GetValuesN()
+{
+    return m_values.size();
+}
+
 Bands::const_iterator
 SpectrumValue::ConstBandsBegin () const
 {
