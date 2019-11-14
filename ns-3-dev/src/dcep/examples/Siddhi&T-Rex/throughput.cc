@@ -39,23 +39,31 @@ class SiddhiTRexTrace {
     std::string traceFileName;
     std::queue<int> indexQueue;
 
-    std::queue<std::pair<Time, Ptr<CepEvent> > > rxCepEventTraceTuples;
+    /*std::queue<std::pair<Time, Ptr<CepEvent> > > rxCepEventTraceTuples;
     std::queue<Time> clearQueriesTraceTuples;
     std::queue<std::pair<Time, Ptr<Query> > > txQueryTraceTuples;
     std::queue<std::pair<Time, std::pair<Ptr<CepEvent>, Ptr<Query> > > > passedConstraintsTraceTuples;
     std::queue<std::pair<Time, Ptr<CepEvent> > > checkedConstraintsTraceTuples;
-    std::queue<std::pair<Time, Ptr<CepEvent> > > rxFinalCepEventTraceTuples;
+    std::queue<std::pair<Time, Ptr<CepEvent> > > rxFinalCepEventTraceTuples;*/
+
+    std::queue<std::vector<long> > rxCepEventTraceTuples;
+    std::queue<std::vector<long> > clearQueriesTraceTuples;
+    std::queue<std::vector<long> > txQueryTraceTuples;
+    std::queue<std::vector<long> > passedConstraintsTraceTuples;
+    std::queue<std::vector<long> > checkedConstraintsTraceTuples;
+    std::queue<std::vector<long> > rxFinalCepEventTraceTuples;
+    std::queue<std::vector<long> > finishedProcessingCepEvent;
 
 public:
     SiddhiTRexTrace(std::string traceFileName);
 
-    void RxCepEventTrace(Ptr<CepEvent> e);
+    void RxCepEventTrace(Ptr<CepEvent> e, Thread *t);
     void ClearQueriesTrace();
-    void TxQueryTrace(Ptr<Query> q);
-    void CheckedConstraintsTrace(Ptr<CepEvent> e);
-    void PassedConstraintsTrace(Ptr<CepEvent> e, Ptr<Query> q);
-    void RxFinalCepEventTrace(Ptr<CepEvent> e);
-    void FinishedProcessingCepEvent(Ptr<CepEvent> e);
+    void TxQueryTrace(Ptr<Query> q, Thread *t);
+    void CheckedConstraintsTrace(Ptr<CepEvent> e, Thread *t);
+    void PassedConstraintsTrace(Ptr<CepEvent> e, Ptr<Query> q, Thread *t);
+    void RxFinalCepEventTrace(Ptr<CepEvent> e, Thread *t);
+    void FinishedProcessingCepEvent(Ptr<CepEvent> e, Thread *t);
 
     void WriteTraceToFile();
 };
@@ -67,11 +75,16 @@ SiddhiTRexTrace::SiddhiTRexTrace(std::string traceFileName)
 }
 
 
-void SiddhiTRexTrace::RxCepEventTrace(Ptr<CepEvent> e)
+void SiddhiTRexTrace::RxCepEventTrace(Ptr<CepEvent> e, Thread *t)
 {
     std::cout << Simulator::Now() << ": Received CEP event " << e << std::endl;
-    auto pair = make_pair(Simulator::Now(), e);
-    rxCepEventTraceTuples.push(pair);
+    //auto pair = make_pair(Simulator::Now(), e);
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    args->push_back(t->GetPid());
+    args->push_back(e->m_seq);
+    rxCepEventTraceTuples.push(*args);
+    //rxCepEventTraceTuples.push(pair);
     indexQueue.push(1);
 }
 
@@ -79,51 +92,88 @@ void SiddhiTRexTrace::RxCepEventTrace(Ptr<CepEvent> e)
 void SiddhiTRexTrace::ClearQueriesTrace()
 {
     std::cout << Simulator::Now() << ": Cleared queries" << std::endl;
-    clearQueriesTraceTuples.push(Simulator::Now());
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    clearQueriesTraceTuples.push(*args);
+    //clearQueriesTraceTuples.push(Simulator::Now());
     indexQueue.push(222);
 }
 
 
-void SiddhiTRexTrace::TxQueryTrace(Ptr<Query> q)
+void SiddhiTRexTrace::TxQueryTrace(Ptr<Query> q, Thread *t)
 {
     std::cout << Simulator::Now() << ": Transmitted query " << q->eventType << std::endl;
-    auto pair = make_pair(Simulator::Now(), q);
-    txQueryTraceTuples.push(pair);
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    args->push_back(q->query_base_id);
+    txQueryTraceTuples.push(*args);
+    //auto pair = make_pair(Simulator::Now(), q);
+    //txQueryTraceTuples.push(pair);
     indexQueue.push(221);
 }
 
 
-void SiddhiTRexTrace::CheckedConstraintsTrace(Ptr<CepEvent> e)
+void SiddhiTRexTrace::CheckedConstraintsTrace(Ptr<CepEvent> e, Thread *t)
 {
     std::cout << Simulator::Now() << ": " << e << " Checked constraints of event " << e->type << std::endl;
-    auto pair = make_pair(Simulator::Now(), e);
-    checkedConstraintsTraceTuples.push(pair);
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    args->push_back(t->GetPid());
+    args->push_back(e->m_seq);
+    checkedConstraintsTraceTuples.push(*args);
+    //auto pair = make_pair(Simulator::Now(), e);
+    //checkedConstraintsTraceTuples.push(pair);
     indexQueue.push(4);
 }
 
-void SiddhiTRexTrace::PassedConstraintsTrace(Ptr<CepEvent> e, Ptr<Query> q)
+void SiddhiTRexTrace::PassedConstraintsTrace(Ptr<CepEvent> e, Ptr<Query> q, Thread *t)
 {
     std::cout << Simulator::Now() << ": Event " << e->type << " passed constraints of query " << q->eventType << std::endl;
-    auto pair = make_pair(Simulator::Now(), make_pair(e, q));
-    passedConstraintsTraceTuples.push(pair);
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    args->push_back(t->GetPid());
+    args->push_back(e->m_seq);
+    args->push_back(q->id);
+    passedConstraintsTraceTuples.push(*args);
+    //auto pair = make_pair(Simulator::Now(), make_pair(e, q));
+    //passedConstraintsTraceTuples.push(pair);
     indexQueue.push(5);
 }
 
 
-void SiddhiTRexTrace::RxFinalCepEventTrace(Ptr<CepEvent> e)
+void SiddhiTRexTrace::RxFinalCepEventTrace(Ptr<CepEvent> e, Thread *t)
 {
     std::cout << Simulator::Now() << ": Created complex event " << e->type << std::endl;
-    auto pair = make_pair(Simulator::Now(), e);
-    rxFinalCepEventTraceTuples.push(pair);
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    args->push_back(t->GetPid());
+    args->push_back(e->m_seq);
+    rxFinalCepEventTraceTuples.push(*args);
+    //auto pair = make_pair(Simulator::Now(), e);
+    //rxFinalCepEventTraceTuples.push(pair);
     indexQueue.push(6);
 }
 
-void SiddhiTRexTrace::FinishedProcessingCepEvent(Ptr<CepEvent> e)
+void SiddhiTRexTrace::FinishedProcessingCepEvent(Ptr<CepEvent> e, Thread *t)
 {
     std::cout << Simulator::Now() << ": Finished processing CEP event " << e->type << std::endl;
-    auto pair = make_pair(Simulator::Now(), e);
-    rxFinalCepEventTraceTuples.push(pair);
+    auto *args = new std::vector<long>();
+    args->push_back((long)Simulator::Now().GetNanoSeconds());
+    args->push_back(t->GetPid());
+    args->push_back(e->m_seq);
+    finishedProcessingCepEvent.push(*args);
+    //auto pair = make_pair(Simulator::Now(), e);
+    //finishedProcessingCepEvent.push(pair);
     indexQueue.push(100);
+}
+
+
+void writeTupleToFile(ofstream& myfile, int index, const std::vector<long>& items) {
+    myfile << index;
+    for (auto item : items) {
+        myfile << "\t" << item;
+    }
+    myfile << "\n";
 }
 
 
@@ -136,53 +186,58 @@ void SiddhiTRexTrace::WriteTraceToFile() {
     while (!indexQueue.empty()) {
         auto index = indexQueue.front();
         indexQueue.pop();
+        std::vector<long> items;
         switch (index) {
             case 1: {
-                std::pair<Time, Ptr<CepEvent> > item = rxCepEventTraceTuples.front();
+                //std::pair<Time, Ptr<CepEvent> > item = rxCepEventTraceTuples.front();
+                items = rxCepEventTraceTuples.front();
                 rxCepEventTraceTuples.pop();
-                NS_LOG_INFO(item.first.GetMilliSeconds() << ": Received event " << item.second->type);
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << item.first.GetNanoSeconds() << "\n";
+                NS_LOG_INFO(items[0] << ": Received event " << items[1]);
                 break;
             } case 222: {
-                Time t = clearQueriesTraceTuples.front();
+                //Time t = clearQueriesTraceTuples.front();
+                items = clearQueriesTraceTuples.front();
                 clearQueriesTraceTuples.pop();
-                NS_LOG_INFO(t.GetMilliSeconds() << ": ClearQueries");
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << t.GetNanoSeconds() << "\n";
+                NS_LOG_INFO(items[0] << ": ClearQueries");
+                //myfile << index << "\t" << items[0] << "\n";
                 break;
             } case 221: {
-                auto item = txQueryTraceTuples.front();
+                items = txQueryTraceTuples.front();
                 txQueryTraceTuples.pop();
-                NS_LOG_INFO(item.first.GetMilliSeconds() << ": Transmitted query " << item.second->eventType);
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << item.first.GetNanoSeconds() << "\n";
+                NS_LOG_INFO(items[0] << ": Transmitted query " << items[2]);
+                //myfile << index << "\t" << items[0] << "\t" << items[1] << "\n";
                 break;
             } case 4: {
-                auto item = checkedConstraintsTraceTuples.front();
+                items = checkedConstraintsTraceTuples.front();
                 checkedConstraintsTraceTuples.pop();
-                NS_LOG_INFO(item.first.GetMilliSeconds() << ": Checked constraints of event " << item.second->type);
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << item.first.GetNanoSeconds() << "\n";
+                NS_LOG_INFO(items[0] << ": Checked constraints of event " << items[2]);
+                //myfile << index << "\t" << items[0] << "\t" << items[1] << "\n";
                 break;
             } case 5: {
-                auto item = passedConstraintsTraceTuples.front();
+                items = passedConstraintsTraceTuples.front();
                 passedConstraintsTraceTuples.pop();
-                NS_LOG_INFO(item.first.GetMilliSeconds() << ": Event " << item.second.first->type << " passed the constraints of query " << item.second.second->eventType);
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << item.first.GetNanoSeconds() << "\n";
+                NS_LOG_INFO(items[0] << ": Event " << items[2] << " passed the constraints of query " << items[3]);
+
+                //myfile << index << "\t" << items[0] << "\t" << items[1] << "\n";
                 break;
             } case 6: {
-                auto item = rxFinalCepEventTraceTuples.front();
+                items = rxFinalCepEventTraceTuples.front();
                 rxFinalCepEventTraceTuples.pop();
-                NS_LOG_INFO(item.first.GetMilliSeconds() << ": Created complex event " << item.second->type);
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << item.first.GetNanoSeconds() << "\n";
+                NS_LOG_INFO(items[0] << ": Created complex event " << items[2]);
+                //myfile << index << "\t" << items[0] << "\t" << items[1] << "\n";
                 break;
             } case 100: {
-                auto item = rxFinalCepEventTraceTuples.front();
-                rxFinalCepEventTraceTuples.pop();
-                NS_LOG_INFO(item.first.GetMilliSeconds() << ": Finished processing CEP event " << item.second->type);
-                myfile << index << "\t" << "-" << "\t" << "-" << "\t" << "-" << "\t" << item.first.GetNanoSeconds() << "\n";
+                items = finishedProcessingCepEvent.front();
+                finishedProcessingCepEvent.pop();
+                NS_LOG_INFO(items[0] << ": Finished processing CEP event " << items[2]);
+                //myfile << index << "\t" << items[0] << "\t" << items[1] << "\n";
                 break;
             } default: {
                 break;
             }
         }
+
+        writeTupleToFile(myfile, index, items);
     }
 
     NS_LOG_INFO("Finished writing trace file " << traceFileName);

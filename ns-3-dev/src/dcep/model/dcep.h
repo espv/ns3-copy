@@ -61,13 +61,13 @@ public:
 
     Ptr<Node> node;
 
-    TracedCallback<Ptr<CepEvent> > RxCepEvent;
+    TracedCallback<Ptr<CepEvent>, Thread* > RxCepEvent;
     TracedCallback<> ClearQueries;
-    TracedCallback<Ptr<Query> > TxQuery;
-    TracedCallback<Ptr<CepEvent> > CheckedConstraints;
-    TracedCallback<Ptr<CepEvent>, Ptr<Query> > PassedConstraints;
-    TracedCallback<Ptr<CepEvent> > RxFinalCepEvent;
-    TracedCallback<Ptr<CepEvent> > FinishedProcessingCepEvent;
+    TracedCallback<Ptr<Query>, Thread* > TxQuery;
+    TracedCallback<Ptr<CepEvent>, Thread* > CheckedConstraints;
+    TracedCallback<Ptr<CepEvent>, Ptr<Query>, Thread* > PassedConstraints;
+    TracedCallback<Ptr<CepEvent>, Thread* > RxFinalCepEvent;
+    TracedCallback<Ptr<CepEvent>, Thread* > FinishedProcessingCepEvent;
 protected:
     
     virtual void StartApplication (void);

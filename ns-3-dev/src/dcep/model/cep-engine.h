@@ -131,6 +131,7 @@ namespace ns3 {
         Query(Ptr<Query> q);
         Query();
         uint32_t id;
+        uint32_t query_base_id;
         uint32_t actionType;
         std::string eventType;
         bool isAtomic;

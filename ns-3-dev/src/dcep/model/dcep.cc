@@ -229,7 +229,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         NS_LOG_FUNCTION(this);
         NS_LOG_INFO(Simulator::Now() << " DCEP: received query to dispatch");
 
-        this->TxQuery(q);
+        auto ee = node->GetObject<ExecEnv>();
+        this->TxQuery(q, ee->currentlyExecutingThread);
         GetObject<Placement>()->RecvQuery(q);
     }
     
@@ -350,7 +351,8 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
     void 
     Dcep::SendFinalCepEventToSink(Ptr<CepEvent> event)
     {
-        this->RxFinalCepEvent(event);
+        auto ee = node->GetObject<ExecEnv>();
+        this->RxFinalCepEvent(event, ee->currentlyExecutingThread);
 
         GetObject<Sink>()->receiveFinalCepEvent(event);
     }

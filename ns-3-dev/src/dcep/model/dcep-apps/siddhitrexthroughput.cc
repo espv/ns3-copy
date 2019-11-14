@@ -134,7 +134,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 continue;
 
             auto splitLine = split(line, '\t');
-            int argument = std::stoi(splitLine[3]);
+            //int argument = std::stoi(splitLine[3]);
             int tracepointID = std::stoi(splitLine[0]);
 
             json tracepoint = metadata[tracepointID];
@@ -144,8 +144,8 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
 
             static long long first_time = 0;
             if (first_time == 0)
-                first_time = (NanoSeconds(stol(splitLine[4])) - Seconds(100)).GetNanoSeconds();
-            next_time = NanoSeconds(stol(splitLine[4])-first_time);
+                first_time = (NanoSeconds(stol(splitLine[1])) - Seconds(100)).GetNanoSeconds();
+            next_time = NanoSeconds(stol(splitLine[1])-first_time);
 
             std::string tracepointName = tracepoint["name"];
 
@@ -156,7 +156,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
             // real-world execution.
             if (tracepointName == "receiveEvent") {
                 // Schedule a CEP event to be produced
-                int eventID = argument;
+                int eventID = std::stoi(splitLine[2]);
                 json event_to_add;
                 auto cepevents = j["cepevents"];
                 for (auto cepevent : cepevents) {
@@ -172,7 +172,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 e->event_class = ATOMIC_EVENT;
                 e->delay = 0; // initializing delay
                 static int cnt;
-                e->m_seq = cnt;
+                e->m_seq = cnt++;
                 e->hopsCount = 0;
                 e->prevHopsCount = 0;
                 std::map<std::string, double> numberValues;
@@ -186,18 +186,18 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                         NS_ABORT_MSG("CEP event has unsupported attribute type");
                     }
                 }
-                e->timestamp = Simulator::Now();
+                e->timestamp = next_time;
                 e->pkt = Create<Packet>();  // Dummy packet for processing delay
                 NS_LOG_INFO(Simulator::Now() << " CepEvent number " << e->m_seq << " timestamp: " << e->timestamp);
                 // TODO: Find out how to create the events once instead of every "receive_event" event
                 Simulator::Schedule (next_time, &CEPEngine::ProcessCepEvent, GetObject<CEPEngine>(), e);
             } else if (tracepointName == "addQuery") {
                 // Schedule a complex query to be produced and placed
-                int queryID = argument;
+                int queryId = std::stoi(splitLine[2]);
                 json query_to_add;
                 auto cepqueries = j["cepqueries"];
                 for (auto cepquery : cepqueries) {
-                    if (cepquery["id"] == queryID) {
+                    if (cepquery["id"] == queryId) {
                         // Found query
                         query_to_add = cepquery;
                         break;
@@ -207,6 +207,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 Ptr<Query> q = CreateObject<Query>();  // q3 = complex event
                 q->toBeProcessed = true;
                 q->actionType = NOTIFICATION;
+                q->query_base_id = queryId;
                 static int query_cnt = 0;
                 static int complex_event_cnt = 0;
                 q->id = query_cnt++;
@@ -438,7 +439,7 @@ SiddhiTRexThroughputDataSource::GenerateAtomicCepEvents(Ptr<Query> q) {
 
     if(m_eventType != " ")
     {
-        counter++;
+        ++counter;
         Ptr<CepEvent> e = CreateObject<CepEvent>();
         NS_LOG_INFO(Simulator::Now() << " creating event of type " << m_eventType << " cnt " << counter);
         e->type = m_eventType;

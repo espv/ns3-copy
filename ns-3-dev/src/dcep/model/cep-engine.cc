@@ -97,7 +97,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto dcep = GetObject<Dcep>();
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         if (values.begin() == values.end()) {
-            dcep->CheckedConstraints(e);
+            dcep->CheckedConstraints(e, ee->currentlyExecutingThread);
             ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
             return;
         }
@@ -183,15 +183,15 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         //NS_LOG_INFO(Simulator::Now() << " Time to process event " << e->m_seq << ": " << (Simulator::Now() - ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0]).GetMicroSeconds() << " µs");
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo = Create<ExecutionInfo>();
-        dcep->FinishedProcessingCepEvent(e);
+        dcep->FinishedProcessingCepEvent(e, ee->currentlyExecutingThread);
     }
     
     void
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
     {
         auto dcep = GetObject<Dcep>();
-        dcep->RxCepEvent(e);
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
+        dcep->RxCepEvent(e, ee->currentlyExecutingThread);
         auto node = GetObject<Dcep>()->GetNode();
 
         // I think it's an error to just set the curCepEvent for the entire thread to be e, since a function that
@@ -696,7 +696,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             return false;
         }
 
-        dcep->PassedConstraints(e, q);
+        dcep->PassedConstraints(e, q, ee->currentlyExecutingThread);
 
         auto *events1 = new std::vector<Ptr<CepEvent>>();
         auto *events2 = new std::vector<Ptr<CepEvent>>();
