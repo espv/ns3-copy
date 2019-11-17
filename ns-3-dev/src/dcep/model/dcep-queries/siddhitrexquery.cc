@@ -23,6 +23,10 @@ namespace ns3 {
       Ptr<SiddhiTRexQuery> q = CreateObject<SiddhiTRexQuery>();;
       switch (query_id) {
         case SIDDHITREXDETECTFIRETEMPGT80HUMIDITYLT10: {
+
+          break;
+        }
+        case SIDDHITREXDETECTFIRETEMPGT45HUMIDITYLT25: {
           q->toBeProcessed = true;
           q->actionType = NOTIFICATION;
           q->query_base_id = query_id;
@@ -50,10 +54,6 @@ namespace ns3 {
           q->assigned = false;
           q->currentHost.Set("0.0.0.0");
           q->parent_output = event1 + "then" + event2;
-          break;
-        }
-        case SIDDHITREXDETECTFIRETEMPGT45HUMIDITYLT25: {
-
           break;
         }
         default: {
