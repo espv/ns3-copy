@@ -36,6 +36,7 @@ namespace ns3 {
     class SerializedQuery;
     class Producer;
     class CEPEngine;
+    class FogApplicationComponent;
     
     class Window : public Object{
     public:
@@ -134,6 +135,12 @@ namespace ns3 {
     {
     public:
         static TypeId GetTypeId ();
+
+        /*
+         * Builds a DAG of ApplicationComponent objects
+         * @return Pointer to the last ApplicationComponent in the DAG
+         */
+        virtual Ptr<FogApplicationComponent> buildComponentDAG();
     };
 
     class Query : public FogService
@@ -173,7 +180,7 @@ namespace ns3 {
         SerializedQuery* serialize();
         void deserialize(uint8_t *buffer, uint32_t);
         uint32_t getSerializedSize();
-        static Ptr<Query> buildQuery(int query_id);
+        Ptr<FogApplicationComponent> buildComponentDAG() final;
          
     };
 

@@ -1002,6 +1002,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         return tid;
     }
+
+    Ptr<FogApplicationComponent> FogService::buildComponentDAG() {return nullptr;}
     
     TypeId
     Query::GetTypeId(void)
@@ -1149,7 +1151,15 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->currentHost = q->currentHost;
     }
     
-    
+    Ptr<FogApplicationComponent>
+    Query::buildComponentDAG()
+    {
+        /* In this methods, we create a set of operators that are connected together
+         * For instance, the ThenOperator might be the final operator that produces the complex event,
+         * but before it, comes two filter operations: a filter for the first event, and one for the second.
+         */
+        return CreateObject<ThenOperator>();
+    }
 
     uint32_t 
     Query::getSerializedSize()
