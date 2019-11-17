@@ -21,6 +21,8 @@ def build(bld):
         'model/dcep-apps/siddhitrexthroughput.cc',
         'model/dcep-apps/siddhitrexexecutiontime.cc',
         'model/dcep-queries/siddhitrexquery.cc',
+        'model/dcep-cepengines/siddhicepengine.cc',
+        'model/dcep-cepengines/trexcepengine.cc'
         ]
 
     module_test = bld.create_ns3_module_test_library('dcep')
@@ -44,7 +46,9 @@ def build(bld):
         'model/dcep-state.h',
         'model/dcep-apps/siddhitrexthroughput.h',
         'model/dcep-apps/siddhitrexexecutiontime.h',
-        'model/dcep-queries/siddhitrexquery.h'
+        'model/dcep-queries/siddhitrexquery.h',
+        'model/dcep-cepengines/siddhicepengine.h',
+        'model/dcep-cepengines/trexcepengine.h'
         ]
 
     if bld.env['ENABLE_EXAMPLES']:
