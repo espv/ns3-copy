@@ -63,6 +63,7 @@ namespace ns3
     public:
         std::string type;
         uint32_t event_class;
+        uint32_t event_base;
         uint64_t delay;
         uint64_t m_seq;
         uint32_t hopsCount;

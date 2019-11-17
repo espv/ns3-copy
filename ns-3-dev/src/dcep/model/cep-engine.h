@@ -60,6 +60,7 @@ namespace ns3 {
         uint64_t m_seq;
         uint64_t delay;
         uint32_t event_class;
+        uint32_t event_base;
         uint32_t hopsCount;
         uint32_t prevHopsCount;
         Time timestamp;

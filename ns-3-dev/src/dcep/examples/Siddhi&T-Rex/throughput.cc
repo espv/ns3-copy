@@ -84,6 +84,7 @@ void SiddhiTRexTrace::RxCepEventTrace(Ptr<CepEvent> e, Thread *t)
     args->push_back((long)Simulator::Now().GetNanoSeconds());
     args->push_back(t->GetPid());
     args->push_back(e->m_seq);
+    args->push_back(e->event_base);
     rxCepEventTraceTuples.push(*args);
     //rxCepEventTraceTuples.push(pair);
     indexQueue.push(1);

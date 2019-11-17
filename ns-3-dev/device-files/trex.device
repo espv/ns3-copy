@@ -38,7 +38,7 @@ check-constraints-cepevents FIFO -1 cepevents
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
-PEU 1 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
+PEU 1000000 cpu0 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 1 cpu1 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 #PEU 1 cpu2 ns3::processing::RoundRobinScheduler 0 irq_enter HIRQ
 

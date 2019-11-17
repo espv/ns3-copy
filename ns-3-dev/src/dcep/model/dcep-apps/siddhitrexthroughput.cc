@@ -157,7 +157,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
             // real-world execution.
             if (tracepointName == "receiveEvent") {
                 // Schedule a CEP event to be produced
-                int eventID = std::stoi(splitLine[2]);
+                int eventID = std::stoi(splitLine[4]);
                 json event_to_add;
                 auto cepevents = j["cepevents"];
                 for (auto cepevent : cepevents) {
@@ -169,6 +169,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 }
 
                 Ptr<CepEvent> e = CreateObject<CepEvent>();
+                e->event_base = eventID;
                 e->type = std::to_string((int)event_to_add["stream-id"]);
                 e->event_class = ATOMIC_EVENT;
                 e->delay = 0; // initializing delay
