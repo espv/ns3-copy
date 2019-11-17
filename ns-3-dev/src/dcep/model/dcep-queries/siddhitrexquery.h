@@ -6,7 +6,9 @@
 #define NS_3_EXTENDED_WITH_EXECUTION_ENVIRONMENT_SIDDHITREXQUERY_H
 
 #include "ns3/cep-engine.h"
+#include <nlohmann/json.hpp>
 
+using json = nlohmann::json;
 namespace ns3 {
 
     enum SiddhiTRexQueryId {
@@ -17,7 +19,7 @@ namespace ns3 {
     class SiddhiTRexQuery : public Query {
     public:
         static TypeId GetTypeId ();
-        static Ptr<SiddhiTRexQuery> buildQuery(SiddhiTRexQueryId query_id);
+        static Ptr<SiddhiTRexQuery> buildQuery(SiddhiTRexQueryId query_id, json query_to_add);
     };
 
 }

@@ -125,8 +125,8 @@ namespace ns3 {
         
         if (e->event_class == FINAL_EVENT) {
             Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("AllCepOpsDoneYet")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->setLocalStateVariable("AllCepOpsDoneYet", 1);
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
             SendCepEventToSink(e);
         }
         else

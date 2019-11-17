@@ -205,7 +205,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                     }
                 }
 
-                Ptr<SiddhiTRexQuery> q = SiddhiTRexQuery::buildQuery((SiddhiTRexQueryId)queryId);
+                Ptr<SiddhiTRexQuery> q = SiddhiTRexQuery::buildQuery((SiddhiTRexQueryId)queryId, query_to_add);
 
                 //Ptr<Query> q = CreateObject<Query>();  // q3 = complex event
                 /*q->toBeProcessed = true;

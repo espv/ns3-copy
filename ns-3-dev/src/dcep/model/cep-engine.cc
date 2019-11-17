@@ -98,20 +98,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
         if (values.begin() == values.end()) {
             dcep->CheckedConstraints(e, ee->currentlyExecutingThread);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 1;
+            ee->setLocalStateVariable("constraints-done", 1);
             return;
         }
         auto k = values.begin()->first;
         values.erase(values.begin());
 
         // Constraint type is 1 (string)
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 1;
+        ee->setLocalStateVariable("constraints-type", 1);
 
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+        ee->setLocalStateVariable("constraints-done", 0);
         if (constraints[k]) {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
+            ee->setLocalStateVariable("constraint-processed", 1);
         } else {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
+            ee->setLocalStateVariable("constraint-processed", 0);
         }
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckStringConstraints, this, e, constraints, cep, producer, values);
@@ -131,13 +131,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         values.erase(values.begin());
 
         // Constraint type is 0 (number)
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-type")->value = 0;
-
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraints-done")->value = 0;
+        ee->setLocalStateVariable("constraints-type", 0);
+        ee->setLocalStateVariable("constraints-done", 0);
         if (constraints[k]) {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 1;
+            ee->setLocalStateVariable("constraint-processed", 1);
         } else {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("constraint-processed")->value = 0;
+            ee->setLocalStateVariable("constraint-processed", 0);
         }
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
         ee->Proceed(1, ee->currentlyExecutingThread, "check-constraints", &CEPEngine::DoCheckNumberConstraints, this, e, constraints, cep, producer, values, stringValues);
@@ -330,10 +329,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         e->pkt = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet;
         auto op = ee->currentlyExecutingThread->m_currentLocation->curCepQuery;
 
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 0;
+        ee->setLocalStateVariable("CepOpDoneYet", 0);
+        ee->setLocalStateVariable("CreatedComplexEvent", 0);
         if (!op->ExpectingCepEvent(e->type)) {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
             return;
         }
 
@@ -557,10 +556,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         auto ee = node->GetObject<ExecEnv>();
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 0;
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
+        ee->setLocalStateVariable("CepOpType", 0);
+        ee->setLocalStateVariable("CreatedComplexEvent", 0);
+        ee->setLocalStateVariable("CepOpDoneYet", 1);
+        ee->setLocalStateVariable("attributes-left", 0);
         if (!constraintsFulfilled) {
             return false;
         }
@@ -575,8 +574,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto ee = node->GetObject<ExecEnv>();
         if (events1->empty()) {
             // No sequences left
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
+            ee->setLocalStateVariable("InsertedSequence", 0);
             delete events1;
             return false;
         }
@@ -596,11 +595,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             Consume(returned);
 
             p->HandleNewCepEvent(q, returned, this);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            ee->setLocalStateVariable("CepOpDoneYet", 0);
+            ee->setLocalStateVariable("InsertedSequence", 1);
         } else {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 0;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            ee->setLocalStateVariable("CepOpDoneYet", 0);
+            ee->setLocalStateVariable("InsertedSequence", 0);
         }
 
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
@@ -617,7 +616,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         auto ee = cepEngine->GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
 
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 1;
+        ee->setLocalStateVariable("CepOpType", 1);
 
         if (!events1->empty() && !events2->empty())
         {
@@ -637,8 +636,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             
         } else {
             // No sequences left
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
+            ee->setLocalStateVariable("InsertedSequence", 1);
         }
         return false;
     }
@@ -649,8 +648,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         auto ee = node->GetObject<ExecEnv>();
         if (events1->empty()) {
             // No sequences left
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
+            ee->setLocalStateVariable("InsertedSequence", 0);
             delete events1;
             return false;
         }
@@ -668,11 +667,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             returned.push_back(newEvent2);
 
             p->HandleNewCepEvent(q, returned, this);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CreatedComplexEvent")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->setLocalStateVariable("InsertedSequence", 1);
+            ee->setLocalStateVariable("CreatedComplexEvent", 1);
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
         } else {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            ee->setLocalStateVariable("InsertedSequence", 0);
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
             ee->Proceed(1, ee->currentlyExecutingThread, "handle-then-cepop", &ThenOperator::DoEvaluate, this, newEvent2, returned, events1, q, p, ops, cep);
         }
@@ -683,7 +682,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         auto dcep = cepEngine->GetObject<Dcep>();
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 2;
+        ee->setLocalStateVariable("CepOpType", 2);
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
@@ -692,7 +691,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
 
         if (!constraintsFulfilled) {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
             return false;
         }
 
@@ -711,8 +710,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->Proceed(1, ee->currentlyExecutingThread, "handle-then-cepop", &ThenOperator::DoEvaluate, this, e, returned, events1, q, p, ops, cep);
         } else {
             // No sequences left
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
+            ee->setLocalStateVariable("InsertedSequence", 1);
             delete events1;
             delete events2;
         }
@@ -727,8 +726,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         // Here we insert the incoming event into the sequence
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpType")->value = 0;
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("CepOpDoneYet")->value = 1;
+        ee->setLocalStateVariable("CepOpType", 0);
+        ee->setLocalStateVariable("CepOpDoneYet", 1);
         bool constraintsFulfilled = true;
         for (auto c : q->constraints)
         {
@@ -737,9 +736,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
         if (constraintsFulfilled) {
             p->HandleNewCepEvent(q, returned, this);
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 1;
+            ee->setLocalStateVariable("InsertedSequence", 1);
         } else {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("InsertedSequence")->value = 0;
+            ee->setLocalStateVariable("InsertedSequence", 0);
         }
         return constraintsFulfilled;
     }
@@ -868,7 +867,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     Producer::AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op, int index) {
         Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
         if (index >= events.size()) {
-            ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 0;
+            ee->setLocalStateVariable("attributes-left", 0);
             // Here we consume the previous events
             ee->queues["complex-pkts"]->Enqueue(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo);
             Ptr<Forwarder> forwarder = GetObject<Forwarder>();
@@ -877,7 +876,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             return;
         }
 
-        ee->currentlyExecutingThread->m_currentLocation->getLocalStateVariable("attributes-left")->value = 1;
+        ee->setLocalStateVariable("attributes-left", 1);
         auto e = events[index];
         for( auto const& [key, val] : e->stringValues )
         {

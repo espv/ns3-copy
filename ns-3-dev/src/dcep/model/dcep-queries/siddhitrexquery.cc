@@ -2,9 +2,11 @@
 // Created by espen on 16.11.2019.
 //
 
+#include <nlohmann/json.hpp>
 #include <ns3/common.h>
 #include "siddhitrexquery.h"
 
+using json = nlohmann::json;
 namespace ns3 {
 
     TypeId
@@ -17,7 +19,7 @@ namespace ns3 {
       return tid;
     }
 
-    Ptr<SiddhiTRexQuery> SiddhiTRexQuery::buildQuery(SiddhiTRexQueryId query_id) {
+    Ptr<SiddhiTRexQuery> SiddhiTRexQuery::buildQuery(SiddhiTRexQueryId query_id, json query_to_add) {
       Ptr<SiddhiTRexQuery> q = CreateObject<SiddhiTRexQuery>();;
       switch (query_id) {
         case SIDDHITREXDETECTFIRETEMPGT80HUMIDITYLT10: {

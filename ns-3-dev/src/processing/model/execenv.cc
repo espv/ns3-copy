@@ -74,6 +74,9 @@ ExecEnv::ExecEnv() :
                             dummyProgramLoc);
     }
 
+    void ExecEnv::setLocalStateVariable(std::string stateVariable, int value) {
+        currentlyExecutingThread->m_currentLocation->getLocalStateVariable(stateVariable)->value = value;
+    }
 
 	void
 /* STEIN */

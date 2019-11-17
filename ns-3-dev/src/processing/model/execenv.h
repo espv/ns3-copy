@@ -161,6 +161,7 @@ namespace ns3 {
         void fillQueues(std::string first, std::string last, LoopCondition *lc);
         // To parse device files
         void Parse(std::string device);
+        void setLocalStateVariable(std::string stateVariable, int value);
 
         /* Executed upon STOP/RESTART event to insert
          * newly created program into existing SEM
