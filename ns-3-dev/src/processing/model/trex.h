@@ -26,6 +26,7 @@
 #include "execenv.h"
 
 enum FSM {
+    PACKETTHREADRECVPACKET,
     HANDLETHENCEPOP,
     HANDLECEPOP,
     CHECKCONSTRAINTS,

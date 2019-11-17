@@ -22,6 +22,7 @@ TRexProtocolStack::GetTypeId (void)
 TRexProtocolStack::TRexProtocolStack() {
     deviceFile = "device-files/trex.device";  // Required if we use gdb
 
+    fsms["packet-thread-recv-packet"] = PACKETTHREADRECVPACKET;
     fsms["handle-then-cepop"] = HANDLETHENCEPOP;
     fsms["handle-cepop"] = HANDLECEPOP;
     fsms["check-constraints"] = CHECKCONSTRAINTS;
@@ -34,7 +35,19 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
     auto dcep = GetObject<Dcep>();
     auto enum_fsm = fsms[fsm];
     switch (enum_fsm) {
-        case HANDLETHENCEPOP: {
+        case PACKETTHREADRECVPACKET: {
+            auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find(
+                    "DCEP-Sim");
+            if (evs == ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.end()) {
+                ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables["DCEP-Sim"] = new DcepSimExecutionVariables();
+                evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find(
+                        "DCEP-Sim");
+            }
+
+            dcep->GetObject<CEPEngine>()->PacketThreadRecvPacket(
+                    ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent);
+            break;
+        } case HANDLETHENCEPOP: {
             break;
         } case HANDLECEPOP: {
             auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");

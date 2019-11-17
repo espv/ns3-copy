@@ -170,6 +170,7 @@ class CEPEngine : public Object
         static TypeId GetTypeId (void);
         CEPEngine();
         void Configure();
+        void PacketThreadRecvPacket(Ptr<CepEvent> e);
         void ProcessCepEvent(Ptr<CepEvent> e);
         void GetOpsByInputCepEventType(std::string eventType, std::vector<Ptr<CepOperator> >& ops);
         void CheckConstraints(Ptr<CepEvent> e);

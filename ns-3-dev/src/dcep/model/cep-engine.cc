@@ -184,13 +184,21 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         ee->currentlyExecutingThread->m_currentLocation->m_executionInfo = Create<ExecutionInfo>();
         dcep->FinishedProcessingCepEvent(e, ee->currentlyExecutingThread);
     }
-    
+
+    void
+    CEPEngine::PacketThreadRecvPacket(Ptr<CepEvent> e)
+    {
+        auto dcep = GetObject<Dcep>();
+        Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
+        dcep->RxCepEvent(e, ee->currentlyExecutingThread);
+    }
+
     void
     CEPEngine::ProcessCepEvent(Ptr<CepEvent> e)
     {
         auto dcep = GetObject<Dcep>();
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
-        dcep->RxCepEvent(e, ee->currentlyExecutingThread);
+        //dcep->RxCepEvent(e, ee->currentlyExecutingThread);
         auto node = GetObject<Dcep>()->GetNode();
 
         // I think it's an error to just set the curCepEvent for the entire thread to be e, since a function that
