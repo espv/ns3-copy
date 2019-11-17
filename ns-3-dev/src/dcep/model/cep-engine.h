@@ -43,8 +43,15 @@ namespace ns3 {
         std::vector<CepEvent> buffer;
         
     };
+
+    class FogEvent : public Object
+    {
+    public:
+        static TypeId GetTypeId (void);
+    };
     
-     class CepEvent : public Object{
+    class CepEvent : public FogEvent
+    {
     public:
         static TypeId GetTypeId (void);
         
@@ -123,7 +130,13 @@ namespace ns3 {
         bool Evaluate(Ptr<CepEvent> e) override;
     };
 
-    class Query : public Object
+    class FogService : public Object
+    {
+    public:
+        static TypeId GetTypeId ();
+    };
+
+    class Query : public FogService
     {
         
     public:
@@ -163,150 +176,164 @@ namespace ns3 {
         static Ptr<Query> buildQuery(int query_id);
          
     };
-    
-class CEPEngine : public Object
+
+    class FogApplicationEngine : public Object
     {
     public:
-        static TypeId GetTypeId (void);
-        CEPEngine();
-        void Configure();
-        void PacketThreadRecvPacket(Ptr<CepEvent> e);
-        void ProcessCepEvent(Ptr<CepEvent> e);
-        void GetOpsByInputCepEventType(std::string eventType, std::vector<Ptr<CepOperator> >& ops);
-        void CheckConstraints(Ptr<CepEvent> e);
-        void DoCheckNumberConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, double> values, std::map<std::string, std::string> stringValues);
-        void DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, std::string> values);
-        void FinishedProcessingEvent(Ptr<CepEvent> e);
-        void ClearQueries();
-
-        Ptr<CepOperator> GetOperator(uint32_t queryId);
-        Ptr<Query> GetQuery(uint32_t id);
-
-        /**
-         * this method instantiates the query and 
-         * stores it in the query pool
-         * @param 
-         * the query to instantiate
-         */
-        void RecvQuery(Ptr<Query>);
-        TracedCallback< Ptr<CepEvent> > nevent;
-        
-        
-private:
-    friend class Detector;
-   
-    
-    void ForwardProducedCepEvent(Ptr<CepEvent>);
-    void InstantiateQuery(Ptr<Query> q);
-    void StoreQuery(Ptr<Query> q);
-    std::vector<Ptr<Query> > queryPool;
-    std::vector<Ptr<CepOperator> > ops_queue;
-      
-    };
-    class Forwarder  : public Object
-    {
-    public:
-        static TypeId GetTypeId (void);
-        Forwarder();
-        void Configure();
-        virtual void ForwardNewCepEvent(Ptr<CepEvent> new_event);
-    private:
-        friend class Producer;
-        TracedCallback< Ptr<CepEvent> > new_event;
-        
-    };
-    
-    class Detector  : public Object
-    {
-    public:
-        static TypeId GetTypeId (void);
-        void ProcessCepEvent(Ptr<CepEvent> e);
-        void CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
-       
-    };
-    
-    class BufferManager : public Object{
-    public:
-        static TypeId GetTypeId (void);
-        
-        void Configure(Ptr<CepOperator> op);
-        void read_events(std::vector<Ptr<CepEvent> >& event1, 
-        std::vector<Ptr<CepEvent> >& event2);
-        void put_event(Ptr<CepEvent>, CepOperator *op);
-        void consume(std::vector<Ptr<CepEvent> > &events);
-        uint32_t consumption_policy;
-        uint32_t selection_policy;
-        std::vector<Ptr<CepEvent> > events1;
-        std::vector<Ptr<CepEvent> > events2;
-        
-    private:
-        friend class CepOperator;
-          
-    };
-    
-    class CepOperator: public Object {
-    public:
         static TypeId GetTypeId ();
-        
-        virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
-        virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
-        bool ExpectingCepEvent (std::string);
-        void Consume(std::vector<Ptr<CepEvent> > &events);
-        uint32_t queryId;
-        Ptr<CEPEngine> cepEngine;
-        std::string event1;
-        std::string event2;
-        std::vector<Ptr<Constraint> > constraints;
-        Ptr<CepOperator> prevOperator;
-
-    protected:
-        Ptr<BufferManager> bufman;
     };
 
-    class AtomicOperator: public CepOperator {
-    public:
-        static TypeId GetTypeId ();
-        void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
-        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-    };
-    
-    class AndOperator: public CepOperator {
-    public:
-        static TypeId GetTypeId ();
-        void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
-        bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+    class CEPEngine : public FogApplicationEngine
+        {
+        public:
+            static TypeId GetTypeId (void);
+            CEPEngine();
+            void Configure();
+            void PacketThreadRecvPacket(Ptr<CepEvent> e);
+            void ProcessCepEvent(Ptr<CepEvent> e);
+            void GetOpsByInputCepEventType(std::string eventType, std::vector<Ptr<CepOperator> >& ops);
+            void CheckConstraints(Ptr<CepEvent> e);
+            void DoCheckNumberConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, double> values, std::map<std::string, std::string> stringValues);
+            void DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, std::string> values);
+            void FinishedProcessingEvent(Ptr<CepEvent> e);
+            void ClearQueries();
 
-        bool DoEvaluate(Ptr<CepEvent> newEvent2, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *events1, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
-        
-    };
-    
-    class OrOperator: public CepOperator {
-    public:
-        static TypeId GetTypeId ();
-        void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-    };
+            Ptr<CepOperator> GetOperator(uint32_t queryId);
+            Ptr<Query> GetQuery(uint32_t id);
 
-    class ThenOperator: public CepOperator {
-    public:
-        static TypeId GetTypeId ();
-        void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
-        bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+            /**
+             * this method instantiates the query and
+             * stores it in the query pool
+             * @param
+             * the query to instantiate
+             */
+            void RecvQuery(Ptr<Query>);
+            TracedCallback< Ptr<CepEvent> > nevent;
 
-        bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
-    };
-    
-    class Producer  : public Object
-    {
-    public:
-        static TypeId GetTypeId (void);
-        void HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> >&, CepOperator *op);
-        void AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op, int index);
-        
+
     private:
         friend class Detector;
-        
-    };
+
+
+        void ForwardProducedCepEvent(Ptr<CepEvent>);
+        void InstantiateQuery(Ptr<Query> q);
+        void StoreQuery(Ptr<Query> q);
+        std::vector<Ptr<Query> > queryPool;
+        std::vector<Ptr<CepOperator> > ops_queue;
+
+        };
+        class Forwarder  : public Object
+        {
+        public:
+            static TypeId GetTypeId (void);
+            Forwarder();
+            void Configure();
+            virtual void ForwardNewCepEvent(Ptr<CepEvent> new_event);
+        private:
+            friend class Producer;
+            TracedCallback< Ptr<CepEvent> > new_event;
+
+        };
+
+        class Detector  : public Object
+        {
+        public:
+            static TypeId GetTypeId (void);
+            void ProcessCepEvent(Ptr<CepEvent> e);
+            void CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
+
+        };
+
+        class BufferManager : public Object{
+        public:
+            static TypeId GetTypeId (void);
+
+            void Configure(Ptr<CepOperator> op);
+            void read_events(std::vector<Ptr<CepEvent> >& event1,
+            std::vector<Ptr<CepEvent> >& event2);
+            void put_event(Ptr<CepEvent>, CepOperator *op);
+            void consume(std::vector<Ptr<CepEvent> > &events);
+            uint32_t consumption_policy;
+            uint32_t selection_policy;
+            std::vector<Ptr<CepEvent> > events1;
+            std::vector<Ptr<CepEvent> > events2;
+
+        private:
+            friend class CepOperator;
+
+        };
+
+        class FogApplicationComponent : public Object
+        {
+        public:
+            static TypeId GetTypeId ();
+        private:
+            Ptr<FogApplicationComponent> next;
+        };
+
+        class CepOperator: public FogApplicationComponent {
+        public:
+            static TypeId GetTypeId ();
+
+            virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
+            virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
+            bool ExpectingCepEvent (std::string);
+            void Consume(std::vector<Ptr<CepEvent> > &events);
+            uint32_t queryId;
+            Ptr<CEPEngine> cepEngine;
+            std::string event1;
+            std::string event2;
+            std::vector<Ptr<Constraint> > constraints;
+            Ptr<CepOperator> prevOperator;
+
+        protected:
+            Ptr<BufferManager> bufman;
+        };
+
+        class AtomicOperator: public CepOperator {
+        public:
+            static TypeId GetTypeId ();
+            void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
+            bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+        };
+
+        class AndOperator: public CepOperator {
+        public:
+            static TypeId GetTypeId ();
+            void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
+            bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+
+            bool DoEvaluate(Ptr<CepEvent> newEvent2, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *events1, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
+
+        };
+
+        class OrOperator: public CepOperator {
+        public:
+            static TypeId GetTypeId ();
+            void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
+            bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+        };
+
+        class ThenOperator: public CepOperator {
+        public:
+            static TypeId GetTypeId ();
+            void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
+            bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+
+            bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
+        };
+
+        class Producer  : public Object
+        {
+        public:
+            static TypeId GetTypeId (void);
+            void HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> >&, CepOperator *op);
+            void AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op, int index);
+
+        private:
+            friend class Detector;
+
+        };
     
 }
 

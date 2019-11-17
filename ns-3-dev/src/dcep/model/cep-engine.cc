@@ -49,10 +49,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
  * ***************************************************/
 /* ... */
     TypeId
+    FogApplicationEngine::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::FogApplicationEngine")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
+
+    TypeId
     CEPEngine::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::CEPEngine")
-        .SetParent<Object> ()
+        .SetParent<FogApplicationEngine> ()
         .AddConstructor<CEPEngine> ()
         .AddTraceSource ("CepEvent",
                        "Final event.",
@@ -432,13 +442,22 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         return tid;
     }
-    
-    
+
+    TypeId
+    FogApplicationComponent::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::FogApplicationComponent")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
+
     TypeId
     CepOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::CepOperator")
-            .SetParent<Object> ()
+            .SetParent<FogApplicationComponent> ()
         ;
         
         return tid;
@@ -973,13 +992,22 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         new_event(event);
     }
-    
+
+    TypeId
+    FogService::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::FogService")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
     
     TypeId
     Query::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::Query")
-        .SetParent<Object> ()
+        .SetParent<FogService> ()
         .AddConstructor<Query> ()
         ;
         
@@ -1006,10 +1034,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
      * ***********************************************
      * *************************************************/
     TypeId
+    FogEvent::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::FogEvent")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
+
+    TypeId
     CepEvent::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::CepEvent")
-        .SetParent<Object> ()
+        .SetParent<FogEvent> ()
         .AddConstructor<CepEvent> ()
         ;
         
