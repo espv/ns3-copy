@@ -25,6 +25,7 @@
 #include "siddhitrexthroughput.h"
 
 #include <nlohmann/json.hpp>
+#include "ns3/siddhitrexquery.h"
 
 using json = nlohmann::json;
 
@@ -204,8 +205,10 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                     }
                 }
 
-                Ptr<Query> q = CreateObject<Query>();  // q3 = complex event
-                q->toBeProcessed = true;
+                Ptr<SiddhiTRexQuery> q = SiddhiTRexQuery::buildQuery((SiddhiTRexQueryId)queryId);
+
+                //Ptr<Query> q = CreateObject<Query>();  // q3 = complex event
+                /*q->toBeProcessed = true;
                 q->actionType = NOTIFICATION;
                 q->query_base_id = queryId;
                 static int query_cnt = 0;
@@ -231,7 +234,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 q->op = "then";
                 q->assigned = false;
                 q->currentHost.Set("0.0.0.0");
-                q->parent_output = event1 + "then" + event2;
+                q->parent_output = event1 + "then" + event2;*/
                 Simulator::Schedule(next_time, &Dcep::DispatchQuery, this, q);
                 // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {

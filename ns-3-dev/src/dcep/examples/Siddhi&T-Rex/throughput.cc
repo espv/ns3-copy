@@ -29,6 +29,7 @@
 #include "ns3/data-collector.h"
 #include "ns3/time-data-calculators.h"
 #include "ns3/trex.h"
+#include "ns3/siddhitrexquery.h"
 
 using namespace ns3;
 using namespace std;
@@ -362,7 +363,6 @@ int main(int argc, char** argv) {
     {
 	staticMobility.Install (allNodesContainer.Get(i));
     }
-    
     auto itr = allNodesContainer.Begin();
     std::advance(itr, numStationary);// skip the first nodes which should be static
     ns2.Install (itr, allNodesContainer.End()); // configure movements for each node, while reading trace file

@@ -159,6 +159,7 @@ namespace ns3 {
         SerializedQuery* serialize();
         void deserialize(uint8_t *buffer, uint32_t);
         uint32_t getSerializedSize();
+        static Ptr<Query> buildQuery(int query_id);
          
     };
     

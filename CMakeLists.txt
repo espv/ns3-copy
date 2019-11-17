@@ -3483,8 +3483,13 @@ add_executable(
         README.md
         ns-3-dev/src/processing/model/software-execution-model.cc
         ns-3-dev/src/processing/model/software-execution-model.h
-        ns-3-dev/src/processing/model/trex.cc ns-3-dev/src/dcep/model/dcep-apps/siddhitrexthroughput.cc ns-3-dev/src/dcep/model/dcep-apps/siddhitrexthroughput.h
-        ns-3-dev/src/dcep/model/dcep-apps/siddhitrexexecutiontime.cc ns-3-dev/src/dcep/model/dcep-apps/siddhitrexexecutiontime.h)
+        ns-3-dev/src/processing/model/trex.cc
+        ns-3-dev/src/dcep/model/dcep-apps/siddhitrexthroughput.cc
+        ns-3-dev/src/dcep/model/dcep-apps/siddhitrexthroughput.h
+        ns-3-dev/src/dcep/model/dcep-apps/siddhitrexexecutiontime.cc
+        ns-3-dev/src/dcep/model/dcep-apps/siddhitrexexecutiontime.h
+        ns-3-dev/src/dcep/model/dcep-queries/siddhitrexquery.cc
+        ns-3-dev/src/dcep/model/dcep-queries/siddhitrexquery.h)
 
 add_custom_target(
         Debug-configuration COMMAND configure-waf-scripts/configure_debug_waf.sh
