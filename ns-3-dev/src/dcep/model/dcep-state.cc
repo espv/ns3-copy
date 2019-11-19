@@ -131,6 +131,28 @@ namespace ns3
 
         this->eventRoutingTable.push_back(ee);
     }
+
+
+    void
+    DcepState::CreateCepEventRoutingTableEntry (Ptr<CepQueryComponent> queryComponent)
+    {
+        Ptr<CepEventRoutingTableEntry> ee = CreateObject<CepEventRoutingTableEntry>();
+        ee->source_query_component = queryComponent;
+        ee->state = ACTIVE;
+        // Just to avoid changing DcepState
+        ee->source_query = CreateObject<Query>();
+        //if(ee->source_query_component->isFinal) {
+            Ptr<Dcep> dcep = GetObject<Dcep> ();
+            if (dcep->isDistributedExecution())
+                ee->source_query->output_dest = Ipv4Address("10.0.0.4");
+            else
+                ee->source_query->output_dest = Ipv4Address("10.0.0.3");
+        //} else {
+        //    ee->source_query->output_dest = GetObject<Communication>()->GetSinkAddress();
+        //}
+
+        this->eventRoutingTable.push_back(ee);
+    }
     
     
     bool

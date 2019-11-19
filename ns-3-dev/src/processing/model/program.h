@@ -302,11 +302,13 @@ class LoopCondition : public Condition {
   bool serviceQueues;
   bool stateQueues;
   bool cepQueryQueues;
+  bool cepQueryComponentQueues;
   bool cepEventQueues;
   std::vector<Ptr<DropTailQueue<ExecutionInfo>> > queuesServed;
   std::vector<std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *> serviceQueuesServed;
   std::vector<Ptr<StateVariableQueue> > stateQueuesServed;
   std::vector<std::queue<Ptr<CepOperator> > *> cepQueryQueuesServed;
+  std::vector<std::queue<Ptr<CepQueryComponent> > *> cepQueryComponentQueuesServed;
   std::vector<std::queue<Ptr<CepEvent> > *> cepEventQueuesServed;
 
 
@@ -395,12 +397,14 @@ public:
 	bool isPacketQueue;
 	bool isCepEventQueue;
 	bool isCepQueryQueue;
+	bool isCepQueryComponentQueue;
 	bool local;
 	std::string threadToWake;
 	Ptr<DropTailQueue<ExecutionInfo>> queue;
 	std::queue<std::pair<Ptr<SEM>, Ptr<ProgramLocation> > > *servQueue;
 	std::queue<Ptr<CepEvent> > *cepEventQueue;
 	std::queue<Ptr<CepOperator> > *cepQueryQueue;
+	std::queue<Ptr<CepQueryComponent> > *cepQueryComponentQueue;
 	std::string queueName;
 
 	// If we have an enqeueue with a service, we must
@@ -421,6 +425,7 @@ public:
     bool isPacketQueue;
     bool isCepEventQueue;
     bool isCepQueryQueue;
+    bool isCepQueryComponentQueue;
 
     std::string fromQueue;
     std::string toQueue;

@@ -206,6 +206,8 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
             numQueues = m_currentLocation->lc->stateQueuesServed.size();
         } else if (m_currentLocation->lc->cepQueryQueues) {
             numQueues = m_currentLocation->lc->cepQueryQueuesServed.size();
+        } else if (m_currentLocation->lc->cepQueryComponentQueues) {
+            numQueues = m_currentLocation->lc->cepQueryComponentQueuesServed.size();
         } else if (m_currentLocation->lc->cepEventQueues) {
             numQueues = m_currentLocation->lc->cepEventQueuesServed.size();
         } else {
@@ -299,7 +301,17 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
                     m_programStack.pop();
                     return true;
                 }
-			} else if (curLc->cepEventQueues) {
+			} else if (curLc->cepQueryComponentQueues) {
+        auto it = curLc->cepQueryComponentQueuesServed.begin();
+        for (; it != curLc->cepQueryComponentQueuesServed.end() && (*it)->empty(); it++);
+
+        // If all queues were empty, pop program and return.
+        if (it == curLc->cepQueryComponentQueuesServed.end()) {
+          // We do not pop thread of execution, as we did not push it yet
+          m_programStack.pop();
+          return true;
+        }
+      } else if (curLc->cepEventQueues) {
                 auto it = curLc->cepEventQueuesServed.begin();
                 for (; it != curLc->cepEventQueuesServed.end() && (*it)->empty(); it++);
 
@@ -365,7 +377,9 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
 		    queueEmpty = m_currentLocation->lc->stateQueuesServed[queueServedIndex]->empty();
 		} else if (m_currentLocation->lc->cepQueryQueues) {
 		    queueEmpty = m_currentLocation->lc->cepQueryQueuesServed[queueServedIndex]->empty();
-		} else if (m_currentLocation->lc->cepEventQueues) {
+		} else if (m_currentLocation->lc->cepQueryComponentQueues) {
+      queueEmpty = m_currentLocation->lc->cepQueryComponentQueuesServed[queueServedIndex]->empty();
+    } else if (m_currentLocation->lc->cepEventQueues) {
             queueEmpty = m_currentLocation->lc->cepEventQueuesServed[queueServedIndex]->empty();
         } else {
 		    m_currentLocation->lc->queuesServed[queueServedIndex]->IsEmpty();
@@ -423,7 +437,21 @@ bool Thread::HandleEndEvent(ExecutionEvent* e) {
                         } else {
                             m_currentLocation->curServedQueue = index;
                         }
-					} else if (curLc->cepEventQueues) {
+					} else if (curLc->cepQueryComponentQueues) {
+            auto it = curLc->cepQueryComponentQueuesServed.begin();
+            for (; it != curLc->cepQueryComponentQueuesServed.end() && (*it)->empty(); it++) {
+              index++;
+            }
+
+            // If all queues were empty, pop program and return.
+            if (it == curLc->cepQueryComponentQueuesServed.end()) {
+              // We do not pop thread of execution, as we did not push it yet
+              m_programStack.pop();
+              return true;
+            } else {
+              m_currentLocation->curServedQueue = index;
+            }
+          } else if (curLc->cepEventQueues) {
                         auto it = curLc->cepEventQueuesServed.begin();
                         for (; it != curLc->cepEventQueuesServed.end() && (*it)->empty(); it++) {
                             index++;
@@ -625,7 +653,9 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 				    queueSize = newLc->stateQueuesServed.size();
 				} else if (newLc->cepQueryQueues) {
 				    queueSize = newLc->cepQueryQueuesServed.size();
-				} else if (newLc->cepEventQueues) {
+				} else if (newLc->cepQueryComponentQueues) {
+            queueSize = newLc->cepQueryComponentQueuesServed.size();
+        } else if (newLc->cepEventQueues) {
 				    queueSize = newLc->cepEventQueuesServed.size();
 				} else {
 				    queueSize = newLc->queuesServed.size();
@@ -650,7 +680,9 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
 						firstQueueEmpty = newLc->cepEventQueuesServed[0]->empty();
 					} else if (newLc->cepQueryQueues) {
 						firstQueueEmpty = newLc->cepQueryQueuesServed[0]->empty();
-					} else {  // Packet queues left
+					} else if (newLc->cepQueryComponentQueues) {
+            firstQueueEmpty = newLc->cepQueryComponentQueuesServed[0]->empty();
+          } else {  // Packet queues left
 						firstQueueEmpty = newLc->queuesServed[0]->IsEmpty();
 					}
 
@@ -731,7 +763,20 @@ bool Thread::HandleExecuteEvent(ExecutionEvent* e) {
                                     } else {
                                         m_currentLocation->curServedQueue = index;
                                     }
-								} else {
+								} else if (newLc->cepQueryComponentQueues) {
+                  uint32_t index = 0;
+                  auto it = newLc->cepQueryComponentQueuesServed.begin();
+                  for (; it != newLc->cepQueryComponentQueuesServed.end() && (*it)->empty(); it++)
+                    index++;
+
+                  // If all queues were empty, pop program and return.
+                  if (it == newLc->cepQueryComponentQueuesServed.end()) {
+                    // We do not pop thread of execution, as we did not push it yet
+                    return true;
+                  } else {
+                    m_currentLocation->curServedQueue = index;
+                  }
+                } else {
 									uint32_t index = 0;
 									auto it = newLc->queuesServed.begin();
 									for (;
@@ -807,7 +852,9 @@ bool Thread::HandleQueueEvent(ExecutionEvent* e) {
         } else if (qe->isCepEventQueue) {
             qe->cepEventQueue->push(m_currentLocation->m_executionInfo->curCepEvent);
         } else if (qe->isCepQueryQueue) {
-			qe->cepQueryQueue->push(m_currentLocation->curCepQuery);
+			      qe->cepQueryQueue->push(m_currentLocation->curCepQuery);
+        } else if (qe->isCepQueryComponentQueue) {
+            qe->cepQueryComponentQueue->push(m_currentLocation->curCepQueryComponent);
         } else {
             NS_ASSERT_MSG(0, "Couldn't find queue to enqueue into");
         }
@@ -890,6 +937,14 @@ m_currentLocation->localStateVariableQueues[qe->queueName]->stateVariableQueue.p
     auto nextCepQuery = queueToServe->front();
     m_currentLocation->curCepQuery = nextCepQuery;
     queueToServe->pop();
+  } else if (qe->isCepQueryComponentQueue) {
+        auto queueToServe = (qe->cepQueryComponentQueue == nullptr) ?
+                            m_currentLocation->lc->cepQueryComponentQueuesServed[m_currentLocation->curServedQueue] :
+                            qe->cepQueryComponentQueue;
+
+        auto nextCepQuery = queueToServe->front();
+        m_currentLocation->curCepQueryComponent = nextCepQuery;
+        queueToServe->pop();
   } else if (qe->isCepEventQueue) {
     auto queueToServe = (qe->cepEventQueue == nullptr) ?
                         m_currentLocation->lc->cepEventQueuesServed[m_currentLocation->curServedQueue] :
@@ -930,7 +985,10 @@ bool Thread::HandleCopyQueueEvent(ExecutionEvent* e) {
 	if (cqe->isCepQueryQueue) {
 		auto fromQueue = *execEnv->cepQueryQueues[cqe->fromQueue];
 		*execEnv->cepQueryQueues[cqe->toQueue] = fromQueue;
-	} else if (cqe->isCepEventQueue) {
+	} else if (cqe->isCepQueryComponentQueue) {
+    auto fromQueue = *execEnv->cepQueryComponentQueues[cqe->fromQueue];
+    *execEnv->cepQueryComponentQueues[cqe->toQueue] = fromQueue;
+  } else if (cqe->isCepEventQueue) {
 		auto fromQueue = execEnv->cepEventQueues[cqe->fromQueue];
 		*execEnv->cepEventQueues[cqe->toQueue] = *fromQueue;
 	} else if (cqe->isPacketQueue) {

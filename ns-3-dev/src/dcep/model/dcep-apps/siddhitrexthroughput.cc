@@ -27,6 +27,7 @@
 #include <nlohmann/json.hpp>
 #include "ns3/siddhitrexquery.h"
 
+using namespace ns3;
 using json = nlohmann::json;
 
 
@@ -37,7 +38,7 @@ NS_LOG_COMPONENT_DEFINE ("SiddhiTRexThroughputDcep");
 TypeId
 SiddhiTRexThroughputDcep::GetTypeId(void)
 {
-    static TypeId tid = TypeId("ns3::SiddhiTRexThroughputDcep")
+    static TypeId tid = TypeId("SiddhiTRexThroughputDcep")
             .SetParent<Dcep> ()
             .SetGroupName("Applications")
             .AddConstructor<SiddhiTRexThroughputDcep> ()
@@ -197,8 +198,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 // Schedule a complex query to be produced and placed
                 int queryId = std::stoi(splitLine[2]);
                 json query_to_add;
-                auto cepqueries = j["cepqueries"];
-                for (auto cepquery : cepqueries) {
+                for (auto cepquery : j["cepqueries"]) {
                     if (cepquery["id"] == queryId) {
                         // Found query
                         query_to_add = cepquery;
@@ -206,7 +206,10 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                     }
                 }
 
-                Ptr<SiddhiTRexQuery> q = SiddhiTRexQuery::buildQuery((SiddhiTRexQueryId)queryId, query_to_add);
+                auto q = CreateObject<SiddhiTRexQuery>();
+                q->json_query = query_to_add;
+                // Ptr<SiddhiTRexQuery> q = SiddhiTRexQuery::buildQuery((SiddhiTRexQueryId)queryId, query_to_add);
+                auto queryComponent = q->buildComponentDAG();
 
                 //Ptr<Query> q = CreateObject<Query>();  // q3 = complex event
                 /*q->toBeProcessed = true;
@@ -236,7 +239,8 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 q->assigned = false;
                 q->currentHost.Set("0.0.0.0");
                 q->parent_output = event1 + "then" + event2;*/
-                Simulator::Schedule(next_time, &Dcep::DispatchQuery, this, q);
+                //Simulator::Schedule(next_time, &Dcep::DispatchQuery, this, q);
+                Simulator::Schedule(next_time, &Dcep::DispatchCepQueryComponent, this, queryComponent);
                 // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {
                 // Schedule all queries to be removed
@@ -275,7 +279,7 @@ SiddhiTRexThroughputDcep::ActivateDatasource(Ptr<Query> q)
 TypeId
 SiddhiTRexThroughputSink::GetTypeId (void)
 {
-    static TypeId tid = TypeId ("ns3::SiddhiTRexThroughputSink")
+    static TypeId tid = TypeId ("SiddhiTRexThroughputSink")
             .SetParent<Sink>()
     ;
     return tid;
@@ -412,7 +416,7 @@ SiddhiTRexThroughputSink::receiveFinalCepEvent(Ptr<CepEvent> e)
 TypeId
 SiddhiTRexThroughputDataSource::GetTypeId (void)
 {
-    static TypeId tid = TypeId ("ns3::SiddhiTRexThroughputDataSource")
+    static TypeId tid = TypeId ("SiddhiTRexThroughputDataSource")
             .SetParent<DataSource> ()
             .AddConstructor<SiddhiTRexThroughputDataSource> ()
     ;
@@ -467,4 +471,92 @@ SiddhiTRexThroughputDataSource::GenerateAtomicCepEvents(Ptr<Query> q) {
         }
     }
 
+}
+
+Ptr<CepQueryComponent>
+Query::buildComponentDAG()
+{
+    /* In this method, we create a set of operators that are connected together
+     * For instance, the ThenOperator might be the final operator that produces the complex event,
+     * but before it, comes two filter operations: a filter for the first event, and one for the second.
+     */
+    auto queryComponent = CreateObject<CepQueryComponent>();
+    json prevSubexpression = nullptr;
+    std::vector<json> prevSubsubexpressions;
+
+    Ptr<ThenOperator> prevThenOperator = nullptr;
+    // The JoinOperator might be an AndOperator or OrOperator
+    Ptr<JoinOperator> prevJoinOperator = nullptr;
+    Ptr<AtomicOperator> prevAtomicOperator = nullptr;
+    Ptr<CepOperator> curOperator = nullptr;
+    for (auto subexpression : json_query["indata"]) {
+        if (curOperator != nullptr) {
+            auto thenOperator = CreateObject<ThenOperator>();
+            curOperator->nextOperator = thenOperator;
+            thenOperator->prevOperator = curOperator;
+            curOperator = thenOperator;
+            queryComponent->InsertThenOperator(thenOperator);
+        }
+        prevJoinOperator = nullptr;
+        prevAtomicOperator = nullptr;
+        for (auto subsubexpression : subexpression["incoming"]) {
+            auto atomicOperator = CreateObject<AtomicOperator>();
+            for (auto window : subsubexpression["windows"]) {
+                Ptr<Window> w = nullptr;
+                if (window["type"] == "sliding") {
+                if (window["unit"] == "millisecond") {
+                    w = CreateObject<SlidingTimeWindow>();
+                } else if (window["unit"] == "tuple") {
+                    w = CreateObject<SlidingTupleWindow>();
+                }
+                } else if (window["type"] == "tumbling") {
+                    if (window["unit"] == "millisecond") {
+                      w = CreateObject<TumblingTimeWindow>();
+                    } else if (window["unit"] == "tuple") {
+                        w = CreateObject<TumblingTupleWindow>();
+                    }
+                }
+                if (w == nullptr) {
+                    NS_ABORT_MSG("Invalid window type specified");
+                }
+
+                atomicOperator->stream_windows[subsubexpression["id"]].emplace_back(w);
+            }
+
+            if (prevAtomicOperator != nullptr) {
+                if (prevJoinOperator == nullptr) {
+                    prevJoinOperator = CreateObject<JoinOperator>();
+                    // Insert the previous atomic event; will only be done once
+                    prevJoinOperator->InsertAtomicOperator(prevAtomicOperator);
+                }
+                prevJoinOperator->InsertAtomicOperator(atomicOperator);
+                if (curOperator != nullptr) {
+                    curOperator->nextOperator = prevJoinOperator;
+                    prevJoinOperator->prevOperator = curOperator;
+                }
+                curOperator = prevJoinOperator;
+            }
+            prevSubsubexpressions.push_back(subsubexpression);
+            prevAtomicOperator = atomicOperator;
+        }
+        // IFF we only got a single atomic operator and not a join operator, we set the curOperator to the atomicOperator
+        if (prevJoinOperator == nullptr) {
+            if (curOperator != nullptr) {
+                curOperator->nextOperator = prevAtomicOperator;
+                prevAtomicOperator->prevOperator = curOperator;
+            }
+            curOperator = prevAtomicOperator;
+        }
+
+        if (queryComponent->GetFirstOperator() == nullptr) {
+            if (prevJoinOperator == nullptr) {
+                queryComponent->SetFirstOperator(prevAtomicOperator);
+            } else {
+                queryComponent->SetFirstOperator(prevJoinOperator);
+            }
+        }
+        prevSubsubexpressions.empty();
+        prevSubexpression = prevSubexpression;
+    }
+    return queryComponent;
 }

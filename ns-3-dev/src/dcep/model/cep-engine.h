@@ -26,6 +26,9 @@
 #include "ns3/packet.h"
 #include "ns3/nstime.h"
 #include <map>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 namespace ns3 {
 
@@ -37,13 +40,9 @@ namespace ns3 {
     class Producer;
     class CEPEngine;
     class FogApplicationComponent;
-    
-    class Window : public Object{
-    public:
-        static TypeId GetTypeId (void);
-        std::vector<CepEvent> buffer;
-        
-    };
+    class Window;
+    class CepQueryComponent;
+
 
     class FogEvent : public Object
     {
@@ -63,6 +62,7 @@ namespace ns3 {
         void deserialize(uint8_t*, uint32_t);
         uint32_t getSize();
         void CopyCepEvent (Ptr<CepEvent> e);
+        int GetStreamId();
         
         std::string type; //the type of the event
         uint64_t m_seq;
@@ -80,6 +80,8 @@ namespace ns3 {
         CepOperator *generatedByOp;
         std::vector<Ptr<CepEvent> > prevEvents;
         // Complex event only end
+
+        std::vector<Ptr<CepEvent> > internalEvents;
 
         // Added by Espen to exempt certain generated complex events from being processed,
         // to be able to chain together queries
@@ -106,29 +108,59 @@ namespace ns3 {
         GTECONSTRAINT
     };
 
-    class Constraint: public Object {
+    class Constraint : public Object {
     public:
         ConstraintType type;
         Ptr<CEPEngine> cepEngine;
         std::string var_name;
-
         virtual bool Evaluate(Ptr<CepEvent> e) = 0;
+        virtual bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) = 0;
     };
 
-    class NumberConstraint: public Constraint {
+    class AtomicConstraint : public Constraint {
+    public:
+    };
+
+    class NumberConstraint: public AtomicConstraint {
     public:
         static TypeId GetTypeId ();
         double numberValue;
 
         bool Evaluate(Ptr<CepEvent> e) override;
+        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
     };
 
-    class StringConstraint: public Constraint {
+    class StringConstraint: public AtomicConstraint {
     public:
         static TypeId GetTypeId ();
         std::string stringValue;
 
         bool Evaluate(Ptr<CepEvent> e) override;
+        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
+    };
+
+    class JoinConstraint : public Constraint {
+    public:
+        int event_stream1;
+        int event_stream2;
+    };
+
+    class JoinNumberConstraint : public JoinConstraint {
+    public:
+        static TypeId GetTypeId ();
+        bool Evaluate(Ptr<CepEvent> e) override;
+        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
+
+        double numberValue;
+    };
+
+    class JoinStringConstraint : public JoinConstraint {
+    public:
+        static TypeId GetTypeId ();
+        bool Evaluate(Ptr<CepEvent> e) override;
+        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
+
+        std::string stringValue;
     };
 
     class FogService : public Object
@@ -140,7 +172,7 @@ namespace ns3 {
          * Builds a DAG of ApplicationComponent objects
          * @return Pointer to the last ApplicationComponent in the DAG
          */
-        virtual Ptr<FogApplicationComponent> buildComponentDAG();
+        //virtual Ptr<FogApplicationComponent> buildComponentDAG();
     };
 
     class Query : public FogService
@@ -169,6 +201,7 @@ namespace ns3 {
         Time window;
         Ptr<Query> nextQuery;
         Ptr<Query> prevQuery;
+        json json_query;
         /*
          * the event notification for the event of type above is the
          * one the sink is interested in.
@@ -180,7 +213,7 @@ namespace ns3 {
         SerializedQuery* serialize();
         void deserialize(uint8_t *buffer, uint32_t);
         uint32_t getSerializedSize();
-        Ptr<FogApplicationComponent> buildComponentDAG() final;
+        Ptr<CepQueryComponent> buildComponentDAG();
          
     };
 
@@ -207,6 +240,7 @@ namespace ns3 {
 
             Ptr<CepOperator> GetOperator(uint32_t queryId);
             Ptr<Query> GetQuery(uint32_t id);
+            std::set<Ptr<CepQueryComponent> > GetCepQueryComponents(int stream_id);
 
             /**
              * this method instantiates the query and
@@ -215,6 +249,7 @@ namespace ns3 {
              * the query to instantiate
              */
             void RecvQuery(Ptr<Query>);
+            void RecvQueryComponent(Ptr<CepQueryComponent>);
             TracedCallback< Ptr<CepEvent> > nevent;
 
 
@@ -224,9 +259,13 @@ namespace ns3 {
 
         void ForwardProducedCepEvent(Ptr<CepEvent>);
         void InstantiateQuery(Ptr<Query> q);
+        void InstantiateQueryComponent(Ptr<CepQueryComponent> queryComponent);
         void StoreQuery(Ptr<Query> q);
+        void StoreQueryComponent(Ptr<CepQueryComponent> queryComponent);
         std::vector<Ptr<Query> > queryPool;
+        std::vector<Ptr<CepQueryComponent> > queryComponentPool;
         std::vector<Ptr<CepOperator> > ops_queue;
+        std::map<int, std::set<Ptr<CepQueryComponent> > > streamToQueryComponents;
 
         };
         class Forwarder  : public Object
@@ -248,6 +287,7 @@ namespace ns3 {
             static TypeId GetTypeId (void);
             void ProcessCepEvent(Ptr<CepEvent> e);
             void CepOperatorProcessCepEvent(Ptr<CepEvent> e, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep, Ptr<Producer> producer);
+            void CepQueryComponentProcessCepEvent(Ptr<CepEvent> e, Ptr<CEPEngine> cep);
 
         };
 
@@ -278,12 +318,14 @@ namespace ns3 {
             Ptr<FogApplicationComponent> next;
         };
 
-        class CepOperator: public FogApplicationComponent {
+        class CepOperator: public Object {
         public:
             static TypeId GetTypeId ();
 
             virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
             virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
+            virtual bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) = 0;
+            void InsertCepEventIntoWindows(Ptr<CepEvent> e);
             bool ExpectingCepEvent (std::string);
             void Consume(std::vector<Ptr<CepEvent> > &events);
             uint32_t queryId;
@@ -292,6 +334,11 @@ namespace ns3 {
             std::string event2;
             std::vector<Ptr<Constraint> > constraints;
             Ptr<CepOperator> prevOperator;
+            Ptr<CepOperator> nextOperator;
+            std::vector<Ptr<Window> > windows;
+            // Maps event streams to windows; we require that events are in all the windows to move on
+            std::map<int, std::vector<Ptr<Window> > > stream_windows;
+            int stream_id;
 
         protected:
             Ptr<BufferManager> bufman;
@@ -302,23 +349,38 @@ namespace ns3 {
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
         };
 
-        class AndOperator: public CepOperator {
+        class JoinOperator: public CepOperator {
         public:
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            void InsertAtomicOperator(Ptr<AtomicOperator> a);
+            std::vector<Ptr<AtomicOperator> > GetAtomicOperators();
+        private:
+            std::vector<Ptr<AtomicOperator> > atomicOperators;
+        };
+
+        class AndOperator: public JoinOperator {
+        public:
+            static TypeId GetTypeId ();
+            void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
+            bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
 
             bool DoEvaluate(Ptr<CepEvent> newEvent2, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *events1, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
 
         };
 
-        class OrOperator: public CepOperator {
+        class OrOperator: public JoinOperator {
         public:
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
         };
 
         class ThenOperator: public CepOperator {
@@ -328,6 +390,27 @@ namespace ns3 {
             bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
 
             bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
+
+            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+        };
+
+        class CepQueryComponent : public FogApplicationComponent {
+        public:
+            static TypeId GetTypeId ();
+            CepQueryComponent();
+            void InsertThenOperator(Ptr<ThenOperator>);
+            void SetFirstOperator(Ptr<CepOperator>);
+            Ptr<CepOperator> GetFirstOperator();
+            std::string GetEventType();
+            void SetEventType(std::string);
+            int GetId();
+
+        private:
+            int id;
+            int lastLocalOperatorIndex;
+            std::string eventType;;
+            Ptr<CepOperator> firstOperator;
+            std::vector<Ptr<ThenOperator> > thenOperators;
         };
 
         class Producer  : public Object
@@ -340,6 +423,77 @@ namespace ns3 {
         private:
             friend class Detector;
 
+        };
+
+        class Window : public Object {
+        public:
+            static TypeId GetTypeId(void);
+            Window() = default;
+
+            virtual void InsertEvent(Ptr<CepEvent> e) = 0;
+
+            virtual std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents();
+
+        protected:
+            std::vector <std::pair<Time, Ptr<CepEvent> > > buffer;
+        };
+
+        class TimeWindow : public Window {
+        public:
+            static TypeId GetTypeId(void);
+            TimeWindow() = default;
+            TimeWindow(Time t) {
+                this->size = t;
+            }
+
+        protected:
+            Time size;
+        };
+
+        class TupleWindow : public Window {
+        public:
+            static TypeId GetTypeId(void);
+            TupleWindow() = default;
+            TupleWindow(int numberTuples) {
+                this->size = numberTuples;
+            }
+
+        protected:
+            int size;
+        };
+
+        class SlidingTimeWindow : public TimeWindow {
+        public:
+            static TypeId GetTypeId(void);
+            SlidingTimeWindow();
+            void InsertEvent(Ptr<CepEvent> e) final;
+            std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents() final;
+            void UpdateWindow();
+        };
+
+        class SlidingTupleWindow : public TupleWindow {
+        public:
+            static TypeId GetTypeId(void);
+            SlidingTupleWindow();
+            void InsertEvent(Ptr<CepEvent> e) final;
+        };
+
+        class TumblingTimeWindow : public TimeWindow {
+        public:
+            static TypeId GetTypeId(void);
+            TumblingTimeWindow();
+            void InsertEvent(Ptr<CepEvent> e) final;
+            std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents() final;
+            void UpdateWindow();
+        private:
+            Time lastTumble;
+        };
+
+        class TumblingTupleWindow : public TupleWindow {
+        public:
+            static TypeId GetTypeId(void);
+            TumblingTupleWindow();
+            void InsertEvent(Ptr<CepEvent> e) final;
         };
     
 }

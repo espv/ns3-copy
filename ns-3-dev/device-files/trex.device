@@ -33,7 +33,9 @@ rcvd-pkts-t3 FIFO -1 packets
 complex-pkts FIFO -1 packets
 packets-to-be-sent FIFO -1 packets
 all-cepops FIFO -1 cepqueries
+all-queries FIFO -1 cepquerycomponents
 threads-cepops FIFO -1 cepqueries
+threads-queries FIFO -1 cepquerycomponents
 check-constraints-cepevents FIFO -1 cepevents
 
 HARDWARE
@@ -220,6 +222,7 @@ x ENQUEUE PKTQUEUE 0 rcvd-pkts-t2
 #x DUPLICATEPKT
 x ENQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x COPYQUEUE CEPQUERYQUEUE all-cepops threads-cepops
+x COPYQUEUE CEPQUERYCOMPONENTQUEUE all-queries threads-queries
 
 x TTWAKEUP event_thread1
 x TTWAKEUP event_thread2
@@ -465,11 +468,11 @@ PEU cpu
 RESOURCES cycles normal
 FRACTION 100% 1 1
 
-0 LOOPSTART     0 threads-cepops threads-cepops 0
-call-to-handle-then-cepop DEQUEUE CEPQUERYQUEUE 0 0
+0 LOOPSTART     0 threads-queries threads-queries 0
+call-to-handle-then-cepop DEQUEUE CEPQUERYCOMPONENTQUEUE 0 0
 x EXECUTEFSM handle-cepop
 x SEMUP threads-cepops-SEM global
-x CALL handle-then-cepop
+#x CALL handle-then-cepop
 x SEMDOWN threads-cepops-SEM global
 0 RESTART
 
@@ -502,7 +505,7 @@ x QUEUECOND rcvd-pkts-t1 rcvd-pkts-t1 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t1
 x PROCESS 4000 0  # 4
 x SEMDOWN threads-cepops-SEM global
-x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x LOOP handle-cepops 0 threads-queries threads-queries 0
 x SEMUP threads-cepops-SEM global
 x CALL handle-created-complex-events
 x SEMUP packet-threads-SEM global
@@ -537,7 +540,7 @@ x QUEUECOND rcvd-pkts-t2 rcvd-pkts-t2 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t2
 x PROCESS 4000 0  # 4
 x SEMDOWN threads-cepops-SEM global
-x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x LOOP handle-cepops 0 threads-queries threads-queries 0
 x SEMUP threads-cepops-SEM global
 x CALL handle-created-complex-events
 x SEMUP packet-threads-SEM global
@@ -572,7 +575,7 @@ x QUEUECOND rcvd-pkts-t3 rcvd-pkts-t3 notempty
 x DEQUEUE PKTQUEUE 0 rcvd-pkts-t3
 x PROCESS 4000 0  # 4
 x SEMDOWN threads-cepops-SEM global
-x LOOP handle-cepops 0 threads-cepops threads-cepops 0
+x LOOP handle-cepops 0 threads-queries threads-queries 0
 x SEMUP threads-cepops-SEM global
 x CALL handle-created-complex-events
 x SEMUP packet-threads-SEM global

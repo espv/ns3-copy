@@ -20,7 +20,8 @@ namespace ns3 {
     }
 
     Ptr<SiddhiTRexQuery> SiddhiTRexQuery::buildQuery(SiddhiTRexQueryId query_id, json query_to_add) {
-      Ptr<SiddhiTRexQuery> q = CreateObject<SiddhiTRexQuery>();;
+      Ptr<SiddhiTRexQuery> q = CreateObject<SiddhiTRexQuery>();
+      q->json_query = query_to_add;
       switch (query_id) {
         case SIDDHITREXDETECTFIRETEMPGT80HUMIDITYLT10: {
 

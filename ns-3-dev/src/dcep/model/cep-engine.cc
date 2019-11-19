@@ -93,6 +93,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         GetObject<Forwarder>()->TraceConnectWithoutContext("new event", 
                 MakeCallback(&CEPEngine::ForwardProducedCepEvent, this));
     }
+
+    std::set<Ptr<CepQueryComponent> > CEPEngine::GetCepQueryComponents(int stream_id)
+    {
+        return streamToQueryComponents[stream_id];
+    }
     
     void
     CEPEngine::ForwardProducedCepEvent(Ptr<CepEvent> e)
@@ -160,13 +165,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         std::vector<Ptr<CepOperator>> ops;
         cep->GetOpsByInputCepEventType(e->type, ops);
         std::map<std::string, Ptr<Constraint> > constraints;
-        for (auto cepop : ops)
+        /*for (auto cepop : ops)
         {
             for (auto c : cepop->constraints)
             {
                 constraints[c->var_name] = c;
             }
-        }
+        }*/
         Ptr<Producer> producer = GetObject<Producer>();
 
         auto node = GetObject<Dcep>()->GetNode();
@@ -267,6 +272,13 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         InstantiateQuery(q);
         StoreQuery(q);
     }
+
+    void
+    CEPEngine::RecvQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+        InstantiateQueryComponent(queryComponent);
+        StoreQueryComponent(queryComponent);
+    }
     
     void
     CEPEngine::InstantiateQuery(Ptr<Query> q){
@@ -306,6 +318,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     void
+    CEPEngine::InstantiateQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+      GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>()->cepQueryComponentQueues["all-queries"]->push(queryComponent);
+    }
+
+    void
     CEPEngine::ClearQueries() {
         auto dcep = GetObject<Dcep>();
         dcep->ClearQueries();
@@ -318,6 +336,32 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     CEPEngine::StoreQuery(Ptr<Query> q){
         queryPool.push_back(q);
+    }
+
+    void
+    CEPEngine::StoreQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+        queryComponentPool.push_back(queryComponent);
+        /* For each event stream that's in the queryComponent locally, place the queryComponent in the vector in
+         * streamToQueryComponents that corresponds to the stream */
+        auto cepop = queryComponent->GetFirstOperator();
+        while (cepop != nullptr) {
+            if (typeid(*cepop) == typeid(JoinOperator)) {
+                Ptr<JoinOperator> joinOp = dynamic_cast<JoinOperator* >(&(*cepop));
+                for (auto atom : joinOp->GetAtomicOperators()) {
+                    streamToQueryComponents[atom->stream_id].insert(queryComponent);
+                }
+            } else if (typeid(*cepop) == typeid(AtomicOperator)) {
+                Ptr<AtomicOperator> atom = dynamic_cast<AtomicOperator* >(&(*cepop));
+                streamToQueryComponents[atom->stream_id].insert(queryComponent);
+            } else if (typeid(*cepop) == typeid(ThenOperator)) {
+
+            } else {
+                // Unknown Type
+                NS_ABORT_MSG("Unknown operator");
+            }
+            cepop = cepop->nextOperator;
+        }
     }
 
 
@@ -368,6 +412,48 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
     }
+
+
+    void
+    Detector::CepQueryComponentProcessCepEvent(Ptr<CepEvent> e, Ptr<CEPEngine> cep)
+    {
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        cep = GetObject<CEPEngine>();
+        Ptr<Producer> producer = GetObject<Producer>();
+        ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent = e;
+        e->pkt = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet;
+        auto op = ee->currentlyExecutingThread->m_currentLocation->curCepQuery;
+
+        ee->setLocalStateVariable("CepOpDoneYet", 0);
+        ee->setLocalStateVariable("CreatedComplexEvent", 0);
+        /*if (!op->ExpectingCepEvent(e->type)) {
+            ee->setLocalStateVariable("CepOpDoneYet", 1);
+            return;
+        }*/
+
+        std::vector<Ptr<CepEvent> > returned;
+
+        auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
+        if (evs == ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.end()) {
+            ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables["DCEP-Sim"] = new DcepSimExecutionVariables();
+            evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
+        }
+        auto devs = (DcepSimExecutionVariables *)evs->second;
+        devs->cepOperatorProcessCepEvent_cep = cep;
+        //devs->cepOperatorProcessCepEvent_ops = ops;
+        devs->cepOperatorProcessCepEvent_cepQueryComponents = cep->GetCepQueryComponents(e->GetStreamId());
+        devs->cepOperatorProcessCepEvent_producer = producer;
+
+        for (auto cqc : cep->streamToQueryComponents[e->GetStreamId()]) {
+          auto cepop = cqc->GetFirstOperator();
+          while (cepop != nullptr) {
+            cepop->Evaluate2(e, returned, cep);
+            cepop = cepop->nextOperator;
+          }
+        }
+        //op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
+    }
+
     
     void
     Detector::ProcessCepEvent(Ptr<CepEvent> e)
@@ -384,6 +470,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         CepOperatorProcessCepEvent(e, ops, cep, producer);
     }
 
+    bool NumberConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) { return false; }
 
     bool
     NumberConstraint::Evaluate(Ptr<CepEvent> e)
@@ -408,6 +495,31 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
     }
 
+    bool JoinNumberConstraint::Evaluate(Ptr<CepEvent> e) { return false; }
+
+    bool
+    JoinNumberConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
+    {
+        switch (type) {
+            case EQCONSTRAINT:
+                return e1->numberValues[var_name] == e2->numberValues[var_name];
+            case INEQCONSTRAINT:
+                return e1->numberValues[var_name] != e2->numberValues[var_name];
+            case LTCONSTRAINT:
+                return e1->numberValues[var_name] < e2->numberValues[var_name];
+            case LTECONSTRAINT:
+                return e1->numberValues[var_name] <= e2->numberValues[var_name];
+            case GTCONSTRAINT:
+                return e1->numberValues[var_name] > e2->numberValues[var_name];
+            case GTECONSTRAINT:
+                return e1->numberValues[var_name] >= e2->numberValues[var_name];
+            default:
+                NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
+        }
+    }
+
+    bool StringConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) { return false; }
+
     bool
     StringConstraint::Evaluate(Ptr<CepEvent> e)
     {
@@ -416,6 +528,21 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 return e->stringValues[var_name] == stringValue;
             case INEQCONSTRAINT:
                 return e->stringValues[var_name] != stringValue;
+            default:
+                NS_FATAL_ERROR("String constraints can only have equality or inequality constraints");
+        }
+    }
+
+    bool JoinStringConstraint::Evaluate(Ptr<CepEvent> e) { return false; }
+
+    bool
+    JoinStringConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
+    {
+        switch (type) {
+            case EQCONSTRAINT:
+                return e1->stringValues[var_name] == e2->stringValues[var_name];
+            case INEQCONSTRAINT:
+                return e1->stringValues[var_name] != e2->stringValues[var_name];
             default:
                 NS_FATAL_ERROR("String constraints can only have equality or inequality constraints");
         }
@@ -444,6 +571,27 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     TypeId
+    JoinNumberConstraint::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::JoinNumberConstraint")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
+
+
+    TypeId
+    JoinStringConstraint::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::JoinStringConstraint")
+                .SetParent<Object> ()
+        ;
+
+        return tid;
+    }
+
+    TypeId
     FogApplicationComponent::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::FogApplicationComponent")
@@ -454,10 +602,61 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     TypeId
+    CepQueryComponent::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::CepQueryComponent")
+                .SetParent<FogApplicationComponent> ()
+                .AddConstructor<CepQueryComponent> ()
+        ;
+
+        return tid;
+    }
+
+    CepQueryComponent::CepQueryComponent()
+    {
+        static int cepQueryComponentCounter = 0;
+        id = cepQueryComponentCounter++;
+    }
+
+    int
+    CepQueryComponent::GetId()
+    {
+        return id;
+    }
+
+    void
+    CepQueryComponent::InsertThenOperator(Ptr<ThenOperator> cepop)
+    {
+        thenOperators.emplace_back(cepop);
+    }
+
+    void
+    CepQueryComponent::SetFirstOperator(Ptr<CepOperator> cepop)
+    {
+        firstOperator = cepop;
+    }
+
+    Ptr<CepOperator>
+    CepQueryComponent::GetFirstOperator()
+    {
+        return firstOperator;
+    }
+
+    std::string CepQueryComponent::GetEventType()
+    {
+        return eventType;
+    }
+
+    void CepQueryComponent::SetEventType(std::string et)
+    {
+        eventType = et;
+    }
+
+    TypeId
     CepOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::CepOperator")
-            .SetParent<FogApplicationComponent> ()
+            .SetParent<Object> ()
         ;
         
         return tid;
@@ -472,12 +671,22 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         return tid;
     }
+
+    TypeId
+    JoinOperator::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::JoinOperator")
+                .SetParent<CepOperator> ()
+        ;
+
+        return tid;
+    }
     
     TypeId
     AndOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::AndOperator")
-            .SetParent<CepOperator> ()
+            .SetParent<JoinOperator> ()
         ;
         
         return tid;
@@ -487,7 +696,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     ThenOperator::GetTypeId(void)
     {
         static TypeId tid = TypeId("ns3::ThenOperator")
-                .SetParent<CepOperator> ()
+                .SetParent<JoinOperator> ()
         ;
 
         return tid;
@@ -505,6 +714,17 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
     void
     AtomicOperator::Configure(Ptr<Query> q, Ptr<CEPEngine> cep)
+    {
+        this->queryId = q->id;
+        this->event1 = q->inevent1;
+        this->event2 = q->inevent2;
+        this->constraints = q->constraints;
+
+        cepEngine = cep;
+    }
+
+    void
+    JoinOperator::Configure(Ptr<Query> q, Ptr<CEPEngine> cep)
     {
         this->queryId = q->id;
         this->event1 = q->inevent1;
@@ -571,6 +791,19 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         cepEngine = cep;
     }
 
+    std::vector<Ptr<AtomicOperator> > JoinOperator::GetAtomicOperators()
+    {
+        return atomicOperators;
+    }
+
+    void
+    CepOperator::InsertCepEventIntoWindows(Ptr<CepEvent> e)
+    {
+      for (auto window : stream_windows[e->GetStreamId()]) {
+        window->InsertEvent(e);
+      }
+    }
+
     bool
     AtomicOperator::Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
@@ -593,6 +826,138 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
 
         p->GetObject<Forwarder>()->ForwardNewCepEvent(e);
         return true;
+    }
+
+    bool
+    AtomicOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
+    {
+      bool constraintsFulfilled = true;
+      for (auto c : constraints)
+      {
+        // All constraints must be fulfilled for constraintsFulfilled to be true
+        constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
+      }
+
+      Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
+      auto ee = node->GetObject<ExecEnv>();
+      ee->setLocalStateVariable("CepOpType", 0);
+      ee->setLocalStateVariable("CreatedComplexEvent", 0);
+      ee->setLocalStateVariable("CepOpDoneYet", 1);
+      ee->setLocalStateVariable("attributes-left", 0);
+      if (!constraintsFulfilled) {
+        return false;
+      }
+
+      cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
+      return true;
+    }
+
+    // TODO: finish implementing this method
+    bool
+    JoinOperator::Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
+    {
+        bool constraintsFulfilled = true;
+        for (auto c : constraints)
+        {
+            // All constraints must be fulfilled for constraintsFulfilled to be true
+            constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
+        }
+
+        Ptr<Node> node = cep->GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+        ee->setLocalStateVariable("CepOpType", 4);
+        ee->setLocalStateVariable("CreatedComplexEvent", 0);
+        ee->setLocalStateVariable("CepOpDoneYet", 1);
+        ee->setLocalStateVariable("attributes-left", 0);
+        if (!constraintsFulfilled) {
+            return false;
+        }
+
+        p->GetObject<Forwarder>()->ForwardNewCepEvent(e);
+        return true;
+    }
+
+    bool
+    JoinOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
+    {
+        bool constraintsFulfilled = true;
+
+        for (auto atomic : atomicOperators) {
+            if (atomic->stream_id == e->GetStreamId()) {
+                for (auto c : atomic->constraints) {
+                    // All constraints must be fulfilled for constraintsFulfilled to be true
+                    constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
+                }
+                // Only one AtomicOperator for each stream
+                break;
+            }
+        }
+
+        if (!constraintsFulfilled)
+            return false;
+
+        // Atomic constraints are fulfilled; now we insert the event into windows
+        for (auto window : stream_windows[e->GetStreamId()]) {
+            window->InsertEvent(e);
+        }
+
+        // Now we check if the event joins with other events. If all constraints are fulfilled
+        // TODO: Finish this; it's not trivial because we have to potentially join many tuples
+        std::vector<std::pair<Ptr<CepEvent>, Ptr<CepEvent> > > fulfilledEvents;
+        for (auto c : constraints) {
+            Ptr<JoinConstraint> join_constraint = dynamic_cast<JoinConstraint*>(&(*c));
+            // All constraints must be fulfilled for constraintsFulfilled to be true
+            int eventStreamOfNewEvent = e->GetStreamId();
+            int otherEventStream;
+            if (eventStreamOfNewEvent == join_constraint->event_stream1) {
+                otherEventStream = join_constraint->event_stream2;
+            } else if (eventStreamOfNewEvent == join_constraint->event_stream2) {
+                otherEventStream = join_constraint->event_stream1;
+            } else {
+                continue;
+            }
+
+            for ( auto it = stream_windows.begin(); it != stream_windows.end(); it++ )
+            {
+                if (it->first == otherEventStream) {
+                    for (auto w : it->second) {
+                        for (auto e2 : w->GetCepEvents()) {
+                            if (eventStreamOfNewEvent == join_constraint->event_stream1) {
+                                constraintsFulfilled = join_constraint->Evaluate(e, e2.second);
+                            } else {  // We know then that the newly received event is the second argument
+                                constraintsFulfilled = join_constraint->Evaluate(e2.second, e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (constraintsFulfilled) {
+            // We managed to produce some output. Now we have to place the output into the window of the next operator.
+            // If this is the last operator, we send it upwards to the CepQueryComponent, which will
+            // display it to the user.
+        }
+
+
+        Ptr<Node> node = cep->GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv>();
+        ee->setLocalStateVariable("CepOpType", 4);
+        ee->setLocalStateVariable("CreatedComplexEvent", 0);
+        ee->setLocalStateVariable("CepOpDoneYet", 1);
+        ee->setLocalStateVariable("attributes-left", 0);
+        if (!constraintsFulfilled) {
+            return false;
+        }
+
+        cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
+        return true;
+    }
+
+    void
+    JoinOperator::InsertAtomicOperator(Ptr<AtomicOperator> a)
+    {
+        atomicOperators.emplace_back(a);
     }
 
     bool
@@ -667,6 +1032,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->setLocalStateVariable("InsertedSequence", 1);
         }
         return false;
+    }
+
+    bool
+    AndOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
+    {
+      return false;
     }
 
     bool
@@ -746,6 +1117,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     bool
+    ThenOperator::Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
+    {
+      return false;
+    }
+
+    bool
     OrOperator::Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep)
     {
         /* everything is a match*/
@@ -753,7 +1130,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         // Here we insert the incoming event into the sequence
         Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
         Ptr<ExecEnv> ee = node->GetObject<ExecEnv>();
-        ee->setLocalStateVariable("CepOpType", 0);
+        ee->setLocalStateVariable("CepOpType", 3);
         ee->setLocalStateVariable("CepOpDoneYet", 1);
         bool constraintsFulfilled = true;
         for (auto c : q->constraints)
@@ -768,6 +1145,12 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             ee->setLocalStateVariable("InsertedSequence", 0);
         }
         return constraintsFulfilled;
+    }
+
+    bool
+    OrOperator::Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
+    {
+      return true;
     }
     
     bool
@@ -1003,7 +1386,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return tid;
     }
 
-    Ptr<FogApplicationComponent> FogService::buildComponentDAG() {return nullptr;}
+    //Ptr<FogApplicationComponent> FogService::buildComponentDAG() {return nullptr;}
     
     TypeId
     Query::GetTypeId(void)
@@ -1130,7 +1513,191 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         e->prevHopsCount = prevHopsCount;
         e->delay = delay;
     }
-    
+
+    int
+    CepEvent::GetStreamId()
+    {
+        return event_class;
+    }
+
+
+    /************** WINDOW ***************************/
+    TypeId
+    Window::GetTypeId(void)
+    {
+      static TypeId tid = TypeId("ns3::Window")
+              .SetParent<Object> ()
+      ;
+
+      return tid;
+    }
+
+    TypeId
+    TimeWindow::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::TimeWindow")
+              .SetParent<Window> ()
+        ;
+
+        return tid;
+    }
+
+    TypeId
+    SlidingTimeWindow::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::SlidingTimeWindow")
+                .SetParent<TimeWindow> ()
+                .AddConstructor<SlidingTimeWindow>()
+        ;
+
+        return tid;
+    }
+
+    TypeId
+    TumblingTimeWindow::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::TumblingTimeWindow")
+                .SetParent<TimeWindow> ()
+                .AddConstructor<TumblingTimeWindow>()
+        ;
+
+        return tid;
+    }
+
+    TypeId
+    TupleWindow::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::TupleWindow")
+                .SetParent<Window> ()
+        ;
+
+        return tid;
+    }
+
+    TypeId
+    SlidingTupleWindow::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::SlidingTupleWindow")
+                .SetParent<TupleWindow> ()
+                .AddConstructor<SlidingTupleWindow>()
+        ;
+
+        return tid;
+    }
+
+    TypeId
+    TumblingTupleWindow::GetTypeId(void)
+    {
+        static TypeId tid = TypeId("ns3::TumblingTupleWindow")
+                .SetParent<TupleWindow> ()
+                .AddConstructor<TumblingTupleWindow>()
+        ;
+
+        return tid;
+    }
+
+    TumblingTupleWindow::TumblingTupleWindow()
+    {
+
+    }
+
+    SlidingTupleWindow::SlidingTupleWindow()
+    {
+
+    }
+
+    TumblingTimeWindow::TumblingTimeWindow()
+    {
+        lastTumble = Simulator::Now();
+    }
+
+    SlidingTimeWindow::SlidingTimeWindow()
+    {
+
+    }
+
+    void
+    SlidingTimeWindow::InsertEvent(Ptr<CepEvent> e)
+    {
+        this->UpdateWindow();
+        Time now = Simulator::Now();
+        buffer.emplace_back(std::pair<Time, Ptr<CepEvent> >(now, e));
+    }
+
+    void
+    SlidingTupleWindow::InsertEvent(Ptr<CepEvent> e)
+    {
+        buffer.emplace_back(std::pair<Time, Ptr<CepEvent> >(Simulator::Now(), e));
+        if (buffer.size() > this->size) {
+            // Erase first element in buffer
+            buffer.erase(buffer.begin(), buffer.begin()+1);
+        }
+    }
+
+    void
+    TumblingTimeWindow::InsertEvent(Ptr<CepEvent> e)
+    {
+        this->UpdateWindow();
+        Time now = Simulator::Now();
+        buffer.emplace_back(std::pair<Time, Ptr<CepEvent> >(now, e));
+    }
+
+    void
+    TumblingTupleWindow::InsertEvent(Ptr<CepEvent> e)
+    {
+        // We empty the whole buffer excluding the element we received
+        if (buffer.size() == this->size) {
+            buffer.clear();
+        }
+        buffer.emplace_back(std::pair<Time, Ptr<CepEvent> >(Simulator::Now(), e));
+    }
+
+    std::vector <std::pair<Time, Ptr<CepEvent> > >
+    Window::GetCepEvents()
+    {
+        return buffer;
+    }
+
+    std::vector <std::pair<Time, Ptr<CepEvent> > >
+    SlidingTimeWindow::GetCepEvents()
+    {
+        this->UpdateWindow();
+        return buffer;
+    }
+
+    std::vector <std::pair<Time, Ptr<CepEvent> > >
+    TumblingTimeWindow::GetCepEvents()
+    {
+        this->UpdateWindow();
+        return buffer;
+    }
+
+    void SlidingTimeWindow::UpdateWindow()
+    {
+        Time now = Simulator::Now();
+        // Sliding window logic: If the item has been in the buffer for more than the size of the time window, it's removed from it
+        for(auto it = buffer.begin(); it != buffer.end(); ++it) {
+            std::pair<Time, Ptr<CepEvent> > p = *it;
+            Time t = p.first;
+            if (now - t > this->size) {
+                buffer.erase(it);
+            }
+        }
+    }
+
+    void TumblingTimeWindow::UpdateWindow()
+    {
+        Time now = Simulator::Now();
+        // Update last time the window tumbled
+        lastTumble = lastTumble + this->size*((now-lastTumble)/size);
+        for(auto it = buffer.begin(); it != buffer.end(); ++it) {
+            std::pair<Time, Ptr<CepEvent> > p = *it;
+            Time t = p.first;
+            if (this->lastTumble > t) {
+                buffer.erase(it);
+            }
+        }
+    }
     
     
     /************** QUERY **************
@@ -1150,16 +1717,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->assigned = q->assigned;
         this->currentHost = q->currentHost;
     }
-    
-    Ptr<FogApplicationComponent>
-    Query::buildComponentDAG()
-    {
-        /* In this methods, we create a set of operators that are connected together
-         * For instance, the ThenOperator might be the final operator that produces the complex event,
-         * but before it, comes two filter operations: a filter for the first event, and one for the second.
-         */
-        return CreateObject<ThenOperator>();
-    }
+
 
     uint32_t 
     Query::getSerializedSize()

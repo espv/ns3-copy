@@ -224,6 +224,10 @@ void ExecEnv::HandleQueue(std::vector<std::string> tokens) {
 
             // Add the queue to the reverse mapping
             cepQueryQueueNames[cepQueryQueues[tokens[0]]] = tokens[0];
+		} else if (tokens[3] == "cepquerycomponents") {
+		    this->cepQueryComponentQueues[tokens[0]] = new std::queue<Ptr<CepQueryComponent> > ();
+		    cepQueryComponentQueueOrder.push_back(cepQueryComponentQueues[tokens[0]]);
+		    cepQueryComponentQueueNames[cepQueryComponentQueues[tokens[0]]] = tokens[0];
 		} else if (tokens[3] == "cepevents") {
 			this->cepEventQueues[tokens[0]] = new std::queue<Ptr<CepEvent> > ();
             /* Add the queue to the end of queueOrder. This is used
@@ -452,7 +456,17 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
         for (; qIt != qItLast; qIt++)
             if (std::find(lc->cepQueryQueuesServed.begin(), lc->cepQueryQueuesServed.end(), *qIt) != lc->cepQueryQueuesServed.end())
                 return true;
-	} else if (lc->cepEventQueues) {
+	} else if (lc->cepQueryComponentQueues) {
+    auto firstQueue = cepQueryComponentQueues[first];
+    auto lastQueue = cepQueryComponentQueues[last];
+
+    auto qIt = std::find(cepQueryComponentQueueOrder.begin(), cepQueryComponentQueueOrder.end(), firstQueue);
+    auto qItLast = std::find(cepQueryComponentQueueOrder.begin(), cepQueryComponentQueueOrder.end(), lastQueue);
+
+    for (; qIt != qItLast; qIt++)
+      if (std::find(lc->cepQueryComponentQueuesServed.begin(), lc->cepQueryComponentQueuesServed.end(), *qIt) != lc->cepQueryComponentQueuesServed.end())
+        return true;
+  } else if (lc->cepEventQueues) {
         auto firstQueue = cepEventQueues[first];
         auto lastQueue = cepEventQueues[last];
 
@@ -491,7 +505,7 @@ bool ExecEnv::queuesIn(std::string first, std::string last, LoopCondition *lc) {
 
 void ExecEnv::fillQueues(std::string first, std::string last, LoopCondition *lc) {
 	// Assume first and last queues are of the same type
-	if (!lc->serviceQueues && !lc->stateQueues && !lc->cepQueryQueues && !lc->cepEventQueues) {
+	if (!lc->serviceQueues && !lc->stateQueues && !lc->cepQueryQueues && !lc->cepEventQueues && !lc->cepQueryComponentQueues) {
 		auto firstQueue = queues[first];
 		auto lastQueue = queues[last];
 
@@ -559,7 +573,24 @@ void ExecEnv::fillQueues(std::string first, std::string last, LoopCondition *lc)
 		// Push the last one if we actually had any
 		if (qIt != cepQueryQueueOrder.end())
 			lc->cepQueryQueuesServed.push_back(*qIt);
-	} else if (lc->cepEventQueues) {
+	} else if (lc->cepQueryComponentQueues) {
+    auto firstQueue = cepQueryComponentQueues[first];
+    auto lastQueue = cepQueryComponentQueues[last];
+    /* Iterate queues in the queue order, and
+     * insert each queue between and including
+     * firstQueue and lastQueue in lc->queues.
+     */
+    auto qIt = std::find(cepQueryComponentQueueOrder.begin(), cepQueryComponentQueueOrder.end(), firstQueue);
+    auto qItLast = std::find(cepQueryComponentQueueOrder.begin(), cepQueryComponentQueueOrder.end(), lastQueue);
+
+    // Push all _except_ the last one
+    for (; qIt != qItLast; qIt++)
+      lc->cepQueryComponentQueuesServed.push_back(*qIt);
+
+    // Push the last one if we actually had any
+    if (qIt != cepQueryComponentQueueOrder.end())
+      lc->cepQueryComponentQueuesServed.push_back(*qIt);
+  } else if (lc->cepEventQueues) {
         auto firstQueue = cepEventQueues[first];
         auto lastQueue = cepEventQueues[last];
 		/* Iterate queues in the queue order, and
@@ -989,6 +1020,7 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 				                                       stateQueueOrder.end(),
 						                               tokens[3]) == stateQueueOrder.end());
 				currentlyHandled->lc->cepQueryQueues = !(cepQueryQueues.find(tokens[3]) == cepQueryQueues.end());
+				currentlyHandled->lc->cepQueryComponentQueues = !(cepQueryComponentQueues.find(tokens[3]) == cepQueryComponentQueues.end());
 				currentlyHandled->lc->cepEventQueues = !(cepEventQueues.find(tokens[3]) == cepEventQueues.end());
 				fillQueues(tokens[3], tokens[4], currentlyHandled->lc);
 			}
@@ -1025,7 +1057,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			    numQueues = currentlyHandled->lc->stateQueuesServed.size();
 			} else if (currentlyHandled->lc->cepQueryQueues) {
 			    numQueues = currentlyHandled->lc->cepQueryQueuesServed.size();
-			} else if (currentlyHandled->lc->cepEventQueues) {
+			} else if (currentlyHandled->lc->cepQueryComponentQueues) {
+        numQueues = currentlyHandled->lc->cepQueryComponentQueuesServed.size();
+      } else if (currentlyHandled->lc->cepEventQueues) {
                 numQueues = currentlyHandled->lc->cepEventQueuesServed.size();
 			} else {
 			    numQueues = currentlyHandled->lc->queuesServed.size();
@@ -1205,7 +1239,13 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			NS_ASSERT_MSG(tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE", "Invalid operation performed on CEPQUERYQUEUE in line " << q->lineNr << " in device file");
 			q->cepQueryQueue = cepQueryQueues[tokens[4]];
             q->queueName = tokens[4];
-		} else if (tokens[2] == "CEPEVENTQUEUE") {
+		} else if (tokens[2] == "CEPQUERYCOMPONENTQUEUE") {
+            q->isCepQueryComponentQueue = true;
+            NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPQUERYQUEUE at line " << q->lineNr << " in device file");
+            NS_ASSERT_MSG(tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE", "Invalid operation performed on CEPQUERYQUEUE in line " << q->lineNr << " in device file");
+            q->cepQueryQueue = cepQueryQueues[tokens[4]];
+            q->queueName = tokens[4];
+        } else if (tokens[2] == "CEPEVENTQUEUE") {
 		    q->isCepEventQueue = true;
             NS_ASSERT_MSG(tokens.size() >= 4, "Need to specify queue when enqueuing/dequeuing from CEPEVENTQUEUE at line " << q->lineNr << " in device file");
             if (tokens[1] == "ENQUEUE" || tokens[1] == "DEQUEUE") {
@@ -1226,7 +1266,9 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 			    q->cepEventQueue = cepEventQueues[tokens[4]];
 			} else if (q->isCepQueryQueue) {
                 q->cepQueryQueue = cepQueryQueues[tokens[4]];
-			} else {  // When specifying queue in a PKTQUEUE event
+			} else if (q->isCepQueryComponentQueue) {
+        q->cepQueryComponentQueue = cepQueryComponentQueues[tokens[4]];
+      } else {  // When specifying queue in a PKTQUEUE event
                 q->queue = queues[tokens[4]];
                 q->isPacketQueue = true;
             }
@@ -1272,6 +1314,8 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
 
         if (tokens[2] == "CEPQUERYQUEUE") {
             cq->isCepQueryQueue = true;
+        } else if (tokens[2] == "CEPQUERYCOMPONENTQUEUE") {
+          cq->isCepQueryComponentQueue = true;
         } else if (tokens[2] == "SRVQUEUE") {
             cq->isServiceQueue = true;
         } else if (tokens[2] == "STATEQUEUE") {
@@ -1445,7 +1489,15 @@ void ExecEnv::HandleSignature(std::vector<std::string> tokens) {
                         if (name != cepQueryQueueNames.end()) {
                             queueName = (*name).second;
                         }
-					} else if (currentlyHandled->lc->cepEventQueues) {
+					} else if (currentlyHandled->lc->cepQueryComponentQueues) {
+            auto firstQueue = currentlyHandled->lc->cepQueryComponentQueuesServed[0];
+
+            // First, find the queue name
+            auto name = cepQueryComponentQueueNames.find(firstQueue);
+            if (name != cepQueryComponentQueueNames.end()) {
+              queueName = (*name).second;
+            }
+          } else if (currentlyHandled->lc->cepEventQueues) {
                         auto firstQueue = currentlyHandled->lc->cepEventQueuesServed[0];
 
                         // First, find the queue name

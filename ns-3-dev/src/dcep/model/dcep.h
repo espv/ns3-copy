@@ -58,6 +58,7 @@ public:
     void DispatchAtomicCepEvent (Ptr<CepEvent> e);
     void rcvRemoteMsg(uint8_t *data, uint32_t size, uint16_t msg_type, uint64_t delay);
     void SendFinalCepEventToSink(Ptr<CepEvent>);
+    void DispatchCepQueryComponent(Ptr<CepQueryComponent> queryComponent);
 
     Ptr<Node> node;
 

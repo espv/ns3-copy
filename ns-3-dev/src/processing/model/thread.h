@@ -43,6 +43,7 @@ public:
 	int currentEvent;
 	Ptr<Packet> curPkt;
 	Ptr<CepOperator> curCepQuery;
+	Ptr<CepQueryComponent> curCepQueryComponent;
   Ptr<ExecutionInfo> m_executionInfo = Create<ExecutionInfo>();
 	struct tempVar tempvar;
 

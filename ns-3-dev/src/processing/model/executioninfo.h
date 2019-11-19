@@ -56,6 +56,7 @@ namespace ns3 {
         std::vector<Ptr<CepOperator>> cepOperatorProcessCepEvent_ops;
         Ptr<CEPEngine> cepOperatorProcessCepEvent_cep;
         Ptr<Producer> cepOperatorProcessCepEvent_producer;
+        std::set<Ptr<CepQueryComponent>> cepOperatorProcessCepEvent_cepQueryComponents;
     };
 
     class ExecutionInfo : public SimpleRefCount<ExecutionInfo> {

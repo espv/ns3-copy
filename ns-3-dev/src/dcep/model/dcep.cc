@@ -233,6 +233,17 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         this->TxQuery(q, ee->currentlyExecutingThread);
         GetObject<Placement>()->RecvQuery(q);
     }
+
+    void
+    Dcep::DispatchCepQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+        NS_LOG_FUNCTION(this);
+        NS_LOG_INFO(Simulator::Now() << " DCEP: received query to dispatch");
+
+        auto ee = node->GetObject<ExecEnv>();
+        //this->TxQuery(q, ee->currentlyExecutingThread);
+        GetObject<Placement>()->RecvQueryComponent(queryComponent);
+    }
     
     void
     Dcep::DispatchAtomicCepEvent(Ptr<CepEvent> e)

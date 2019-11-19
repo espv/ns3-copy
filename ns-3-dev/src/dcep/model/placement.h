@@ -20,6 +20,7 @@
 #define PLACEMENT_H
 
 #include <stdint.h>
+#include <ns3/cep-engine.h>
 #include "ns3/object-factory.h"
 #include "ns3/object.h"
 #include "ns3/olsr-routing-protocol.h"
@@ -44,6 +45,7 @@ namespace ns3 {
         
         virtual void configure(void)= 0;
         virtual void DoPlacement(void)= 0;
+        virtual void DoQueryComponentPlacement() = 0;
         virtual bool doAdaptation(std::string eType)= 0;
         /**
          * This function is used to determine where the event produced 
@@ -92,9 +94,11 @@ namespace ns3 {
         
         virtual void configure(void);
         virtual void DoPlacement(void);
+        void DoQueryComponentPlacement() override;
         virtual bool doAdaptation(std::string eType);
         virtual bool PlaceQuery(Ptr<Query> q);
-        
+        virtual bool PlaceQueryComponent(Ptr<CepQueryComponent> cepQueryComponent);
+
     
     };
     
@@ -138,9 +142,12 @@ class Placement : public Object
          * given query should be sent
          */
         void ForwardQuery(Ptr<Query> q);
+        void ForwardQueryComponent(Ptr<CepQueryComponent> queryComponent);
         void SendQueryToCepEngine (Ptr<Query> q);
-        
+        void SendQueryComponentToCepEngine (Ptr<CepQueryComponent> queryComponent);
+
         void RecvQuery(Ptr<Query> q);
+        void RecvQueryComponent(Ptr<CepQueryComponent> queryComponent);
 
         Ipv4Address SinkAddressForEvent(Ptr<CepEvent> e);
         
@@ -174,7 +181,8 @@ class Placement : public Object
         
         void ForwardRemoteQuery(std::string eType);
         uint32_t RemoveQuery(Ptr<Query> q);
-        
+        uint32_t RemoveQueryComponent(Ptr<CepQueryComponent> queryComponent);
+
         uint16_t deploymentModel;
         std::vector<Ptr<CepEvent> > eventsList;
         
@@ -184,6 +192,7 @@ class Placement : public Object
         
         
         std::vector<Ptr<Query> > q_queue;//queries awaiting to be placed
+        std::vector<Ptr<CepQueryComponent> > qc_queue;//query components awaiting to be placed
         TracedCallback<> activateDatasource;
         TracedCallback<Ptr<CepEvent> > remoteCepEventReceived;
         TracedCallback<Ptr<CepEvent> > m_newCepEventProduced;

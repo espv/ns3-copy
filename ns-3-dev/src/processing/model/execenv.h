@@ -92,6 +92,10 @@ namespace ns3 {
         std::map<std::queue<Ptr<CepOperator> > *, std::string> cepQueryQueueNames;
         std::vector<std::queue<Ptr<CepOperator> > *> cepQueryQueueOrder;
 
+        std::map<std::string, std::queue<Ptr<CepQueryComponent> > *> cepQueryComponentQueues;
+        std::map<std::queue<Ptr<CepQueryComponent> > *, std::string> cepQueryComponentQueueNames;
+        std::vector<std::queue<Ptr<CepQueryComponent> > *> cepQueryComponentQueueOrder;
+
         std::map<std::string, std::queue<Ptr<CepEvent> > *> cepEventQueues;
         std::map<std::queue<Ptr<CepEvent> > *, std::string> cepEventQueueNames;
         std::vector<std::queue<Ptr<CepEvent> > *> cepEventQueueOrder;

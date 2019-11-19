@@ -19,6 +19,7 @@
 #ifndef DCEP_STATE_H
 #define DCEP_STATE_H
 
+#include <ns3/cep-engine.h>
 #include "ns3/object.h"
 #include "ns3/ipv4-address.h"
 #include "common.h"
@@ -34,6 +35,7 @@ namespace ns3
        // void CepEventRoutingTableEntry(Ptr<CepEventRoutingTableEntry>);
         CepEventRoutingTableEntry();
         Ptr<Query> source_query;//the query used to produce the event corresponding to the current entry
+        Ptr<CepQueryComponent> source_query_component;//the query used to produce the event corresponding to the current entry
         OperatorState state;
         bool monitoring;
         Ipv4Address current_processor;
@@ -64,6 +66,7 @@ namespace ns3
         void SetCurrentProcessor (std::string eventType, Ipv4Address adr);
         void SetOutDest (std::string eventType, Ipv4Address adr);
         void CreateCepEventRoutingTableEntry (Ptr<Query> q);
+        void CreateCepEventRoutingTableEntry (Ptr<CepQueryComponent> queryComponent);
 
         Ptr<CepEventRoutingTableEntry> lookUpCepEventRoutingTable(std::string eventType);
     private:

@@ -57,11 +57,15 @@ void TRexProtocolStack::FsmTriggerCallback(Ptr<ExecEnv> ee, std::string fsm) {
             }
             auto devs = (DcepSimExecutionVariables *)evs->second;
 
-            dcep->GetObject<CEPEngine>()->GetObject<Detector>()->CepOperatorProcessCepEvent(
+            /*dcep->GetObject<CEPEngine>()->GetObject<Detector>()->CepOperatorProcessCepEvent(
                     ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent,
                     devs->cepOperatorProcessCepEvent_ops,
                     devs->cepOperatorProcessCepEvent_cep,
-                    devs->cepOperatorProcessCepEvent_producer);
+                    devs->cepOperatorProcessCepEvent_producer);*/
+
+            dcep->GetObject<CEPEngine>()->GetObject<Detector>()->CepQueryComponentProcessCepEvent(
+                    ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent,
+                    devs->cepOperatorProcessCepEvent_cep);
             break;
         } case CHECKCONSTRAINTS: {
             dcep->GetObject<CEPEngine>()->CheckConstraints(ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->curCepEvent);

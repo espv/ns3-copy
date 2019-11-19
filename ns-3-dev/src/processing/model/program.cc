@@ -143,6 +143,7 @@ QueueExecutionEvent::QueueExecutionEvent()
 	isPacketQueue = false;
 	isCepEventQueue = false;
 	isCepQueryQueue = false;
+	isCepQueryComponentQueue = false;
 	local = false;
 	servQueue = nullptr;
 	queue = nullptr;
@@ -159,8 +160,9 @@ CopyQueueExecutionEvent::CopyQueueExecutionEvent()
 	isServiceQueue = false;
 	isStateQueue = false;
 	isPacketQueue = false;
-    isCepEventQueue = false;
-    isCepQueryQueue = false;
+  isCepEventQueue = false;
+  isCepQueryQueue = false;
+  isCepQueryComponentQueue = false;
 
 	fromQueue = "";
 	toQueue = "";

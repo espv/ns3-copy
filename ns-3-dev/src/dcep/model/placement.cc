@@ -255,6 +255,14 @@ namespace ns3 {
         q_queue.push_back(q);
         Simulator::Schedule(Seconds(0.0), &PlacementPolicy::DoPlacement, GetObject<PlacementPolicy>());
     }
+
+
+    void
+    Placement::RecvQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+        qc_queue.push_back(queryComponent);
+        Simulator::Schedule(Seconds(0.0), &PlacementPolicy::DoQueryComponentPlacement, GetObject<PlacementPolicy>());
+    }
     
     
     uint32_t 
@@ -270,6 +278,24 @@ namespace ns3 {
                 break;
             }
                 
+        }
+        return q_queue.size();
+    }
+
+
+    uint32_t
+    Placement::RemoveQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+        std::vector<Ptr<CepQueryComponent> >::iterator it;
+        for (it = qc_queue.begin(); it != qc_queue.end(); it++)
+        {
+            auto qc = *it;
+            if (qc->GetId() == queryComponent->GetId())
+            {
+                qc_queue.erase(it);
+                break;
+            }
+
         }
         return q_queue.size();
     }
@@ -309,6 +335,12 @@ namespace ns3 {
         GetObject<CEPEngine>()->RecvQuery(q);
     }
 
+    void
+    Placement::SendQueryComponentToCepEngine(Ptr<CepQueryComponent> queryComponent)
+    {
+        GetObject<CEPEngine>()->RecvQueryComponent(queryComponent);
+    }
+
     void Placement::ForwardQuery(Ptr<Query> q)
     {
         auto eType = q->eventType;
@@ -337,7 +369,38 @@ namespace ns3 {
         }
  
     }
-    
+
+
+    void Placement::ForwardQueryComponent(Ptr<CepQueryComponent> queryComponent)
+    {
+        auto eType = queryComponent->GetEventType();
+
+        NS_LOG_INFO(Simulator::Now() << " Forwarding partial query to its destination");
+        Ptr<DcepState> dstate = GetObject<DcepState>();
+
+        if (dstate->GetNextHop(eType).IsAny())
+        {
+            NS_ABORT_MSG ("ASKED TO FORWARD A QUERY WITH NO DESTINATION ADDRESS!");
+        }
+        else if (dstate->GetNextHop(eType).IsEqual(GetObject<Communication>()->GetLocalAddress()))
+        {
+
+            if(dstate->GetQuery(eType)->isAtomic)
+            {
+                GetObject<CEPEngine>()->RecvQueryComponent(queryComponent);
+            }
+            else/* Send to local CEP engine*/
+                SendQueryComponentToCepEngine (queryComponent);
+        }
+        else
+        {
+            /* Send to remote destination */
+            ForwardRemoteQuery(eType);
+        }
+
+    }
+
+
     /*
      * ********************** PLACEMENT POLICIES ***********************
      * *****************************************************************
@@ -393,6 +456,27 @@ namespace ns3 {
         }
 
     }
+
+
+    void
+    CentralizedPlacementPolicy::DoQueryComponentPlacement()
+    {
+        NS_LOG_INFO (Simulator::Now() << " Doing centralized placement");
+        Ptr<Placement> p = GetObject<Placement>();
+
+        std::vector<Ptr < CepQueryComponent>> cqcq = p->qc_queue;
+
+        for (auto queryComponent : cqcq) {
+            if (!PlaceQueryComponent(queryComponent))
+            {
+                Simulator::Schedule(Seconds(3.0), &CentralizedPlacementPolicy::DoQueryComponentPlacement, this);
+            } else {
+                p->RemoveQueryComponent(queryComponent);
+            }
+        }
+
+    }
+
 
     bool
     CentralizedPlacementPolicy::doAdaptation(std::string eType) 
@@ -487,8 +571,23 @@ namespace ns3 {
 
         return placed;
     }
-    
 
+    bool
+    CentralizedPlacementPolicy::PlaceQueryComponent(Ptr<CepQueryComponent> cepQueryComponent)
+    {
+        Ptr<Placement> p = GetObject<Placement>();
+        Ptr<DcepState> dstate = GetObject<DcepState>();
+        Ptr<Dcep> dcep = GetObject<Dcep>();
+        Ptr<Node> node = GetObject<Dcep> ()->GetNode();
+        dstate->CreateCepEventRoutingTableEntry(cepQueryComponent);
+        Ptr<Communication> cm = GetObject<Communication>();
+
+        dstate->SetNextHop(cepQueryComponent->GetEventType(), Ipv4Address("10.0.0.3"));
+        newLocalPlacement(cepQueryComponent->GetEventType());
+        p->ForwardQueryComponent(cepQueryComponent);
+
+        return true;
+    }
     
 
 }
