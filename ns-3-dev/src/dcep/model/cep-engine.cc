@@ -334,6 +334,18 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     }
 
     void
+    CEPEngine::ClearQueryComponents() {
+        auto dcep = GetObject<Dcep>();
+        dcep->ClearQueries();
+        auto processing_ops_queue2 = dcep->GetNode()->GetObject<ExecEnv>()->cepQueryComponentQueues["all-queries"];
+        while(!processing_ops_queue2->empty())
+            processing_ops_queue2->pop();
+        queryComponentPool.clear();
+        streamToQueryComponents.clear();
+        this->ops_queue.clear();
+    }
+
+    void
     CEPEngine::StoreQuery(Ptr<Query> q){
         queryPool.push_back(q);
     }
@@ -431,8 +443,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             return;
         }*/
 
-        std::vector<Ptr<CepEvent> > returned;
-
         auto evs = ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.find("DCEP-Sim");
         if (evs == ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables.end()) {
             ee->currentlyExecutingThread->m_currentLocation->m_executionInfo->executionVariables["DCEP-Sim"] = new DcepSimExecutionVariables();
@@ -444,14 +454,20 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         devs->cepOperatorProcessCepEvent_cepQueryComponents = cep->GetCepQueryComponents(e->GetStreamId());
         devs->cepOperatorProcessCepEvent_producer = producer;
 
-        for (auto cqc : cep->streamToQueryComponents[e->GetStreamId()]) {
-          auto cepop = cqc->GetFirstOperator();
-          while (cepop != nullptr) {
-            cepop->Evaluate2(e, returned, cep);
-            cepop = cepop->nextOperator;
-          }
+        auto cqc = ee->currentlyExecutingThread->m_currentLocation->curCepQueryComponent;
+        std::vector<Ptr<CepEvent> > returned;
+        if (cqc->GetThenOperators().empty()) {
+            // A single AtomicOperator or JoinOperator
+            auto cepop = cqc->GetFirstOperator();
+            returned = cepop->Evaluate2(e, returned, cep);
+        } else {
+            for (auto thenop : cqc->GetThenOperators()) {
+                thenop->Evaluate2(e, returned, cep);
+                if (thenop->nextOperator->nextOperator == nullptr && !returned.empty()) {
+                    cep->GetObject<Producer>()->HandleNewCepEvent2(cqc, returned);
+                }
+            }
         }
-        //op->Evaluate(e, returned, cep->GetQuery(op->queryId), producer, ops, cep);
     }
 
     
@@ -636,10 +652,28 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         firstOperator = cepop;
     }
 
+    void
+    CepQueryComponent::SetLastOperator(Ptr<CepOperator> cepop)
+    {
+        lastOperator = cepop;
+    }
+
     Ptr<CepOperator>
     CepQueryComponent::GetFirstOperator()
     {
         return firstOperator;
+    }
+
+    Ptr<CepOperator>
+    CepQueryComponent::GetLastOperator()
+    {
+        return lastOperator;
+    }
+
+    std::vector<Ptr<ThenOperator> >
+    CepQueryComponent::GetThenOperators()
+    {
+        return thenOperators;
     }
 
     std::string CepQueryComponent::GetEventType()
@@ -828,28 +862,46 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return true;
     }
 
-    bool
+    std::vector<Ptr<CepEvent> >
     AtomicOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
-      bool constraintsFulfilled = true;
-      for (auto c : constraints)
-      {
+        if (stream_windows[e->GetStreamId()].empty()) {
+            return std::vector<Ptr<CepEvent> > ();
+        }
+        bool constraintsFulfilled = true;
+        for (auto c : constraints)
+        {
         // All constraints must be fulfilled for constraintsFulfilled to be true
-        constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
-      }
+            constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
+        }
 
-      Ptr<Node> node = cepEngine->GetObject<Dcep>()->GetNode();
-      auto ee = node->GetObject<ExecEnv>();
-      ee->setLocalStateVariable("CepOpType", 0);
-      ee->setLocalStateVariable("CreatedComplexEvent", 0);
-      ee->setLocalStateVariable("CepOpDoneYet", 1);
-      ee->setLocalStateVariable("attributes-left", 0);
-      if (!constraintsFulfilled) {
-        return false;
-      }
+        Ptr<Node> node = cep->GetObject<Dcep>()->GetNode();
+        auto ee = node->GetObject<ExecEnv> ();
+        ee->setLocalStateVariable("CepOpType", 0);
+        ee->setLocalStateVariable("CreatedComplexEvent", 0);
+        ee->setLocalStateVariable("CepOpDoneYet", 1);
+        ee->setLocalStateVariable("attributes-left", 0);
+        if (!constraintsFulfilled) {
+            return std::vector<Ptr<CepEvent> >();
+        }
 
-      cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
-      return true;
+        stream_windows[e->GetStreamId()].at(0)->InsertEvent(e);
+
+        returned.emplace_back(e);
+        //cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
+        return std::vector<Ptr<CepEvent> > ();
+    }
+
+    void
+    AtomicOperator::GetPartialResults(std::vector<Ptr<CepEvent> > &ret)
+    {
+        for (auto q : stream_windows) {
+            for (auto p : q.second) {
+                for (auto e : p->GetCepEvents()) {
+                    ret.emplace_back(e.second);
+                }
+            }
+        }
     }
 
     // TODO: finish implementing this method
@@ -877,7 +929,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return true;
     }
 
-    bool
+    std::vector<Ptr<CepEvent> >
     JoinOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
         bool constraintsFulfilled = true;
@@ -894,7 +946,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
 
         if (!constraintsFulfilled)
-            return false;
+            return std::vector<Ptr<CepEvent> > ();
 
         // Atomic constraints are fulfilled; now we insert the event into windows
         for (auto window : stream_windows[e->GetStreamId()]) {
@@ -947,17 +999,23 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         ee->setLocalStateVariable("CepOpDoneYet", 1);
         ee->setLocalStateVariable("attributes-left", 0);
         if (!constraintsFulfilled) {
-            return false;
+            return std::vector<Ptr<CepEvent> > ();
         }
 
         cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
-        return true;
+        return std::vector<Ptr<CepEvent> > ();
     }
 
     void
     JoinOperator::InsertAtomicOperator(Ptr<AtomicOperator> a)
     {
         atomicOperators.emplace_back(a);
+    }
+
+    void
+    JoinOperator::GetPartialResults(std::vector<Ptr<CepEvent> > &ret)
+    {
+
     }
 
     bool
@@ -1034,10 +1092,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return false;
     }
 
-    bool
+    std::vector<Ptr<CepEvent> >
     AndOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
-      return false;
+      return std::vector<Ptr<CepEvent> > ();
+    }
+
+    void
+    AndOperator::GetPartialResults(std::vector<Ptr<CepEvent> > &ret)
+    {
+
     }
 
     bool
@@ -1116,10 +1180,68 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return false;
     }
 
-    bool
+    void Consume2(Ptr<CepEvent> e, Ptr<CepOperator> cepop)
+    {
+        Ptr<Window> w = cepop->stream_windows[e->GetStreamId()].at(0);
+        w->RemoveEvent(e);
+        if (cepop->prevOperator != nullptr && cepop->prevOperator->prevOperator != nullptr) {
+            for (auto event : e->internalEvents) {
+                Consume2(event, cepop->prevOperator->prevOperator);
+            }
+        }
+    }
+
+    /*
+     * Algorithm: Check if there's output in window such that the "followed by" expression is expected,
+     * and check if the newly received event fits that operator.
+     * Evaluate the previous operator and place the contents in the current window if there was output.
+     **/
+    std::vector<Ptr<CepEvent> >
     ThenOperator::Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
-      return false;
+        static int cnt = 0;
+        if (++cnt % 1000 == 0)
+            std::cout << "ThenOperator::Evaluate2 " << cnt << std::endl;
+        std::vector<Ptr<CepEvent> > output;
+        // Check if there's already a compound event in the window, and that the next operator expects this event.
+        prevOperator->GetPartialResults(output);
+        if (!output.empty()) {
+            // We copy e because we will change its state and don't want that to be included when evaluating prevOperator
+            Ptr<CepEvent> copy = CreateObject<CepEvent>(e);
+            // We insert the partial results into the received event e such that it contains the previous events
+            copy->internalEvents.insert(e->internalEvents.end(), output.begin(), output.end());
+            // copy's internalEvents consists of the events that made it possible to insert copy in the nextOperator
+            // That means these events belong to this query. If the consumption policy is to use events only a single
+            // time, we will remove these events recursively once they trigger output for the whole query.
+            // We can evaluate the next operator
+            std::vector<Ptr<CepEvent> > output2;
+            nextOperator->Evaluate2(copy, output2, cep);
+            if (!output2.empty()) {
+                // We have output, and should consume events
+                //returned.insert(returned.end(), output.begin(), output.end());
+                //returned.insert(returned.end(), output2.begin(), output2.end());
+                for (auto event : output2) {
+                    if (event != copy) {
+                        copy->internalEvents.emplace_back(event);
+                    }
+                }
+                returned.emplace_back(copy);
+                // Create complex event
+                Consume2(copy, this->nextOperator);
+            }
+        }
+
+        if (returned.empty()) {
+            // Execute the prevOperator with a copy of the newly received event
+            std::vector<Ptr<CepEvent> > output3 = prevOperator->Evaluate2(CreateObject<CepEvent>(e), output, cep);
+        }
+        return returned;
+    }
+
+    void
+    ThenOperator::GetPartialResults(std::vector<Ptr<CepEvent> > &ret)
+    {
+
     }
 
     bool
@@ -1147,10 +1269,16 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         return constraintsFulfilled;
     }
 
-    bool
+    std::vector<Ptr<CepEvent> >
     OrOperator::Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
-      return true;
+      return std::vector<Ptr<CepEvent> >();
+    }
+
+    void
+    OrOperator::GetPartialResults(std::vector<Ptr<CepEvent> > &ret)
+    {
+
     }
     
     bool
@@ -1343,6 +1471,44 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         }
     }
 
+    void
+    Producer::HandleNewCepEvent2(Ptr<CepQueryComponent> cqc, std::vector<Ptr<CepEvent> > &events)
+    {
+        static int cnt = 0;
+        if (++cnt % 1000 == 0)
+            std::cout << "Producer::HandleNewCepEvent2 " << cnt << std::endl;
+        Ptr<CepEvent> new_event = CreateObject<CepEvent>();
+        new_event->timestamp = Simulator::Now();
+        uint64_t delay = 0;
+        uint32_t hops = 0;
+        new_event->timestamp = Seconds(0);
+        for(auto e : events)
+        {
+            delay = std::max(delay, e->delay);
+            hops = hops + e->hopsCount;
+            new_event->prevEvents.push_back(e);
+            new_event->pkt = e->pkt;  // Last event is the most recently received event, with the relevant packet
+            new_event->timestamp = std::max(e->timestamp, new_event->timestamp);
+        }
+        new_event->type = cqc->GetEventType();
+        new_event->delay = delay;
+        new_event->hopsCount = hops;
+        new_event->m_seq = events.back()->m_seq;
+        Ptr<ExecEnv> ee = GetObject<Dcep>()->GetNode()->GetObject<ExecEnv>();
+        for (auto event : events) {
+            for( auto const& [key, val] : event->stringValues )
+            {
+                new_event->stringValues[key] = val;
+            }
+            for( auto const& [key, val] : event->numberValues )
+            {
+                new_event->numberValues[key] = val;
+            }
+
+            GetObject<Forwarder>()->ForwardNewCepEvent(new_event);
+        }
+    }
+
     
     
     /*************************** FORWARDER **************
@@ -1438,6 +1604,11 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         
         return tid;
     }
+
+    CepEvent::CepEvent(std::vector<Ptr<CepEvent> > events)
+    {
+        internalEvents = events;
+    }
     
     CepEvent::CepEvent(Ptr<CepEvent> e)
     {
@@ -1517,7 +1688,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     int
     CepEvent::GetStreamId()
     {
-        return event_class;
+        return std::atoi(this->type.c_str());
     }
 
 
@@ -1547,7 +1718,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         static TypeId tid = TypeId("ns3::SlidingTimeWindow")
                 .SetParent<TimeWindow> ()
-                .AddConstructor<SlidingTimeWindow>()
         ;
 
         return tid;
@@ -1558,7 +1728,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         static TypeId tid = TypeId("ns3::TumblingTimeWindow")
                 .SetParent<TimeWindow> ()
-                .AddConstructor<TumblingTimeWindow>()
         ;
 
         return tid;
@@ -1579,7 +1748,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         static TypeId tid = TypeId("ns3::SlidingTupleWindow")
                 .SetParent<TupleWindow> ()
-                .AddConstructor<SlidingTupleWindow>()
         ;
 
         return tid;
@@ -1590,30 +1758,30 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         static TypeId tid = TypeId("ns3::TumblingTupleWindow")
                 .SetParent<TupleWindow> ()
-                .AddConstructor<TumblingTupleWindow>()
         ;
 
         return tid;
     }
 
-    TumblingTupleWindow::TumblingTupleWindow()
+    TumblingTupleWindow::TumblingTupleWindow(int numberTuples)
     {
-
+        this->size = numberTuples;
     }
 
-    SlidingTupleWindow::SlidingTupleWindow()
+    SlidingTupleWindow::SlidingTupleWindow(int numberTuples)
     {
-
+        this->size = numberTuples;
     }
 
-    TumblingTimeWindow::TumblingTimeWindow()
+    TumblingTimeWindow::TumblingTimeWindow(Time t)
     {
+        this->size = t;
         lastTumble = Simulator::Now();
     }
 
-    SlidingTimeWindow::SlidingTimeWindow()
+    SlidingTimeWindow::SlidingTimeWindow(Time t)
     {
-
+        this->size = t;
     }
 
     void
@@ -1622,6 +1790,19 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         this->UpdateWindow();
         Time now = Simulator::Now();
         buffer.emplace_back(std::pair<Time, Ptr<CepEvent> >(now, e));
+    }
+
+    void
+    Window::RemoveEvent(Ptr<CepEvent> e)
+    {
+        for (auto it=buffer.begin(); it!=buffer.end();) {
+            auto p = *it;
+            if (p.second == e) {
+                buffer.erase(it);
+            } else {
+                ++it;
+            }
+        }
     }
 
     void

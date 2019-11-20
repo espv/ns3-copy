@@ -244,7 +244,7 @@ SiddhiTRexThroughputDcep::ScheduleEventsFromTrace(Ptr<Query> q)
                 // TODO: Find out how to create this query here and deploy it
             } else if (tracepointName == "clearQueries") {
                 // Schedule all queries to be removed
-                Simulator::Schedule (next_time, &CEPEngine::ClearQueries, GetObject<CEPEngine>());
+                Simulator::Schedule (next_time, &CEPEngine::ClearQueryComponents, GetObject<CEPEngine>());
             } else {
                 NS_ABORT_MSG("Unrecognized simulation event in metadata");
             }
@@ -500,20 +500,22 @@ Query::buildComponentDAG()
         prevJoinOperator = nullptr;
         prevAtomicOperator = nullptr;
         for (auto subsubexpression : subexpression["incoming"]) {
+            int stream_id = subsubexpression["id"];
             auto atomicOperator = CreateObject<AtomicOperator>();
+            atomicOperator->stream_id = stream_id;
             for (auto window : subsubexpression["windows"]) {
                 Ptr<Window> w = nullptr;
                 if (window["type"] == "sliding") {
                 if (window["unit"] == "millisecond") {
-                    w = CreateObject<SlidingTimeWindow>();
+                    w = CreateObject<SlidingTimeWindow>(MilliSeconds(window["size"]));
                 } else if (window["unit"] == "tuple") {
-                    w = CreateObject<SlidingTupleWindow>();
+                    w = CreateObject<SlidingTupleWindow>(window["size"]);
                 }
                 } else if (window["type"] == "tumbling") {
                     if (window["unit"] == "millisecond") {
-                      w = CreateObject<TumblingTimeWindow>();
+                      w = CreateObject<TumblingTimeWindow>(MilliSeconds(window["size"]));
                     } else if (window["unit"] == "tuple") {
-                        w = CreateObject<TumblingTupleWindow>();
+                        w = CreateObject<TumblingTupleWindow>(window["size"]);
                     }
                 }
                 if (w == nullptr) {
@@ -558,5 +560,6 @@ Query::buildComponentDAG()
         prevSubsubexpressions.empty();
         prevSubexpression = prevSubexpression;
     }
+    queryComponent->SetLastOperator(curOperator);
     return queryComponent;
 }

@@ -55,6 +55,7 @@ namespace ns3 {
     public:
         static TypeId GetTypeId (void);
         
+        CepEvent(std::vector<Ptr<CepEvent> >);
         CepEvent(Ptr<CepEvent>);
         CepEvent();
         void operator=(Ptr<CepEvent>);
@@ -237,6 +238,7 @@ namespace ns3 {
             void DoCheckStringConstraints(Ptr<CepEvent> e, std::map<std::string, Ptr<Constraint>> constraints, Ptr<CEPEngine> cep, Ptr<Producer> producer, std::map<std::string, std::string> values);
             void FinishedProcessingEvent(Ptr<CepEvent> e);
             void ClearQueries();
+            void ClearQueryComponents();
 
             Ptr<CepOperator> GetOperator(uint32_t queryId);
             Ptr<Query> GetQuery(uint32_t id);
@@ -324,7 +326,8 @@ namespace ns3 {
 
             virtual void Configure (Ptr<Query>, Ptr<CEPEngine>) = 0;
             virtual bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) = 0;
-            virtual bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) = 0;
+            virtual std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) = 0;
+            virtual void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) = 0;
             void InsertCepEventIntoWindows(Ptr<CepEvent> e);
             bool ExpectingCepEvent (std::string);
             void Consume(std::vector<Ptr<CepEvent> > &events);
@@ -349,7 +352,8 @@ namespace ns3 {
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) override;
         };
 
         class JoinOperator: public CepOperator {
@@ -357,9 +361,10 @@ namespace ns3 {
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
             void InsertAtomicOperator(Ptr<AtomicOperator> a);
             std::vector<Ptr<AtomicOperator> > GetAtomicOperators();
+            void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) override;
         private:
             std::vector<Ptr<AtomicOperator> > atomicOperators;
         };
@@ -369,7 +374,8 @@ namespace ns3 {
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) override;
 
             bool DoEvaluate(Ptr<CepEvent> newEvent2, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *events1, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
 
@@ -380,7 +386,8 @@ namespace ns3 {
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
-            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) override;
         };
 
         class ThenOperator: public CepOperator {
@@ -388,10 +395,11 @@ namespace ns3 {
             static TypeId GetTypeId ();
             void Configure (Ptr<Query>, Ptr<CEPEngine>) override;
             bool Evaluate(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep) override;
+            void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) override;
 
             bool DoEvaluate(Ptr<CepEvent> newEvent, std::vector<Ptr<CepEvent> >& returned, std::vector<Ptr<CepEvent>> *bufmanEvents, Ptr<Query> q, Ptr<Producer> p, std::vector<Ptr<CepOperator>> ops, Ptr<CEPEngine> cep);
 
-            bool Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
+            std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) override;
         };
 
         class CepQueryComponent : public FogApplicationComponent {
@@ -400,7 +408,10 @@ namespace ns3 {
             CepQueryComponent();
             void InsertThenOperator(Ptr<ThenOperator>);
             void SetFirstOperator(Ptr<CepOperator>);
+            void SetLastOperator(Ptr<CepOperator>);
+            std::vector<Ptr<ThenOperator> > GetThenOperators();
             Ptr<CepOperator> GetFirstOperator();
+            Ptr<CepOperator> GetLastOperator();
             std::string GetEventType();
             void SetEventType(std::string);
             int GetId();
@@ -410,6 +421,7 @@ namespace ns3 {
             int lastLocalOperatorIndex;
             std::string eventType;;
             Ptr<CepOperator> firstOperator;
+            Ptr<CepOperator> lastOperator;
             std::vector<Ptr<ThenOperator> > thenOperators;
         };
 
@@ -418,6 +430,7 @@ namespace ns3 {
         public:
             static TypeId GetTypeId (void);
             void HandleNewCepEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> >&, CepOperator *op);
+            void HandleNewCepEvent2(Ptr<CepQueryComponent> cqc, std::vector<Ptr<CepEvent> > &events);
             void AddAttributesToNewEvent(Ptr<Query> q, std::vector<Ptr<CepEvent> > &events, Ptr<CepEvent> complex_event, CepOperator *op, int index);
 
         private:
@@ -431,6 +444,7 @@ namespace ns3 {
             Window() = default;
 
             virtual void InsertEvent(Ptr<CepEvent> e) = 0;
+            void RemoveEvent(Ptr<CepEvent> e);
 
             virtual std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents();
 
@@ -465,7 +479,7 @@ namespace ns3 {
         class SlidingTimeWindow : public TimeWindow {
         public:
             static TypeId GetTypeId(void);
-            SlidingTimeWindow();
+            SlidingTimeWindow(Time t);
             void InsertEvent(Ptr<CepEvent> e) final;
             std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents() final;
             void UpdateWindow();
@@ -474,14 +488,14 @@ namespace ns3 {
         class SlidingTupleWindow : public TupleWindow {
         public:
             static TypeId GetTypeId(void);
-            SlidingTupleWindow();
+            SlidingTupleWindow(int numberTuples);
             void InsertEvent(Ptr<CepEvent> e) final;
         };
 
         class TumblingTimeWindow : public TimeWindow {
         public:
             static TypeId GetTypeId(void);
-            TumblingTimeWindow();
+            TumblingTimeWindow(Time t);
             void InsertEvent(Ptr<CepEvent> e) final;
             std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents() final;
             void UpdateWindow();
@@ -492,7 +506,7 @@ namespace ns3 {
         class TumblingTupleWindow : public TupleWindow {
         public:
             static TypeId GetTypeId(void);
-            TumblingTupleWindow();
+            TumblingTupleWindow(int numberTuples);
             void InsertEvent(Ptr<CepEvent> e) final;
         };
     
