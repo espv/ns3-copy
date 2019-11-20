@@ -499,21 +499,74 @@ Query::buildComponentDAG()
         }
         prevJoinOperator = nullptr;
         prevAtomicOperator = nullptr;
+        std::vector<Ptr<JoinConstraint> > joinConstraints;
         for (auto subsubexpression : subexpression["incoming"]) {
             int stream_id = subsubexpression["id"];
             auto atomicOperator = CreateObject<AtomicOperator>();
             atomicOperator->stream_id = stream_id;
+
+            for (auto constraint : subsubexpression["constraints"]) {
+                ConstraintType type;
+                auto type_str = constraint["type"];
+                if (type_str == "EQCONSTRAINT") {
+                    type = EQCONSTRAINT;
+                } else if (type_str == "INEQCONSTRAINT") {
+                    type = INEQCONSTRAINT;
+                } else if (type_str == "LTCONSTRAINT") {
+                    type = LTCONSTRAINT;
+                } else if (type_str == "LTECONSTRAINT") {
+                    type = LTECONSTRAINT;
+                } else if (type_str == "GTCONSTRAINT") {
+                    type = GTCONSTRAINT;
+                } else if (type_str == "GTECONSTRAINT") {
+                    type = GTECONSTRAINT;
+                }
+
+                std::string value_type = constraint["value-type"];
+
+                if (constraint.contains("value")) {
+                    auto value = constraint["value"];
+                    if (constraint["value-type"] == "number") {
+                        auto numberConstraint = CreateObject<NumberConstraint> ();
+                        numberConstraint->type = type;
+                        numberConstraint->numberValue = value;
+                        numberConstraint->var_name = constraint["name"];
+                        atomicOperator->constraints.emplace_back(numberConstraint);
+                    } else if (constraint["value-type"] == "string") {
+                        auto stringConstraint = CreateObject<StringConstraint> ();
+                        stringConstraint->type = type;
+                        stringConstraint->stringValue = value;
+                        stringConstraint->var_name = constraint["name"];
+                        atomicOperator->constraints.emplace_back(stringConstraint);
+                    }
+                } else if (constraint.contains("reference")) {
+                    Ptr<JoinConstraint> joinConstraint;
+                    if (constraint["value-type"] == "number") {
+                        joinConstraint = CreateObject<JoinNumberConstraint> ();
+                    } else if (constraint["value-type"] == "string") {
+                        joinConstraint = CreateObject<JoinStringConstraint> ();
+                    }
+                    joinConstraint->type = type;
+                    joinConstraint->var_name = constraint["name"];
+                    joinConstraint->event_stream1 = std::atoi(((std::string)subsubexpression["reference"]).c_str());
+                    joinConstraint->event_stream2 = std::atoi(((std::string)constraint["reference"]).c_str());
+                    joinConstraints.emplace_back(joinConstraint);
+                } else {
+                    NS_ABORT_MSG("Invalid constraint definition");
+                }
+            }
+
             for (auto window : subsubexpression["windows"]) {
                 Ptr<Window> w = nullptr;
                 if (window["type"] == "sliding") {
-                if (window["unit"] == "millisecond") {
-                    w = CreateObject<SlidingTimeWindow>(MilliSeconds(window["size"]));
-                } else if (window["unit"] == "tuple") {
-                    w = CreateObject<SlidingTupleWindow>(window["size"]);
-                }
+                    if (window["unit"] == "millisecond") {
+                        w = CreateObject<SlidingTimeWindow>(MilliSeconds(window["size"]));
+                    } else if (window["unit"] == "tuple") {
+                        w = CreateObject<SlidingTupleWindow>(window["size"]);
+                    }
                 } else if (window["type"] == "tumbling") {
                     if (window["unit"] == "millisecond") {
-                      w = CreateObject<TumblingTimeWindow>(MilliSeconds(window["size"]));
+                        w = CreateObject<TumblingTimeWindow>(MilliSeconds(window["size"]));
                     } else if (window["unit"] == "tuple") {
                         w = CreateObject<TumblingTupleWindow>(window["size"]);
                     }
@@ -531,6 +584,10 @@ Query::buildComponentDAG()
                     // Insert the previous atomic event; will only be done once
                     prevJoinOperator->InsertAtomicOperator(prevAtomicOperator);
                 }
+                prevJoinOperator->constraints.insert(prevJoinOperator->constraints.end(), joinConstraints.begin(), joinConstraints.end());
+                // Each AtomicOperator might have some join constraints, and they will be placed on the JoinOperator.
+                // We clear the joinConstraints vector here so that the next AtomicOperator might define its
+                joinConstraints.clear();
                 prevJoinOperator->InsertAtomicOperator(atomicOperator);
                 if (curOperator != nullptr) {
                     curOperator->nextOperator = prevJoinOperator;

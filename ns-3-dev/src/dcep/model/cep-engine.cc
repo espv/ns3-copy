@@ -491,8 +491,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     bool
     NumberConstraint::Evaluate(Ptr<CepEvent> e)
     {
-        if (e->numberValues.find(var_name) == e->numberValues.end())
-            return true;
         switch (type) {
             case EQCONSTRAINT:
                 return e->numberValues[var_name] == numberValue;
@@ -871,7 +869,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
-        // All constraints must be fulfilled for constraintsFulfilled to be true
+            // All constraints must be fulfilled for constraintsFulfilled to be true
             constraintsFulfilled = c->Evaluate(e) && constraintsFulfilled;
         }
 
@@ -1199,9 +1197,6 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     std::vector<Ptr<CepEvent> >
     ThenOperator::Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
-        static int cnt = 0;
-        if (++cnt % 1000 == 0)
-            std::cout << "ThenOperator::Evaluate2 " << cnt << std::endl;
         std::vector<Ptr<CepEvent> > output;
         // Check if there's already a compound event in the window, and that the next operator expects this event.
         prevOperator->GetPartialResults(output);
@@ -1216,7 +1211,8 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             // We can evaluate the next operator
             std::vector<Ptr<CepEvent> > output2;
             nextOperator->Evaluate2(copy, output2, cep);
-            if (!output2.empty()) {
+            // Only consume if we're the last ThenOperator
+            if (!output2.empty() && nextOperator->nextOperator == nullptr) {
                 // We have output, and should consume events
                 //returned.insert(returned.end(), output.begin(), output.end());
                 //returned.insert(returned.end(), output2.begin(), output2.end());
