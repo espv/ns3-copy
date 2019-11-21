@@ -320,10 +320,10 @@ SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)
                 q3->window = Seconds(150000000000000000);
                 q3->isFinalWithinNode = true;
 
-                Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();
+                Ptr<Constraint> c3 = CreateObject<Constraint>();
                 c3->var_name = "area";
                 c3->stringValue = "office";
-                c3->type = EQCONSTRAINT;
+                c3->type = STRINGEQCONSTRAINT;
                 q3->constraints.emplace_back(c3);
                 q3->op = "then";
                 q3->assigned = false;
@@ -360,10 +360,10 @@ SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)
             q2->parent_output = parent_output;
             q2->window = Seconds(150000000000000000);
             q2->isFinalWithinNode = true;
-            Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+            Ptr<Constraint> c2 = CreateObject<Constraint> ();
             c2->var_name = "percentage";
             c2->numberValue = 25;
-            c2->type = LTCONSTRAINT;
+            c2->type = NUMBERLTCONSTRAINT;
             q2->constraints.emplace_back(c2);
             Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
             in_seconds += 1;
@@ -387,10 +387,10 @@ SiddhiTRexThroughputSink::BuildTRexQueries(Ptr<Dcep> dcep)
             q1->parent_output = parent_output;
             q1->window = Seconds(150000000000000000);
             q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
-            Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+            Ptr<Constraint> c1 = CreateObject<Constraint> ();
             c1->var_name = "value";
             c1->numberValue = 45;
-            c1->type = GTCONSTRAINT;
+            c1->type = NUMBERGTCONSTRAINT;
             q1->constraints.emplace_back(c1);
             Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
             in_seconds += 1;
@@ -499,7 +499,7 @@ Query::buildComponentDAG()
         }
         prevJoinOperator = nullptr;
         prevAtomicOperator = nullptr;
-        std::vector<Ptr<JoinConstraint> > joinConstraints;
+        std::vector<Ptr<Constraint> > joinConstraints;
         for (auto subsubexpression : subexpression["incoming"]) {
             int stream_id = subsubexpression["id"];
             auto atomicOperator = CreateObject<AtomicOperator>();
@@ -507,50 +507,27 @@ Query::buildComponentDAG()
 
             for (auto constraint : subsubexpression["constraints"]) {
                 ConstraintType type;
-                auto type_str = constraint["type"];
-                if (type_str == "EQCONSTRAINT") {
-                    type = EQCONSTRAINT;
-                } else if (type_str == "INEQCONSTRAINT") {
-                    type = INEQCONSTRAINT;
-                } else if (type_str == "LTCONSTRAINT") {
-                    type = LTCONSTRAINT;
-                } else if (type_str == "LTECONSTRAINT") {
-                    type = LTECONSTRAINT;
-                } else if (type_str == "GTCONSTRAINT") {
-                    type = GTCONSTRAINT;
-                } else if (type_str == "GTECONSTRAINT") {
-                    type = GTECONSTRAINT;
-                }
+                Ptr<Constraint> c = CreateObject<Constraint> ();
+                c->SetType(constraint);
 
                 std::string value_type = constraint["value-type"];
 
                 if (constraint.contains("value")) {
                     auto value = constraint["value"];
                     if (constraint["value-type"] == "number") {
-                        auto numberConstraint = CreateObject<NumberConstraint> ();
-                        numberConstraint->type = type;
-                        numberConstraint->numberValue = value;
-                        numberConstraint->var_name = constraint["name"];
-                        atomicOperator->constraints.emplace_back(numberConstraint);
+                        c->numberValue = value;
+                        c->var_name = constraint["name"];
+                        atomicOperator->constraints.emplace_back(c);
                     } else if (constraint["value-type"] == "string") {
-                        auto stringConstraint = CreateObject<StringConstraint> ();
-                        stringConstraint->type = type;
-                        stringConstraint->stringValue = value;
-                        stringConstraint->var_name = constraint["name"];
-                        atomicOperator->constraints.emplace_back(stringConstraint);
+                        c->stringValue = value;
+                        c->var_name = constraint["name"];
+                        atomicOperator->constraints.emplace_back(c);
                     }
                 } else if (constraint.contains("reference")) {
-                    Ptr<JoinConstraint> joinConstraint;
-                    if (constraint["value-type"] == "number") {
-                        joinConstraint = CreateObject<JoinNumberConstraint> ();
-                    } else if (constraint["value-type"] == "string") {
-                        joinConstraint = CreateObject<JoinStringConstraint> ();
-                    }
-                    joinConstraint->type = type;
-                    joinConstraint->var_name = constraint["name"];
-                    joinConstraint->event_stream1 = std::atoi(((std::string)subsubexpression["reference"]).c_str());
-                    joinConstraint->event_stream2 = std::atoi(((std::string)constraint["reference"]).c_str());
-                    joinConstraints.emplace_back(joinConstraint);
+                    c->var_name = constraint["name"];
+                    c->event_stream1 = std::atoi(((std::string)subsubexpression["reference"]).c_str());
+                    c->event_stream2 = std::atoi(((std::string)constraint["reference"]).c_str());
+                    joinConstraints.emplace_back(c);
                 } else {
                     NS_ABORT_MSG("Invalid constraint definition");
                 }

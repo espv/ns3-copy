@@ -281,10 +281,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q2->parent_output = parent_output;
         q2->window = Seconds(150000000000000000);
         q2->isFinalWithinNode = true;
-        Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+        auto c2 = CreateObject<Constraint> ();
         c2->var_name = "percentage";
         c2->numberValue = 25;
-        c2->type = LTCONSTRAINT;
+        c2->type = NUMBERLTCONSTRAINT;
         q2->constraints.emplace_back(c2);
 
         q1 = CreateObject<Query> ();
@@ -306,10 +306,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
         q1->parent_output = parent_output;
         q1->window = Seconds(150000000000000000);
         q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
-        Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+        auto c1 = CreateObject<Constraint> ();
         c1->var_name = "value";
         c1->numberValue = 45;
-        c1->type = GTCONSTRAINT;
+        c1->type = NUMBERGTCONSTRAINT;
         q1->constraints.emplace_back(c1);}
 
     void
@@ -478,10 +478,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                     q3->window = Seconds(150000000000000000);
                     q3->isFinalWithinNode = true;
 
-                    Ptr<StringConstraint> c3 = CreateObject<StringConstraint>();
+                    auto c3 = CreateObject<Constraint>();
                     c3->var_name = "area";
                     c3->stringValue = "office";
-                    c3->type = EQCONSTRAINT;
+                    c3->type = STRINGEQCONSTRAINT;
                     q3->constraints.emplace_back(c3);
                     q3->op = "then";
                     q3->assigned = false;
@@ -518,10 +518,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q2->parent_output = parent_output;
                 q2->window = Seconds(150000000000000000);
                 q2->isFinalWithinNode = true;
-                Ptr<NumberConstraint> c2 = CreateObject<NumberConstraint> ();
+                auto c2 = CreateObject<Constraint> ();
                 c2->var_name = "percentage";
                 c2->numberValue = 25;
-                c2->type = LTCONSTRAINT;
+                c2->type = NUMBERLTCONSTRAINT;
                 q2->constraints.emplace_back(c2);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q2);
                 in_seconds += 1;
@@ -545,10 +545,10 @@ NS_LOG_COMPONENT_DEFINE ("Dcep");
                 q1->parent_output = parent_output;
                 q1->window = Seconds(150000000000000000);
                 q1->isFinalWithinNode = true;  // Meaning that the output is a complex event
-                Ptr<NumberConstraint> c1 = CreateObject<NumberConstraint> ();
+                auto c1 = CreateObject<Constraint> ();
                 c1->var_name = "value";
                 c1->numberValue = 45;
-                c1->type = GTCONSTRAINT;
+                c1->type = NUMBERGTCONSTRAINT;
                 q1->constraints.emplace_back(c1);
                 Simulator::Schedule(Seconds(in_seconds), &Dcep::DispatchQuery, dcep, q1);
                 in_seconds += 1;

@@ -45,10 +45,10 @@ namespace ns3 {
           q->window = Seconds(150000000000000000);
           q->isFinalWithinNode = true;
 
-          Ptr<NumberConstraint> c = CreateObject<NumberConstraint>();
+          Ptr<Constraint> c = CreateObject<Constraint>();
           c->var_name = "value";
           c->numberValue = 45;
-          c->type = GTCONSTRAINT;
+          c->type = NUMBERGTCONSTRAINT;
 
           q->constraints.emplace_back(c);
           q->op = "then";

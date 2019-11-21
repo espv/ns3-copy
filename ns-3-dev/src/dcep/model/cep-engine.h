@@ -101,12 +101,23 @@ namespace ns3 {
     };
 
     enum ConstraintType {
-        EQCONSTRAINT,
-        INEQCONSTRAINT,
-        LTCONSTRAINT,
-        LTECONSTRAINT,
-        GTCONSTRAINT,
-        GTECONSTRAINT
+        INVALIDCONSTRAINT,
+        NUMBEREQCONSTRAINT,
+        NUMBERINEQCONSTRAINT,
+        NUMBERLTCONSTRAINT,
+        NUMBERLTECONSTRAINT,
+        NUMBERGTCONSTRAINT,
+        NUMBERGTECONSTRAINT,
+        JOINNUMBEREQCONSTRAINT,
+        JOINNUMBERINEQCONSTRAINT,
+        JOINNUMBERLTCONSTRAINT,
+        JOINNUMBERLTECONSTRAINT,
+        JOINNUMBERGTCONSTRAINT,
+        JOINNUMBERGTECONSTRAINT,
+        STRINGEQCONSTRAINT,
+        STRINGINEQCONSTRAINT,
+        JOINSTRINGEQCONSTRAINT,
+        JOINSTRINGINEQCONSTRAINT
     };
 
     class Constraint : public Object {
@@ -114,54 +125,13 @@ namespace ns3 {
         ConstraintType type;
         Ptr<CEPEngine> cepEngine;
         std::string var_name;
-        virtual bool Evaluate(Ptr<CepEvent> e) = 0;
-        virtual bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) = 0;
-    };
-
-    class AtomicConstraint : public Constraint {
-    public:
-    };
-
-    class NumberConstraint: public AtomicConstraint {
-    public:
-        static TypeId GetTypeId ();
         double numberValue;
-
-        bool Evaluate(Ptr<CepEvent> e) override;
-        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
-    };
-
-    class StringConstraint: public AtomicConstraint {
-    public:
-        static TypeId GetTypeId ();
         std::string stringValue;
-
-        bool Evaluate(Ptr<CepEvent> e) override;
-        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
-    };
-
-    class JoinConstraint : public Constraint {
-    public:
         int event_stream1;
         int event_stream2;
-    };
-
-    class JoinNumberConstraint : public JoinConstraint {
-    public:
-        static TypeId GetTypeId ();
-        bool Evaluate(Ptr<CepEvent> e) override;
-        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
-
-        double numberValue;
-    };
-
-    class JoinStringConstraint : public JoinConstraint {
-    public:
-        static TypeId GetTypeId ();
-        bool Evaluate(Ptr<CepEvent> e) override;
-        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) override;
-
-        std::string stringValue;
+        bool Evaluate(Ptr<CepEvent> e);
+        bool Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2);
+        void SetType(json constraint);
     };
 
     class FogService : public Object

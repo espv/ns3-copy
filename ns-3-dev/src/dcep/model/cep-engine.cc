@@ -486,123 +486,120 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         CepOperatorProcessCepEvent(e, ops, cep, producer);
     }
 
-    bool NumberConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) { return false; }
-
     bool
-    NumberConstraint::Evaluate(Ptr<CepEvent> e)
+    Constraint::Evaluate(Ptr<CepEvent> e)
     {
-        switch (type) {
-            case EQCONSTRAINT:
+        switch (this->type) {
+            case NUMBEREQCONSTRAINT:
                 return e->numberValues[var_name] == numberValue;
-            case INEQCONSTRAINT:
+            case NUMBERINEQCONSTRAINT:
                 return e->numberValues[var_name] != numberValue;
-            case LTCONSTRAINT:
+            case NUMBERLTCONSTRAINT:
                 return e->numberValues[var_name] < numberValue;
-            case LTECONSTRAINT:
+            case NUMBERLTECONSTRAINT:
                 return e->numberValues[var_name] <= numberValue;
-            case GTCONSTRAINT:
+            case NUMBERGTCONSTRAINT:
                 return e->numberValues[var_name] > numberValue;
-            case GTECONSTRAINT:
+            case NUMBERGTECONSTRAINT:
                 return e->numberValues[var_name] >= numberValue;
-            default:
-                NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
-        }
-    }
-
-    bool JoinNumberConstraint::Evaluate(Ptr<CepEvent> e) { return false; }
-
-    bool
-    JoinNumberConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
-    {
-        switch (type) {
-            case EQCONSTRAINT:
-                return e1->numberValues[var_name] == e2->numberValues[var_name];
-            case INEQCONSTRAINT:
-                return e1->numberValues[var_name] != e2->numberValues[var_name];
-            case LTCONSTRAINT:
-                return e1->numberValues[var_name] < e2->numberValues[var_name];
-            case LTECONSTRAINT:
-                return e1->numberValues[var_name] <= e2->numberValues[var_name];
-            case GTCONSTRAINT:
-                return e1->numberValues[var_name] > e2->numberValues[var_name];
-            case GTECONSTRAINT:
-                return e1->numberValues[var_name] >= e2->numberValues[var_name];
-            default:
-                NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
-        }
-    }
-
-    bool StringConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2) { return false; }
-
-    bool
-    StringConstraint::Evaluate(Ptr<CepEvent> e)
-    {
-        switch (type) {
-            case EQCONSTRAINT:
+            case STRINGEQCONSTRAINT:
                 return e->stringValues[var_name] == stringValue;
-            case INEQCONSTRAINT:
+            case STRINGINEQCONSTRAINT:
                 return e->stringValues[var_name] != stringValue;
             default:
-                NS_FATAL_ERROR("String constraints can only have equality or inequality constraints");
+                NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
         }
     }
-
-    bool JoinStringConstraint::Evaluate(Ptr<CepEvent> e) { return false; }
 
     bool
-    JoinStringConstraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
+    Constraint::Evaluate(Ptr<CepEvent> e1, Ptr<CepEvent> e2)
     {
         switch (type) {
-            case EQCONSTRAINT:
+            case JOINNUMBEREQCONSTRAINT:
+                return e1->numberValues[var_name] == e2->numberValues[var_name];
+            case JOINNUMBERINEQCONSTRAINT:
+                return e1->numberValues[var_name] != e2->numberValues[var_name];
+            case JOINNUMBERLTCONSTRAINT:
+                return e1->numberValues[var_name] < e2->numberValues[var_name];
+            case JOINNUMBERLTECONSTRAINT:
+                return e1->numberValues[var_name] <= e2->numberValues[var_name];
+            case JOINNUMBERGTCONSTRAINT:
+                return e1->numberValues[var_name] > e2->numberValues[var_name];
+            case JOINNUMBERGTECONSTRAINT:
+                return e1->numberValues[var_name] >= e2->numberValues[var_name];
+            case JOINSTRINGEQCONSTRAINT:
                 return e1->stringValues[var_name] == e2->stringValues[var_name];
-            case INEQCONSTRAINT:
+            case JOINSTRINGINEQCONSTRAINT:
                 return e1->stringValues[var_name] != e2->stringValues[var_name];
             default:
-                NS_FATAL_ERROR("String constraints can only have equality or inequality constraints");
+                NS_FATAL_ERROR("Selected invalid constraint type for number constraint");
         }
     }
 
-
-    TypeId
-    NumberConstraint::GetTypeId(void)
+    void
+    Constraint::SetType(json constraint)
     {
-        static TypeId tid = TypeId("ns3::NumberConstraint")
-                .SetParent<Object> ()
-        ;
+        type = INVALIDCONSTRAINT;
+        std::string type_str = constraint["type"];
+        std::string value_type = constraint["value-type"];
+        bool is_atomic = constraint.contains("value");
+        bool is_join = constraint.contains("reference");
+        NS_ASSERT_MSG(value_type == "number" || value_type == "string",
+                'The "value-type" field must either be "number" or "string"');
+        NS_ASSERT_MSG(is_atomic || is_join,
+                'Either a "value" or a "reference" field must be defined for the constraint');
+        if (is_atomic) {
+            if (value_type == "number") {
+                if (type_str == "EQCONSTRAINT") {
+                    type = NUMBEREQCONSTRAINT;
+                } else if (type_str == "INEQCONSTRAINT") {
+                    type = NUMBERINEQCONSTRAINT;
+                } else if (type_str == "LTCONSTRAINT") {
+                    type = NUMBERLTCONSTRAINT;
+                } else if (type_str == "LTECONSTRAINT") {
+                    type = NUMBERLTECONSTRAINT;
+                } else if (type_str == "GTCONSTRAINT") {
+                    type = NUMBERGTCONSTRAINT;
+                } else if (type_str == "GTECONSTRAINT") {
+                    type = NUMBERGTECONSTRAINT;
+                }
+            } else if (value_type == "string") {
+                if (type_str == "EQCONSTRAINT") {
+                    type = STRINGEQCONSTRAINT;
+                } else if (type_str == "INEQCONSTRAINT") {
+                    type = STRINGINEQCONSTRAINT;
+                }
+            }
+        } else if (is_join) {  // JoinConstraint
+            if (value_type == "int") {
+                if (type_str == "EQCONSTRAINT") {
+                    type = JOINNUMBEREQCONSTRAINT;
+                } else if (type_str == "INEQCONSTRAINT") {
+                    type = JOINNUMBERINEQCONSTRAINT;
+                } else if (type_str == "LTCONSTRAINT") {
+                    type = JOINNUMBERLTCONSTRAINT;
+                } else if (type_str == "LTECONSTRAINT") {
+                    type = JOINNUMBERLTECONSTRAINT;
+                } else if (type_str == "GTCONSTRAINT") {
+                    type = JOINNUMBERGTCONSTRAINT;
+                } else if (type_str == "GTECONSTRAINT") {
+                    type = JOINNUMBERGTECONSTRAINT;
+                }
+            } else if (value_type == "string") {
+                if (type_str == "EQCONSTRAINT") {
+                    type = JOINSTRINGEQCONSTRAINT;
+                } else if (type_str == "INEQCONSTRAINT") {
+                    type = JOINSTRINGINEQCONSTRAINT;
+                }
+            }
+        }
 
-        return tid;
-    }
-
-
-    TypeId
-    StringConstraint::GetTypeId(void)
-    {
-        static TypeId tid = TypeId("ns3::StringConstraint")
-                .SetParent<Object> ()
-        ;
-
-        return tid;
-    }
-
-    TypeId
-    JoinNumberConstraint::GetTypeId(void)
-    {
-        static TypeId tid = TypeId("ns3::JoinNumberConstraint")
-                .SetParent<Object> ()
-        ;
-
-        return tid;
-    }
-
-
-    TypeId
-    JoinStringConstraint::GetTypeId(void)
-    {
-        static TypeId tid = TypeId("ns3::JoinStringConstraint")
-                .SetParent<Object> ()
-        ;
-
-        return tid;
+        if (type == INVALIDCONSTRAINT) {
+            // Failed to parse json for the constraint type
+            NS_ABORT_MSG("Invalid constraint type selected.\n\"type\": " << type_str << "\n\"value-type\": " <<
+                         value_type << "\nIs atomic constraint: " << (is_atomic ? "yes" : "no") <<
+                         "\nIs join constraint: " << (is_join ? "yes" : "no"));
+        }
     }
 
     TypeId
@@ -955,7 +952,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         // TODO: Finish this; it's not trivial because we have to potentially join many tuples
         std::vector<std::pair<Ptr<CepEvent>, Ptr<CepEvent> > > fulfilledEvents;
         for (auto c : constraints) {
-            Ptr<JoinConstraint> join_constraint = dynamic_cast<JoinConstraint*>(&(*c));
+            Ptr<Constraint> join_constraint = c;
             // All constraints must be fulfilled for constraintsFulfilled to be true
             int eventStreamOfNewEvent = e->GetStreamId();
             int otherEventStream;
