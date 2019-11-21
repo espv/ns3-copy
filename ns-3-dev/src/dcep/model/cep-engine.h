@@ -76,6 +76,7 @@ namespace ns3 {
         Ptr<Packet> pkt;
         std::map<std::string, double> numberValues;
         std::map<std::string, std::string> stringValues;
+        Ptr<Window> window;
 
         // Complex event only start
         CepOperator *generatedByOp;
@@ -108,6 +109,12 @@ namespace ns3 {
         NUMBERLTECONSTRAINT,
         NUMBERGTCONSTRAINT,
         NUMBERGTECONSTRAINT,
+        AVGNUMBEREQCONSTRAINT,
+        AVGNUMBERINEQCONSTRAINT,
+        AVGNUMBERLTCONSTRAINT,
+        AVGNUMBERLTECONSTRAINT,
+        AVGNUMBERGTCONSTRAINT,
+        AVGNUMBERGTECONSTRAINT,
         JOINNUMBEREQCONSTRAINT,
         JOINNUMBERINEQCONSTRAINT,
         JOINNUMBERLTCONSTRAINT,
@@ -299,6 +306,7 @@ namespace ns3 {
             virtual std::vector<Ptr<CepEvent> > Evaluate2(Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >&, Ptr<CEPEngine> cep) = 0;
             virtual void GetPartialResults(std::vector<Ptr<CepEvent> > &ret) = 0;
             void InsertCepEventIntoWindows(Ptr<CepEvent> e);
+            void RemoveCepEventFromWindows(Ptr<CepEvent> e);
             bool ExpectingCepEvent (std::string);
             void Consume(std::vector<Ptr<CepEvent> > &events);
             uint32_t queryId;
@@ -415,6 +423,7 @@ namespace ns3 {
 
             virtual void InsertEvent(Ptr<CepEvent> e) = 0;
             void RemoveEvent(Ptr<CepEvent> e);
+            int GetAvgNumberValue(std::string var_name);
 
             virtual std::vector<std::pair<Time, Ptr<CepEvent> > > GetCepEvents();
 

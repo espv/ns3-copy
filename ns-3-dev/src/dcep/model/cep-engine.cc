@@ -213,7 +213,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     {
         auto dcep = GetObject<Dcep>();
         Ptr<ExecEnv> ee = dcep->GetNode()->GetObject<ExecEnv>();
-        //dcep->RxCepEvent(e, ee->currentlyExecutingThread);
+        dcep->RxCepEvent(e, ee->currentlyExecutingThread);
         auto node = GetObject<Dcep>()->GetNode();
 
         // I think it's an error to just set the curCepEvent for the entire thread to be e, since a function that
@@ -459,7 +459,10 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (cqc->GetThenOperators().empty()) {
             // A single AtomicOperator or JoinOperator
             auto cepop = cqc->GetFirstOperator();
-            returned = cepop->Evaluate2(e, returned, cep);
+            cepop->Evaluate2(e, returned, cep);
+            if (!returned.empty()) {
+                cep->GetObject<Producer>()->HandleNewCepEvent2(cqc, returned);
+            }
         } else {
             for (auto thenop : cqc->GetThenOperators()) {
                 thenop->Evaluate2(e, returned, cep);
@@ -502,6 +505,24 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 return e->numberValues[var_name] > numberValue;
             case NUMBERGTECONSTRAINT:
                 return e->numberValues[var_name] >= numberValue;
+            case AVGNUMBEREQCONSTRAINT:
+                return e->window->GetAvgNumberValue(var_name) == numberValue;
+                //return e->numberValues[var_name] == numberValue;
+            case AVGNUMBERINEQCONSTRAINT:
+                return e->window->GetAvgNumberValue(var_name) != numberValue;
+                //return e->numberValues[var_name] != numberValue;
+            case AVGNUMBERLTCONSTRAINT:
+                return e->window->GetAvgNumberValue(var_name) < numberValue;
+                //return e->numberValues[var_name] < numberValue;
+            case AVGNUMBERLTECONSTRAINT:
+                return e->window->GetAvgNumberValue(var_name) <= numberValue;
+                //return e->numberValues[var_name] <= numberValue;
+            case AVGNUMBERGTCONSTRAINT:
+                return e->window->GetAvgNumberValue(var_name) > numberValue;
+                //return e->numberValues[var_name] > numberValue;
+            case AVGNUMBERGTECONSTRAINT:
+                return e->window->GetAvgNumberValue(var_name) >= numberValue;
+                //return e->numberValues[var_name] >= numberValue;
             case STRINGEQCONSTRAINT:
                 return e->stringValues[var_name] == stringValue;
             case STRINGINEQCONSTRAINT:
@@ -543,25 +564,44 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         std::string type_str = constraint["type"];
         std::string value_type = constraint["value-type"];
         bool is_atomic = constraint.contains("value");
-        bool is_join = constraint.contains("reference");
+        bool is_join = constraint.contains("reference1") && constraint.contains("reference2");
+        bool is_aggregation = constraint.contains("aggregation");
         NS_ASSERT_MSG(value_type == "number" || value_type == "string",
                 'The "value-type" field must either be "number" or "string"');
         NS_ASSERT_MSG(is_atomic || is_join,
                 'Either a "value" or a "reference" field must be defined for the constraint');
         if (is_atomic) {
             if (value_type == "number") {
-                if (type_str == "EQCONSTRAINT") {
-                    type = NUMBEREQCONSTRAINT;
-                } else if (type_str == "INEQCONSTRAINT") {
-                    type = NUMBERINEQCONSTRAINT;
-                } else if (type_str == "LTCONSTRAINT") {
-                    type = NUMBERLTCONSTRAINT;
-                } else if (type_str == "LTECONSTRAINT") {
-                    type = NUMBERLTECONSTRAINT;
-                } else if (type_str == "GTCONSTRAINT") {
-                    type = NUMBERGTCONSTRAINT;
-                } else if (type_str == "GTECONSTRAINT") {
-                    type = NUMBERGTECONSTRAINT;
+                if (is_aggregation) {
+                    if (constraint["aggregation"] == "average") {
+                        if (type_str == "EQCONSTRAINT") {
+                            type = AVGNUMBEREQCONSTRAINT;
+                        } else if (type_str == "INEQCONSTRAINT") {
+                            type = AVGNUMBERINEQCONSTRAINT;
+                        } else if (type_str == "LTCONSTRAINT") {
+                            type = AVGNUMBERLTCONSTRAINT;
+                        } else if (type_str == "LTECONSTRAINT") {
+                            type = AVGNUMBERLTECONSTRAINT;
+                        } else if (type_str == "GTCONSTRAINT") {
+                            type = AVGNUMBERGTCONSTRAINT;
+                        } else if (type_str == "GTECONSTRAINT") {
+                            type = AVGNUMBERGTECONSTRAINT;
+                        }
+                    }
+                } else {
+                    if (type_str == "EQCONSTRAINT") {
+                        type = NUMBEREQCONSTRAINT;
+                    } else if (type_str == "INEQCONSTRAINT") {
+                        type = NUMBERINEQCONSTRAINT;
+                    } else if (type_str == "LTCONSTRAINT") {
+                        type = NUMBERLTCONSTRAINT;
+                    } else if (type_str == "LTECONSTRAINT") {
+                        type = NUMBERLTECONSTRAINT;
+                    } else if (type_str == "GTCONSTRAINT") {
+                        type = NUMBERGTCONSTRAINT;
+                    } else if (type_str == "GTECONSTRAINT") {
+                        type = NUMBERGTECONSTRAINT;
+                    }
                 }
             } else if (value_type == "string") {
                 if (type_str == "EQCONSTRAINT") {
@@ -828,9 +868,19 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     void
     CepOperator::InsertCepEventIntoWindows(Ptr<CepEvent> e)
     {
-      for (auto window : stream_windows[e->GetStreamId()]) {
-        window->InsertEvent(e);
-      }
+        for (auto window : stream_windows[e->GetStreamId()]) {
+            e->window = window;
+            Ptr<CepEvent> copy = CreateObject<CepEvent>(e);
+            window->InsertEvent(copy);
+        }
+    }
+
+    void
+    CepOperator::RemoveCepEventFromWindows(Ptr<CepEvent> e)
+    {
+        for (auto window : stream_windows[e->GetStreamId()]) {
+            window->RemoveEvent(e);
+        }
     }
 
     bool
@@ -863,6 +913,7 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         if (stream_windows[e->GetStreamId()].empty()) {
             return std::vector<Ptr<CepEvent> > ();
         }
+        this->InsertCepEventIntoWindows(e);
         bool constraintsFulfilled = true;
         for (auto c : constraints)
         {
@@ -877,10 +928,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
         ee->setLocalStateVariable("CepOpDoneYet", 1);
         ee->setLocalStateVariable("attributes-left", 0);
         if (!constraintsFulfilled) {
+            this->RemoveCepEventFromWindows(e);
             return std::vector<Ptr<CepEvent> >();
         }
-
-        stream_windows[e->GetStreamId()].at(0)->InsertEvent(e);
 
         returned.emplace_back(e);
         //cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
@@ -927,6 +977,9 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
     std::vector<Ptr<CepEvent> >
     JoinOperator::Evaluate2 (Ptr<CepEvent> e, std::vector<Ptr<CepEvent> >& returned, Ptr<CEPEngine> cep)
     {
+        for (auto atomicOperator : atomicOperators) {
+            atomicOperator->InsertCepEventIntoWindows(e);
+        }
         bool constraintsFulfilled = true;
 
         for (auto atomic : atomicOperators) {
@@ -940,64 +993,87 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
             }
         }
 
-        if (!constraintsFulfilled)
-            return std::vector<Ptr<CepEvent> > ();
-
-        // Atomic constraints are fulfilled; now we insert the event into windows
-        for (auto window : stream_windows[e->GetStreamId()]) {
-            window->InsertEvent(e);
+        if (!constraintsFulfilled) {
+            for (auto atomicOperator : atomicOperators) {
+                atomicOperator->RemoveCepEventFromWindows(e);
+            }
+            return std::vector<Ptr<CepEvent> >();
         }
 
+        // Atomic constraints are fulfilled; now we insert the event into windows
+
+        // For each tuple, we need to check if all constraints are fulfilled,
+        // and we potentially have to compare the tuple with every other tuple in all windows.
         // Now we check if the event joins with other events. If all constraints are fulfilled
         // TODO: Finish this; it's not trivial because we have to potentially join many tuples
-        std::vector<std::pair<Ptr<CepEvent>, Ptr<CepEvent> > > fulfilledEvents;
-        for (auto c : constraints) {
-            Ptr<Constraint> join_constraint = c;
-            // All constraints must be fulfilled for constraintsFulfilled to be true
-            int eventStreamOfNewEvent = e->GetStreamId();
-            int otherEventStream;
-            if (eventStreamOfNewEvent == join_constraint->event_stream1) {
-                otherEventStream = join_constraint->event_stream2;
-            } else if (eventStreamOfNewEvent == join_constraint->event_stream2) {
-                otherEventStream = join_constraint->event_stream1;
-            } else {
-                continue;
-            }
-
-            for ( auto it = stream_windows.begin(); it != stream_windows.end(); it++ )
-            {
-                if (it->first == otherEventStream) {
-                    for (auto w : it->second) {
-                        for (auto e2 : w->GetCepEvents()) {
-                            if (eventStreamOfNewEvent == join_constraint->event_stream1) {
-                                constraintsFulfilled = join_constraint->Evaluate(e, e2.second);
-                            } else {  // We know then that the newly received event is the second argument
-                                constraintsFulfilled = join_constraint->Evaluate(e2.second, e);
+        // The algorithm to check this out
+        std::vector<std::vector<Ptr<CepEvent> > > cartesian;
+        std::vector<std::vector<Ptr<CepEvent> > > toBeAddedToCartesian;
+        for (auto atomicOperator : atomicOperators) {
+            for (auto & stream_window : atomicOperator->stream_windows) {
+                for (auto w : stream_window.second) {
+                    for (auto p : w->GetCepEvents()) {
+                        auto event = p.second;
+                        std::vector<Ptr<CepEvent>> new_events;
+                        new_events.emplace_back(event);
+                        cartesian.emplace_back(new_events);
+                        for (std::vector<Ptr<CepEvent> > event_vector : cartesian) {
+                            bool already_in_vector = false;
+                            for (auto e2 : event_vector) {
+                                if (e2->GetStreamId() == event->GetStreamId()) {
+                                    already_in_vector = true;
+                                }
+                            }
+                            if (!already_in_vector) {
+                                std::vector<Ptr<CepEvent> > add_event;
+                                add_event.insert(add_event.end(), event_vector.begin(), event_vector.end());
+                                add_event.emplace_back(event);
+                                toBeAddedToCartesian.emplace_back(add_event);
                             }
                         }
+                        cartesian.insert(cartesian.end(), toBeAddedToCartesian.begin(), toBeAddedToCartesian.end());
+                        toBeAddedToCartesian.clear();
                     }
                 }
             }
         }
 
-        if (constraintsFulfilled) {
-            // We managed to produce some output. Now we have to place the output into the window of the next operator.
-            // If this is the last operator, we send it upwards to the CepQueryComponent, which will
-            // display it to the user.
+        for (auto event_vector : cartesian) {
+            bool containsNewEvent = false;
+            for (auto event : event_vector) {
+                if (event->m_seq == e->m_seq && event->GetStreamId() == e->GetStreamId()) {
+                    containsNewEvent = true;
+                }
+            }
+            if (!containsNewEvent)
+                continue;
+            bool constraints_fulfilled = true;
+            for (auto c : constraints) {
+                Ptr<CepEvent> first_event = nullptr;
+                Ptr<CepEvent> second_event = nullptr;
+                for (auto event : event_vector) {
+                    if (c->event_stream1 == event->GetStreamId()) {
+                        first_event = event;
+                    } else if (c->event_stream2 == event->GetStreamId()) {
+                        second_event = event;
+                    }
+                }
+
+                if (first_event != nullptr && second_event != nullptr) {
+                    constraints_fulfilled = c->Evaluate(first_event, second_event) && constraints_fulfilled;
+                } else {
+                    constraints_fulfilled = false;
+                }
+            }
+
+            //static int cnt = 0;
+            if (constraints_fulfilled) {
+                // Yield output
+                Ptr<CepEvent> complex_event = CreateObject<CepEvent>(event_vector);
+                returned.emplace_back(complex_event);
+            }
         }
 
-
-        Ptr<Node> node = cep->GetObject<Dcep>()->GetNode();
-        auto ee = node->GetObject<ExecEnv>();
-        ee->setLocalStateVariable("CepOpType", 4);
-        ee->setLocalStateVariable("CreatedComplexEvent", 0);
-        ee->setLocalStateVariable("CepOpDoneYet", 1);
-        ee->setLocalStateVariable("attributes-left", 0);
-        if (!constraintsFulfilled) {
-            return std::vector<Ptr<CepEvent> > ();
-        }
-
-        cep->GetObject<Forwarder>()->ForwardNewCepEvent(e);
         return std::vector<Ptr<CepEvent> > ();
     }
 
@@ -1796,6 +1872,18 @@ NS_LOG_COMPONENT_DEFINE ("Detector");
                 ++it;
             }
         }
+    }
+
+    int
+    Window::GetAvgNumberValue(std::string var_name)
+    {
+        int avg = 0;
+        for (auto p : buffer) {
+            auto e = p.second;
+            avg += e->numberValues[var_name];
+        }
+        avg /= buffer.size();
+        return avg;
     }
 
     void

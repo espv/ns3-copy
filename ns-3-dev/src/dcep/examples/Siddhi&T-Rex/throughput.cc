@@ -78,7 +78,7 @@ SiddhiTRexTrace::SiddhiTRexTrace(std::string traceFileName)
 
 void SiddhiTRexTrace::RxCepEventTrace(Ptr<CepEvent> e, Thread *t)
 {
-    std::cout << Simulator::Now() << ": Received CEP event " << e << std::endl;
+    std::cout << Simulator::Now() << ": Received CEP event " << e->m_seq << std::endl;
     //auto pair = make_pair(Simulator::Now(), e);
     auto *args = new std::vector<long>();
     args->push_back((long)Simulator::Now().GetNanoSeconds());
@@ -145,7 +145,8 @@ void SiddhiTRexTrace::PassedConstraintsTrace(Ptr<CepEvent> e, Ptr<Query> q, Thre
 
 void SiddhiTRexTrace::RxFinalCepEventTrace(Ptr<CepEvent> e, Thread *t)
 {
-    std::cout << Simulator::Now() << ": Created complex event " << e->type << std::endl;
+    static int cnt = 0;
+    std::cout << Simulator::Now() << ": Created complex event " << ++cnt << std::endl;
     auto *args = new std::vector<long>();
     args->push_back((long)Simulator::Now().GetNanoSeconds());
     args->push_back(t->GetPid());
@@ -225,7 +226,8 @@ void SiddhiTRexTrace::WriteTraceToFile() {
             } case 6: {
                 items = rxFinalCepEventTraceTuples.front();
                 rxFinalCepEventTraceTuples.pop();
-                NS_LOG_INFO(items[0] << ": Created complex event " << items[2]);
+                static int cnt = 0;
+                NS_LOG_INFO(items[0] << ": Created complex event number " << ++cnt << " with type " << items[2]);
                 //myfile << index << "\t" << items[0] << "\t" << items[1] << "\n";
                 break;
             } case 100: {

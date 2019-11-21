@@ -489,6 +489,7 @@ Query::buildComponentDAG()
     Ptr<JoinOperator> prevJoinOperator = nullptr;
     Ptr<AtomicOperator> prevAtomicOperator = nullptr;
     Ptr<CepOperator> curOperator = nullptr;
+    std::map<std::string, int> reference_to_stream_id;
     for (auto subexpression : json_query["indata"]) {
         if (curOperator != nullptr) {
             auto thenOperator = CreateObject<ThenOperator>();
@@ -502,11 +503,11 @@ Query::buildComponentDAG()
         std::vector<Ptr<Constraint> > joinConstraints;
         for (auto subsubexpression : subexpression["incoming"]) {
             int stream_id = subsubexpression["id"];
+            reference_to_stream_id[subsubexpression["reference"]] = stream_id;
             auto atomicOperator = CreateObject<AtomicOperator>();
             atomicOperator->stream_id = stream_id;
 
             for (auto constraint : subsubexpression["constraints"]) {
-                ConstraintType type;
                 Ptr<Constraint> c = CreateObject<Constraint> ();
                 c->SetType(constraint);
 
@@ -523,10 +524,10 @@ Query::buildComponentDAG()
                         c->var_name = constraint["name"];
                         atomicOperator->constraints.emplace_back(c);
                     }
-                } else if (constraint.contains("reference")) {
+                } else if (constraint.contains("reference1") && constraint.contains("reference2")) {
                     c->var_name = constraint["name"];
-                    c->event_stream1 = std::atoi(((std::string)subsubexpression["reference"]).c_str());
-                    c->event_stream2 = std::atoi(((std::string)constraint["reference"]).c_str());
+                    c->event_stream1 = reference_to_stream_id[constraint["reference1"]];
+                    c->event_stream2 = reference_to_stream_id[constraint["reference2"]];
                     joinConstraints.emplace_back(c);
                 } else {
                     NS_ABORT_MSG("Invalid constraint definition");
