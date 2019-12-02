@@ -1,0 +1,655 @@
+{
+  "name": "Experiment configuration",
+  "tracepoint-format": {
+    "tracepointId": "int",
+    "threadId": "int",
+    "timestamp": "long"
+  },
+  "experiments": [
+    {
+      "name": "experiment 1 --- varying the number of queries",
+      "id": 1,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "setEventBatchSize", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addQueries", "arguments": [1, 1]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [1, 10]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [1, 100]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [1, 1000]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    },
+    {
+      "name": "experiment 2 --- varying the number of states in the sequence operator",
+      "id": 2,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [1, 100]},
+        {"command": "addEvents", "arguments": [2, 100]},
+        {"command": "addEvents", "arguments": [2, 100]},
+        {"command": "addEvents", "arguments": [3, 1]},
+        {"command": "addQueries", "arguments": [1, 1]},
+        {"command": "processEvents", "arguments": [1000]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [2, 1]},
+        {"command": "processEvents", "arguments": [1000]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [3, 1]},
+        {"command": "processEvents", "arguments": [1000]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    },
+    {
+      "name": "experiment 3 --- varying the number of unrelated queries",
+      "id": 3,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [1, 100]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [3, 1]},
+        {"command": "addQueries", "arguments": [4, 1]},
+        {"command": "processEvents", "arguments": [1000]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [4, 10]},
+        {"command": "processEvents", "arguments": [1000]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [4, 100]},
+        {"command": "processEvents", "arguments": [1000]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    },
+    {
+      "name": "experiment 4 --- varying the number of queries",
+      "id": 4,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "setEventBatchSize", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addStreamDefinition", "arguments": [4]},
+        {"command": "addEvents", "arguments": [5, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addQueries", "arguments": [7, 1]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [7, 10]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [7, 100]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [7, 1000]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    },
+    {
+      "name": "experiment 5 --- varying the number of queries",
+      "id": 5,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "setEventBatchSize", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addEvents", "arguments": [5, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [6, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addQueries", "arguments": [7, 1]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [7, 10]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [7, 100]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [7, 1000]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    },
+    {
+      "name": "experiment 6 --- varying the number of join queries",
+      "id": 6,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "setEventBatchSize", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addStreamDefinition", "arguments": [4]},
+        {"command": "addEvents", "arguments": [5, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [6, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addQueries", "arguments": [5, 1]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [5, 10]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [5, 100]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    },
+    {
+      "name": "experiment 7 --- varying the number of two-state then queries",
+      "id": 7,
+      "topology": [
+        {"id":  0, "connected-to":  [2]},
+        {"id":  1, "connected-to":  [2]},
+        {"id":  2, "connected-to":  [0, 1, 3]},
+        {"id":  3, "connected-to":  [2]}
+      ],
+      "flow": [
+        {"command": "setIntervalBetweenEvents", "arguments": [0]},
+        {"command": "setEventBatchSize", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [1]},
+        {"command": "addStreamDefinition", "arguments": [2]},
+        {"command": "addStreamDefinition", "arguments": [3]},
+        {"command": "addStreamDefinition", "arguments": [4]},
+        {"command": "addEvents", "arguments": [5, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addEvents", "arguments": [6, 1]},
+        {"command": "addEvents", "arguments": [4, 1]},
+        {"command": "addEvents", "arguments": [2, 1]},
+        {"command": "addQueries", "arguments": [6, 1]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [6, 10]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [6, 100]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "addQueries", "arguments": [6, 1000]},
+        {"command": "processEvents", "arguments": [100]},
+        {"command": "clearQueries"},
+        {"command": "clearEvents"}
+      ]
+    }
+  ],
+  "cepqueries": [
+    {
+      "name": "temperature_GT45_and_humidity_LT25_5sec_window",
+      "id": 0,
+      "indata": [
+        {
+          "incoming": [
+            {
+              "id": 10,
+              "reference": "temp",
+              "constraints": [{"type": "GTCONSTRAINT", "name": "value", "value": 45, "value-type": "number"}],
+              "consumption": "SINGLE_USE",
+              "windows": [{"type": "tumbling", "unit": "millisecond", "size": 5000}]
+            },
+            {
+              "id": 11,
+              "reference": "humidity",
+              "constraints": [
+                {"type": "LTCONSTRAINT", "name": "percentage", "value": 25, "value-type": "number"},
+                {"type": "EQCONSTRAINT", "name": "area", "reference": "temp", "value-type": "string"}
+              ],
+              "consumption": "SINGLE_USE",
+              "windows": [{"type": "tumbling", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        }
+      ],
+      "literal-query": {
+        "t-rex": "",
+        "siddhi": "from every t = temperatureStream [value > 45] and (h = humidityStream [percentage < 25]) select value, percentage, h.area insert into fireStream ;"
+      }
+    },
+    {
+      "name": "temperature_GT45_join_humidity_LT25_5sec_window",
+      "id": 5,
+      "indata": [
+        {
+          "incoming": [
+            {
+              "id": 10,
+              "reference": "temp",
+              "constraints": [
+                {"type": "GTCONSTRAINT", "name": "value", "value": 45, "aggregation": "average", "value-type": "number"}
+              ],
+              "windows": [{"type": "sliding", "unit": "millisecond", "size": 5000}]
+            },
+            {
+              "id": 11,
+              "reference": "humidity",
+              "constraints": [
+                {"type": "LTCONSTRAINT", "name": "percentage", "value": 25, "aggregation": "average", "value-type": "number"},
+                {"type": "EQCONSTRAINT", "name": "area", "reference1": "temp", "reference2": "humidity", "value-type": "string"}
+              ],
+              "windows": [{"type": "sliding", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        }
+      ],
+      "literal-query": {
+        "t-rex": "Assign 10 => Temp, 11 => Humidity, 12 => Smoke, 1 => Fire\nDefine  Fire(area: string, temp: float)\nFrom   Humidity(percentage<25) and\nlast   Temp(value>45, [string] area=Temp.area)\nwithin 50000000 from Temp and\nlast    Smoke(ppm>100, [string] area=Temp.area)\nwithin 50000000 from Smoke\nWhere   area := Temp.area, temp := Temp.value\nConsuming Smoke, Temp, Humidity;",
+        "siddhi": "from temperatureStream[value > 45]#window.time(1 min) as temp\njoin humidityStream[percentage < 25]#window.time(1 min) as humidity\non temp.area==humidity.area\nselect value, percentage, humidity.area\ninsert into fireStream;"
+      }
+    },
+    {
+      "name": "temperature_GT45_then_humidity_LT25_within_5sec",
+      "id": 6,
+      "indata": [
+        {
+          "incoming": [
+            {
+              "id": 10,
+              "reference": "temp",
+              "constraints": [{"type": "GTCONSTRAINT", "name": "value", "value": 45, "value-type": "number"}],
+              "consumption": "SINGLE_USE",
+              "windows": [{"type": "tumbling", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        },
+        {
+          "incoming": [
+            {
+              "id": 11,
+              "reference": "humidity",
+              "constraints": [
+                {"type": "LTCONSTRAINT", "name": "percentage", "value": 25, "value-type": "number"},
+                {"type": "EQCONSTRAINT", "name": "area", "reference1": "temp", "reference2": "humidity", "value-type": "string"}
+              ],
+              "consumption": "SINGLE_USE",
+              "windows": [{"type": "tumbling", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        }
+      ],
+      "literal-query": {
+        "t-rex": "",
+        "siddhi": "from every t = temperatureStream [value > 45] -> (h = humidityStream [percentage < 25]) select value, percentage, h.area insert into fireStream ;"
+      }
+    },
+    {
+      "name": "temperature_GT45_then_humidity_LT25_within_5sec_then_smoke_GT50_within_5sec",
+      "id": 7,
+      "indata": [
+        {
+          "incoming": [
+            {
+              "id": 10,
+              "reference": "temp",
+              "constraints": [{"type": "GTCONSTRAINT", "name": "value", "value": 45, "value-type": "number"}],
+              "consumption": "SINGLE_USE",
+              "windows": [{"type": "tumbling", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        },
+        {
+          "incoming": [
+            {
+              "id": 11,
+              "reference": "humidity",
+              "constraints": [
+                {"type": "LTCONSTRAINT", "name": "percentage", "value": 25, "value-type": "number"},
+                {"type": "EQCONSTRAINT", "name": "area", "reference1": "temp", "reference2": "humidity", "value-type": "string"}
+              ],
+              "consumption": "SINGLE_USE",
+              "windows": [
+                {"type": "tumbling", "unit": "millisecond", "size": 5000}
+              ]
+            }
+          ]
+        },
+        {
+          "incoming": [
+            {
+              "id": 12,
+              "reference": "smoke",
+              "constraints": [
+                {"type": "GTCONSTRAINT", "name": "ppm", "value": 100, "value-type": "number"},
+                {"type": "EQCONSTRAINT", "name": "area", "reference1": "temp", "reference2": "smoke", "value-type": "string"}
+              ],
+              "consumption": "SINGLE_USE",
+              "windows": [{"type": "tumbling", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        }
+      ],
+      "literal-query": {
+        "t-rex": "Assign 10 => Temp, 11 => Humidity, 12 => Smoke, 1 => Fire\nDefine  Fire(area: string, temp: float)\nFrom   Humidity(percentage<25) and\nlast   Temp(value>45, [string] area=Temp.area)\nwithin 50000000 from Temp and\nlast    Smoke(ppm>100, [string] area=Temp.area)\nwithin 50000000 from Smoke\nWhere   area := Temp.area, temp := Temp.value\nConsuming Smoke, Temp, Humidity;",
+        "siddhi": "from every (t = temperatureStream [value > 45]) -> (h = humidityStream [percentage < 25]) \n -> (s = smokeStream [ppm > 100]) within 5 seconds \nselect value, percentage, h.area \ninsert into fireStream ;"
+      }
+    },
+    {
+      "name": "temperature_AVG_GT45_5sec_window",
+      "id": 8,
+      "indata": [
+        {
+          "incoming": [
+            {
+              "id": 10,
+              "reference": "temp",
+              "constraints": [
+                {"type": "GTCONSTRAINT", "name": "value", "value": 45, "aggregation": "average", "value-type": "number"}
+              ],
+              "windows": [{"type": "sliding", "unit": "millisecond", "size": 5000}]
+            }
+          ]
+        }
+      ],
+      "literal-query": {
+        "t-rex": "Assign 10 => Temp, 11 => Humidity, 12 => Smoke, 1 => Fire\nDefine  Fire(area: string, temp: float)\nFrom   Humidity(percentage<25) and\nlast   Temp(value>45, [string] area=Temp.area)\nwithin 50000000 from Temp and\nlast    Smoke(ppm>100, [string] area=Temp.area)\nwithin 50000000 from Smoke\nWhere   area := Temp.area, temp := Temp.value\nConsuming Smoke, Temp, Humidity;",
+        "siddhi": "from temperatureStream[value > 45]#window.time(1 min) as temp\njoin humidityStream[percentage < 25]#window.time(1 min) as humidity\non temp.area==humidity.area\nselect value, percentage, humidity.area\ninsert into fireStream;"
+      }
+    }
+  ],
+  "stream-definitions": [
+    {"id": 1, "siddhi": "define stream temperatureStream (value long, area string);"},
+    {"id": 2, "siddhi": "define stream humidityStream (percentage long, area string);"},
+    {"id": 3, "siddhi": "define stream fireStream (value long, percentage long, area string);"},
+    {"id": 4, "siddhi": "define stream smokeStream (ppm long, area string);"}
+  ],
+  "cepevents": [
+    {
+      "name": "temperature_22degrees",
+      "id": 1,
+      "stream-id": 10,
+      "stream-name": "Temperature",
+      "attributes": [
+        {"name": "value", "value": 22},
+        {"name": "area", "value": "office"}
+      ]
+    },
+    {
+      "name": "humidity_24percent",
+      "id": 2,
+      "stream-id": 11,
+      "stream-name": "Humidity",
+      "attributes": [
+        {"name": "percentage", "value": 24},
+        {"name": "area", "value": "office"}
+      ]
+    },
+    {
+      "name": "humidity_44percent",
+      "id": 3,
+      "stream-id": 11,
+      "stream-name": "Humidity",
+      "attributes": [
+        {"name": "percentage", "value": 44},
+        {"name": "area", "value": "office"}
+      ]
+    },
+    {
+      "name": "temperature_46degrees",
+      "id": 4,
+      "stream-id": 10,
+      "stream-name": "Temperature",
+      "attributes": [
+        {"name": "value", "value": 46},
+        {"name": "area", "value": "office"}
+      ]
+    },
+    {
+      "name": "smoke_101_ppm",
+      "id": 5,
+      "stream-id": 12,
+      "stream-name": "Smoke",
+      "attributes": [
+        {"name": "ppm", "value": 101},
+        {"name": "area", "value": "office"}
+      ]
+    },
+    {
+      "name": "smoke_99_ppm",
+      "id": 6,
+      "stream-id": 12,
+      "stream-name": "Smoke",
+      "attributes": [
+        {"name": "ppm", "value": 99},
+        {"name": "area", "value": "office"}
+      ]
+    }
+  ],
+  "tracepoints": [
+    {
+      "id": 1,
+      "name": "receiveEvent",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name":  "CurCepEvent", "type":  "int"}
+      ],
+      "description": "",
+      "category": {
+        "isModelEvent": true,
+        "isScalingEvent": false,
+        "isMilestoneEvent": true,
+        "isSimulationEvent": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name":  "CurCepEvent", "type":  "int"}
+      ],
+      "description": "",
+      "category": {
+        "isModelEvent": true,
+        "isScalingEvent": false,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 3,
+      "name": "",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name":  "CurCepEvent", "type":  "int"}
+      ],
+      "description": "",
+      "category": {
+        "isModelEvent": true,
+        "isScalingEvent": false,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 4,
+      "name": "passedConstraints",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name":  "CurCepEvent", "type":  "int"}
+      ],
+      "description": "Passed constraints for query",
+      "category": {
+        "isModelEvent": true,
+        "isScalingEvent": false,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 6,
+      "name": "createdComplexEvent",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name":  "CurCepEvent", "type":  "int"}
+      ],
+      "description": "A complex event was created",
+      "category": {
+        "isModelEvent": true,
+        "isScalingEvent": false,
+        "isMilestoneEvent": true,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 100,
+      "name": "finishedProcessingEvent",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name":  "CurCepEvent", "type":  "int"}
+      ],
+      "description": "",
+      "category": {
+        "isModelEvent": true,
+        "isScalingEvent": false,
+        "isMilestoneEvent": true,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 221,
+      "name": "addQuery",
+      "arguments": [
+        {"name":  "CepQuery", "type":  "int"}
+      ],
+      "x_variable": "numberQueries",
+      "description": "Traced when deploying a query. This is a simulation and scaling event.",
+      "category": {
+        "isModelEvent": false,
+        "isScalingEvent": true,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": true
+      }
+    },
+    {
+      "id": 222,
+      "name": "clearQueries",
+      "arguments": [],
+      "x_variable": "numberQueries",
+      "description": "Traced when removing all deployed queries. This is a simulation and scaling event.",
+      "category": {
+        "isModelEvent": false,
+        "isScalingEvent": true,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": true
+      }
+    },
+    {
+      "id": 220,
+      "name": "addEvent",
+      "arguments": [
+        {"name": "tid", "type":  "int"},
+        {"name": "CepEvent", "type":  "int"}
+      ],
+      "x_variable": "numberEvents",
+      "description": "Traced when adding an event to the allPackets queue.",
+      "category": {
+        "isModelEvent": false,
+        "isScalingEvent": false,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 223,
+      "name": "clearEvents",
+      "arguments": [],
+      "x_variable": "numberEvents",
+      "description": "Traced when clearing all CEP events from allPackets. This is a scaling event.",
+      "category": {
+        "isModelEvent": false,
+        "isScalingEvent": true,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": false
+      }
+    },
+    {
+      "id": 0,
+      "name": "runExperiment",
+      "arguments": [
+        {"name": "experimentId", "type":  "int"}
+      ],
+      "x_variable": "",
+      "description": "Decides which experiment to run",
+      "category": {
+        "isModelEvent": false,
+        "isScalingEvent": false,
+        "isMilestoneEvent": false,
+        "isSimulationEvent": false
+      }
+    }
+  ]
+}
+
