@@ -56,7 +56,7 @@ TelosB::Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetD
 int cnt = 0;
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
-  std::cout << "Received packet " << (++cnt) << " at " << Simulator::Now().GetMicroSeconds() << " microseconds after start" << std::endl;
+  //std::cout << "Received packet " << (++cnt) << " at " << Simulator::Now().GetMicroSeconds() << " microseconds after start" << std::endl;
   total_packets_received++;
   if (first_received_packet == Seconds(0)) {
     first_received_packet = Simulator::Now();
@@ -343,7 +343,7 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
       execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr = seqNr++;
     }
     if (use_device_model) {
-      std::cout << "Received packet with size " << packet->GetSize() << std::endl;
+      //std::cout << "Received packet with size " << packet->GetSize() << std::endl;
       ReceivePacket(packet);
     } else {
       sendViaCC2420(packet);
