@@ -37,16 +37,16 @@ public:
 
     uint32_t seed = 3;
     double duration = 10;
-    int pps = 70;
-    uint32_t packet_size = 125;
+    int pps = 150;
+    uint32_t packet_size = 124;
     std::string trace_fn = "trace-inputs/packets-received.txt";
-    std::string kbps = "65kbps";
+    std::string kbps = "60kbps";
 
     int nr_packets_collision_missed = 0;
     int nr_rxfifo_flushes = 0;
     int nr_packets_dropped_bad_crc = 0;
     int nr_packets_forwarded = 0;
-    int nr_packets_dropped_ip_layer;
+    int nr_packets_dropped_ip_layer = 0;
     int total_intra_os_delay = 0;
     int nr_packets_total = 0;
     bool firstNodeSending = false;
@@ -74,7 +74,7 @@ protected:
     Ptr<Node> node;
 
     Mote() {
-      static int cnt;
+      static int cnt = 1;
       id = cnt++;
     }
 
@@ -99,6 +99,11 @@ private:
     Ptr<CC2420InterfaceNetDevice> netDevice;
 
 public:
+    bool channel_is_clear = true;
+    Ptr<Packet> packet_waiting_to_send = nullptr;
+    Time first_received_packet = Seconds(0);
+    Time last_received_packet = Seconds(0);
+    int total_packets_received = 0;
     bool ip_radioBusy = false;
     int cur_nr_packets_processing = 0;
     bool jitterExperiment = false;
@@ -111,6 +116,7 @@ public:
     TelosB() = default;
 
     void Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetDevice> netDevice);
+    void Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetDevice> netDevice, bool use_device_model);
 
     // Models the radio's behavior before the packets are processed by the microcontroller.
     void ReceivePacket(Ptr<Packet> packet);
@@ -138,6 +144,8 @@ public:
     void SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote);
 
     bool HandleRead (Ptr<CC2420Message> msg);
+
+    void ReSend(Ptr<Packet> packet);
 };
 
 #endif //TELOSB_CSW_MODEL_TELOSB_H

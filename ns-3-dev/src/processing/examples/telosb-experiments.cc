@@ -108,11 +108,13 @@ int main(int argc, char *argv[])
 
 #define READ_TRACES 0
 #define ONE_CONTEXT 0
-#define SIMULATION_OVERHEAD_TEST 0
-#define ALL_CONTEXTS 0
+#define INTRA_OS_DELAY_EXPERIMENT 0
+#define SCALABILITY_EXPERIMENT 0
+#define THROUGHPUT_EXPERIMENT 0
 #define CC2420_MODEL 1
+#define CC2420_THROUGHPUT_EXPERIMENT 0
 
-#if ALL_CONTEXTS
+#if THROUGHPUT_EXPERIMENT
     debugOn = false;
 #else
     debugOn = true;
@@ -121,6 +123,8 @@ int main(int argc, char *argv[])
     if (debugOn) {
         LogComponentEnable("TelosB", LOG_LEVEL_INFO);
         LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
+        LogComponentEnable("PacketSinkCC2420", LOG_LEVEL_INFO);
+        //LogComponentEnable("CC2420NetDevice", LOG_LEVEL_INFO);
     }
 
 #if CC2420_MODEL
@@ -176,12 +180,17 @@ int main(int argc, char *argv[])
     auto mote2 = new TelosB(); mote2->Configure(nodes.Get(1), ps, netDevice2, true);
     auto mote3 = new TelosB(); mote3->Configure(nodes.Get(2), ps, netDevice3, false);
 
-    // send packets to PacketSink (installed on node 1)
+    // send
+    // packets to PacketSink (installed on node 1)
     OnOffCC2420Helper onoff;
     // 80kbps ist die "Grenze", bei der bei einer Paketgröße von 20 Bytes gerade noch alle Pakete ankommen
 
+    ps->pps = 60;
+    ps->packet_size = 124;
+    int kbps = (ps->packet_size * ps->pps * 8) / 1000;
+    std::string str_kbps = std::to_string(kbps) + "kbps";
     // first simulation (DataRate and PacketSize ok)
-    onoff.SetAttribute("DataRate", StringValue(ps->kbps));
+    onoff.SetAttribute("DataRate", StringValue(str_kbps));
     onoff.SetAttribute("PacketSize", StringValue(SSTR( ps->packet_size ))); //default is 512, which is too much for CC2420
 
     ApplicationContainer clientApps = onoff.Install(nodes.Get(0));
@@ -200,11 +209,10 @@ int main(int argc, char *argv[])
     PacketSinkCC2420Helper pktSink;
 
     ApplicationContainer serverApps = pktSink.Install(nodes.Get(2));
-    //serverApps->Start(Seconds(1.0));
-    //serverApps->Stop(Seconds(5.0));
+    serverApps.Start(Seconds(0));
+    serverApps.Stop(Seconds(0+ps->duration));
 
-    ps->duration = 8.01;
-    Simulator::Stop(Seconds(ps->duration));
+    Simulator::Stop(Seconds(0+ps->duration+0));
     Simulator::Run();
     Simulator::Destroy();
 
@@ -213,7 +221,8 @@ int main(int argc, char *argv[])
                  ", ip layer drop: " << ps->nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
                  ps->nr_packets_forwarded << " / " << ps->nr_packets_total << " = " <<
                  (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "% in " << (ps->duration/2 + (int)ps->duration % 2) <<
-                 " seconds, actual pps=" << (ps->nr_packets_forwarded/(ps->duration/2 + (int)ps->duration % 2)));
+                 " seconds, actual pps=" << (ps->nr_packets_forwarded/(ps->duration/2 + (int)ps->duration % 2)) <<
+                 " total received packets: " << mote2->total_packets_received);
 
 #elif READ_TRACES
   Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
@@ -281,43 +290,92 @@ int main(int argc, char *argv[])
                  ps->all_intra_os_delays.at(ps->all_intra_os_delays.size()/2));
 
     writePlot(intraOsDelayPlot, "plots/intraOsDelay.gnu", intraOsDelayDataSet);
-
-#elif ONE_CONTEXT
+#elif INTRA_OS_DELAY_EXPERIMENT
+  LogComponentDisable("TelosB", LOG_LEVEL_INFO);
+  LogComponentDisable("OnOffCC2420Application", LOG_LEVEL_INFO);
+    ps->pps = 1;
   Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
           "cacheLineSize", UintegerValue(64), "tracingOverhead",
           UintegerValue(0));
 
-  // Create node with ExecEnv
-  NodeContainer c;
-  memset(&c, 0, sizeof(NodeContainer));
-  c.Create(3);
+  for (int size = 36; size < 125; size += 7) {
+    ps = CreateObject<ProtocolStack>();
+    ps->packet_size = size;
+    ps->pps = 40;
+    // Create node with ExecEnv
+    NodeContainer c;
+    memset(&c, 0, sizeof(NodeContainer));
+    c.Create(3);
 
-  eeh->Install(ps, c.Get(0));
-  eeh->Install(ps, c.Get(1));
-  eeh->Install(ps, c.Get(2));
+    eeh->Install(ps, c.Get(0));
+    eeh->Install(ps, c.Get(1));
+    eeh->Install(ps, c.Get(2));
 
-  auto mote1 = new TelosB(); mote1->Configure(c.Get(0), ps, nullptr);
-  auto mote2 = new TelosB(); mote2->Configure(c.Get(1), ps, nullptr);
-  auto mote3 = new TelosB(); mote3->Configure(c.Get(2), ps, nullptr);
+    auto mote1 = new TelosB(); mote1->Configure(c.Get(0), ps, nullptr);
+    auto mote2 = new TelosB(); mote2->Configure(c.Get(1), ps, nullptr);
+    auto mote3 = new TelosB(); mote3->Configure(c.Get(2), ps, nullptr);
 
-  ps->GenerateTraffic(c.Get(0), ps->packet_size, mote1, mote2, mote3);
-  Simulator::Stop(Seconds(ps->duration));
-  clock_t t;
-  t = clock();
-  Simulator::Run();
-  t = clock() - t;
-  Simulator::Destroy();
-  NS_LOG_INFO ("Packet size: " << ps->packet_size << ", ps->pps: " << ps->pps << ", RXFIFO flushes: " << ps->nr_rxfifo_flushes <<
-                               ", bad CRC: " << ps->nr_packets_dropped_bad_crc << ", radio collision: " << ps->nr_packets_collision_missed <<
-                               ", ip layer drop: " << ps->nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
-                               ps->nr_packets_forwarded << " / " << ps->nr_packets_total << " = " <<
-                               (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "%");
-  NS_LOG_INFO ("1 " << ps->packet_size << " " << ps->pps << " " << (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "\n");
-  NS_LOG_INFO ("2 " << ps->packet_size << " " << ps->pps << " " <<
-                    (ps->nr_packets_dropped_ip_layer/(float)ps->nr_packets_total)*100 << "\n");
-  NS_LOG_INFO ("3 " << ps->packet_size << " " << ps->pps << " " << ps->total_intra_os_delay/(float)ps->nr_packets_total << "\n");
-  NS_LOG_INFO ("Milliseconds it took to simulate: " << t);
-#elif SIMULATION_OVERHEAD_TEST
+    ps->GenerateTraffic(c.Get(0), ps->packet_size, mote1, mote2, mote3);
+    Simulator::Stop(Seconds(ps->duration));
+    clock_t t;
+    t = clock();
+    Simulator::Run();
+    t = clock() - t;
+    Simulator::Destroy();
+    LogComponentEnable("TelosB", LOG_LEVEL_INFO);
+    LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
+    NS_LOG_INFO ("Packet size: " << ps->packet_size << ", ps->pps: " << ps->pps << ", RXFIFO flushes: " << ps->nr_rxfifo_flushes <<
+                                 ", bad CRC: " << ps->nr_packets_dropped_bad_crc << ", radio collision: " << ps->nr_packets_collision_missed <<
+                                 ", ip layer drop: " << ps->nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
+                                 ps->nr_packets_forwarded << " / " << ps->nr_packets_total << " = " <<
+                                 (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "%");
+    NS_LOG_INFO ("1 " << ps->packet_size << " " << ps->pps << " " << (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "\n");
+    NS_LOG_INFO ("2 " << ps->packet_size << " " << ps->pps << " " <<
+                      (ps->nr_packets_dropped_ip_layer/(float)ps->nr_packets_total)*100 << "\n");
+    NS_LOG_INFO ("3 " << ps->packet_size << " " << ps->pps << " " << ps->total_intra_os_delay/(float)ps->nr_packets_total << "\n");
+    NS_LOG_INFO ("Milliseconds it took to simulate: " << t);
+    LogComponentDisable("TelosB", LOG_LEVEL_INFO);
+    LogComponentDisable("OnOffCC2420Application", LOG_LEVEL_INFO);
+  }
+#elif ONE_CONTEXT
+    Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
+            "cacheLineSize", UintegerValue(64), "tracingOverhead",
+            UintegerValue(0));
+
+    // Create node with ExecEnv
+    NodeContainer c;
+    memset(&c, 0, sizeof(NodeContainer));
+    c.Create(3);
+
+    eeh->Install(ps, c.Get(0));
+    eeh->Install(ps, c.Get(1));
+    eeh->Install(ps, c.Get(2));
+
+    auto mote1 = new TelosB(); mote1->Configure(c.Get(0), ps, nullptr);
+    auto mote2 = new TelosB(); mote2->Configure(c.Get(1), ps, nullptr);
+    auto mote3 = new TelosB(); mote3->Configure(c.Get(2), ps, nullptr);
+
+    ps->packet_size = 36;
+    ps->pps = 1;
+
+    ps->GenerateTraffic(c.Get(0), ps->packet_size, mote1, mote2, mote3);
+    Simulator::Stop(Seconds(ps->duration));
+    clock_t t;
+    t = clock();
+    Simulator::Run();
+    t = clock() - t;
+    Simulator::Destroy();
+    NS_LOG_INFO ("Packet size: " << ps->packet_size << ", ps->pps: " << ps->pps << ", RXFIFO flushes: " << ps->nr_rxfifo_flushes <<
+                                 ", bad CRC: " << ps->nr_packets_dropped_bad_crc << ", radio collision: " << ps->nr_packets_collision_missed <<
+                                 ", ip layer drop: " << ps->nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
+                                 ps->nr_packets_forwarded << " / " << ps->nr_packets_total << " = " <<
+                                 (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "%");
+    NS_LOG_INFO ("1 " << ps->packet_size << " " << ps->pps << " " << (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "\n");
+    NS_LOG_INFO ("2 " << ps->packet_size << " " << ps->pps << " " <<
+                      (ps->nr_packets_dropped_ip_layer/(float)ps->nr_packets_total)*100 << "\n");
+    NS_LOG_INFO ("3 " << ps->packet_size << " " << ps->pps << " " << ps->total_intra_os_delay/(float)ps->nr_packets_total << "\n");
+    NS_LOG_INFO ("Milliseconds it took to simulate: " << t);
+#elif SCALABILITY_EXPERIMENT
     NodeContainer c;
     int numberMotes = 1;
     ps->pps = 10;
@@ -400,7 +458,196 @@ int main(int argc, char *argv[])
     NS_LOG_INFO ("3 " << ps->packet_size << " " << ps->pps << " " << ps->total_intra_os_delay/(float)ps->nr_packets_total << "\n");
     NS_LOG_INFO ("Microseconds to simulate " << numberMotes << " motes for " << ps->duration << " seconds: " <<
                  t << ", install time in microseconds: " << install_time);
-#elif ALL_CONTEXTS
+
+#elif CC2420_THROUGHPUT_EXPERIMENT
+  /*LogComponentDisable("TelosB", LOG_LEVEL_INFO);
+  LogComponentDisable("OnOffCC2420Application", LOG_LEVEL_INFO);
+  LogComponentDisable("PacketSinkCC2420", LOG_LEVEL_INFO);*/
+  //LogComponentEnable("CC2420NetDevice", LOG_LEVEL_INFO);
+
+    std::ofstream numberForwardedFile ("all-contexts-output/NumberPoints.txt");
+    if (!numberForwardedFile.is_open()) {
+        NS_LOG_INFO ("Failed to open NumberPoints.txt, exiting");
+        exit(-1);
+    }
+    for (uint32_t i = 60; i >= 60; i-=8) {
+        ps->packet_size = i;
+        std::ostringstream os;
+        os << ps->packet_size;
+        createPlot(&numberForwardedPlot, "numberForwarded"+os.str()+".png", "Forwarded at packet size: "+os.str(),
+                   &numberForwardedDataSet);
+        createPlot2(&packetOutcomePlot, "packetOutcome"+os.str()+".png", "Packet outcome at packet size: "+os.str(),
+                    &numberForwardedDataSet2, "Forwarded");
+        createPlot(&numberCollidedPlot, "numberCollided"+os.str()+".png", "Collided at packet size: "+os.str(),
+                   &numberCollidedDataSet);
+        createPlot(&numberRxfifoFlushesPlot, "numberRxfifoFlushes"+os.str()+".png",
+                   "RXFIFO flushes at packet size: "+os.str(), &numberRxfifoFlushesDataSet);
+        createPlot(&numberBadCrcPlot, "numberBadCrc"+os.str()+".png", "Bad CRC at packet size: "+os.str(),
+                   &numberBadCrcDataSet);
+        createPlot(&numberIPDroppedPlot, "numberIPdropped"+os.str()+".png",
+                   "Dropped at IP layer - packet size: "+os.str(), &numberIPDroppedDataSet);
+        createPlot(&intraOsDelayPlot, "intraOsDelay"+os.str()+".png", "Intra-OS delay - packet size: "+os.str(),
+                   &intraOsDelayDataSet);
+        numberForwardedPlot->AppendExtra ("set xrange [37:]");
+        numberCollidedPlot->AppendExtra ("set xrange [37:]");
+        numberRxfifoFlushesPlot->AppendExtra ("set xrange [37:]");
+        numberBadCrcPlot->AppendExtra ("set xrange [37:]");
+        numberIPDroppedPlot->AppendExtra ("set xrange [37:]");
+
+        for (int j = 1; j <= 150; j++) {
+            /*LogComponentEnable("TelosB", LOG_LEVEL_INFO);
+            LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
+            LogComponentEnable("PacketSinkCC2420", LOG_LEVEL_INFO);*/
+            //LogComponentEnable("CC2420NetDevice", LOG_LEVEL_INFO);
+            ps->pps = j;
+
+            ps->nr_packets_forwarded = 0;
+            ps->nr_packets_total = 0;
+            ps->nr_packets_dropped_bad_crc = 0;
+            ps->nr_packets_collision_missed = 0;
+            ps->nr_packets_dropped_ip_layer = 0;
+            ps->nr_rxfifo_flushes = 0;
+            ps->total_intra_os_delay = 0;
+            ps->all_intra_os_delays.clear();
+
+            CC2420Helper cc2420;
+
+            NodeContainer nodes;
+            nodes.Create(3);
+
+            NetDeviceContainer devices = cc2420.Install(nodes, true); // regular CC2420NetDevice
+
+            InternetStackHelper stack;
+            stack.Install(nodes);
+
+            MobilityHelper mobility;
+
+            // The way we want to configure this: mote 1 receives the packet from mote 2, but mote 3 does not receive it.
+            // Mote 3 receives the packet from mote 2.
+            mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
+                                           "MinX", DoubleValue (0.0),
+                                           "MinY", DoubleValue (0.0),
+                                           "DeltaX", DoubleValue (30.0),
+                                           "DeltaY", DoubleValue (10.0),
+                                           "GridWidth", UintegerValue (3),
+                                           "LayoutType", StringValue ("RowFirst"));
+
+            mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+            mobility.Install (nodes);
+
+            Ipv4AddressHelper address;
+            address.SetBase("10.1.1.0", "255.255.255.0");
+
+            Ipv4InterfaceContainer interfaces = address.Assign(devices);
+
+            Ptr<ExecEnvHelper> eeh = CreateObjectWithAttributes<ExecEnvHelper>(
+                    "cacheLineSize", UintegerValue(64), "tracingOverhead",
+                    UintegerValue(0));
+
+            eeh->Install(ps, nodes.Get(0));
+            eeh->Install(ps, nodes.Get(1));
+            eeh->Install(ps, nodes.Get(2));
+
+            auto ee1 = nodes.Get(0)->GetObject<ExecEnv>();
+            auto ee2 = nodes.Get(1)->GetObject<ExecEnv>();
+            auto ee3 = nodes.Get(2)->GetObject<ExecEnv>();
+
+            auto netDevice1 = nodes.Get(0)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
+            auto netDevice2 = nodes.Get(1)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
+            auto netDevice3 = nodes.Get(2)->GetDevice(0)->GetObject<CC2420InterfaceNetDevice>();
+            auto mote1 = new TelosB(); mote1->Configure(nodes.Get(0), ps, netDevice1, false);
+            auto mote2 = new TelosB(); mote2->Configure(nodes.Get(1), ps, netDevice2, true);
+            auto mote3 = new TelosB(); mote3->Configure(nodes.Get(2), ps, netDevice3, false);
+
+            // send
+            // packets to PacketSink (installed on node 1)
+            OnOffCC2420Helper onoff;
+
+            int kbps = ps->packet_size * ps->pps * 8;
+            std::string str_kbps = std::to_string(kbps) + "bps";
+            // first simulation (DataRate and PacketSize ok)
+            onoff.SetAttribute("DataRate", StringValue(str_kbps));
+            onoff.SetAttribute("PacketSize", StringValue(SSTR( ps->packet_size ))); //default is 512, which is too much for CC2420
+
+            ApplicationContainer clientApps = onoff.Install(nodes.Get(0));
+
+            netDevice2->SetMessageCallback(MakeCallback(&TelosB::HandleRead, mote2));
+
+            uint8_t channelNo = 12; // channel number is changed from default value 11 to 12
+            uint8_t power = 31; // power remains on default value of 31
+            Ptr<CC2420Message> msg = CreateObject<CC2420Setup>(channelNo, power);
+            //construct Config message (default power, changed channel)
+            netDevice2->descendingSignal(msg);
+
+            // request current status
+            netDevice2->descendingSignal(CreateObject<CC2420StatusReq>());
+
+            PacketSinkCC2420Helper pktSink;
+
+            ApplicationContainer serverApps = pktSink.Install(nodes.Get(2));
+            serverApps.Start(Seconds(1));
+            serverApps.Stop(Seconds(1+ps->duration));
+
+            Simulator::Stop(Seconds(1+ps->duration+1));
+
+            //ps->GenerateTraffic(node_container.Get(0), ps->packet_size, mote1, mote2, mote3);
+
+            //Simulator::Stop(Seconds(ps->duration));
+            Simulator::Run();
+            Simulator::Destroy();
+            numberForwardedDataSet->Add(ps->pps, (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100);
+            numberForwardedDataSet2->Add(ps->pps, (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100);
+            numberBadCrcDataSet->Add(ps->pps, (ps->nr_packets_dropped_bad_crc/(float)ps->nr_packets_total)*100);
+            numberCollidedDataSet->Add(ps->pps, (ps->nr_packets_collision_missed/(float)ps->nr_packets_total)*100);
+            numberRxfifoFlushesDataSet->Add(ps->pps, ps->nr_rxfifo_flushes);
+            numberIPDroppedDataSet->Add(ps->pps, (ps->nr_packets_dropped_ip_layer/(float)ps->nr_packets_total)*100);
+            intraOsDelayDataSet->Add(ps->pps, ps->all_intra_os_delays.at(ps->all_intra_os_delays.size()/2));
+
+            numberForwardedFile << std::flush;
+            numberForwardedFile << "1 " << i << " " << ps->pps << " " << (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100
+                                << "\n";
+            numberForwardedFile << std::flush;
+            numberForwardedFile << "2 " << i << " " << ps->pps << " "
+                                << (ps->nr_packets_dropped_ip_layer/(float)ps->nr_packets_total)*100 << "\n";
+            numberForwardedFile << std::flush;
+            numberForwardedFile << "3 " << i << " " << ps->pps << " "
+                                << ps->all_intra_os_delays.at(ps->all_intra_os_delays.size()/2) << "\n";
+            numberForwardedFile << std::flush;
+
+            LogComponentEnable("TelosB", LOG_LEVEL_INFO);
+            LogComponentEnable("OnOffCC2420Application", LOG_LEVEL_INFO);
+            LogComponentEnable("PacketSinkCC2420", LOG_LEVEL_INFO);
+            //LogComponentEnable("CC2420NetDevice", LOG_LEVEL_INFO);
+            long long actual_pps = ps->nr_packets_forwarded/(float)(mote2->last_received_packet - mote2->first_received_packet).GetSeconds();
+            NS_LOG_INFO ("Packet size: " << ps->packet_size << ", pps: " << ps->pps << ", RXFIFO flushes: " << ps->nr_rxfifo_flushes <<
+                                         ", kbps: " << kbps <<
+                                         ", bad CRC: " << ps->nr_packets_dropped_bad_crc << ", radio collision: " << ps->nr_packets_collision_missed <<
+                                         ", ip layer drop: " << ps->nr_packets_dropped_ip_layer << ", successfully forwarded: " <<
+                                         ps->nr_packets_forwarded << " / " << ps->nr_packets_total << " = " <<
+                                         (ps->nr_packets_forwarded/(float)ps->nr_packets_total)*100 << "% in " << ps->duration << " seconds, actual pps=" << actual_pps);
+            LogComponentDisable("TelosB", LOG_LEVEL_INFO);
+            LogComponentDisable("OnOffCC2420Application", LOG_LEVEL_INFO);
+            LogComponentDisable("PacketSinkCC2420", LOG_LEVEL_INFO);
+            //LogComponentDisable("CC2420NetDevice", LOG_LEVEL_INFO);
+            delete mote1;
+            delete mote2;
+            delete mote3;
+        }
+
+        writePlot2Lines(packetOutcomePlot, "plots/numberForwardedNumberBadCrc" + os.str() + ".gnu",
+                        numberForwardedDataSet2, numberIPDroppedDataSet);
+        writePlot(numberForwardedPlot, "plots/numberForwarded" + os.str() + ".gnu", numberForwardedDataSet);
+        writePlot(numberIPDroppedPlot, "plots/numberIPDropped" + os.str() + ".gnu", numberIPDroppedDataSet);
+        writePlot(numberCollidedPlot, "plots/numberCollided" + os.str() + ".gnu", numberCollidedDataSet);
+        writePlot(numberRxfifoFlushesPlot, "plots/numberRxfifoFlushes" + os.str() + ".gnu", numberRxfifoFlushesDataSet);
+        writePlot(numberBadCrcPlot, "plots/numberBadCrc" + os.str() + ".gnu", numberBadCrcDataSet);
+        writePlot(intraOsDelayPlot, "plots/intraOsDelay" + os.str() + ".gnu", intraOsDelayDataSet);
+
+    }
+
+    numberForwardedFile.close();
+
+#elif THROUGHPUT_EXPERIMENT
 
     std::ofstream numberForwardedFile ("all-contexts-output/NumberPoints.txt");
     if (!numberForwardedFile.is_open()) {

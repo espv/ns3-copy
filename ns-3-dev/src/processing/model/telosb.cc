@@ -40,8 +40,28 @@ TelosB::Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetD
     this->ps = ps;
 }
 
+void
+TelosB::Configure(Ptr<Node> node, Ptr<ProtocolStack> ps, Ptr<CC2420InterfaceNetDevice> netDevice, bool use_device_model) {
+  this->use_device_model = use_device_model;
+  if (use_device_model) {
+    node->GetObject<ExecEnv>()->cpuScheduler->allowNestedInterrupts = true;
+  }
+  this->node = node;
+  this->number_forwarded_and_acked = 0;
+  this->TelosB::receivingPacket = false;
+  this->netDevice = netDevice;
+  this->ps = ps;
+}
+
+int cnt = 0;
 // Models the radio's behavior before the packets are processed by the microcontroller.
 void TelosB::ReceivePacket(Ptr<Packet> packet) {
+  std::cout << "Received packet " << (++cnt) << " at " << Simulator::Now().GetMicroSeconds() << " microseconds after start" << std::endl;
+  total_packets_received++;
+  if (first_received_packet == Seconds(0)) {
+    first_received_packet = Simulator::Now();
+  }
+  last_received_packet = Simulator::Now();
   Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
   execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->executedByExecEnv = false;
 
@@ -71,7 +91,9 @@ void TelosB::ReceivePacket(Ptr<Packet> packet) {
 
   execenv->Proceed(1, execenv->currentlyExecutingThread, "readdonepayload", &TelosB::readDone_payload, this, packet);
   if (receivingPacket) {
-    execenv->queues["rxfifo"]->Enqueue(execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo);
+    Ptr<ExecutionInfo> ei = Create<ExecutionInfo>(execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo);
+    ei->packet = packet;
+    execenv->queues["rxfifo"]->Enqueue(ei);
     NS_LOG_INFO ("Delaying writing the packet into RAM; length of receive_queue: "
                  << execenv->queues["rxfifo"]->GetNPackets());
     return;
@@ -158,6 +180,8 @@ void TelosB::receiveDone_task(Ptr<Packet> packet) {
       radio.bytes_in_rxfifo = 0;
       ps->nr_rxfifo_flushes++;
     }
+  } else {
+    NS_LOG_INFO("rxfifo is not empty, and therefore, we expect the next packet to be processed");
   }
 }
 
@@ -178,9 +202,9 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
   if (!packet->attemptedSent) {
     packet->attemptedSent = true;
     execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.push_back(Simulator::Now());
-    int64_t intra_os_delay = execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[2].GetMicroSeconds() -
-                             execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[1].GetMicroSeconds();
-    ps->time_received_packets.push_back (execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[1].GetMicroSeconds());
+    int64_t intra_os_delay = execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[1].GetMicroSeconds() -
+                             execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0].GetMicroSeconds();
+    ps->time_received_packets.push_back (execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps[0].GetMicroSeconds());
     ps->forwarded_packets_seqnos.push_back (execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr);
     ps->all_intra_os_delays.push_back(intra_os_delay);
     ps->total_intra_os_delay += intra_os_delay;
@@ -191,7 +215,6 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
                                   << ++number_forwarded_and_acked << ", seq no " << execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr);
   }
 
-  // TODO: Use only the CC2420 model to transmit packets
   if (fakeSending) {
     // DO NOT SEND
     ++radio.nr_send_recv;
@@ -217,10 +240,12 @@ void TelosB::writtenToTxFifo(Ptr<Packet> packet) {
 
 void TelosB::sendViaCC2420(Ptr<Packet> packet) {
   uint8_t nullBuffer[packet->GetSize()];
-  wmemset((wchar_t*)nullBuffer, 0, sizeof(uint8_t)*packet->GetSize());
+  memset((char*)nullBuffer, 0, sizeof(uint8_t)*packet->GetSize());
 
   // send with CCA
   Ptr<CC2420Send> msg = CreateObject<CC2420Send>(nullBuffer, packet->GetSize(), true);
+
+  ++radio.nr_send_recv;
 
   netDevice->descendingSignal(msg);
 }
@@ -292,7 +317,7 @@ void TelosB::SendPacket(Ptr<Packet> packet, TelosB *to_mote, TelosB *third_mote)
 
 bool TelosB::HandleRead (Ptr<CC2420Message> msg)
 {
-  //NS_LOG_INFO ("Received message from CC2420InterfaceNetDevice");
+  NS_LOG_INFO ("Node " << id << " Received message from CC2420InterfaceNetDevice");
 
   // What does it mean that it has not been received correctly? Bad CRC?
   if(msg==nullptr){
@@ -302,24 +327,27 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
 
 
   Ptr<CC2420Recv> recvMsg = DynamicCast<CC2420Recv>(msg);
-  if(recvMsg){
-    /* NS_LOG_INFO ("THIS is the place where the device model gets involved and forwards the packet to mote 3");
-     * NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-     *         << "s mote " << GetId() << " received " << recvMsg->getSize()
-     *         << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
-     *         << " and RSSI=" << recvMsg->getRSSI() << " bytes");
-     */
+  if(recvMsg != nullptr){
+     NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
+                  << "s mote " << " received " << recvMsg->getSize()
+                  << " bytes with CRC=" << (recvMsg->getCRC()?"true":"false")
+                  << " and RSSI=" << recvMsg->getRSSI() << " bytes");
+
 
     Ptr<Packet> packet = Create<Packet>(ps->packet_size);
     ps->nr_packets_total++;
+    if (use_device_model) {
       Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
-    execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.push_back (Simulator::Now());
-    execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr = seqNr++;
-    if (use_device_model)
-      ReceivePacket (packet);
-    else
-      sendViaCC2420 (packet);
-    return true;
+      execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->timestamps.push_back(Simulator::Now());
+      execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet = packet;
+      execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->seqNr = seqNr++;
+    }
+    if (use_device_model) {
+      std::cout << "Received packet with size " << packet->GetSize() << std::endl;
+      ReceivePacket(packet);
+    } else {
+      sendViaCC2420(packet);
+    }
 
   } else {
     Ptr<CC2420Cca> ccaMsg = DynamicCast<CC2420Cca>(msg);
@@ -327,6 +355,8 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
       //NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
       //        << "s mote " << GetId() << " received CC2420Cca message with channel free = "
       //        << (ccaMsg->getCcaValue()?"true":"false"));
+
+      channel_is_clear = ccaMsg->getCcaValue();
       return true;
 
     } else {
@@ -339,8 +369,15 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
           // This means we failed to send packet because channel is busy
           //NS_LOG_INFO ("recvMsg->getSize (): " << recvMsg->getSize ());
           Ptr<Packet> packet = Create<Packet>(ps->packet_size);
-          packet->attemptedSent = true;
-          Simulator::Schedule(Seconds(0.0025), &TelosB::writtenToTxFifo, this, packet);
+          //packet->attemptedSent = true;
+          //static int cnt = 0;
+          //++cnt;
+          //std::cout << "Had to resend packet " << cnt << " times" << std::endl;
+          // Error if packet_waiting_to_send != nullptr
+          //packet_waiting_to_send = packet;
+          //Simulator::Schedule(Seconds(0.0025), &TelosB::writtenToTxFifo, this, packet);
+          Simulator::Schedule(Seconds(0.0025), &TelosB::ReSend, this, packet);
+          //writtenToTxFifo(packet);
         }
         return true;
 
@@ -350,7 +387,13 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
           //NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
           //        << "s mote " << GetId() << " received CC2420SendFinished message");
 
-          finishedTransmitting (Create<Packet>(ps->packet_size));
+          Ptr<Packet> packet;
+          if (!use_device_model) {
+            return true;
+          }
+          Ptr<ExecEnv> execenv = node->GetObject<ExecEnv>();
+          packet = execenv->currentlyExecutingThread->m_currentLocation->m_executionInfo->packet;
+          finishedTransmitting (packet);
           return true;
 
         } else {
@@ -381,6 +424,14 @@ bool TelosB::HandleRead (Ptr<CC2420Message> msg)
   //return false; // something went wrong
 }
 
+void TelosB::ReSend(Ptr<Packet> packet) {
+  if (channel_is_clear) {
+    writtenToTxFifo(packet);
+  } else {
+    Simulator::Schedule(Seconds(0.0025), &TelosB::ReSend, this, packet);
+  }
+}
+
 // GeneratePacket creates a packet and passes it on to the NIC
 void ProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *m1, TelosB *m2, TelosB *m3) {
   Ptr<ExecEnv> execenv = m1->GetNode()->GetObject<ExecEnv>();
@@ -399,16 +450,18 @@ void ProtocolStack::GeneratePacket(uint32_t pktSize, uint32_t curSeqNr, TelosB *
 void ProtocolStack::GenerateTraffic(Ptr<Node> n, uint32_t pktSize, TelosB *m1, TelosB *m2, TelosB *m3) {
   static uint32_t curSeqNr = 0;
 
-  static std::random_device r;
-
-  // Choose a random mean between 1 and 6
-  std::default_random_engine e1(r());
-  std::uniform_int_distribution<uint64_t> uniform_dist(0, 99);
-
   GeneratePacket(pktSize, curSeqNr++, m1, m2, m3);
-  if (Simulator::Now().GetSeconds() + (1.0 / (double) pps) < duration - 0.02)
-    Simulator::Schedule(Seconds(1.0 / (double) pps) + MicroSeconds(uniform_dist(e1)),
+  return;
+  if (Simulator::Now().GetSeconds() + (1.0 / (double) pps) < duration - 0.02) {
+    static std::random_device r;
+
+    // Choose a random mean between 1 and 6
+    std::default_random_engine e1(r());
+    std::uniform_int_distribution<uint64_t> uniform_dist(0, 1000);
+    long us_variation = uniform_dist(e1);
+    Simulator::Schedule(Seconds(1.0 / (double) pps) + MicroSeconds(us_variation),
                         &ProtocolStack::GenerateTraffic, this, n, pktSize, m1, m2, m3);
+  }
 }
 
 

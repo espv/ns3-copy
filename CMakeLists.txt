@@ -3503,6 +3503,14 @@ add_custom_target(
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )
 add_custom_target(
+        CC2420 COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
+)
+add_custom_target(
+        netanim COMMAND ./waf
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
+)
+add_custom_target(
         DCEP-Sim COMMAND ./waf
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/ns-3-dev
 )

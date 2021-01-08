@@ -19,7 +19,7 @@ softirq::tasks             FIFO   -1   services
 
 HARDWARE
 # Format: MEMBUS||PEU frequency [name if PEU] [scheduler if PEU] [trace overhead] [callback service queue]
-PEU 4 cpu0 ns3::processing::RoundRobinScheduler 250 irq_enter HIRQ
+PEU 4 cpu0 ns3::processing::RoundRobinScheduler 300 irq_enter HIRQ
 
 SYNCH
 # name type arguments
@@ -54,7 +54,7 @@ RESOURCES cycles normal
 FRACTION 100%  1940 1940
 
 0 LOOPSTART		0 softirq::tasks softirq::tasks 0
-x PROCESS 320 0
+x PROCESS 436 0
 0                                 DEQUEUE		SRVQUEUE 0 0
 0 RESTART
 

@@ -3,3 +3,5 @@
 def build(bld):
     obj = bld.create_ns3_program('telosb-example', ['wifi', 'cc2420', 'applications', 'message', 'processing', 'dcep'])
     obj.source = 'telosb-example.cc'
+    obj = bld.create_ns3_program('telosb-experiments', ['wifi', 'cc2420', 'applications', 'message', 'processing', 'dcep'])
+    obj.source = 'telosb-experiments.cc'
